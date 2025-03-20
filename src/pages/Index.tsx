@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
@@ -9,16 +10,14 @@ import {
   Copy, 
   Upload, 
   ArrowUp, 
+  Twitter,
   Linkedin,
-  Twitter as XIcon,
   Send,
 } from 'lucide-react';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const [prompt, setPrompt] = useState("");
-  const feedImagesRef = useRef<HTMLDivElement>(null);
-  const storyImagesRef = useRef<HTMLDivElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +38,8 @@ const Index = () => {
                 <TabsList className="bg-gray-900 border border-gray-700 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
                   <SocialTab value="feed" icon={<Instagram size={18} />} label="Feed" />
                   <SocialTab value="story" icon={<Instagram size={18} />} label="Story" />
-                  <SocialTab value="tiktok" icon={<div className="text-md">♫</div>} label="TikTok" />
-                  <SocialTab value="x" icon={<XIcon size={18} />} label="X" />
+                  <SocialTab value="tiktok" icon={<div className="text-md font-bold">TT</div>} label="TikTok" />
+                  <SocialTab value="x" icon={<Twitter size={18} />} label="X" />
                   <SocialTab value="linkedin" icon={<Linkedin size={18} />} label="LinkedIn" />
                 </TabsList>
 
@@ -63,9 +62,9 @@ const Index = () => {
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-44 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-700 rounded-md mb-4">
                       <div className="text-center">
-                        <Upload size={32} className="text-gray-600 mx-auto mb-2" />
+                        <Upload size={24} className="text-gray-600 mx-auto mb-2" />
                         <p className="text-gray-400 text-sm">Drop your product image here or</p>
                         <Button className="mt-2 bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 h-8">Upload Image</Button>
                       </div>
@@ -99,9 +98,9 @@ const Index = () => {
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-44 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-700 rounded-md mb-4">
                       <div className="text-center">
-                        <Upload size={32} className="text-gray-600 mx-auto mb-2" />
+                        <Upload size={24} className="text-gray-600 mx-auto mb-2" />
                         <p className="text-gray-400 text-sm">Drop your product image here or</p>
                         <Button className="mt-2 bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 h-8">Upload Image</Button>
                       </div>
@@ -139,8 +138,7 @@ const Index = () => {
         </div>
         
         <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
-          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen" ref={feedImagesRef}>
-            <h3 className="text-white text-lg font-medium mb-4 text-center">Instagram Feed</h3>
+          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen">
             <div className="grid grid-cols-1 gap-5 animate-scroll">
               {feedImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
@@ -159,8 +157,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen" ref={storyImagesRef}>
-            <h3 className="text-white text-lg font-medium mb-4 text-center">Instagram Story / TikTok</h3>
+          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen">
             <div className="grid grid-cols-1 gap-5 animate-scroll">
               {storyImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
@@ -225,6 +222,34 @@ const feedImages = [
     src: "/lovable-uploads/8bba7cc2-64da-4208-9c50-738876bae777.png",
     alt: "Sneakers Store - Square format"
   },
+  {
+    src: "/lovable-uploads/8ea67ce8-3265-4ca2-a255-9b59dec27a23.png",
+    alt: "Stay Hydrated - Square format"
+  },
+  {
+    src: "/lovable-uploads/2ff388cc-44d6-489b-b265-e21659f31f95.png",
+    alt: "Sneakers Store - Square format"
+  },
+  {
+    src: "/lovable-uploads/b84a52e5-35a0-4aed-aa7f-5d8955bbf306.png",
+    alt: "Lumivera Radiant Serum - Square format"
+  },
+  {
+    src: "/lovable-uploads/2d93e533-b9d5-4286-b313-fc590b8c9f73.png",
+    alt: "Hot Spicy Pizza - Square format"
+  },
+  {
+    src: "/lovable-uploads/fe7b4491-efca-4abd-a278-3456db1e48c7.png",
+    alt: "Elegant House - Square format"
+  },
+  {
+    src: "/lovable-uploads/48c39036-d7ee-4f0f-bb03-2957efd34d5d.png",
+    alt: "Earth Hour - Square format"
+  },
+  {
+    src: "/lovable-uploads/b70080aa-6fe0-4fc1-8d20-81ecfdb1e1c9.png",
+    alt: "Borcelle Restaurant - Square format"
+  },
 ];
 
 const storyImages = [
@@ -259,6 +284,10 @@ const storyImages = [
   {
     src: "/lovable-uploads/ba036cf2-f597-41e5-8650-821a023df877.png",
     alt: "Lumivera Radiant Serum - Story format"
+  },
+  {
+    src: "/lovable-uploads/6940dffe-9415-469a-a350-f90592be4665.png",
+    alt: "Explore Thailand - Story format"
   },
 ];
 
