@@ -58,4 +58,23 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Animated scrolling for image galleries */
+  .animate-scroll {
+    animation: smooth-scroll 30s linear infinite alternate;
+  }
+  
+  @keyframes smooth-scroll {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(calc(-100% + 100vh));
+    }
+  }
+  
+  /* Pause animation on hover */
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
 }
