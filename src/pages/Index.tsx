@@ -31,7 +31,7 @@ const Index = () => {
       <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0">
         <div className="col-span-5 p-6 border-r border-gray-800">
           <div className="max-w-xl mx-auto">
-            <h1 className="text-2xl font-bold text-white mb-6">Create Image that sells your product</h1>
+            <h1 className="text-xl font-bold text-white mb-6 text-center">Create Image that sells your product</h1>
             
             <div className="mb-6">
               <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
@@ -54,25 +54,25 @@ const Index = () => {
                           className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                            <Send className="mr-2 h-4 w-4" />
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-8 px-3 py-1 text-sm">
+                            <Send className="mr-1 h-3.5 w-3.5" />
                             Send
                           </Button>
                         </div>
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-24 border-2 border-dashed border-gray-700 rounded-md mb-4">
                       <div className="text-center">
-                        <Upload size={24} className="text-gray-600 mx-auto mb-2" />
-                        <p className="text-gray-400 text-sm">Drop your product image here or</p>
-                        <Button className="mt-2 bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 h-8">Upload Image</Button>
+                        <Upload size={20} className="text-gray-600 mx-auto mb-1" />
+                        <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-6">Upload Image</Button>
                       </div>
                     </div>
                     
                     <div className="flex justify-center">
-                      <Button className="bg-blue-600 hover:bg-blue-700 px-6">
-                        <ArrowUp className="mr-2 h-4 w-4" />
+                      <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                        <ArrowUp className="mr-1 h-3.5 w-3.5" />
                         Generate
                       </Button>
                     </div>
@@ -90,25 +90,25 @@ const Index = () => {
                           className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                            <Send className="mr-2 h-4 w-4" />
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-8 px-3 py-1 text-sm">
+                            <Send className="mr-1 h-3.5 w-3.5" />
                             Send
                           </Button>
                         </div>
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-24 border-2 border-dashed border-gray-700 rounded-md mb-4">
                       <div className="text-center">
-                        <Upload size={24} className="text-gray-600 mx-auto mb-2" />
-                        <p className="text-gray-400 text-sm">Drop your product image here or</p>
-                        <Button className="mt-2 bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 h-8">Upload Image</Button>
+                        <Upload size={20} className="text-gray-600 mx-auto mb-1" />
+                        <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-6">Upload Image</Button>
                       </div>
                     </div>
                     
                     <div className="flex justify-center">
-                      <Button className="bg-blue-600 hover:bg-blue-700 px-6">
-                        <ArrowUp className="mr-2 h-4 w-4" />
+                      <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                        <ArrowUp className="mr-1 h-3.5 w-3.5" />
                         Generate
                       </Button>
                     </div>
@@ -138,8 +138,8 @@ const Index = () => {
         </div>
         
         <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
-          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-scroll">
+          <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
+            <div className="grid grid-cols-1 gap-5 animate-feed-scroll">
               {feedImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
                   <img 
@@ -157,8 +157,8 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="col-span-6 p-4 bg-[#121212] overflow-y-auto max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-scroll">
+          <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
+            <div className="grid grid-cols-1 gap-5 animate-story-scroll">
               {storyImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
                   <img 
@@ -254,40 +254,32 @@ const feedImages = [
 
 const storyImages = [
   {
-    src: "/lovable-uploads/15930e55-8065-44f9-b993-e2203c7d0d68.png",
+    src: "/lovable-uploads/3eaf26ea-5c41-4dd6-a936-da3761e1df91.png",
     alt: "Chocolate Day - Story format"
   },
   {
-    src: "/lovable-uploads/aa4b197d-e10f-4132-b7f9-31449783dea4.png",
-    alt: "Coming Soon - Story format"
-  },
-  {
-    src: "/lovable-uploads/7cf630db-6939-4ca6-8589-73836e330f1e.png",
+    src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
     alt: "Cocktail Party - Story format"
   },
   {
-    src: "/lovable-uploads/e294ecc1-d57a-4657-9455-40839817d622.png",
+    src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
     alt: "2024 New Arrival - Story format"
   },
   {
-    src: "/lovable-uploads/2c871241-de11-4104-b4a3-ce74017861a5.png",
+    src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
+    alt: "Coming Soon - Story format"
+  },
+  {
+    src: "/lovable-uploads/4566da4e-dcd6-43f1-8b1a-8f086bbbf049.png",
     alt: "We Are Brewing - Story format"
   },
   {
-    src: "/lovable-uploads/a5a7db89-1eb7-4dca-a51b-b2c65fab4393.png",
-    alt: "Stay Hydrated - Story format"
-  },
-  {
-    src: "/lovable-uploads/aab5bb25-14d6-46a5-be5e-d249fdf741ea.png",
+    src: "/lovable-uploads/d5259be9-2c46-4118-8dae-0b7a5ee45cbe.png",
     alt: "Delicious Ice Cream - Story format"
   },
   {
-    src: "/lovable-uploads/ba036cf2-f597-41e5-8650-821a023df877.png",
-    alt: "Lumivera Radiant Serum - Story format"
-  },
-  {
-    src: "/lovable-uploads/6940dffe-9415-469a-a350-f90592be4665.png",
-    alt: "Explore Thailand - Story format"
+    src: "/lovable-uploads/12bfd206-826f-465e-bcc7-458b0aa560d9.png",
+    alt: "Pastries - Story format"
   },
 ];
 
