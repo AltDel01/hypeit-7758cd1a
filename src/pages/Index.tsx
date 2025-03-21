@@ -31,7 +31,7 @@ const Index = () => {
       <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0">
         <div className="col-span-5 p-6 border-r border-gray-800">
           <div className="max-w-xl mx-auto">
-            <h1 className="text-xl font-bold text-white mb-6 text-center">Create Image that sells your product</h1>
+            <h1 className="text-lg font-bold text-white mb-6 text-center">Create Image that sells your product</h1>
             
             <div className="mb-6">
               <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
@@ -48,29 +48,29 @@ const Index = () => {
                     <form onSubmit={handlePromptSubmit} className="mb-4">
                       <div className="flex flex-col space-y-3">
                         <Textarea 
-                          placeholder="Describe what kind of image, color, and style you want..."
+                          placeholder="Describe what kind of image, color codes, and style you want..."
                           value={prompt}
                           onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
+                          className="min-h-[150px] bg-gray-800 border-gray-700 text-white"
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-8 px-3 py-1 text-sm">
-                            <Send className="mr-1 h-3.5 w-3.5" />
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-7 px-3 py-1 text-xs">
+                            <Send className="mr-1 h-3 w-3" />
                             Send
                           </Button>
                         </div>
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-24 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-700 rounded-md mb-5">
                       <div className="text-center">
-                        <Upload size={20} className="text-gray-600 mx-auto mb-1" />
+                        <Upload size={18} className="text-gray-600 mx-auto mb-1" />
                         <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-6">Upload Image</Button>
+                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
                       </div>
                     </div>
                     
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mt-3">
                       <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
                         <ArrowUp className="mr-1 h-3.5 w-3.5" />
                         Generate
@@ -84,29 +84,29 @@ const Index = () => {
                     <form onSubmit={handlePromptSubmit} className="mb-4">
                       <div className="flex flex-col space-y-3">
                         <Textarea 
-                          placeholder="Describe what kind of image, color, and style you want..."
+                          placeholder="Describe what kind of image, color codes, and style you want..."
                           value={prompt}
                           onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
+                          className="min-h-[150px] bg-gray-800 border-gray-700 text-white"
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-8 px-3 py-1 text-sm">
-                            <Send className="mr-1 h-3.5 w-3.5" />
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-7 px-3 py-1 text-xs">
+                            <Send className="mr-1 h-3 w-3" />
                             Send
                           </Button>
                         </div>
                       </div>
                     </form>
                     
-                    <div className="flex items-center justify-center h-24 border-2 border-dashed border-gray-700 rounded-md mb-4">
+                    <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-700 rounded-md mb-5">
                       <div className="text-center">
-                        <Upload size={20} className="text-gray-600 mx-auto mb-1" />
+                        <Upload size={18} className="text-gray-600 mx-auto mb-1" />
                         <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-6">Upload Image</Button>
+                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
                       </div>
                     </div>
                     
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mt-3">
                       <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
                         <ArrowUp className="mr-1 h-3.5 w-3.5" />
                         Generate
@@ -139,7 +139,7 @@ const Index = () => {
         
         <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
           <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-feed-scroll">
+            <div className="grid grid-cols-1 gap-5 animate-feed-scroll md:scrollbar-hide">
               {feedImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
                   <img 
@@ -158,7 +158,7 @@ const Index = () => {
           </div>
           
           <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-story-scroll">
+            <div className="grid grid-cols-1 gap-5 animate-story-scroll md:scrollbar-hide">
               {storyImages.map((image, index) => (
                 <div key={index} className="rounded-lg overflow-hidden relative group">
                   <img 
@@ -195,61 +195,37 @@ const SocialTab = ({ value, icon, label }: { value: string; icon: React.ReactNod
 
 const feedImages = [
   {
-    src: "/lovable-uploads/a36d5fc7-d77d-4c73-896a-787bb22b74c4.png",
-    alt: "Explore Thailand - Square format"
-  },
-  {
-    src: "/lovable-uploads/ba77f210-fc55-4175-8640-5d671e03c3a0.png",
-    alt: "Elegant House - Square format"
-  },
-  {
-    src: "/lovable-uploads/26ff0b9c-a999-4e58-b379-bdb61091d81f.png",
-    alt: "Earth Hour - Square format"
-  },
-  {
-    src: "/lovable-uploads/8c8108e7-4987-4914-96f4-9e21afdafb9a.png",
-    alt: "Borcelle Restaurant - Square format"
-  },
-  {
-    src: "/lovable-uploads/7aef90e5-58c4-4380-b4e2-b613a2a30be1.png",
-    alt: "Pastries - Square format"
-  },
-  {
-    src: "/lovable-uploads/b014adca-4281-467f-9421-542ca7bac029.png",
+    src: "/lovable-uploads/f87f82c8-bda2-4268-9607-11b99cf94970.png",
     alt: "Hot Spicy Pizza - Square format"
   },
   {
-    src: "/lovable-uploads/8bba7cc2-64da-4208-9c50-738876bae777.png",
-    alt: "Sneakers Store - Square format"
-  },
-  {
-    src: "/lovable-uploads/8ea67ce8-3265-4ca2-a255-9b59dec27a23.png",
+    src: "/lovable-uploads/f06d046c-9571-47f7-a1d2-f5ed72ae9768.png",
     alt: "Stay Hydrated - Square format"
   },
   {
-    src: "/lovable-uploads/2ff388cc-44d6-489b-b265-e21659f31f95.png",
-    alt: "Sneakers Store - Square format"
-  },
-  {
-    src: "/lovable-uploads/b84a52e5-35a0-4aed-aa7f-5d8955bbf306.png",
-    alt: "Lumivera Radiant Serum - Square format"
-  },
-  {
-    src: "/lovable-uploads/2d93e533-b9d5-4286-b313-fc590b8c9f73.png",
-    alt: "Hot Spicy Pizza - Square format"
-  },
-  {
-    src: "/lovable-uploads/fe7b4491-efca-4abd-a278-3456db1e48c7.png",
+    src: "/lovable-uploads/6534ea8a-5ce6-4f1d-af20-f5a89ce0423d.png",
     alt: "Elegant House - Square format"
   },
   {
-    src: "/lovable-uploads/48c39036-d7ee-4f0f-bb03-2957efd34d5d.png",
+    src: "/lovable-uploads/bbbcc7ce-8b51-43d4-be3c-d397f82d9b4b.png",
     alt: "Earth Hour - Square format"
   },
   {
-    src: "/lovable-uploads/b70080aa-6fe0-4fc1-8d20-81ecfdb1e1c9.png",
+    src: "/lovable-uploads/9d701c54-3390-4b75-bb0d-7ea9611529de.png",
     alt: "Borcelle Restaurant - Square format"
   },
+  {
+    src: "/lovable-uploads/5a1b8cd4-8cf8-49bd-ac67-491059107a73.png",
+    alt: "Sneakers Store - Square format"
+  },
+  {
+    src: "/lovable-uploads/02930cb5-a761-467a-ae52-3371e487ea28.png",
+    alt: "Lumivera Radiant Serum - Square format"
+  },
+  {
+    src: "/lovable-uploads/6a4e3dc1-1f68-4eac-8b1a-2a6fed380c48.png",
+    alt: "Explore Thailand - Square format"
+  }
 ];
 
 const storyImages = [

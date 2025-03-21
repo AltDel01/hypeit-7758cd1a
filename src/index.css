@@ -91,4 +91,26 @@
   .animate-story-scroll:hover {
     animation-play-state: paused;
   }
+  
+  /* Hide scrollbars on desktop */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Show scrollbars on mobile only */
+  @media (max-width: 768px) {
+    .md\:scrollbar-hide::-webkit-scrollbar {
+      display: initial;
+    }
+    
+    .md\:scrollbar-hide {
+      -ms-overflow-style: auto;
+      scrollbar-width: auto;
+    }
+  }
 }

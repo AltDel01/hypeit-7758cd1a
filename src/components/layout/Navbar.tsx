@@ -17,7 +17,7 @@ const Navbar = () => {
         <div className="flex items-center justify-center flex-1 space-x-8">
           <NavLink to="/">Generate Content</NavLink>
           <NavLink to="/brand-identity">Brand Identity</NavLink>
-          <NavLink to="/virality">Virality</NavLink>
+          <NavLink to="/virality">Virality Strategy</NavLink>
         </div>
 
         {/* Auth Buttons */}
