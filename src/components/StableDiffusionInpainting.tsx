@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +70,7 @@ const StableDiffusionInpainting = () => {
       setIsGenerating(true);
       toast.info("Starting inpainting...");
       
-      // Convert files to HTML images
+      // Convert files to HTML images - use instance methods now
       const originalImgEl = await stableDiffusionService.fileToImage(originalImage);
       const maskImgEl = await stableDiffusionService.fileToImage(maskImage);
       
@@ -79,7 +78,7 @@ const StableDiffusionInpainting = () => {
       originalImageRef.current = originalImgEl;
       maskImageRef.current = maskImgEl;
       
-      // Resize images if needed
+      // Resize images if needed - use instance methods now
       const resizedOriginal = stableDiffusionService.resizeImageIfNeeded(originalImgEl);
       const resizedMask = stableDiffusionService.resizeImageIfNeeded(maskImgEl);
       
@@ -95,8 +94,8 @@ const StableDiffusionInpainting = () => {
         }
       );
       
-      // Set the result image
-      setResultImage(URL.createObjectURL(result));
+      // Set the result image - use URL.createObjectURL with the Blob
+      setResultImage(URL.createObjectURL(new Blob([result], { type: 'image/png' })));
       toast.success("Inpainting completed successfully!");
     } catch (error) {
       console.error("Inpainting error:", error);

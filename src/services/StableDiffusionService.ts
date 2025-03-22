@@ -42,7 +42,7 @@ export class StableDiffusionService {
       
       this.inpainter = await pipeline('image-to-image', INPAINTING_MODEL, {
         revision: 'main',
-        quantized: false,
+        // Remove the quantized property as it doesn't exist in PretrainedModelOptions
         progress_callback: onProgress
       });
       
@@ -94,7 +94,7 @@ export class StableDiffusionService {
   /**
    * Convert a File/Blob to an HTMLImageElement
    */
-  static async fileToImage(file: File | Blob): Promise<HTMLImageElement> {
+  async fileToImage(file: File | Blob): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
@@ -106,7 +106,7 @@ export class StableDiffusionService {
   /**
    * Resize an image if needed to fit within max dimensions
    */
-  static resizeImageIfNeeded(image: HTMLImageElement): HTMLCanvasElement {
+  resizeImageIfNeeded(image: HTMLImageElement): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Could not get canvas context');
