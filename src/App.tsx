@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import StableDiffusionPage from "./pages/StableDiffusionPage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +48,7 @@ const AppRoutes = () => {
         path="/dashboard" 
         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
       />
+      <Route path="/inpainting" element={<StableDiffusionPage />} />
       <Route 
         path="/login" 
         element={<AuthRoute><Login /></AuthRoute>} 
