@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import AuroraBackground from '@/components/effects/AuroraBackground';
 import { 
   Instagram, 
   Copy, 
@@ -26,158 +26,160 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#121212]">
-      <Navbar />
-      <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0">
-        <div className="col-span-5 p-6 border-r border-gray-800">
-          <div className="max-w-xl mx-auto">
-            <h1 className="text-lg font-bold text-white mb-6 text-center">Create Image that sells your product</h1>
-            
-            <div className="mb-6">
-              <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
-                <TabsList className="bg-gray-900 border border-gray-700 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
-                  <SocialTab value="feed" icon={<Instagram size={18} />} label="Feed" />
-                  <SocialTab value="story" icon={<Instagram size={18} />} label="Story" />
-                  <SocialTab value="tiktok" icon={<div className="text-md font-bold">TT</div>} label="TikTok" />
-                  <SocialTab value="x" icon={<Twitter size={18} />} label="X" />
-                  <SocialTab value="linkedin" icon={<Linkedin size={18} />} label="LinkedIn" />
-                </TabsList>
+    <AuroraBackground>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
+          <div className="col-span-5 p-6 border-r border-gray-800">
+            <div className="max-w-xl mx-auto">
+              <h1 className="text-sm font-bold text-white mb-6 text-center">Create Image that sells your product</h1>
+              
+              <div className="mb-6">
+                <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="bg-gray-900 border border-gray-700 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
+                    <SocialTab value="feed" icon={<Instagram size={18} />} label="Feed" />
+                    <SocialTab value="story" icon={<Instagram size={18} />} label="Story" />
+                    <SocialTab value="tiktok" icon={<div className="text-md font-bold">TT</div>} label="TikTok" />
+                    <SocialTab value="x" icon={<Twitter size={18} />} label="X" />
+                    <SocialTab value="linkedin" icon={<Linkedin size={18} />} label="LinkedIn" />
+                  </TabsList>
 
-                <TabsContent value="feed" className="mt-6">
-                  <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                    <form onSubmit={handlePromptSubmit} className="mb-4">
-                      <div className="flex flex-col space-y-3">
-                        <Textarea 
-                          placeholder="Describe what kind of image, color codes, and style you want..."
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[150px] bg-gray-800 border-gray-700 text-white"
-                        />
-                        <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-7 px-3 py-1 text-xs">
-                            <Send className="mr-1 h-3 w-3" />
-                            Send
-                          </Button>
+                  <TabsContent value="feed" className="mt-6">
+                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+                      <form onSubmit={handlePromptSubmit} className="mb-4">
+                        <div className="flex flex-col space-y-3">
+                          <Textarea 
+                            placeholder="Describe what kind of image, color codes, and style you want..."
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
+                          />
+                          <div className="flex justify-end">
+                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
+                              <Send className="mr-1 h-3 w-3" />
+                              Send
+                            </Button>
+                          </div>
+                        </div>
+                      </form>
+                      
+                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
+                        <div className="text-center">
+                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
                         </div>
                       </div>
-                    </form>
-                    
-                    <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-700 rounded-md mb-5">
-                      <div className="text-center">
-                        <Upload size={18} className="text-gray-600 mx-auto mb-1" />
-                        <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
+                      
+                      <div className="flex justify-center mt-5">
+                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                          <ArrowUp className="mr-1 h-3.5 w-3.5" />
+                          Generate
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-center mt-3">
-                      <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
-                        <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                        Generate
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="story" className="mt-6">
-                  <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                    <form onSubmit={handlePromptSubmit} className="mb-4">
-                      <div className="flex flex-col space-y-3">
-                        <Textarea 
-                          placeholder="Describe what kind of image, color codes, and style you want..."
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[150px] bg-gray-800 border-gray-700 text-white"
-                        />
-                        <div className="flex justify-end">
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-7 px-3 py-1 text-xs">
-                            <Send className="mr-1 h-3 w-3" />
-                            Send
-                          </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="story" className="mt-6">
+                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+                      <form onSubmit={handlePromptSubmit} className="mb-4">
+                        <div className="flex flex-col space-y-3">
+                          <Textarea 
+                            placeholder="Describe what kind of image, color codes, and style you want..."
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
+                          />
+                          <div className="flex justify-end">
+                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
+                              <Send className="mr-1 h-3 w-3" />
+                              Send
+                            </Button>
+                          </div>
+                        </div>
+                      </form>
+                      
+                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
+                        <div className="text-center">
+                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
                         </div>
                       </div>
-                    </form>
-                    
-                    <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-700 rounded-md mb-5">
-                      <div className="text-center">
-                        <Upload size={18} className="text-gray-600 mx-auto mb-1" />
-                        <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                        <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
+                      
+                      <div className="flex justify-center mt-5">
+                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                          <ArrowUp className="mr-1 h-3.5 w-3.5" />
+                          Generate
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-center mt-3">
-                      <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
-                        <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                        Generate
-                      </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="tiktok" className="mt-6">
+                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+                      <p className="text-gray-400 text-center">TikTok content generation coming soon</p>
                     </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="tiktok" className="mt-6">
-                  <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                    <p className="text-gray-400 text-center">TikTok content generation coming soon</p>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="x" className="mt-6">
-                  <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                    <p className="text-gray-400 text-center">X content generation coming soon</p>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="linkedin" className="mt-6">
-                  <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                    <p className="text-gray-400 text-center">LinkedIn content generation coming soon</p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-        </div>
-        
-        <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
-          <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-feed-scroll md:scrollbar-hide">
-              {feedImages.map((image, index) => (
-                <div key={index} className="rounded-lg overflow-hidden relative group">
-                  <img 
-                    src={image.src} 
-                    alt={image.alt} 
-                    className="w-full aspect-square object-cover" 
-                  />
-                  <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                      <Copy size={14} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                  </TabsContent>
+                  
+                  <TabsContent value="x" className="mt-6">
+                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+                      <p className="text-gray-400 text-center">X content generation coming soon</p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="linkedin" className="mt-6">
+                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+                      <p className="text-gray-400 text-center">LinkedIn content generation coming soon</p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </div>
           </div>
           
-          <div className="col-span-6 p-4 bg-[#121212] overflow-hidden max-h-screen">
-            <div className="grid grid-cols-1 gap-5 animate-story-scroll md:scrollbar-hide">
-              {storyImages.map((image, index) => (
-                <div key={index} className="rounded-lg overflow-hidden relative group">
-                  <img 
-                    src={image.src} 
-                    alt={image.alt} 
-                    className="w-full aspect-[9/16] object-cover" 
-                  />
-                  <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                      <Copy size={14} />
-                    </Button>
+          <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
+            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+              <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
+                {feedImages.map((image, index) => (
+                  <div key={index} className="rounded-lg overflow-hidden relative group">
+                    <img 
+                      src={image.src} 
+                      alt={image.alt} 
+                      className="w-full aspect-square object-cover" 
+                    />
+                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                        <Copy size={14} />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            
+            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+              <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
+                {storyImages.map((image, index) => (
+                  <div key={index} className="rounded-lg overflow-hidden relative group">
+                    <img 
+                      src={image.src} 
+                      alt={image.alt} 
+                      className="w-full aspect-[9/16] object-cover" 
+                    />
+                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                        <Copy size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuroraBackground>
   );
 };
 
