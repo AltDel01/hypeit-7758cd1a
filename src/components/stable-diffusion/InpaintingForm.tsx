@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Wand2, Upload, CircleOff } from 'lucide-react';
 import ImageUploader from './ImageUploader';
 import PromptInput from './PromptInput';
 import SliderControl from './SliderControl';
 import ModelLoader from './ModelLoader';
+import MaskDrawingCanvas from './MaskDrawingCanvas';
 
 interface InpaintingFormProps {
   isModelLoading: boolean;
@@ -46,6 +47,8 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
   onGenerate,
   isGenerating
 }) => {
+  const [maskDrawingMode, setMaskDrawingMode] = useState<boolean>(true);
+  
   const handleOriginalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setOriginalImage(e.target.files[0]);
@@ -57,13 +60,24 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
       setMaskImage(e.target.files[0]);
     }
   };
+  
+  const handleMaskDrawingChange = (maskDataUrl: string) => {
+    // Convert data URL to File
+    fetch(maskDataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'mask.png', { type: 'image/png' });
+        setMaskImage(file);
+      })
+      .catch(err => console.error('Error converting mask data URL to file:', err));
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-4">Stable Diffusion Inpainting</h2>
         <p className="text-gray-500 mb-4">
-          Upload an image and a mask, then provide a prompt to inpaint the masked area.
+          Upload an image and draw a mask, then provide a prompt to inpaint the masked area.
         </p>
       </div>
       
@@ -79,13 +93,46 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
             image={originalImage}
           />
           
-          <ImageUploader
-            id="mask-image"
-            label="Mask Image (white areas will be inpainted)"
-            icon={<CircleOff size={16} />}
-            onChange={handleMaskImageUpload}
-            image={maskImage}
-          />
+          {originalImage && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Mask</h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant={maskDrawingMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMaskDrawingMode(true)}
+                  >
+                    Draw Mask
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={!maskDrawingMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setMaskDrawingMode(false)}
+                  >
+                    Upload Mask
+                  </Button>
+                </div>
+              </div>
+              
+              {maskDrawingMode ? (
+                <MaskDrawingCanvas 
+                  originalImage={originalImage}
+                  onChange={handleMaskDrawingChange}
+                />
+              ) : (
+                <ImageUploader
+                  id="mask-image"
+                  label="Mask Image (white areas will be inpainted)"
+                  icon={<CircleOff size={16} />}
+                  onChange={handleMaskImageUpload}
+                  image={maskImage}
+                />
+              )}
+            </div>
+          )}
           
           <PromptInput
             id="prompt"
