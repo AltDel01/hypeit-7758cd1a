@@ -33,20 +33,26 @@ export class StableDiffusionService {
    * Load the inpainting model
    */
   async loadModel(onProgress?: (progress: { status: string, progress?: number }) => void) {
-    if (this.inpainter) return this.inpainter;
-    if (this.isLoading) return null;
+    if (this.inpainter) {
+      console.log("Model already loaded, returning existing instance");
+      return this.inpainter;
+    }
+    
+    if (this.isLoading) {
+      console.log("Model is currently loading, waiting...");
+      return null;
+    }
     
     try {
       this.isLoading = true;
-      console.log('Loading inpainting model...');
+      console.log('Loading inpainting model:', INPAINTING_MODEL);
       
       this.inpainter = await pipeline('image-to-image', INPAINTING_MODEL, {
         revision: 'main',
-        // Remove the quantized property as it doesn't exist in PretrainedModelOptions
         progress_callback: onProgress
       });
       
-      console.log('Model loaded successfully');
+      console.log('Model loaded successfully:', this.inpainter);
       this.isLoading = false;
       return this.inpainter;
     } catch (error) {
@@ -66,6 +72,7 @@ export class StableDiffusionService {
   ): Promise<string> {
     try {
       if (!this.inpainter) {
+        console.log("Inpainter not loaded, loading now...");
         await this.loadModel();
       }
       
@@ -74,8 +81,18 @@ export class StableDiffusionService {
         throw new Error('Model not loaded');
       }
       
+      // Log input parameters
+      console.log('Running inpainting with options:', {
+        prompt: options.prompt,
+        negative_prompt: options.negativePrompt || '',
+        num_inference_steps: options.numInferenceSteps || 25,
+        guidance_scale: options.guidanceScale || 7.5,
+      });
+      
+      console.log('Original image dimensions:', originalImage.width, 'x', originalImage.height);
+      console.log('Mask image dimensions:', maskImage.width, 'x', maskImage.height);
+      
       // Run the inpainting
-      console.log('Running inpainting with prompt:', options.prompt);
       const result = await this.inpainter(originalImage, {
         prompt: options.prompt,
         negative_prompt: options.negativePrompt || '',
@@ -83,6 +100,8 @@ export class StableDiffusionService {
         num_inference_steps: options.numInferenceSteps || 25,
         guidance_scale: options.guidanceScale || 7.5,
       });
+      
+      console.log('Inpainting result:', result);
       
       return result[0].blob;
     } catch (error) {
@@ -95,11 +114,20 @@ export class StableDiffusionService {
    * Convert a File/Blob to an HTMLImageElement
    */
   async fileToImage(file: File | Blob): Promise<HTMLImageElement> {
+    console.log(`Converting file to image: ${file.type}, size: ${file.size}`);
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        console.log(`Image loaded: ${img.width}x${img.height}`);
+        resolve(img);
+      };
+      img.onerror = (e) => {
+        console.error('Error loading image:', e);
+        reject(new Error('Failed to load image'));
+      };
+      const url = URL.createObjectURL(file);
+      console.log('Created object URL:', url);
+      img.src = url;
     });
   }
   
@@ -114,6 +142,7 @@ export class StableDiffusionService {
     let { width, height } = image;
     
     if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+      console.log(`Image needs resizing: ${width}x${height} -> max: ${MAX_IMAGE_DIMENSION}`);
       if (width > height) {
         height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
         width = MAX_IMAGE_DIMENSION;
@@ -121,6 +150,9 @@ export class StableDiffusionService {
         width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
         height = MAX_IMAGE_DIMENSION;
       }
+      console.log(`Resized dimensions: ${width}x${height}`);
+    } else {
+      console.log(`No resizing needed: ${width}x${height}`);
     }
     
     canvas.width = width;

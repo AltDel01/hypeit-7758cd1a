@@ -17,6 +17,7 @@ const StableDiffusionInpainting = () => {
   const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [loadingStatus, setLoadingStatus] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const originalImageRef = useRef<HTMLImageElement | null>(null);
   const maskImageRef = useRef<HTMLImageElement | null>(null);
@@ -26,17 +27,22 @@ const StableDiffusionInpainting = () => {
     try {
       setIsModelLoading(true);
       setLoadingStatus("Initializing model...");
+      console.log("Starting model load...");
       
       await stableDiffusionService.loadModel((progress) => {
         setLoadingStatus(progress.status);
+        console.log(`Loading status: ${progress.status}, progress: ${progress.progress}`);
         if (progress.progress !== undefined) {
           setLoadingProgress(progress.progress * 100);
         }
       });
       
+      console.log("Model loaded successfully");
       setIsModelLoading(false);
+      toast.success("Stable Diffusion model loaded successfully!");
     } catch (error) {
       console.error("Error loading model:", error);
+      setErrorMessage(`Failed to load model: ${error instanceof Error ? error.message : String(error)}`);
       toast.error("Failed to load the Stable Diffusion model");
       setIsModelLoading(false);
     }
@@ -45,27 +51,46 @@ const StableDiffusionInpainting = () => {
   // Generate the inpainted image
   const generateInpaintedImage = async () => {
     if (!originalImage || !maskImage || !prompt) {
-      toast.error("Please provide an original image, a mask image, and a prompt");
+      const missingItems = [];
+      if (!originalImage) missingItems.push("original image");
+      if (!maskImage) missingItems.push("mask image");
+      if (!prompt) missingItems.push("prompt");
+      
+      const errorMsg = `Please provide: ${missingItems.join(", ")}`;
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     
     try {
       setIsGenerating(true);
+      setErrorMessage(null);
       toast.info("Starting inpainting...");
+      console.log("Starting inpainting process with prompt:", prompt);
       
       // Convert files to HTML images
+      console.log("Converting original image to HTML Image");
       const originalImgEl = await stableDiffusionService.fileToImage(originalImage);
+      console.log("Converting mask image to HTML Image");
       const maskImgEl = await stableDiffusionService.fileToImage(maskImage);
       
       // Ensure both images have the same dimensions
       originalImageRef.current = originalImgEl;
       maskImageRef.current = maskImgEl;
       
+      console.log("Original image dimensions:", originalImgEl.width, "x", originalImgEl.height);
+      console.log("Mask image dimensions:", maskImgEl.width, "x", maskImgEl.height);
+      
       // Resize images if needed
+      console.log("Resizing original image if needed");
       const resizedOriginal = stableDiffusionService.resizeImageIfNeeded(originalImgEl);
+      console.log("Resizing mask image if needed");
       const resizedMask = stableDiffusionService.resizeImageIfNeeded(maskImgEl);
       
+      console.log("Resized dimensions:", resizedOriginal.width, "x", resizedOriginal.height);
+      
       // Perform inpainting
+      console.log("Calling inpaint with prompt:", prompt);
       const result = await stableDiffusionService.inpaint(
         resizedOriginal,
         resizedMask,
@@ -77,12 +102,15 @@ const StableDiffusionInpainting = () => {
         }
       );
       
+      console.log("Inpainting completed, creating object URL");
       // Set the result image
       setResultImage(URL.createObjectURL(new Blob([result], { type: 'image/png' })));
       toast.success("Inpainting completed successfully!");
     } catch (error) {
       console.error("Inpainting error:", error);
-      toast.error("Failed to generate inpainted image");
+      const errorMsg = `Failed to generate inpainted image: ${error instanceof Error ? error.message : String(error)}`;
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsGenerating(false);
     }
@@ -114,6 +142,7 @@ const StableDiffusionInpainting = () => {
         setGuidanceScale={setGuidanceScale}
         onGenerate={generateInpaintedImage}
         isGenerating={isGenerating}
+        errorMessage={errorMessage}
       />
       
       <ResultPreview resultImage={resultImage} />

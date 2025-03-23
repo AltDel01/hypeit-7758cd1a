@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Wand2, Upload, CircleOff } from 'lucide-react';
+import { Wand2, Upload, CircleOff, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import ImageUploader from './ImageUploader';
 import PromptInput from './PromptInput';
 import SliderControl from './SliderControl';
@@ -26,6 +27,7 @@ interface InpaintingFormProps {
   setGuidanceScale: (scale: number) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  errorMessage?: string | null;
 }
 
 const InpaintingForm: React.FC<InpaintingFormProps> = ({
@@ -45,28 +47,33 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
   guidanceScale,
   setGuidanceScale,
   onGenerate,
-  isGenerating
+  isGenerating,
+  errorMessage
 }) => {
   const [maskDrawingMode, setMaskDrawingMode] = useState<boolean>(true);
   
   const handleOriginalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
+      console.log("Original image selected:", e.target.files[0].name, e.target.files[0].size);
       setOriginalImage(e.target.files[0]);
     }
   };
 
   const handleMaskImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
+      console.log("Mask image selected:", e.target.files[0].name, e.target.files[0].size);
       setMaskImage(e.target.files[0]);
     }
   };
   
   const handleMaskDrawingChange = (maskDataUrl: string) => {
     // Convert data URL to File
+    console.log("Mask drawing changed, converting to file");
     fetch(maskDataUrl)
       .then(res => res.blob())
       .then(blob => {
         const file = new File([blob], 'mask.png', { type: 'image/png' });
+        console.log("Mask file created:", file.size);
         setMaskImage(file);
       })
       .catch(err => console.error('Error converting mask data URL to file:', err));
@@ -80,6 +87,13 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
           Upload an image and draw a mask, then provide a prompt to inpaint the masked area.
         </p>
       </div>
+      
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
       
       {isModelLoading ? (
         <ModelLoader loadingStatus={loadingStatus} loadingProgress={loadingProgress} />
