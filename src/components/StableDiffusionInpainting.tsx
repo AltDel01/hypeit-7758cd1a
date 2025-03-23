@@ -4,8 +4,11 @@ import { toast } from "sonner";
 import stableDiffusionService from '@/services/StableDiffusionService';
 import InpaintingForm from './stable-diffusion/InpaintingForm';
 import ResultPreview from './stable-diffusion/ResultPreview';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StableDiffusionInpainting = () => {
+  const { user } = useAuth();
+  
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [maskImage, setMaskImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState<string>("");
@@ -18,6 +21,8 @@ const StableDiffusionInpainting = () => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [loadingStatus, setLoadingStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [useWebhook, setUseWebhook] = useState<boolean>(false);
+  const [generationStartTime, setGenerationStartTime] = useState<number>(0);
   
   const originalImageRef = useRef<HTMLImageElement | null>(null);
   const maskImageRef = useRef<HTMLImageElement | null>(null);
@@ -48,6 +53,19 @@ const StableDiffusionInpainting = () => {
     }
   };
   
+  // Helper function to update progress with animation
+  const animateProgress = () => {
+    // For a 60-second expected process, calculate progress based on elapsed time
+    const elapsed = Date.now() - generationStartTime;
+    const expectedDuration = 60000; // 60 seconds in ms
+    const progress = Math.min(95, (elapsed / expectedDuration) * 100);
+    setLoadingProgress(progress);
+    
+    if (progress < 95) {
+      requestAnimationFrame(animateProgress);
+    }
+  };
+  
   // Generate the inpainted image
   const generateInpaintedImage = async () => {
     if (!originalImage || !maskImage || !prompt) {
@@ -65,8 +83,24 @@ const StableDiffusionInpainting = () => {
     try {
       setIsGenerating(true);
       setErrorMessage(null);
+      setGenerationStartTime(Date.now());
+      setLoadingProgress(0);
+      requestAnimationFrame(animateProgress);
+      
       toast.info("Starting inpainting...");
       console.log("Starting inpainting process with prompt:", prompt);
+      
+      // If using webhook, send the image to the webhook
+      if (useWebhook) {
+        try {
+          await stableDiffusionService.sendImageToWebhook(originalImage, prompt);
+          console.log("Image sent to webhook successfully");
+        } catch (webhookError) {
+          console.error("Webhook error:", webhookError);
+          // Continue with local processing despite webhook error
+          toast.error("Failed to send to webhook, continuing with local processing");
+        }
+      }
       
       // Convert files to HTML images
       console.log("Converting original image to HTML Image");
@@ -102,6 +136,9 @@ const StableDiffusionInpainting = () => {
         }
       );
       
+      // Set final progress
+      setLoadingProgress(100);
+      
       console.log("Inpainting completed, creating object URL");
       // Set the result image
       setResultImage(URL.createObjectURL(new Blob([result], { type: 'image/png' })));
@@ -121,6 +158,10 @@ const StableDiffusionInpainting = () => {
     loadModel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  // Calculate generation time
+  const elapsedSeconds = Math.floor((Date.now() - generationStartTime) / 1000);
+  const generationTime = generationStartTime > 0 ? Math.max(1, elapsedSeconds) : 60;
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
@@ -143,9 +184,16 @@ const StableDiffusionInpainting = () => {
         onGenerate={generateInpaintedImage}
         isGenerating={isGenerating}
         errorMessage={errorMessage}
+        useWebhook={useWebhook}
+        setUseWebhook={setUseWebhook}
       />
       
-      <ResultPreview resultImage={resultImage} />
+      <ResultPreview 
+        resultImage={resultImage} 
+        isLoading={isGenerating}
+        loadingProgress={loadingProgress}
+        generationTime={generationTime}
+      />
     </div>
   );
 };

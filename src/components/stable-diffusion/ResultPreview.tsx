@@ -1,12 +1,22 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Download, Share2 } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
 
 interface ResultPreviewProps {
   resultImage: string | null;
+  isLoading?: boolean;
+  loadingProgress?: number;
+  generationTime?: number;
 }
 
-const ResultPreview: React.FC<ResultPreviewProps> = ({ resultImage }) => {
+const ResultPreview: React.FC<ResultPreviewProps> = ({ 
+  resultImage, 
+  isLoading = false,
+  loadingProgress = 0,
+  generationTime = 60 
+}) => {
   const handleDownload = () => {
     if (!resultImage) return;
     
@@ -18,10 +28,102 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({ resultImage }) => {
     document.body.removeChild(link);
   };
   
+  const handleShare = async () => {
+    if (!resultImage) return;
+    
+    try {
+      if (navigator.share) {
+        // Get the blob from the url
+        const response = await fetch(resultImage);
+        const blob = await response.blob();
+        const file = new File([blob], 'inpainted-image.png', { type: 'image/png' });
+        
+        await navigator.share({
+          title: 'My Inpainted Image',
+          text: 'Check out this image I created!',
+          files: [file]
+        });
+      } else {
+        // Fallback - copy to clipboard
+        const canvas = document.createElement('canvas');
+        const img = document.createElement('img');
+        img.src = resultImage;
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              alert('Image copied to clipboard!');
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error sharing image:', error);
+      alert('Unable to share image. Try downloading instead.');
+    }
+  };
+  
+  const LoadingAnimation = () => {
+    const timeRemaining = Math.max(0, Math.ceil(generationTime * (1 - loadingProgress / 100)));
+    
+    return (
+      <div className="flex items-center justify-center flex-col space-y-4">
+        <div className="relative h-40 w-40">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-3xl font-bold">{timeRemaining}s</div>
+          </div>
+          <svg className="animate-spin h-full w-full" viewBox="0 0 100 100">
+            <circle 
+              className="opacity-25" 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              stroke="currentColor" 
+              strokeWidth="8" 
+              fill="none" 
+            />
+            <circle 
+              className="opacity-75 text-primary" 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              stroke="currentColor" 
+              strokeWidth="8" 
+              fill="none" 
+              strokeDasharray="283" 
+              strokeDashoffset={283 * (1 - loadingProgress / 100)} 
+            />
+          </svg>
+        </div>
+        <div className="w-full max-w-xs">
+          <Progress value={loadingProgress} className="h-2" />
+        </div>
+        <p className="text-center text-sm text-gray-500">
+          Applying your prompt to the image...
+          <br />
+          This may take up to a minute
+        </p>
+      </div>
+    );
+  };
+  
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold">Result</h3>
-      {resultImage ? (
+      {isLoading ? (
+        <div className="aspect-square w-full max-h-[500px] overflow-hidden rounded-md border bg-gray-50 flex items-center justify-center">
+          <LoadingAnimation />
+        </div>
+      ) : resultImage ? (
         <div className="aspect-square w-full max-h-[500px] overflow-hidden rounded-md border">
           <img
             src={resultImage}
@@ -38,13 +140,24 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({ resultImage }) => {
       )}
       
       {resultImage && (
-        <Button 
-          variant="outline"
-          className="w-full"
-          onClick={handleDownload}
-        >
-          Download Result
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant="default"
+            className="flex-1"
+            onClick={handleDownload}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download
+          </Button>
+          <Button 
+            variant="outline"
+            className="flex-1"
+            onClick={handleShare}
+          >
+            <Share2 className="mr-2 h-4 w-4" />
+            Share
+          </Button>
+        </div>
       )}
     </div>
   );

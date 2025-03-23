@@ -28,6 +28,8 @@ interface InpaintingFormProps {
   onGenerate: () => void;
   isGenerating: boolean;
   errorMessage?: string | null;
+  useWebhook?: boolean;
+  setUseWebhook?: (useWebhook: boolean) => void;
 }
 
 const InpaintingForm: React.FC<InpaintingFormProps> = ({
@@ -48,7 +50,9 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
   setGuidanceScale,
   onGenerate,
   isGenerating,
-  errorMessage
+  errorMessage,
+  useWebhook = false,
+  setUseWebhook
 }) => {
   const [maskDrawingMode, setMaskDrawingMode] = useState<boolean>(true);
   
@@ -78,6 +82,15 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
       })
       .catch(err => console.error('Error converting mask data URL to file:', err));
   };
+  
+  const handleRemoveOriginalImage = () => {
+    setOriginalImage(null);
+    if (maskImage) setMaskImage(null);
+  };
+  
+  const handleRemoveMaskImage = () => {
+    setMaskImage(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -105,6 +118,7 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
             icon={<Upload size={16} />}
             onChange={handleOriginalImageUpload}
             image={originalImage}
+            onRemoveImage={handleRemoveOriginalImage}
           />
           
           {originalImage && (
@@ -143,6 +157,7 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
                   icon={<CircleOff size={16} />}
                   onChange={handleMaskImageUpload}
                   image={maskImage}
+                  onRemoveImage={handleRemoveMaskImage}
                 />
               )}
             </div>
@@ -185,6 +200,21 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
             onChange={(value) => setGuidanceScale(value[0])}
             displayValue={guidanceScale.toFixed(1)}
           />
+          
+          {setUseWebhook && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="use-webhook"
+                checked={useWebhook}
+                onChange={(e) => setUseWebhook(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="use-webhook" className="text-sm text-gray-700">
+                Also send to webhook (for advanced processing)
+              </label>
+            </div>
+          )}
           
           <Button
             className="w-full"

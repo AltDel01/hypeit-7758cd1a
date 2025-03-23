@@ -161,6 +161,34 @@ export class StableDiffusionService {
     
     return canvas;
   }
+  
+  /**
+   * Send an image to a webhook
+   */
+  async sendImageToWebhook(imageFile: File | Blob, prompt: string): Promise<void> {
+    try {
+      const webhookUrl = 'https://hook.us2.make.com/l8m3dlxnkbkgzp9e53jboadp6fjml6w';
+      console.log(`Sending image to webhook: ${webhookUrl}`);
+      
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('prompt', prompt);
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
+      }
+      
+      console.log('Webhook response:', await response.json());
+    } catch (error) {
+      console.error('Error sending image to webhook:', error);
+      throw error;
+    }
+  }
 }
 
 export default StableDiffusionService.getInstance();
