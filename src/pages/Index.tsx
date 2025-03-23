@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import { toast } from "sonner";
 import { 
   Instagram, 
   Copy, 
@@ -13,16 +14,89 @@ import {
   Twitter,
   Linkedin,
   Send,
+  X
 } from 'lucide-react';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const [prompt, setPrompt] = useState("");
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prompt submitted:", prompt);
     setPrompt("");
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      console.log("File selected:", file.name);
+      setProductImage(file);
+      
+      // Send to webhook
+      sendImageToWebhook(file);
+    }
+  };
+  
+  const handleUploadButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.match('image.*')) {
+        console.log("File dropped:", file.name);
+        setProductImage(file);
+        
+        // Send to webhook
+        sendImageToWebhook(file);
+      }
+    }
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const sendImageToWebhook = async (file: File) => {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('filename', file.name);
+      formData.append('type', file.type);
+      formData.append('size', file.size.toString());
+
+      const webhookUrl = 'https://ekalovable.app.n8n.cloud/webhook-test/c7d65113-1128-44ee-bcdb-6d334459913c';
+      
+      console.log(`Sending ${file.name} to webhook: ${webhookUrl}`);
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Webhook response:', result);
+      toast.success(`Image ${file.name} successfully sent to webhook`);
+    } catch (error) {
+      console.error('Error sending image to webhook:', error);
+      toast.error(`Failed to send image to webhook: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -63,16 +137,58 @@ const Index = () => {
                         </div>
                       </form>
                       
-                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
-                        <div className="text-center">
-                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
-                        </div>
+                      <div 
+                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6 ${isUploading ? 'opacity-70' : ''}`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                      >
+                        {!productImage ? (
+                          <div className="text-center">
+                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                            <Button 
+                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
+                              onClick={handleUploadButtonClick}
+                              disabled={isUploading}
+                            >
+                              Upload Image
+                            </Button>
+                            {isUploading && (
+                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
+                            )}
+                            <Input 
+                              type="file"
+                              accept="image/*"
+                              ref={fileInputRef}
+                              onChange={handleFileInputChange}
+                              className="hidden"
+                            />
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <img 
+                              src={URL.createObjectURL(productImage)} 
+                              alt="Product" 
+                              className="max-h-full max-w-full object-contain" 
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 rounded-full h-5 w-5"
+                              onClick={() => setProductImage(null)}
+                              disabled={isUploading}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex justify-center mt-5">
-                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm"
+                          disabled={!productImage || !prompt.trim() || isUploading}
+                        >
                           <ArrowUp className="mr-1 h-3.5 w-3.5" />
                           Generate
                         </Button>
@@ -99,16 +215,51 @@ const Index = () => {
                         </div>
                       </form>
                       
-                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
-                        <div className="text-center">
-                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
-                        </div>
+                      <div 
+                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6 ${isUploading ? 'opacity-70' : ''}`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                      >
+                        {!productImage ? (
+                          <div className="text-center">
+                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                            <Button 
+                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
+                              onClick={handleUploadButtonClick}
+                              disabled={isUploading}
+                            >
+                              Upload Image
+                            </Button>
+                            {isUploading && (
+                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <img 
+                              src={URL.createObjectURL(productImage)} 
+                              alt="Product" 
+                              className="max-h-full max-w-full object-contain" 
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 rounded-full h-5 w-5"
+                              onClick={() => setProductImage(null)}
+                              disabled={isUploading}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex justify-center mt-5">
-                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm"
+                          disabled={!productImage || !prompt.trim() || isUploading}
+                        >
                           <ArrowUp className="mr-1 h-3.5 w-3.5" />
                           Generate
                         </Button>
