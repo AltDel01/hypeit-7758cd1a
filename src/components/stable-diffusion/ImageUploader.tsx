@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X } from 'lucide-react';
+import { toast } from "sonner";
 
 interface ImageUploaderProps {
   id: string;
@@ -23,6 +24,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   onRemoveImage
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -56,9 +58,55 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           }
         } as unknown as React.ChangeEvent<HTMLInputElement>;
         onChange(syntheticEvent);
+        
+        // Send to webhook
+        sendImageToWebhook(file);
       }
     }
   }, [onChange]);
+
+  const sendImageToWebhook = async (file: File) => {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('filename', file.name);
+      formData.append('type', file.type);
+      formData.append('size', file.size.toString());
+
+      const webhookUrl = 'https://ekalovable.app.n8n.cloud/webhook-test/c7d65113-1128-44ee-bcdb-6d334459913c';
+      
+      console.log(`Sending ${file.name} to webhook: ${webhookUrl}`);
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Webhook response:', result);
+      toast.success(`Image ${file.name} successfully sent to webhook`);
+    } catch (error) {
+      console.error('Error sending image to webhook:', error);
+      toast.error(`Failed to send image to webhook: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // Call the parent onChange handler
+      onChange(e);
+      
+      // Send to webhook
+      sendImageToWebhook(e.target.files[0]);
+    }
+  };
   
   return (
     <div>
@@ -66,7 +114,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       <div
         className={`mt-1 border-2 border-dashed rounded-md p-6 transition-colors ${
           isDragging ? 'border-primary bg-primary/10' : 'border-gray-300'
-        }`}
+        } ${isUploading ? 'opacity-70' : ''}`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -84,6 +132,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               <div className="text-xs text-gray-400">
                 PNG, JPG, GIF up to 10MB
               </div>
+              {isUploading && (
+                <div className="text-xs text-blue-500 mt-2">
+                  Sending to webhook...
+                </div>
+              )}
             </>
           ) : (
             <div className="relative w-full aspect-square max-h-[300px] overflow-hidden rounded-md">
@@ -97,6 +150,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 size="icon"
                 className="absolute top-2 right-2 rounded-full h-8 w-8"
                 onClick={onRemoveImage}
+                disabled={isUploading}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -106,7 +160,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             id={id}
             type="file"
             accept="image/*"
-            onChange={onChange}
+            onChange={handleImageChange}
             className={image ? "hidden" : "hidden"}
           />
         </div>

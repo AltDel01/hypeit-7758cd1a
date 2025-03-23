@@ -165,14 +165,23 @@ export class StableDiffusionService {
   /**
    * Send an image to a webhook
    */
-  async sendImageToWebhook(imageFile: File | Blob, prompt: string): Promise<void> {
+  async sendImageToWebhook(imageFile: File | Blob, prompt: string = ""): Promise<void> {
     try {
-      const webhookUrl = 'https://hook.us2.make.com/l8m3dlxnkbkgzp9e53jboadp6fjml6w';
+      const webhookUrl = 'https://ekalovable.app.n8n.cloud/webhook-test/c7d65113-1128-44ee-bcdb-6d334459913c';
       console.log(`Sending image to webhook: ${webhookUrl}`);
       
       const formData = new FormData();
       formData.append('image', imageFile);
-      formData.append('prompt', prompt);
+      
+      if (prompt) {
+        formData.append('prompt', prompt);
+      }
+      
+      if (imageFile instanceof File) {
+        formData.append('filename', imageFile.name);
+        formData.append('type', imageFile.type);
+        formData.append('size', imageFile.size.toString());
+      }
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
