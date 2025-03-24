@@ -15,7 +15,6 @@ import {
   Linkedin,
   Send,
   X,
-  TikTok,
 } from 'lucide-react';
 
 const Index = () => {
