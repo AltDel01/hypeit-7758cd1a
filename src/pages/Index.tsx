@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -178,6 +177,10 @@ const Index = () => {
         </div>
       </div>
     );
+  };
+
+  const isVerticalFormat = (tab: string) => {
+    return ["story", "tiktok"].includes(tab);
   };
 
   return (
@@ -399,24 +402,48 @@ const storyImages = [
     alt: "Chocolate Day - Story format"
   },
   {
+    src: "/lovable-uploads/fd5809e6-8498-4bd7-869c-d8ff86660e30.png", 
+    alt: "Chocolate Day - Vertical format"
+  },
+  {
     src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
     alt: "Cocktail Party - Story format"
+  },
+  {
+    src: "/lovable-uploads/25d12b60-7652-407f-a209-9ee7bbf49e9d.png",
+    alt: "New Arrival - Vertical format" 
   },
   {
     src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
     alt: "2024 New Arrival - Story format"
   },
   {
+    src: "/lovable-uploads/e4ff8e9e-a57e-469a-999c-fc9c3d381e95.png",
+    alt: "Coming Soon - Vertical format"
+  },
+  {
     src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
     alt: "Coming Soon - Story format"
+  },
+  {
+    src: "/lovable-uploads/88071d13-6956-458b-b572-a0b698f46b9e.png",
+    alt: "We Are Brewing - Vertical format"
   },
   {
     src: "/lovable-uploads/4566da4e-dcd6-43f1-8b1a-8f086bbbf049.png",
     alt: "We Are Brewing - Story format"
   },
   {
+    src: "/lovable-uploads/e7959655-3a2f-4ea0-a0d2-b7a03b5e1799.png",
+    alt: "Ice Cream - Vertical format"
+  },
+  {
     src: "/lovable-uploads/d5259be9-2c46-4118-8dae-0b7a5ee45cbe.png",
     alt: "Delicious Ice Cream - Story format"
+  },
+  {
+    src: "/lovable-uploads/1ec21b2c-7367-4316-a78d-7ca265b84f02.png", 
+    alt: "Pastries - Vertical format"
   },
   {
     src: "/lovable-uploads/12bfd206-826f-465e-bcc7-458b0aa560d9.png",
@@ -426,20 +453,32 @@ const storyImages = [
 
 const tiktokImages = [
   {
-    src: "/lovable-uploads/3eaf26ea-5c41-4dd6-a936-da3761e1df91.png",
-    alt: "TikTok Content - Vertical format"
+    src: "/lovable-uploads/fd5809e6-8498-4bd7-869c-d8ff86660e30.png", 
+    alt: "Chocolate Day - TikTok format"
   },
   {
     src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
     alt: "TikTok Dance - Vertical format"
   },
   {
-    src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
-    alt: "TikTok Trends - Vertical format"
+    src: "/lovable-uploads/25d12b60-7652-407f-a209-9ee7bbf49e9d.png",
+    alt: "New Arrival - TikTok format" 
   },
   {
-    src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
-    alt: "TikTok Challenge - Vertical format"
+    src: "/lovable-uploads/e4ff8e9e-a57e-469a-999c-fc9c3d381e95.png",
+    alt: "Coming Soon - TikTok format"
+  },
+  {
+    src: "/lovable-uploads/88071d13-6956-458b-b572-a0b698f46b9e.png",
+    alt: "We Are Brewing - TikTok format"
+  },
+  {
+    src: "/lovable-uploads/e7959655-3a2f-4ea0-a0d2-b7a03b5e1799.png",
+    alt: "Ice Cream - TikTok format"
+  },
+  {
+    src: "/lovable-uploads/1ec21b2c-7367-4316-a78d-7ca265b84f02.png", 
+    alt: "Pastries - TikTok format"
   }
 ];
 
