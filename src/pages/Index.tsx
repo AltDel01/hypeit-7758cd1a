@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -243,64 +244,100 @@ const Index = () => {
             </div>
             
             <div className="col-span-6 p-4 overflow-hidden max-h-screen">
-              <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
-                {activeTab === "story" && storyImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-[9/16] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
+              {activeTab === "feed" && (
+                <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
+                  {feedImages.slice(4).map((image, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden relative group">
+                      <img 
+                        src={image.src} 
+                        alt={image.alt} 
+                        className="w-full aspect-square object-cover" 
+                      />
+                      <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                          <Copy size={14} />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {activeTab === "tiktok" && tiktokImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-[9/16] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
+                  ))}
+                </div>
+              )}
+              
+              {activeTab === "story" && (
+                <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
+                  {storyImages.map((image, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden relative group">
+                      <img 
+                        src={image.src} 
+                        alt={image.alt} 
+                        className="w-full aspect-[9/16] object-cover" 
+                      />
+                      <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                          <Copy size={14} />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {activeTab === "x" && xImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-[16/9] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
+                  ))}
+                </div>
+              )}
+              
+              {activeTab === "tiktok" && (
+                <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
+                  {tiktokImages.map((image, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden relative group">
+                      <img 
+                        src={image.src} 
+                        alt={image.alt} 
+                        className="w-full aspect-[9/16] object-cover" 
+                      />
+                      <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                          <Copy size={14} />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {activeTab === "linkedin" && linkedinImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-[3/2] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
+                  ))}
+                </div>
+              )}
+              
+              {activeTab === "x" && (
+                <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
+                  {xImages.map((image, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden relative group">
+                      <img 
+                        src={image.src} 
+                        alt={image.alt} 
+                        className="w-full aspect-[16/9] object-cover" 
+                      />
+                      <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                          <Copy size={14} />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+              
+              {activeTab === "linkedin" && (
+                <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
+                  {linkedinImages.map((image, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden relative group">
+                      <img 
+                        src={image.src} 
+                        alt={image.alt} 
+                        className="w-full aspect-[3/2] object-cover" 
+                      />
+                      <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </main>
