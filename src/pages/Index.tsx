@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +23,9 @@ const Index = () => {
   const [prompt, setPrompt] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [xText, setXText] = useState("");
+  const [linkedinText, setLinkedinText] = useState("");
+  const [isGeneratingText, setIsGeneratingText] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
@@ -97,6 +101,32 @@ const Index = () => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const generateTextContent = (platform: "x" | "linkedin") => {
+    setIsGeneratingText(true);
+    
+    // Simulating text generation with a timeout
+    setTimeout(() => {
+      const productName = productImage ? productImage.name.split('.')[0] : "our product";
+      
+      if (platform === "x") {
+        const generatedText = `Just launched ${productName}! This innovative solution will transform how you work. Check it out now! #ProductLaunch #Innovation`;
+        setXText(generatedText);
+        toast.success("X post content generated!");
+      } else if (platform === "linkedin") {
+        const generatedText = `We're excited to announce the release of ${productName}!\n\nAfter months of development and testing, our team has created a solution that addresses key challenges in the industry. ${productName} offers unparalleled efficiency and performance.\n\nVisit our website to learn more about how ${productName} can benefit your business.\n\n#ProductLaunch #Innovation #BusinessSolutions`;
+        setLinkedinText(generatedText);
+        toast.success("LinkedIn post content generated!");
+      }
+      
+      setIsGeneratingText(false);
+    }, 1500);
+  };
+
+  const copyToClipboard = (text: string, platform: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${platform} text copied to clipboard!`);
   };
 
   return (
@@ -275,13 +305,157 @@ const Index = () => {
                   
                   <TabsContent value="x" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">X content generation coming soon</p>
+                      <div className="mb-4">
+                        <Textarea 
+                          placeholder="Enter details about your product for X post generation..."
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div 
+                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-4 ${isUploading ? 'opacity-70' : ''}`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                      >
+                        {!productImage ? (
+                          <div className="text-center">
+                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                            <Button 
+                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
+                              onClick={handleUploadButtonClick}
+                              disabled={isUploading}
+                            >
+                              Upload Image
+                            </Button>
+                            {isUploading && (
+                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <img 
+                              src={URL.createObjectURL(productImage)} 
+                              alt="Product" 
+                              className="max-h-full max-w-full object-contain" 
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 rounded-full h-5 w-5"
+                              onClick={() => setProductImage(null)}
+                              disabled={isUploading}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-center">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm mb-4"
+                          disabled={!prompt.trim() || isGeneratingText}
+                          onClick={() => generateTextContent("x")}
+                        >
+                          {isGeneratingText ? "Generating..." : "Generate X Post"}
+                        </Button>
+                      </div>
+                      
+                      {xText && (
+                        <div className="mt-4 bg-gray-800 p-3 rounded-md relative">
+                          <p className="text-white text-sm">{xText}</p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute top-2 right-2 h-6 w-6 p-0"
+                            onClick={() => copyToClipboard(xText, "X")}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="linkedin" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">LinkedIn content generation coming soon</p>
+                      <div className="mb-4">
+                        <Textarea 
+                          placeholder="Enter details about your product for LinkedIn post generation..."
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div 
+                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-4 ${isUploading ? 'opacity-70' : ''}`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                      >
+                        {!productImage ? (
+                          <div className="text-center">
+                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
+                            <Button 
+                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
+                              onClick={handleUploadButtonClick}
+                              disabled={isUploading}
+                            >
+                              Upload Image
+                            </Button>
+                            {isUploading && (
+                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <img 
+                              src={URL.createObjectURL(productImage)} 
+                              alt="Product" 
+                              className="max-h-full max-w-full object-contain" 
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 rounded-full h-5 w-5"
+                              onClick={() => setProductImage(null)}
+                              disabled={isUploading}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-center">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm mb-4"
+                          disabled={!prompt.trim() || isGeneratingText}
+                          onClick={() => generateTextContent("linkedin")}
+                        >
+                          {isGeneratingText ? "Generating..." : "Generate LinkedIn Post"}
+                        </Button>
+                      </div>
+                      
+                      {linkedinText && (
+                        <div className="mt-4 bg-gray-800 p-3 rounded-md relative">
+                          <p className="text-white text-sm whitespace-pre-line">{linkedinText}</p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute top-2 right-2 h-6 w-6 p-0"
+                            onClick={() => copyToClipboard(linkedinText, "LinkedIn")}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>
