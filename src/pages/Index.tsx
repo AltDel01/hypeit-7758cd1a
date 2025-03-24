@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import { toast } from "sonner";
 import { 
   Instagram, 
   Copy, 
@@ -13,16 +14,169 @@ import {
   Twitter,
   Linkedin,
   Send,
+  X,
 } from 'lucide-react';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const [prompt, setPrompt] = useState("");
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prompt submitted:", prompt);
     setPrompt("");
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      console.log("File selected:", file.name);
+      setProductImage(file);
+      
+      // Send to webhook
+      sendImageToWebhook(file);
+    }
+  };
+  
+  const handleUploadButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.match('image.*')) {
+        console.log("File dropped:", file.name);
+        setProductImage(file);
+        
+        // Send to webhook
+        sendImageToWebhook(file);
+      }
+    }
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const sendImageToWebhook = async (file: File) => {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('filename', file.name);
+      formData.append('type', file.type);
+      formData.append('size', file.size.toString());
+
+      const webhookUrl = 'https://ekalovable.app.n8n.cloud/webhook-test/c7d65113-1128-44ee-bcdb-6d334459913c';
+      
+      console.log(`Sending ${file.name} to webhook: ${webhookUrl}`);
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Webhook response:', result);
+      toast.success(`Image ${file.name} successfully sent to webhook`);
+    } catch (error) {
+      console.error('Error sending image to webhook:', error);
+      toast.error(`Failed to send image to webhook: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const renderTabContent = (tabValue: string) => {
+    return (
+      <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+        <form onSubmit={handlePromptSubmit} className="mb-4">
+          <div className="flex flex-col space-y-3">
+            <Textarea 
+              placeholder="Describe what kind of image, color codes, and style you want..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
+            />
+            <div className="flex justify-end">
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
+                <Send className="mr-1 h-3 w-3" />
+                Send
+              </Button>
+            </div>
+          </div>
+        </form>
+        
+        <div 
+          className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6 ${isUploading ? 'opacity-70' : ''}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {!productImage ? (
+            <div className="text-center">
+              <Upload size={16} className="text-gray-600 mx-auto mb-1" />
+              <p className="text-gray-400 text-xs">Drop your product image here or</p>
+              <Button 
+                className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
+                onClick={handleUploadButtonClick}
+                disabled={isUploading}
+              >
+                Upload Image
+              </Button>
+              {isUploading && (
+                <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
+              )}
+              <Input 
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+            </div>
+          ) : (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={URL.createObjectURL(productImage)} 
+                alt="Product" 
+                className="max-h-full max-w-full object-contain" 
+              />
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-1 right-1 rounded-full h-5 w-5"
+                onClick={() => setProductImage(null)}
+                disabled={isUploading}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex justify-center mt-5">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm"
+            disabled={!productImage || !prompt.trim() || isUploading}
+          >
+            <ArrowUp className="mr-1 h-3.5 w-3.5" />
+            Generate
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -45,93 +199,23 @@ const Index = () => {
                   </TabsList>
 
                   <TabsContent value="feed" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <form onSubmit={handlePromptSubmit} className="mb-4">
-                        <div className="flex flex-col space-y-3">
-                          <Textarea 
-                            placeholder="Describe what kind of image, color codes, and style you want..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
-                          />
-                          <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
-                              <Send className="mr-1 h-3 w-3" />
-                              Send
-                            </Button>
-                          </div>
-                        </div>
-                      </form>
-                      
-                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
-                        <div className="text-center">
-                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-center mt-5">
-                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
-                          <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                          Generate
-                        </Button>
-                      </div>
-                    </div>
+                    {renderTabContent("feed")}
                   </TabsContent>
                   
                   <TabsContent value="story" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <form onSubmit={handlePromptSubmit} className="mb-4">
-                        <div className="flex flex-col space-y-3">
-                          <Textarea 
-                            placeholder="Describe what kind of image, color codes, and style you want..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
-                          />
-                          <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
-                              <Send className="mr-1 h-3 w-3" />
-                              Send
-                            </Button>
-                          </div>
-                        </div>
-                      </form>
-                      
-                      <div className="flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6">
-                        <div className="text-center">
-                          <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                          <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                          <Button className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5">Upload Image</Button>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-center mt-5">
-                        <Button className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm">
-                          <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                          Generate
-                        </Button>
-                      </div>
-                    </div>
+                    {renderTabContent("story")}
                   </TabsContent>
                   
                   <TabsContent value="tiktok" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">TikTok content generation coming soon</p>
-                    </div>
+                    {renderTabContent("tiktok")}
                   </TabsContent>
                   
                   <TabsContent value="x" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">X content generation coming soon</p>
-                    </div>
+                    {renderTabContent("x")}
                   </TabsContent>
                   
                   <TabsContent value="linkedin" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">LinkedIn content generation coming soon</p>
-                    </div>
+                    {renderTabContent("linkedin")}
                   </TabsContent>
                 </Tabs>
               </div>
@@ -160,12 +244,54 @@ const Index = () => {
             
             <div className="col-span-6 p-4 overflow-hidden max-h-screen">
               <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
-                {storyImages.map((image, index) => (
+                {activeTab === "story" && storyImages.map((image, index) => (
                   <div key={index} className="rounded-lg overflow-hidden relative group">
                     <img 
                       src={image.src} 
                       alt={image.alt} 
                       className="w-full aspect-[9/16] object-cover" 
+                    />
+                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                        <Copy size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {activeTab === "tiktok" && tiktokImages.map((image, index) => (
+                  <div key={index} className="rounded-lg overflow-hidden relative group">
+                    <img 
+                      src={image.src} 
+                      alt={image.alt} 
+                      className="w-full aspect-[9/16] object-cover" 
+                    />
+                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                        <Copy size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {activeTab === "x" && xImages.map((image, index) => (
+                  <div key={index} className="rounded-lg overflow-hidden relative group">
+                    <img 
+                      src={image.src} 
+                      alt={image.alt} 
+                      className="w-full aspect-[16/9] object-cover" 
+                    />
+                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
+                        <Copy size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {activeTab === "linkedin" && linkedinImages.map((image, index) => (
+                  <div key={index} className="rounded-lg overflow-hidden relative group">
+                    <img 
+                      src={image.src} 
+                      alt={image.alt} 
+                      className="w-full aspect-[3/2] object-cover" 
                     />
                     <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
@@ -259,6 +385,59 @@ const storyImages = [
     src: "/lovable-uploads/12bfd206-826f-465e-bcc7-458b0aa560d9.png",
     alt: "Pastries - Story format"
   },
+];
+
+const tiktokImages = [
+  {
+    src: "/lovable-uploads/3eaf26ea-5c41-4dd6-a936-da3761e1df91.png",
+    alt: "TikTok Content - Vertical format"
+  },
+  {
+    src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
+    alt: "TikTok Dance - Vertical format"
+  },
+  {
+    src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
+    alt: "TikTok Trends - Vertical format"
+  },
+  {
+    src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
+    alt: "TikTok Challenge - Vertical format"
+  }
+];
+
+const xImages = [
+  {
+    src: "/lovable-uploads/f87f82c8-bda2-4268-9607-11b99cf94970.png",
+    alt: "X Promotion - Landscape format"
+  },
+  {
+    src: "/lovable-uploads/f06d046c-9571-47f7-a1d2-f5ed72ae9768.png",
+    alt: "X Campaign - Landscape format"
+  },
+  {
+    src: "/lovable-uploads/6534ea8a-5ce6-4f1d-af20-f5a89ce0423d.png",
+    alt: "X Announcement - Landscape format"
+  }
+];
+
+const linkedinImages = [
+  {
+    src: "/lovable-uploads/bbbcc7ce-8b51-43d4-be3c-d397f82d9b4b.png",
+    alt: "LinkedIn Professional - Landscape format"
+  },
+  {
+    src: "/lovable-uploads/9d701c54-3390-4b75-bb0d-7ea9611529de.png",
+    alt: "LinkedIn Business - Landscape format"
+  },
+  {
+    src: "/lovable-uploads/5a1b8cd4-8cf8-49bd-ac67-491059107a73.png",
+    alt: "LinkedIn Networking - Landscape format"
+  },
+  {
+    src: "/lovable-uploads/02930cb5-a761-467a-ae52-3371e487ea28.png",
+    alt: "LinkedIn Job Post - Landscape format"
+  }
 ];
 
 export default Index;
