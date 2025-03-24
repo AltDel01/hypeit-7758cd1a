@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,7 +45,9 @@ const Index = () => {
   };
   
   const handleUploadButtonClick = () => {
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
   
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -315,44 +316,8 @@ const Index = () => {
                         />
                       </div>
                       
-                      <div 
-                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-4 ${isUploading ? 'opacity-70' : ''}`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                      >
-                        {!productImage ? (
-                          <div className="text-center">
-                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                            <Button 
-                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
-                              onClick={handleUploadButtonClick}
-                              disabled={isUploading}
-                            >
-                              Upload Image
-                            </Button>
-                            {isUploading && (
-                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="relative w-full h-full flex items-center justify-center">
-                            <img 
-                              src={URL.createObjectURL(productImage)} 
-                              alt="Product" 
-                              className="max-h-full max-w-full object-contain" 
-                            />
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 rounded-full h-5 w-5"
-                              onClick={() => setProductImage(null)}
-                              disabled={isUploading}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
+                      <div className="text-center mb-4 text-sm text-gray-400">
+                        <p>Upload image functionality is disabled for X posts</p>
                       </div>
                       
                       <div className="flex justify-center">
@@ -393,44 +358,8 @@ const Index = () => {
                         />
                       </div>
                       
-                      <div 
-                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-4 ${isUploading ? 'opacity-70' : ''}`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                      >
-                        {!productImage ? (
-                          <div className="text-center">
-                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                            <Button 
-                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
-                              onClick={handleUploadButtonClick}
-                              disabled={isUploading}
-                            >
-                              Upload Image
-                            </Button>
-                            {isUploading && (
-                              <p className="text-xs text-blue-500 mt-1">Sending to webhook...</p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="relative w-full h-full flex items-center justify-center">
-                            <img 
-                              src={URL.createObjectURL(productImage)} 
-                              alt="Product" 
-                              className="max-h-full max-w-full object-contain" 
-                            />
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 rounded-full h-5 w-5"
-                              onClick={() => setProductImage(null)}
-                              disabled={isUploading}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
+                      <div className="text-center mb-4 text-sm text-gray-400">
+                        <p>Upload image functionality is disabled for LinkedIn posts</p>
                       </div>
                       
                       <div className="flex justify-center">
@@ -587,3 +516,4 @@ const storyImages = [
 ];
 
 export default Index;
+
