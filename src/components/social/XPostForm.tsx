@@ -148,12 +148,12 @@ const XPostForm: React.FC<XPostFormProps> = ({ apiKey, onGeneratePost }) => {
       </Button>
       
       {generatedPost && (
-        <div className="mt-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-md relative">
-          <p className="text-sm">{generatedPost}</p>
+        <div className="mt-4 bg-gray-800 p-4 rounded-md relative border border-gray-700">
+          <p className="text-sm text-white">{generatedPost}</p>
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 text-white"
             onClick={copyToClipboard}
           >
             <Copy size={16} />

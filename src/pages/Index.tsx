@@ -288,8 +288,10 @@ const Index = () => {
                   
                   <TabsContent value="x" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
-                      
+                      <h2 className="text-lg font-bold text-white mb-4">Generate Your X Post</h2>
+                      <div className="hidden">
+                        <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
+                      </div>
                       <XPostForm 
                         apiKey={qwenApiKey} 
                         onGeneratePost={setXText} 
@@ -300,9 +302,9 @@ const Index = () => {
                   <TabsContent value="linkedin" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
                       <h2 className="text-lg font-bold text-white mb-4">Generate Your LinkedIn Post</h2>
-                      
-                      <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
-                      
+                      <div className="hidden">
+                        <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
+                      </div>
                       <LinkedInPostForm 
                         apiKey={qwenApiKey} 
                         onGeneratePost={setLinkedinText} 
@@ -310,6 +312,10 @@ const Index = () => {
                     </div>
                   </TabsContent>
                 </Tabs>
+              </div>
+              
+              <div className="mt-4 mb-4">
+                <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
               </div>
             </div>
           </div>

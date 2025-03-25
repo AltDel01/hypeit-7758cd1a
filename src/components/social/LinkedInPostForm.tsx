@@ -176,12 +176,12 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ apiKey, onGenerateP
       </Button>
       
       {generatedPost && (
-        <div className="mt-6 bg-gray-50 dark:bg-gray-800 p-4 rounded-md relative">
-          <p className="text-sm whitespace-pre-line">{generatedPost}</p>
+        <div className="mt-6 bg-gray-800 p-4 rounded-md relative border border-gray-700">
+          <p className="text-sm text-white whitespace-pre-line">{generatedPost}</p>
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 text-white"
             onClick={copyToClipboard}
           >
             <Copy size={16} />
