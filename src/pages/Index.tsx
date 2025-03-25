@@ -28,7 +28,6 @@ const Index = () => {
   const [xText, setXText] = useState("");
   const [linkedinText, setLinkedinText] = useState("");
   const [isGeneratingText, setIsGeneratingText] = useState(false);
-  const [qwenApiKey, setQwenApiKey] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
@@ -106,10 +105,6 @@ const Index = () => {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const handleApiKeyChange = (key: string) => {
-    setQwenApiKey(key);
   };
 
   return (
@@ -303,7 +298,7 @@ const Index = () => {
               </div>
               
               <div className="mt-4 mb-4">
-                <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
+                <QwenKeyInput />
               </div>
             </div>
           </div>
