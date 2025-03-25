@@ -16,6 +16,9 @@ import {
   Send,
   X
 } from 'lucide-react';
+import QwenKeyInput from '@/components/api/QwenKeyInput';
+import LinkedInPostForm from '@/components/social/LinkedInPostForm';
+import XPostForm from '@/components/social/XPostForm';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -25,6 +28,7 @@ const Index = () => {
   const [xText, setXText] = useState("");
   const [linkedinText, setLinkedinText] = useState("");
   const [isGeneratingText, setIsGeneratingText] = useState(false);
+  const [qwenApiKey, setQwenApiKey] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
@@ -104,30 +108,8 @@ const Index = () => {
     }
   };
 
-  const generateTextContent = (platform: "x" | "linkedin") => {
-    setIsGeneratingText(true);
-    
-    // Simulating text generation with a timeout
-    setTimeout(() => {
-      const productName = productImage ? productImage.name.split('.')[0] : "our product";
-      
-      if (platform === "x") {
-        const generatedText = `Just launched ${productName}! This innovative solution will transform how you work. Check it out now! #ProductLaunch #Innovation`;
-        setXText(generatedText);
-        toast.success("X post content generated!");
-      } else if (platform === "linkedin") {
-        const generatedText = `We're excited to announce the release of ${productName}!\n\nAfter months of development and testing, our team has created a solution that addresses key challenges in the industry. ${productName} offers unparalleled efficiency and performance.\n\nVisit our website to learn more about how ${productName} can benefit your business.\n\n#ProductLaunch #Innovation #BusinessSolutions`;
-        setLinkedinText(generatedText);
-        toast.success("LinkedIn post content generated!");
-      }
-      
-      setIsGeneratingText(false);
-    }, 1500);
-  };
-
-  const copyToClipboard = (text: string, platform: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${platform} text copied to clipboard!`);
+  const handleApiKeyChange = (key: string) => {
+    setQwenApiKey(key);
   };
 
   return (
@@ -306,85 +288,25 @@ const Index = () => {
                   
                   <TabsContent value="x" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <div className="mb-4">
-                        <Textarea 
-                          placeholder="Enter details about your product for X post generation..."
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
-                          rows={3}
-                        />
-                      </div>
+                      <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
                       
-                      <div className="text-center mb-4 text-sm text-gray-400">
-                        <p>Upload image functionality is disabled for X posts</p>
-                      </div>
-                      
-                      <div className="flex justify-center">
-                        <Button 
-                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm mb-4"
-                          disabled={!prompt.trim() || isGeneratingText}
-                          onClick={() => generateTextContent("x")}
-                        >
-                          {isGeneratingText ? "Generating..." : "Generate X Post"}
-                        </Button>
-                      </div>
-                      
-                      {xText && (
-                        <div className="mt-4 bg-gray-800 p-3 rounded-md relative">
-                          <p className="text-white text-sm">{xText}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-2 right-2 h-6 w-6 p-0"
-                            onClick={() => copyToClipboard(xText, "X")}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
+                      <XPostForm 
+                        apiKey={qwenApiKey} 
+                        onGeneratePost={setXText} 
+                      />
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="linkedin" className="mt-6">
                     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <div className="mb-4">
-                        <Textarea 
-                          placeholder="Enter details about your product for LinkedIn post generation..."
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[100px] bg-gray-800 border-gray-700 text-white"
-                          rows={3}
-                        />
-                      </div>
+                      <h2 className="text-lg font-bold text-white mb-4">Generate Your LinkedIn Post</h2>
                       
-                      <div className="text-center mb-4 text-sm text-gray-400">
-                        <p>Upload image functionality is disabled for LinkedIn posts</p>
-                      </div>
+                      <QwenKeyInput onApiKeyChange={handleApiKeyChange} />
                       
-                      <div className="flex justify-center">
-                        <Button 
-                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm mb-4"
-                          disabled={!prompt.trim() || isGeneratingText}
-                          onClick={() => generateTextContent("linkedin")}
-                        >
-                          {isGeneratingText ? "Generating..." : "Generate LinkedIn Post"}
-                        </Button>
-                      </div>
-                      
-                      {linkedinText && (
-                        <div className="mt-4 bg-gray-800 p-3 rounded-md relative">
-                          <p className="text-white text-sm whitespace-pre-line">{linkedinText}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-2 right-2 h-6 w-6 p-0"
-                            onClick={() => copyToClipboard(linkedinText, "LinkedIn")}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
+                      <LinkedInPostForm 
+                        apiKey={qwenApiKey} 
+                        onGeneratePost={setLinkedinText} 
+                      />
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -516,4 +438,3 @@ const storyImages = [
 ];
 
 export default Index;
-
