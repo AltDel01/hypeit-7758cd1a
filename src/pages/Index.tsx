@@ -16,7 +16,6 @@ import {
   Send,
   X
 } from 'lucide-react';
-import QwenKeyInput from '@/components/api/QwenKeyInput';
 import LinkedInPostForm from '@/components/social/LinkedInPostForm';
 import XPostForm from '@/components/social/XPostForm';
 
@@ -296,10 +295,6 @@ const Index = () => {
                   </TabsContent>
                 </Tabs>
               </div>
-              
-              <div className="mt-4 mb-4">
-                <QwenKeyInput />
-              </div>
             </div>
           </div>
           
@@ -427,3 +422,4 @@ const storyImages = [
 ];
 
 export default Index;
+

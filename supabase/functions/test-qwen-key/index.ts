@@ -13,35 +13,62 @@ serve(async (req) => {
   }
 
   try {
-    const { key } = await req.json();
+    const qwenApiKey = Deno.env.get('QWEN_API_KEY');
+    const { key, action } = await req.json();
     
-    // For development purposes only!
-    // In production, you should set this in the Supabase dashboard
-    // This is just a temporary solution for testing
-    
-    // Test the key with a simple request to Qwen API
-    const response = await fetch('https://api.qwen.ai/v1/models', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${key}`
+    // Just check if the key is configured
+    if (action === 'check') {
+      if (!qwenApiKey) {
+        console.log('QWEN_API_KEY is not set in environment variables');
+        return new Response(
+          JSON.stringify({ success: false, error: 'API key not configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-    });
-
-    if (!response.ok) {
-      console.error('Invalid Qwen API key');
+      
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid API key' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    // Test a provided key
+    if (key) {
+      try {
+        // Test the key with a simple request to Qwen API
+        const response = await fetch('https://api.qwen.ai/v1/models', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${key}`
+          }
+        });
 
-    // Here you would normally use Deno.env.set but that doesn't persist between invocations
-    // In a real scenario, you'd set this in the Supabase dashboard
-    console.log('Valid Qwen API key received');
+        if (!response.ok) {
+          console.error('Invalid Qwen API key provided');
+          return new Response(
+            JSON.stringify({ success: false, error: 'Invalid API key' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('Valid Qwen API key received');
+        
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (error) {
+        console.error('Error testing Qwen API key:', error);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Error testing API key' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
     
     return new Response(
-      JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false, error: 'Invalid request' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error in test-qwen-key function:', error);

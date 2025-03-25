@@ -16,16 +16,16 @@ serve(async (req) => {
     const qwenApiKey = Deno.env.get('QWEN_API_KEY');
     
     if (!qwenApiKey) {
-      console.error('QWEN_API_KEY is not set in the environment');
+      console.error('QWEN_API_KEY is not set in environment variables');
       return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'API key not configured on the server' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const { prompt, tone, platform, length } = await req.json();
     
-    console.log(`Generating ${platform} post with tone: ${tone}, length: ${length || 'default'}`);
+    console.log(`Generating ${platform} post with tone: ${tone}, length: ${length || 'default'}, prompt: ${prompt}`);
 
     let systemPrompt = '';
     
@@ -39,49 +39,62 @@ serve(async (req) => {
       Include 1-2 relevant hashtags.`;
     }
 
-    const response = await fetch('https://api.qwen.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${qwenApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'qwen-max',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
-      })
-    });
+    // Make API request with better error handling
+    try {
+      const response = await fetch('https://api.qwen.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${qwenApiKey}`
+        },
+        body: JSON.stringify({
+          model: 'qwen-max',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        })
+      });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Qwen API error:', errorData);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Qwen API error:', response.status, errorText);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to generate post with Qwen API', 
+            status: response.status,
+            details: errorText 
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const data = await response.json();
+      const generatedText = data.choices[0].message.content;
+      
+      console.log('Successfully generated post');
+      
       return new Response(
-        JSON.stringify({ error: 'Failed to generate post', details: errorData }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ text: generatedText }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (apiError) {
+      console.error('Error communicating with Qwen API:', apiError);
+      return new Response(
+        JSON.stringify({ error: 'Error communicating with Qwen API', details: apiError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    const data = await response.json();
-    const generatedText = data.choices[0].message.content;
-    
-    console.log('Successfully generated post');
-    
-    return new Response(
-      JSON.stringify({ text: generatedText }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
-    console.error('Error in generate-post function:', error);
+    console.error('General error in generate-post function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Server error', details: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
