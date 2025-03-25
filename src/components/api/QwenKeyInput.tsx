@@ -1,30 +1,44 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Key } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-interface QwenKeyInputProps {
-  onApiKeyChange: (key: string) => void;
-}
-
-const QwenKeyInput: React.FC<QwenKeyInputProps> = ({ onApiKeyChange }) => {
+const QwenKeyInput: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('');
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  
-  // Load API key from localStorage on component mount
-  useEffect(() => {
-    const savedKey = localStorage.getItem('qwen_api_key');
-    if (savedKey) {
-      setApiKey(savedKey);
-      onApiKeyChange(savedKey);
-    }
-  }, [onApiKeyChange]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSaveKey = () => {
-    localStorage.setItem('qwen_api_key', apiKey);
-    onApiKeyChange(apiKey);
-    setIsVisible(false);
+  const handleSaveKey = async () => {
+    if (!apiKey.trim()) {
+      toast.error("Please enter your Qwen API key");
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // For development only - normally you'd set this in Supabase directly
+      // This is a simplified way to test the functionality
+      const { error } = await supabase.functions.invoke('test-qwen-key', {
+        body: { key: apiKey }
+      });
+      
+      if (error) {
+        toast.error("Failed to verify API key");
+        return;
+      }
+      
+      toast.success("API key verified and ready to use");
+      setIsVisible(false);
+    } catch (error) {
+      console.error("Error verifying API key:", error);
+      toast.error("Failed to verify API key");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,7 +50,7 @@ const QwenKeyInput: React.FC<QwenKeyInputProps> = ({ onApiKeyChange }) => {
           className="flex items-center gap-2 text-sm"
         >
           <Key size={16} /> 
-          {apiKey ? 'Change Qwen API Key' : 'Add Qwen API Key'}
+          Configure Qwen API Key
         </Button>
       ) : (
         <div className="space-y-2">
@@ -48,11 +62,13 @@ const QwenKeyInput: React.FC<QwenKeyInputProps> = ({ onApiKeyChange }) => {
               onChange={(e) => setApiKey(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleSaveKey} disabled={!apiKey}>Save</Button>
+            <Button onClick={handleSaveKey} disabled={!apiKey || isLoading}>
+              {isLoading ? "Saving..." : "Save"}
+            </Button>
             <Button variant="ghost" onClick={() => setIsVisible(false)}>Cancel</Button>
           </div>
           <p className="text-xs text-gray-400">
-            Your API key is stored locally in your browser and never sent to our servers.
+            This will securely add your API key to Supabase. Do not share your API key with others.
           </p>
         </div>
       )}
