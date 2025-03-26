@@ -10,6 +10,16 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import QwenKeyInput from "@/components/api/QwenKeyInput";
+import { AlertCircle } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog";
 
 interface LinkedInPostFormProps {
   onGeneratePost: (post: string) => void;
@@ -24,6 +34,7 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
   const [generatedPost, setGeneratedPost] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+  const [showQuotaError, setShowQuotaError] = useState(false);
 
   useEffect(() => {
     // Check API key status on component mount
@@ -72,12 +83,20 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       });
 
       if (error) {
+        console.error("Error invoking function:", error);
         throw new Error(error.message);
       }
 
       if (data.error) {
-        setErrorMessage(data.error);
-        toast.error(`Failed to generate post: ${data.error}`);
+        console.error("API returned error:", data.error);
+        // Check if it's a quota exceeded error
+        if (data.error.includes('quota') || data.error.includes('exceeded')) {
+          setShowQuotaError(true);
+          toast.error("OpenAI quota exceeded");
+        } else {
+          setErrorMessage(data.error);
+          toast.error(`Failed to generate post: ${data.error}`);
+        }
         return;
       }
 
@@ -188,6 +207,46 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
           </Button>
         </div>
       )}
+      
+      {/* Quota Exceeded Dialog */}
+      <Dialog open={showQuotaError} onOpenChange={setShowQuotaError}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              OpenAI API Quota Exceeded
+            </DialogTitle>
+            <DialogDescription>
+              <p className="mt-2">
+                Your OpenAI API key has exceeded its usage quota. This typically happens when:
+              </p>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>You're using a free tier key with limited credits</li>
+                <li>Your billing cycle has ended and payment is needed</li>
+                <li>You've reached your defined usage limits</li>
+              </ul>
+              <p className="mt-4">
+                To resolve this issue, please visit your OpenAI account dashboard to check your usage
+                status and billing information.
+              </p>
+              <div className="mt-4 flex gap-2 justify-end">
+                <Button variant="outline" asChild>
+                  <a 
+                    href="https://platform.openai.com/account/billing/overview" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    OpenAI Billing Dashboard
+                  </a>
+                </Button>
+                <DialogClose asChild>
+                  <Button>Close</Button>
+                </DialogClose>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -79,7 +79,13 @@ serve(async (req) => {
         
         // Extract more specific error information if available
         if (errorData && errorData.error) {
-          if (errorData.error.type === 'invalid_request_error' && 
+          // Special handling for quota exceeded error
+          if (errorData.error.type === 'insufficient_quota' || 
+              errorData.error.code === 'insufficient_quota' ||
+              (errorData.error.message && errorData.error.message.includes('quota'))) {
+            errorMessage = 'Your OpenAI API key has exceeded its quota. Please check your billing details or use a different API key.';
+          }
+          else if (errorData.error.type === 'invalid_request_error' && 
               errorData.error.code === 'invalid_api_key') {
             errorMessage = 'Invalid OpenAI API key provided';
           } else if (errorData.error.message) {
@@ -89,7 +95,7 @@ serve(async (req) => {
         
         return new Response(
           JSON.stringify({ error: errorMessage }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
