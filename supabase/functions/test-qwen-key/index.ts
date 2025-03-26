@@ -26,6 +26,18 @@ serve(async (req) => {
         );
       }
       
+      // Basic format validation
+      if (!openaiApiKey.startsWith('sk-')) {
+        console.log('OPENAI_API_KEY does not appear to be a valid OpenAI key format');
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'API key does not appear to be a valid OpenAI key format. OpenAI keys typically start with "sk-"' 
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -35,6 +47,18 @@ serve(async (req) => {
     // Test a provided key
     if (key) {
       try {
+        // Validate format
+        if (!key.startsWith('sk-')) {
+          console.error('Provided key does not appear to be a valid OpenAI key format');
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Key does not appear to be a valid OpenAI key format. OpenAI keys typically start with "sk-"' 
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
         // Test the key with a simple request to OpenAI API
         const response = await fetch('https://api.openai.com/v1/models', {
           method: 'GET',
@@ -44,7 +68,8 @@ serve(async (req) => {
         });
 
         if (!response.ok) {
-          console.error('Invalid OpenAI API key provided');
+          const errorData = await response.json();
+          console.error('Invalid OpenAI API key provided:', errorData);
           return new Response(
             JSON.stringify({ success: false, error: 'Invalid API key' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

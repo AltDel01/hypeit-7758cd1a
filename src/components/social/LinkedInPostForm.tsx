@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Copy } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import QwenKeyInput from "@/components/api/QwenKeyInput";
 
 interface LinkedInPostFormProps {
   onGeneratePost: (post: string) => void;
@@ -20,6 +22,30 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
   const [length, setLength] = useState('medium');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPost, setGeneratedPost] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+
+  useEffect(() => {
+    // Check API key status on component mount
+    checkApiKeyStatus();
+  }, []);
+
+  const checkApiKeyStatus = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('test-qwen-key', {
+        body: { action: 'check' }
+      });
+      
+      if (error || !data.success) {
+        setIsApiKeyConfigured(false);
+      } else {
+        setIsApiKeyConfigured(true);
+      }
+    } catch (err) {
+      console.error("Error checking API key status:", err);
+      setIsApiKeyConfigured(false);
+    }
+  };
 
   const handleGeneratePost = async () => {
     if (!idea.trim()) {
@@ -27,6 +53,8 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       return;
     }
 
+    // Clear previous error and post
+    setErrorMessage(null);
     setIsGenerating(true);
     
     const prompt = industry 
@@ -48,7 +76,9 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       }
 
       if (data.error) {
-        throw new Error(data.error);
+        setErrorMessage(data.error);
+        toast.error(`Failed to generate post: ${data.error}`);
+        return;
       }
 
       const generatedText = data.text;
@@ -57,7 +87,8 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       toast.success("LinkedIn post generated successfully!");
     } catch (error) {
       console.error('Error generating post:', error);
-      toast.error("Failed to generate post. OpenAI API key may not be configured correctly.");
+      setErrorMessage("Server error. Please try again later.");
+      toast.error("Failed to generate post. Please try again later.");
     } finally {
       setIsGenerating(false);
     }
@@ -67,6 +98,10 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
     navigator.clipboard.writeText(generatedPost);
     toast.success("Post copied to clipboard!");
   };
+
+  if (!isApiKeyConfigured) {
+    return <QwenKeyInput />;
+  }
 
   return (
     <div className="space-y-4">
@@ -123,6 +158,14 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
           </Select>
         </div>
       </div>
+      
+      {errorMessage && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {errorMessage}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Button 
         className="w-full bg-blue-600 hover:bg-blue-700 text-white"

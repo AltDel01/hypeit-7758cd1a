@@ -23,6 +23,15 @@ serve(async (req) => {
       );
     }
 
+    // Validate if the API key format looks like an OpenAI key (they typically start with "sk-")
+    if (!openaiApiKey.startsWith('sk-')) {
+      console.error('OPENAI_API_KEY does not appear to be a valid OpenAI key format');
+      return new Response(
+        JSON.stringify({ error: 'API key does not appear to be a valid OpenAI key' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { prompt, tone, platform, length } = await req.json();
     
     console.log(`Generating ${platform} post with tone: ${tone}, length: ${length || 'default'}, prompt: ${prompt}`);
@@ -63,14 +72,23 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('OpenAI API error:', response.status, errorText);
+        const errorData = await response.json();
+        console.error('OpenAI API error:', response.status, JSON.stringify(errorData));
+        
+        let errorMessage = 'Failed to generate post with OpenAI API';
+        
+        // Extract more specific error information if available
+        if (errorData && errorData.error) {
+          if (errorData.error.type === 'invalid_request_error' && 
+              errorData.error.code === 'invalid_api_key') {
+            errorMessage = 'Invalid OpenAI API key provided';
+          } else if (errorData.error.message) {
+            errorMessage = errorData.error.message;
+          }
+        }
+        
         return new Response(
-          JSON.stringify({ 
-            error: 'Failed to generate post with OpenAI API', 
-            status: response.status,
-            details: errorText 
-          }),
+          JSON.stringify({ error: errorMessage }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
