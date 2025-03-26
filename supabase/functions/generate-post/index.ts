@@ -13,10 +13,10 @@ serve(async (req) => {
   }
 
   try {
-    const qwenApiKey = Deno.env.get('QWEN_API_KEY');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!qwenApiKey) {
-      console.error('QWEN_API_KEY is not set in environment variables');
+    if (!openaiApiKey) {
+      console.error('OPENAI_API_KEY is not set in environment variables');
       return new Response(
         JSON.stringify({ error: 'API key not configured on the server' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -41,14 +41,14 @@ serve(async (req) => {
 
     // Make API request with better error handling
     try {
-      const response = await fetch('https://api.qwen.ai/v1/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${qwenApiKey}`
+          'Authorization': `Bearer ${openaiApiKey}`
         },
         body: JSON.stringify({
-          model: 'qwen-max',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
@@ -64,10 +64,10 @@ serve(async (req) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Qwen API error:', response.status, errorText);
+        console.error('OpenAI API error:', response.status, errorText);
         return new Response(
           JSON.stringify({ 
-            error: 'Failed to generate post with Qwen API', 
+            error: 'Failed to generate post with OpenAI API', 
             status: response.status,
             details: errorText 
           }),
@@ -85,9 +85,9 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (apiError) {
-      console.error('Error communicating with Qwen API:', apiError);
+      console.error('Error communicating with OpenAI API:', apiError);
       return new Response(
-        JSON.stringify({ error: 'Error communicating with Qwen API', details: apiError.message }),
+        JSON.stringify({ error: 'Error communicating with OpenAI API', details: apiError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

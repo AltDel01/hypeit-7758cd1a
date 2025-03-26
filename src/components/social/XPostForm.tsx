@@ -56,7 +56,7 @@ const XPostForm: React.FC<XPostFormProps> = ({ onGeneratePost }) => {
       toast.success("X post generated successfully!");
     } catch (error) {
       console.error('Error generating post:', error);
-      toast.error("Failed to generate post. API key may not be configured correctly.");
+      toast.error("Failed to generate post. OpenAI API key may not be configured correctly.");
     } finally {
       setIsGenerating(false);
     }

@@ -13,13 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    const qwenApiKey = Deno.env.get('QWEN_API_KEY');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     const { key, action } = await req.json();
     
     // Just check if the key is configured
     if (action === 'check') {
-      if (!qwenApiKey) {
-        console.log('QWEN_API_KEY is not set in environment variables');
+      if (!openaiApiKey) {
+        console.log('OPENAI_API_KEY is not set in environment variables');
         return new Response(
           JSON.stringify({ success: false, error: 'API key not configured' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -35,8 +35,8 @@ serve(async (req) => {
     // Test a provided key
     if (key) {
       try {
-        // Test the key with a simple request to Qwen API
-        const response = await fetch('https://api.qwen.ai/v1/models', {
+        // Test the key with a simple request to OpenAI API
+        const response = await fetch('https://api.openai.com/v1/models', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${key}`
@@ -44,21 +44,21 @@ serve(async (req) => {
         });
 
         if (!response.ok) {
-          console.error('Invalid Qwen API key provided');
+          console.error('Invalid OpenAI API key provided');
           return new Response(
             JSON.stringify({ success: false, error: 'Invalid API key' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
-        console.log('Valid Qwen API key received');
+        console.log('Valid OpenAI API key received');
         
         return new Response(
           JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } catch (error) {
-        console.error('Error testing Qwen API key:', error);
+        console.error('Error testing OpenAI API key:', error);
         return new Response(
           JSON.stringify({ success: false, error: 'Error testing API key' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -71,7 +71,7 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in test-qwen-key function:', error);
+    console.error('Error in test-openai-key function:', error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
