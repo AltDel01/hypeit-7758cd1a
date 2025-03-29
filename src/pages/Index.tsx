@@ -1,26 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { toast } from "sonner";
-import { 
-  Instagram, 
-  Copy, 
-  Upload, 
-  ArrowUp, 
-  Twitter,
-  Linkedin,
-  Send,
-  X,
-  Loader2
-} from 'lucide-react';
-import LinkedInPostForm from '@/components/social/LinkedInPostForm';
-import XPostForm from '@/components/social/XPostForm';
+import TabsContainer from '@/components/tabs/TabsContainer';
+import ImageGallery from '@/components/gallery/ImageGallery';
 import GeminiImageService from '@/services/GeminiImageService';
 import GeminiKeyInput from '@/components/api/GeminiKeyInput';
+import { feedImages, storyImages } from '@/data/galleryImages';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -31,7 +18,6 @@ const Index = () => {
   const [linkedinText, setLinkedinText] = useState("");
   const [isGeminiKeyConfigured, setIsGeminiKeyConfigured] = useState(true);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     const checkApiKey = async () => {
@@ -41,50 +27,6 @@ const Index = () => {
     
     checkApiKey();
   }, []);
-  
-  const handlePromptSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Prompt submitted:", prompt);
-    
-    if (!prompt.trim()) {
-      toast.error("Please enter a prompt to generate an image");
-      return;
-    }
-    
-    generateImage();
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      console.log("File selected:", file.name);
-      setProductImage(file);
-    }
-  };
-  
-  const handleUploadButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-  
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.match('image.*')) {
-        console.log("File dropped:", file.name);
-        setProductImage(file);
-      }
-    }
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
   
   const generateImage = async () => {
     setIsGenerating(true);
@@ -129,373 +71,32 @@ const Index = () => {
               <h1 className="text-sm font-bold text-white mb-6 text-center">Create AI Branding Image</h1>
               
               <div className="mb-6">
-                <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="bg-gray-900 border border-gray-700 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
-                    <SocialTab value="feed" icon={<Instagram size={18} />} label="Feed" />
-                    <SocialTab value="story" icon={<Instagram size={18} />} label="Story" />
-                    <SocialTab value="tiktok" icon={<div className="text-md font-bold">TT</div>} label="TikTok" />
-                    <SocialTab value="x" icon={<Twitter size={18} />} label="X" />
-                    <SocialTab value="linkedin" icon={<Linkedin size={18} />} label="LinkedIn" />
-                  </TabsList>
-
-                  <TabsContent value="feed" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <form onSubmit={handlePromptSubmit} className="mb-4">
-                        <div className="flex flex-col space-y-3">
-                          <Textarea 
-                            placeholder="Describe what kind of image, color codes, and style you want..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
-                          />
-                          <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
-                              <Send className="mr-1 h-3 w-3" />
-                              Send
-                            </Button>
-                          </div>
-                        </div>
-                      </form>
-                      
-                      <div 
-                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                      >
-                        {!productImage ? (
-                          <div className="text-center">
-                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                            <Button 
-                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
-                              onClick={handleUploadButtonClick}
-                            >
-                              Upload Image
-                            </Button>
-                            <Input 
-                              type="file"
-                              accept="image/*"
-                              ref={fileInputRef}
-                              onChange={handleFileInputChange}
-                              className="hidden"
-                            />
-                          </div>
-                        ) : (
-                          <div className="relative w-full h-full flex items-center justify-center">
-                            <img 
-                              src={URL.createObjectURL(productImage)} 
-                              alt="Product" 
-                              className="max-h-full max-w-full object-contain" 
-                            />
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 rounded-full h-5 w-5"
-                              onClick={() => setProductImage(null)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex justify-center mt-5">
-                        <Button 
-                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm"
-                          disabled={!prompt.trim() || isGenerating}
-                          onClick={generateImage}
-                        >
-                          {isGenerating ? (
-                            <>
-                              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                              Generate
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="story" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <form onSubmit={handlePromptSubmit} className="mb-4">
-                        <div className="flex flex-col space-y-3">
-                          <Textarea 
-                            placeholder="Describe what kind of image, color codes, and style you want..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
-                          />
-                          <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-6 px-2 py-0.5 text-xs">
-                              <Send className="mr-1 h-3 w-3" />
-                              Send
-                            </Button>
-                          </div>
-                        </div>
-                      </form>
-                      
-                      <div 
-                        className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                      >
-                        {!productImage ? (
-                          <div className="text-center">
-                            <Upload size={16} className="text-gray-600 mx-auto mb-1" />
-                            <p className="text-gray-400 text-xs">Drop your product image here or</p>
-                            <Button 
-                              className="mt-1 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-0.5 h-5"
-                              onClick={handleUploadButtonClick}
-                            >
-                              Upload Image
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="relative w-full h-full flex items-center justify-center">
-                            <img 
-                              src={URL.createObjectURL(productImage)} 
-                              alt="Product" 
-                              className="max-h-full max-w-full object-contain" 
-                            />
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 rounded-full h-5 w-5"
-                              onClick={() => setProductImage(null)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex justify-center mt-5">
-                        <Button 
-                          className="bg-blue-600 hover:bg-blue-700 px-6 h-8 text-sm"
-                          disabled={!prompt.trim() || isGenerating}
-                          onClick={generateImage}
-                        >
-                          {isGenerating ? (
-                            <>
-                              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <ArrowUp className="mr-1 h-3.5 w-3.5" />
-                              Generate
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tiktok" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <p className="text-gray-400 text-center">TikTok content generation coming soon</p>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="x" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <h2 className="text-lg font-bold text-white mb-4">Generate Your X Post</h2>
-                      <XPostForm onGeneratePost={setXText} />
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="linkedin" className="mt-6">
-                    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-                      <h2 className="text-lg font-bold text-white mb-4">Generate Your LinkedIn Post</h2>
-                      <LinkedInPostForm onGeneratePost={setLinkedinText} />
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <TabsContainer 
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  prompt={prompt}
+                  setPrompt={setPrompt}
+                  productImage={productImage}
+                  setProductImage={setProductImage}
+                  isGenerating={isGenerating}
+                  generateImage={generateImage}
+                  setXText={setXText}
+                  setLinkedinText={setLinkedinText}
+                />
               </div>
             </div>
           </div>
           
-          <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
-            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
-              <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
-                {generatedImage && activeTab === "feed" ? (
-                  <div className="rounded-lg overflow-hidden relative group mb-5">
-                    <img 
-                      src={generatedImage} 
-                      alt="Generated AI image" 
-                      className="w-full aspect-square object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-                        onClick={() => {
-                          const a = document.createElement('a');
-                          a.href = generatedImage;
-                          a.download = 'generated-image.jpg';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                          toast.success("Image downloaded");
-                        }}
-                      >
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ) : null}
-                {feedImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-square object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
-              <div className="grid grid-cols-1 gap-5 animate-story-scroll scrollbar-hide">
-                {generatedImage && activeTab === "story" ? (
-                  <div className="rounded-lg overflow-hidden relative group mb-5">
-                    <img 
-                      src={generatedImage} 
-                      alt="Generated AI image" 
-                      className="w-full aspect-[9/16] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-                        onClick={() => {
-                          const a = document.createElement('a');
-                          a.href = generatedImage;
-                          a.download = 'generated-story.jpg';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                          toast.success("Image downloaded");
-                        }}
-                      >
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ) : null}
-                {storyImages.map((image, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden relative group">
-                    <img 
-                      src={image.src} 
-                      alt={image.alt} 
-                      className="w-full aspect-[9/16] object-cover" 
-                    />
-                    <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="bg-black/70 text-white rounded-full h-8 w-8 p-0">
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <ImageGallery 
+            feedImages={feedImages}
+            storyImages={storyImages}
+            generatedImage={generatedImage}
+            activeTab={activeTab}
+          />
         </main>
       </div>
     </AuroraBackground>
   );
 };
-
-const SocialTab = ({ value, icon, label }: { value: string; icon: React.ReactNode; label: string }) => {
-  return (
-    <TabsTrigger 
-      value={value}
-      className="flex items-center gap-2 py-2 data-[state=active]:bg-gray-800"
-    >
-      {icon}
-      <span>{label}</span>
-    </TabsTrigger>
-  );
-};
-
-const feedImages = [
-  {
-    src: "/lovable-uploads/f87f82c8-bda2-4268-9607-11b99cf94970.png",
-    alt: "Hot Spicy Pizza - Square format"
-  },
-  {
-    src: "/lovable-uploads/f06d046c-9571-47f7-a1d2-f5ed72ae9768.png",
-    alt: "Stay Hydrated - Square format"
-  },
-  {
-    src: "/lovable-uploads/6534ea8a-5ce6-4f1d-af20-f5a89ce0423d.png",
-    alt: "Elegant House - Square format"
-  },
-  {
-    src: "/lovable-uploads/bbbcc7ce-8b51-43d4-be3c-d397f82d9b4b.png",
-    alt: "Earth Hour - Square format"
-  },
-  {
-    src: "/lovable-uploads/9d701c54-3390-4b75-bb0d-7ea9611529de.png",
-    alt: "Borcelle Restaurant - Square format"
-  },
-  {
-    src: "/lovable-uploads/5a1b8cd4-8cf8-49bd-ac67-491059107a73.png",
-    alt: "Sneakers Store - Square format"
-  },
-  {
-    src: "/lovable-uploads/02930cb5-a761-467a-ae52-3371e487ea28.png",
-    alt: "Lumivera Radiant Serum - Square format"
-  },
-  {
-    src: "/lovable-uploads/6a4e3dc1-1f68-4eac-8b1a-2a6fed380c48.png",
-    alt: "Explore Thailand - Square format"
-  }
-];
-
-const storyImages = [
-  {
-    src: "/lovable-uploads/3eaf26ea-5c41-4dd6-a936-da3761e1df91.png",
-    alt: "Chocolate Day - Story format"
-  },
-  {
-    src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
-    alt: "Cocktail Party - Story format"
-  },
-  {
-    src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
-    alt: "2024 New Arrival - Story format"
-  },
-  {
-    src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
-    alt: "Coming Soon - Story format"
-  },
-  {
-    src: "/lovable-uploads/4566da4e-dcd6-43f1-8b1a-8f086bbbf049.png",
-    alt: "We Are Brewing - Story format"
-  },
-  {
-    src: "/lovable-uploads/d5259be9-2c46-4118-8dae-0b7a5ee45cbe.png",
-    alt: "Delicious Ice Cream - Story format"
-  },
-  {
-    src: "/lovable-uploads/12bfd206-826f-465e-bcc7-458b0aa560d9.png",
-    alt: "Pastries - Story format"
-  },
-];
 
 export default Index;
