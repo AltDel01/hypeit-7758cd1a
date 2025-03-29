@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -149,10 +150,10 @@
   /* Smooth scroll up animation for story (9:16) images - slower */
   @keyframes smooth-scroll-up {
     0% {
-      transform: translateY(0);
+      transform: translateY(-50%);
     }
     100% {
-      transform: translateY(-50%);
+      transform: translateY(0);
     }
   }
   
