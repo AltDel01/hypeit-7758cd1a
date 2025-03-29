@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,7 +38,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
   const [fallbackWarning, setFallbackWarning] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check API key status on component mount
     checkApiKeyStatus();
   }, []);
 
@@ -66,7 +64,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       return;
     }
 
-    // Clear previous error and post
     setErrorMessage(null);
     setIsFallbackContent(false);
     setFallbackWarning(null);
@@ -93,7 +90,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
 
       if (data.error) {
         console.error("API returned error:", data.error);
-        // Check if it's a quota exceeded error
         if (data.error.includes('quota') || data.error.includes('exceeded')) {
           setShowQuotaError(true);
           toast.error("OpenAI quota exceeded");
@@ -104,7 +100,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
         return;
       }
 
-      // Check if this is fallback content
       if (data.isFallback) {
         setIsFallbackContent(true);
         if (data.warning) {
@@ -206,7 +201,7 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       
       {isFallbackContent && fallbackWarning && (
         <Alert>
-          <Info className="h-4 w-4 text-[#9b87f5]" />
+          <Info className="h-4 w-4 text-[#6E59A5]" />
           <AlertDescription>
             {fallbackWarning}
           </AlertDescription>
@@ -214,7 +209,7 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       )}
       
       <Button 
-        className="w-full bg-[#9b87f5] hover:bg-[#8B5CF6] text-white"
+        className="w-full bg-[#6E59A5] hover:bg-[#5d4a8e] text-white"
         disabled={!idea.trim() || isGenerating}
         onClick={handleGeneratePost}
       >
@@ -240,7 +235,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
         </div>
       )}
       
-      {/* Quota Exceeded Dialog */}
       <Dialog open={showQuotaError} onOpenChange={setShowQuotaError}>
         <DialogContent>
           <DialogHeader>
