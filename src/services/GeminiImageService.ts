@@ -36,8 +36,17 @@ export class GeminiImageService {
         return null;
       }
       
+      if (!data.imageUrl) {
+        console.error("No image URL returned:", data);
+        toast.error("Failed to generate image: No image URL returned");
+        return null;
+      }
+      
       console.log("Image generated successfully:", data.imageUrl);
       toast.success("Image generated successfully!");
+      
+      // Log the first 100 characters of the image URL to help debug
+      console.log("Image URL preview:", data.imageUrl.substring(0, 100) + "...");
       
       return data.imageUrl;
     } catch (error) {

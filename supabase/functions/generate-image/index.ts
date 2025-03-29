@@ -107,37 +107,30 @@ serve(async (req) => {
       );
     }
     
-    // Now we'll use a different API to generate the actual image based on the description
-    // For this example, we'll use a placeholder image. In a real implementation,
-    // you would integrate with an image generation API like DALL-E, Stable Diffusion, etc.
-    
-    // Generate a placeholder image based on the aspect ratio
-    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
+    // Generate a colored placeholder with the first few words of the description as text
+    const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const placeholderImageUrl = `https://placehold.co/600x${aspect_ratio === "1:1" ? "600" : "1067"}/${randomColor.substring(1)}/FFFFFF?text=AI+Generated+Image`;
+    const textColor = '#FFFFFF';
+    
+    // Create a short preview of the description (first 30 characters)
+    const shortText = imageDescription.substring(0, 30).trim() + "...";
+    
+    // Create an SVG with the text
+    const svgContent = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${aspect_ratio === "1:1" ? "600" : "600"}" height="${aspect_ratio === "1:1" ? "600" : "1067"}" viewBox="0 0 ${aspect_ratio === "1:1" ? "600" : "600"} ${aspect_ratio === "1:1" ? "600" : "1067"}">
+      <rect width="100%" height="100%" fill="${randomColor}"/>
+      <text x="50%" y="50%" font-family="Arial" font-size="24" fill="${textColor}" text-anchor="middle">${shortText}</text>
+    </svg>
+    `;
+    
+    // Convert SVG to base64
+    const base64 = btoa(svgContent);
     
     console.log('Successfully generated image placeholder');
     
-    // Create a data URL from the placeholder
-    const placeholderResponse = await fetch(placeholderImageUrl);
-    const imageBlob = await placeholderResponse.blob();
-    const reader = new FileReader();
-    
-    // Convert blob to base64
-    const base64Data = await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        // Extract just the base64 data part
-        const base64Data = base64.split(',')[1];
-        resolve(base64Data);
-      };
-      reader.readAsDataURL(imageBlob);
-    });
-    
     return new Response(
       JSON.stringify({ 
-        imageUrl: `data:image/jpeg;base64,${base64Data}`,
+        imageUrl: `data:image/svg+xml;base64,${base64}`,
         description: imageDescription,
         message: 'Image generated successfully' 
       }),
