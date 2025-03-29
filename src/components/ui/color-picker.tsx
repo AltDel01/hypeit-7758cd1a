@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -41,108 +42,147 @@ export function ColorPicker({
     onChange(hsvaToHex(newHsva))
   }
 
+  // Get material design color name from hex
+  const getColorName = (hex: string) => {
+    // This is a simplified version - in a real app you might want to use a proper color naming library
+    // or a predefined mapping of hex values to material design color names
+    const h = hsva.h;
+    
+    if (h >= 0 && h < 30) return "Red";
+    if (h >= 30 && h < 60) return "Orange";
+    if (h >= 60 && h < 90) return "Yellow";
+    if (h >= 90 && h < 150) return "Green";
+    if (h >= 150 && h < 210) return "Cyan";
+    if (h >= 210 && h < 270) return "Blue";
+    if (h >= 270 && h < 330) return "Purple";
+    return "Red";
+  }
+
   return (
-    <div className={cn("grid gap-2", className)}>
-      <div
-        className="h-24 rounded-md"
-        style={{
-          backgroundColor: color,
-        }}
-      />
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <label className="text-xs" htmlFor="hue-slider">
-            Hue
-          </label>
-          <span className="text-xs text-muted-foreground">
-            {Math.round(hsva.h)}°
+    <div className={cn("grid gap-4", className)}>
+      {/* Color preview area inspired by the material design preview */}
+      <div className="bg-gray-800 p-4 rounded-lg">
+        <div className="text-sm text-gray-400 text-center mb-2">
+          {getColorName(color)} {Math.round(hsva.v * 100)}
+        </div>
+        <div 
+          className="h-24 rounded-md flex items-center justify-center mb-2"
+          style={{
+            backgroundColor: color,
+          }}
+        >
+          <span className="material-icons text-white text-5xl">
+            {/* Material icon would go here */}
           </span>
         </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-[#ff0000] via-[#ffff00] via-[#00ff00] via-[#00ffff] via-[#0000ff] via-[#ff00ff] to-[#ff0000] z-0"
-            style={{ height: "0.5rem" }}
-          />
-          <Slider
-            id="hue-slider"
-            value={[hsva.h]}
-            max={360}
-            step={1}
-            onValueChange={handleHueChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
+        <div className="text-sm font-mono text-center">
+          {color.toUpperCase()}
         </div>
       </div>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <label className="text-xs" htmlFor="saturation-slider">
-            Saturation
-          </label>
-          <span className="text-xs text-muted-foreground">
-            {Math.round(hsva.s * 100)}%
-          </span>
+      
+      <div className="space-y-4 bg-gray-800 p-4 rounded-lg">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="text-xs" htmlFor="hue-slider">
+              Hue
+            </label>
+            <span className="text-xs text-muted-foreground">
+              {Math.round(hsva.h)}°
+            </span>
+          </div>
+          <div className="relative">
+            <div 
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-[#ff0000] via-[#ffff00] via-[#00ff00] via-[#00ffff] via-[#0000ff] via-[#ff00ff] to-[#ff0000] z-0"
+              style={{ height: "0.5rem" }}
+            />
+            <Slider
+              id="hue-slider"
+              value={[hsva.h]}
+              max={360}
+              step={1}
+              onValueChange={handleHueChange}
+              className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+            />
+          </div>
         </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full z-0"
-            style={{ 
-              height: "0.5rem",
-              background: `linear-gradient(to right, white, ${hsvaToRgba({
-                h: hsva.h,
-                s: 1,
-                v: hsva.v,
-                a: 1,
-              })})`
-            }}
-          />
-          <Slider
-            id="saturation-slider"
-            value={[hsva.s * 100]}
-            max={100}
-            step={1}
-            onValueChange={handleSaturationChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="text-xs" htmlFor="saturation-slider">
+              Saturation
+            </label>
+            <span className="text-xs text-muted-foreground">
+              {Math.round(hsva.s * 100)}%
+            </span>
+          </div>
+          <div className="relative">
+            <div 
+              className="absolute inset-0 rounded-full z-0"
+              style={{ 
+                height: "0.5rem",
+                background: `linear-gradient(to right, white, ${hsvaToRgba({
+                  h: hsva.h,
+                  s: 1,
+                  v: hsva.v,
+                  a: 1,
+                })})`
+              }}
+            />
+            <Slider
+              id="saturation-slider"
+              value={[hsva.s * 100]}
+              max={100}
+              step={1}
+              onValueChange={handleSaturationChange}
+              className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="text-xs" htmlFor="value-slider">
+              Value
+            </label>
+            <span className="text-xs text-muted-foreground">
+              {Math.round(hsva.v * 100)}%
+            </span>
+          </div>
+          <div className="relative">
+            <div 
+              className="absolute inset-0 rounded-full z-0"
+              style={{ 
+                height: "0.5rem",
+                background: `linear-gradient(to right, #000, ${hsvaToRgba({
+                  h: hsva.h,
+                  s: hsva.s,
+                  v: 1,
+                  a: 1,
+                })})`
+              }}
+            />
+            <Slider
+              id="value-slider"
+              value={[hsva.v * 100]}
+              max={100}
+              step={1}
+              onValueChange={handleValueChange}
+              className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+            />
+          </div>
         </div>
       </div>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <label className="text-xs" htmlFor="value-slider">
-            Value
-          </label>
-          <span className="text-xs text-muted-foreground">
-            {Math.round(hsva.v * 100)}%
-          </span>
-        </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full z-0"
-            style={{ 
-              height: "0.5rem",
-              background: `linear-gradient(to right, #000, ${hsvaToRgba({
-                h: hsva.h,
-                s: hsva.s,
-                v: 1,
-                a: 1,
-              })})`
-            }}
-          />
-          <Slider
-            id="value-slider"
-            value={[hsva.v * 100]}
-            max={100}
-            step={1}
-            onValueChange={handleValueChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
-        </div>
-      </div>
-      <div className="flex items-center space-x-2 pt-4">
+      
+      {/* Selected color display */}
+      <div className="flex items-center p-3 bg-gray-800 rounded-lg space-x-3">
         <div
-          className="h-5 w-5 rounded border border-muted-foreground"
+          className="h-10 w-10 rounded-full border border-gray-600 flex-shrink-0"
           style={{ backgroundColor: color }}
         />
-        <div className="text-sm font-medium uppercase">{color}</div>
+        <div className="flex flex-col">
+          <div className="text-sm font-medium">{getColorName(color)}</div>
+          <div className="text-xs font-mono text-gray-400">{color.toUpperCase()}</div>
+        </div>
       </div>
     </div>
   )
