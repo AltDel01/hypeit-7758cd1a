@@ -31,7 +31,7 @@ const Virality = () => {
                   
                   <div className="space-y-6">
                     <div className="flex items-start">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#8c52ff] flex items-center justify-center mr-3">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#cc0000] flex items-center justify-center mr-3">
                         <span className="text-white font-medium">1</span>
                       </div>
                       <div>
@@ -43,8 +43,8 @@ const Virality = () => {
                     </div>
                     
                     <div className="flex items-start">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center mr-3">
-                        <span className="text-white font-medium">2</span>
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#ffcc00] flex items-center justify-center mr-3">
+                        <span className="text-gray-900 font-medium">2</span>
                       </div>
                       <div>
                         <h3 className="text-lg font-medium text-white">Analyze Your Audience</h3>
