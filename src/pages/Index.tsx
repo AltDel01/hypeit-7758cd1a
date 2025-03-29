@@ -26,7 +26,7 @@ const Index = () => {
     setIsGenerating(true);
     try {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
-      console.log(`Generating image with DALL-E, aspect ratio: ${aspectRatio}`);
+      console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       
       const imageUrl = await GeminiImageService.generateImage({
         prompt,
@@ -60,7 +60,7 @@ const Index = () => {
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
           <div className="col-span-5 p-6 border-r border-gray-800">
             <div className="max-w-xl mx-auto">
-              <h1 className="text-sm font-bold text-white mb-6 text-center">Create AI Branding Image with DALL-E</h1>
+              <h1 className="text-sm font-bold text-white mb-6 text-center">Create AI Branding Image</h1>
               
               <div className="mb-6">
                 <TabsContainer 

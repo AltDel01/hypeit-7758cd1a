@@ -13,18 +13,19 @@ export class GeminiImageService {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}`);
       
-      const toastId = toast.loading("Generating image with DALL-E...", { duration: 60000 });
+      const toastId = toast.loading("Generating image...", { duration: 30000 });
       
       // Add a timestamp to help identify this specific request in logs
       const requestId = new Date().toISOString();
-      console.log(`[${requestId}] Starting image generation request with OpenAI`);
+      console.log(`[${requestId}] Starting image generation request`);
       
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: {
           prompt,
           aspect_ratio: aspectRatio,
           style,
-          request_id: requestId
+          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA", // Default key
+          request_id: requestId // Pass the request ID for tracking
         }
       });
       
@@ -49,16 +50,11 @@ export class GeminiImageService {
       console.log(`[${requestId}] Image generated successfully`);
       toast.success("Image generated successfully!", { id: toastId });
       
-      // If we received a revised prompt from OpenAI, log it
-      if (data.revised_prompt) {
-        console.log(`[${requestId}] OpenAI revised prompt: ${data.revised_prompt}`);
-      }
-      
       // Check if the image URL is a base64 image
       if (data.imageUrl.startsWith('data:')) {
-        console.log(`[${requestId}] Generated image is a base64 image (likely a placeholder)`);
+        console.log(`[${requestId}] Generated image is a base64 image`);
       } else {
-        console.log(`[${requestId}] Generated image is a URL from OpenAI`);
+        console.log(`[${requestId}] Generated image is a URL`);
       }
       
       return data.imageUrl;
