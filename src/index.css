@@ -130,11 +130,11 @@
   
   /* Animated scrolling for image galleries with different scroll directions */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 120s linear infinite;
+    animation: smooth-scroll-down 240s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 150s linear infinite;
+    animation: smooth-scroll-up 300s linear infinite;
   }
   
   /* Smooth scroll down animation for feed (1:1) images */
