@@ -36,8 +36,11 @@ const Index = () => {
       if (imageUrl) {
         console.log(`Image generated, URL: ${imageUrl}`);
         setGeneratedImage(imageUrl);
+        // Scroll to top to show the generated image
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         console.error("No image URL returned from generation service");
+        toast.error("Failed to generate image");
       }
     } catch (error) {
       console.error("Error generating image:", error);
@@ -46,6 +49,11 @@ const Index = () => {
       setIsGenerating(false);
     }
   };
+
+  // Clear generated image when switching tabs
+  useEffect(() => {
+    setGeneratedImage(null);
+  }, [activeTab]);
 
   return (
     <AuroraBackground>
