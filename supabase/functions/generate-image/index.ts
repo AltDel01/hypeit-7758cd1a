@@ -13,17 +13,10 @@ serve(async (req) => {
   }
 
   try {
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    const { prompt, aspect_ratio = "1:1", style, api_key } = await req.json();
     
-    if (!geminiApiKey) {
-      console.error('GEMINI_API_KEY is not set in environment variables');
-      return new Response(
-        JSON.stringify({ error: 'Gemini API key not configured on the server' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { prompt, aspect_ratio = "1:1", style } = await req.json();
+    // Use the API key from the request body or the environment variable as fallback
+    const geminiApiKey = api_key || Deno.env.get('GEMINI_API_KEY') || "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA";
     
     console.log(`Generating image with prompt: ${prompt}, aspect ratio: ${aspect_ratio}, style: ${style || 'default'}`);
 

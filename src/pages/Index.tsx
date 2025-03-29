@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import GeminiImageService from '@/services/GeminiImageService';
-import GeminiKeyInput from '@/components/api/GeminiKeyInput';
 import { feedImages, storyImages } from '@/data/galleryImages';
 
 const Index = () => {
@@ -16,17 +15,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [xText, setXText] = useState("");
   const [linkedinText, setLinkedinText] = useState("");
-  const [isGeminiKeyConfigured, setIsGeminiKeyConfigured] = useState(true);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const checkApiKey = async () => {
-      const isConfigured = await GeminiImageService.checkApiKeyStatus();
-      setIsGeminiKeyConfigured(isConfigured);
-    };
-    
-    checkApiKey();
-  }, []);
   
   const generateImage = async () => {
     setIsGenerating(true);
@@ -47,19 +36,6 @@ const Index = () => {
       setIsGenerating(false);
     }
   };
-
-  if (!isGeminiKeyConfigured) {
-    return (
-      <AuroraBackground>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <GeminiKeyInput />
-          </main>
-        </div>
-      </AuroraBackground>
-    );
-  }
 
   return (
     <AuroraBackground>
