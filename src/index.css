@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -130,11 +129,11 @@
   
   /* Animated scrolling for image galleries with different scroll directions */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 90s linear infinite;
+    animation: smooth-scroll-down 120s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 120s linear infinite;
+    animation: smooth-scroll-up 150s linear infinite;
   }
   
   /* Smooth scroll down animation for feed (1:1) images */
@@ -143,7 +142,7 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(calc(-50%));
+      transform: translateY(-50%);
     }
   }
   
@@ -153,7 +152,7 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(calc(50%));
+      transform: translateY(-50%);
     }
   }
   
