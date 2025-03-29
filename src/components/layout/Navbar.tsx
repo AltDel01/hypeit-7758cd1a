@@ -14,6 +14,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
+          <span className="text-2xl font-extrabold tracking-tight mr-2 text-white">HYPEIT</span>
           <img 
             src="/lovable-uploads/b27adc82-453c-41d7-a6f0-4ced31d63950.png" 
             alt="Purple Arrow Logo" 
