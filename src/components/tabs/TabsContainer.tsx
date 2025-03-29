@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import SocialTab from './SocialTab';
 import MediaTabContent from './MediaTabContent';
 import XPostForm from '@/components/social/XPostForm';
 import LinkedInPostForm from '@/components/social/LinkedInPostForm';
-import { Instagram, Twitter, Linkedin } from 'lucide-react';
+import { Instagram, Linkedin } from 'lucide-react';
 
 interface TabsContainerProps {
   activeTab: string;
@@ -38,8 +39,31 @@ const TabsContainer = ({
       <TabsList className="bg-gray-900 border border-gray-700 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
         <SocialTab value="feed" icon={<Instagram size={18} />} label="Feed" />
         <SocialTab value="story" icon={<Instagram size={18} />} label="Story" />
-        <SocialTab value="tiktok" icon={<div className="text-md font-bold">TT</div>} label="TikTok" />
-        <SocialTab value="x" icon={<Twitter size={18} />} label="X" />
+        <SocialTab 
+          value="tiktok" 
+          icon={
+            <img 
+              src="/lovable-uploads/be264f03-9166-4358-b191-c18e11efce55.png" 
+              alt="TikTok Logo" 
+              className="w-4 h-4"
+            />
+          } 
+          label="TikTok" 
+        />
+        <SocialTab 
+          value="x" 
+          icon={
+            <svg 
+              viewBox="0 0 24 24" 
+              width="18" 
+              height="18" 
+              fill="currentColor"
+            >
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          } 
+          label="X" 
+        />
         <SocialTab value="linkedin" icon={<Linkedin size={18} />} label="LinkedIn" />
       </TabsList>
 
