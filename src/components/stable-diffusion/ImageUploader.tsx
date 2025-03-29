@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X } from 'lucide-react';
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ImageUploaderProps {
   id: string;
@@ -13,6 +14,7 @@ interface ImageUploaderProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   image: File | null;
   onRemoveImage?: () => void;
+  className?: string;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ 
@@ -21,7 +23,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   icon, 
   onChange,
   image,
-  onRemoveImage
+  onRemoveImage,
+  className
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -109,7 +112,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
   
   return (
-    <div>
+    <div className={cn(className)}>
       <Label htmlFor={id}>{label}</Label>
       <div
         className={`mt-1 border-2 border-dashed rounded-md p-6 transition-colors ${
