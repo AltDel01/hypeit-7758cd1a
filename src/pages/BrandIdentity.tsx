@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { 
@@ -8,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/components/ui/use-toast';
-import { PDFGenerator } from '@/components/brand/PDFGenerator';
+import { PDFGenerator } from '@/components/brand/pdf/PDFGenerator';
 import { brandIdentitySchema, BrandIdentityFormValues } from '@/types/brand';
 
 // Import step components
@@ -59,7 +58,6 @@ const BrandIdentity = () => {
         return;
       }
     } else if (step === 3) {
-      // Logo is optional, but we do check if product photos are added
       if (productPhotos.length === 0) {
         toast({
           title: "Please upload photos",
@@ -107,12 +105,9 @@ const BrandIdentity = () => {
     setProductPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Make sure all the fields are filled before sending to PDF generator
-  const getPDFData = () => {
+  const getPDFData = (): BrandIdentityFormValues => {
     const values = form.getValues();
     
-    // Explicitly create a new object with all required properties
-    // that matches the BrandIdentityFormValues type exactly
     const completeValues: BrandIdentityFormValues = {
       businessName: values.businessName || '',
       brandStory: values.brandStory || '',
@@ -128,7 +123,6 @@ const BrandIdentity = () => {
     return completeValues;
   };
 
-  // Render current step based on step state
   const renderCurrentStep = () => {
     switch (step) {
       case 1:
@@ -175,15 +169,11 @@ const BrandIdentity = () => {
           {!showPdfPreview ? (
             <Card className="bg-gray-900 text-white border-gray-800">
               <CardContent className="pt-6">
-                {/* Progress indicator */}
                 <FormProgress currentStep={step} totalSteps={totalSteps} />
 
                 <Form {...form}>
                   <form className="space-y-4">
-                    {/* Render the current step */}
                     {renderCurrentStep()}
-
-                    {/* Navigation buttons */}
                     <FormNavigation 
                       step={step}
                       totalSteps={totalSteps}
@@ -197,7 +187,6 @@ const BrandIdentity = () => {
               </CardContent>
             </Card>
           ) : (
-            /* PDF Preview Section */
             <PDFGenerator 
               formData={getPDFData()}
               brandLogo={brandLogo}
