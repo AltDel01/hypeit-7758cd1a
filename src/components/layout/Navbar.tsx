@@ -18,11 +18,8 @@ const Navbar = () => {
             <img 
               src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
               alt="HYPEIT Logo" 
-              className="h-8 w-8 mr-2"
+              className="h-8 w-8"
             />
-            <div className="text-2xl font-extrabold text-white">
-              HYPE<span className="text-[#8c52ff]">IT</span>
-            </div>
           </div>
         </Link>
 
