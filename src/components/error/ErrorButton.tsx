@@ -13,6 +13,11 @@ const ErrorButton = () => {
     }
   };
 
+  // Only render in development mode
+  if (import.meta.env.MODE !== 'development') {
+    return null;
+  }
+
   return (
     <Button 
       variant="destructive"
