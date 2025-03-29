@@ -18,7 +18,7 @@ const Navbar = () => {
             <img 
               src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
               alt="HYPEIT Logo" 
-              className="h-8 w-8"
+              className="h-10 w-auto" 
             />
           </div>
         </Link>
