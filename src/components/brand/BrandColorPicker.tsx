@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface BrandColorPickerProps {
   selectedColors: string[];
@@ -40,6 +41,9 @@ const BrandColorPicker: React.FC<BrandColorPickerProps> = ({
   setSelectedColors,
   maxColors
 }) => {
+  const [customColor, setCustomColor] = useState<string>('#000000');
+  const [isValidColor, setIsValidColor] = useState<boolean>(true);
+
   const handleColorClick = (color: string) => {
     if (selectedColors.includes(color)) {
       // Remove color if already selected
@@ -47,6 +51,22 @@ const BrandColorPicker: React.FC<BrandColorPickerProps> = ({
     } else if (selectedColors.length < maxColors) {
       // Add color if not at max
       setSelectedColors([...selectedColors, color]);
+    }
+  };
+
+  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomColor(value);
+    
+    // Basic validation for hex color format
+    const isValid = /^#([0-9A-F]{3}){1,2}$/i.test(value);
+    setIsValidColor(isValid);
+  };
+
+  const handleCustomColorAdd = () => {
+    if (isValidColor && !selectedColors.includes(customColor) && selectedColors.length < maxColors) {
+      setSelectedColors([...selectedColors, customColor]);
+      setCustomColor('#000000');
     }
   };
 
@@ -81,6 +101,27 @@ const BrandColorPicker: React.FC<BrandColorPickerProps> = ({
             <span className="text-gray-500 text-sm">Select</span>
           </div>
         ))}
+      </div>
+
+      {/* Custom color input */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-md border border-gray-500" style={{ backgroundColor: isValidColor ? customColor : '#FF0000' }}></div>
+        <Input
+          type="text"
+          value={customColor}
+          onChange={handleCustomColorChange}
+          placeholder="#RRGGBB"
+          className={`w-32 bg-gray-800 text-white ${!isValidColor ? 'border-red-500' : ''}`}
+          maxLength={7}
+        />
+        <Button 
+          onClick={handleCustomColorAdd}
+          disabled={!isValidColor || selectedColors.length >= maxColors}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          Add Color
+        </Button>
+        {!isValidColor && <span className="text-xs text-red-400">Enter valid hex color (e.g., #FF5500)</span>}
       </div>
 
       <p className="text-sm text-gray-400">
