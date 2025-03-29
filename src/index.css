@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -110,7 +111,7 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: gradient-text 3s ease infinite;
+    animation: gradient-text 1s ease infinite;
     background-image: linear-gradient(45deg, #9b87f5, #F97316, #33C3F0, #9b87f5);
     background-size: 300% 300%;
     font-weight: 800;
