@@ -37,7 +37,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
         <Button 
           type="button" 
           onClick={onNext}
-          className="ml-auto bg-blue-600 hover:bg-blue-700"
+          className="ml-auto bg-[#9b87f5] hover:bg-[#8B5CF6]"
         >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

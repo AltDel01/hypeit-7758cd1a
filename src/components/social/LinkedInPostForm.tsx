@@ -206,7 +206,7 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       
       {isFallbackContent && fallbackWarning && (
         <Alert>
-          <Info className="h-4 w-4 text-blue-500" />
+          <Info className="h-4 w-4 text-[#9b87f5]" />
           <AlertDescription>
             {fallbackWarning}
           </AlertDescription>
@@ -214,7 +214,7 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       )}
       
       <Button 
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-[#9b87f5] hover:bg-[#8B5CF6] text-white"
         disabled={!idea.trim() || isGenerating}
         onClick={handleGeneratePost}
       >

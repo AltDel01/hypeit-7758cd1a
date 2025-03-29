@@ -37,7 +37,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
       {generatedImage && showGenerated ? (
-        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-blue-500">
+        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
             src={generatedImage} 
             alt="Generated AI image" 
@@ -61,7 +61,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               <Download size={14} />
             </Button>
           </div>
-          <div className="absolute top-0 left-0 bg-blue-600 text-white px-2 py-1 text-xs">
+          <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
             Generated Image
           </div>
         </div>
