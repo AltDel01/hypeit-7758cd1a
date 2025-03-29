@@ -17,7 +17,7 @@ const Navbar = () => {
           <img 
             src="/lovable-uploads/b27adc82-453c-41d7-a6f0-4ced31d63950.png" 
             alt="Purple Arrow Logo" 
-            className="h-8 w-8"
+            className="h-8 object-contain"
           />
         </Link>
 
