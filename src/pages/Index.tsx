@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -75,7 +74,7 @@ const Index = () => {
           <div className="col-span-5 p-6 border-r border-gray-800">
             <div className="max-w-xl mx-auto">
               <h1 className="text-3xl font-extrabold mb-6 text-center leading-tight animate-gradient-text animate-fade-in-up">
-                Create One Month Social Media Content <br />Within Minutes
+                Create One Month<br />Social Media Content Within Minutes
               </h1>
               
               <div className="mb-6">
