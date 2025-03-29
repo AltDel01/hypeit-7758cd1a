@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -127,13 +128,13 @@
     caret-color: #9b87f5;
   }
   
-  /* Animated scrolling for image galleries with new scroll directions */
+  /* Animated scrolling for image galleries with different scroll directions */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 60s linear infinite;
+    animation: smooth-scroll-down 90s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 60s linear infinite;
+    animation: smooth-scroll-up 120s linear infinite;
   }
   
   /* Smooth scroll down animation for feed (1:1) images */
@@ -146,13 +147,13 @@
     }
   }
   
-  /* Smooth scroll up animation for story (9:16) images */
+  /* Smooth scroll up animation for story (9:16) images - slower */
   @keyframes smooth-scroll-up {
     0% {
       transform: translateY(0);
     }
     100% {
-      transform: translateY(calc(-50%));
+      transform: translateY(calc(50%));
     }
   }
   
