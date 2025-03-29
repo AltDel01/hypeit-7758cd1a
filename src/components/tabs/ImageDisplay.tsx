@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Download } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { toast } from "sonner";
 
 interface ImageDisplayProps {
@@ -29,18 +29,18 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   };
 
   return (
-    <div className="grid grid-cols-1 gap-5">
+    <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
       {generatedImage && showGenerated ? (
-        <div className="rounded-lg overflow-hidden relative group mb-5 border-4 border-blue-500 shadow-lg">
+        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-blue-500">
           <img 
             src={generatedImage} 
             alt="Generated AI image" 
             className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
           />
-          <div className="absolute bottom-0 right-0 p-2 opacity-80 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button 
               size="sm" 
-              variant="secondary" 
+              variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
               onClick={() => handleCopy(generatedImage)}
             >
@@ -48,14 +48,14 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
             </Button>
             <Button 
               size="sm" 
-              variant="secondary" 
+              variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
               onClick={() => handleDownload(generatedImage)}
             >
-              <Download size={14} />
+              <Copy size={14} />
             </Button>
           </div>
-          <div className="absolute top-0 left-0 bg-blue-600 text-white px-3 py-1 text-sm font-bold">
+          <div className="absolute top-0 left-0 bg-blue-600 text-white px-2 py-1 text-xs">
             Generated Image
           </div>
         </div>
