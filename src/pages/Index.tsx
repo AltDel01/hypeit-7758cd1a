@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -18,16 +17,13 @@ const Index = () => {
   const [linkedinText, setLinkedinText] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   
-  // Set user context for Sentry (usually done after authentication)
   useEffect(() => {
-    // This would typically use actual user data from your auth system
     Sentry.setUser({
       id: "example-user-id",
       email: "example@user.com",
       username: "exampleUser"
     });
     
-    // Set extra context that might be useful
     Sentry.setTag("page", "index");
     Sentry.setTag("feature", "image-generation");
   }, []);
@@ -43,7 +39,6 @@ const Index = () => {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       
-      // Set context for the current operation
       Sentry.setContext("image_generation", {
         prompt: prompt,
         aspectRatio: aspectRatio,
@@ -60,12 +55,10 @@ const Index = () => {
         setGeneratedImage(imageUrl);
       } else {
         console.error("No image URL returned from generation service");
-        // Capture a handled exception
         Sentry.captureMessage("Image generation failed - No URL returned", "error");
       }
     } catch (error) {
       console.error("Error generating image:", error);
-      // Capture the exception
       Sentry.captureException(error);
       toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
@@ -99,8 +92,6 @@ const Index = () => {
                   generatedImage={generatedImage}
                 />
               </div>
-              
-              {/* Error Button removed */}
             </div>
           </div>
           
