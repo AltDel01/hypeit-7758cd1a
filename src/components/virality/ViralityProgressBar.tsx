@@ -18,7 +18,7 @@ const ViralityProgressBar: React.FC<ViralityProgressBarProps> = ({
             key={i}
             className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
               i + 1 === currentStep 
-                ? 'bg-blue-600' 
+                ? 'bg-[#8c52ff]' 
                 : i + 1 < currentStep 
                   ? 'bg-green-600' 
                   : 'bg-gray-700'
@@ -30,7 +30,7 @@ const ViralityProgressBar: React.FC<ViralityProgressBarProps> = ({
       </div>
       <div className="h-2 bg-gray-700 rounded-full">
         <div 
-          className="h-2 bg-blue-600 rounded-full transition-all"
+          className="h-2 bg-[#8c52ff] rounded-full transition-all"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         ></div>
       </div>

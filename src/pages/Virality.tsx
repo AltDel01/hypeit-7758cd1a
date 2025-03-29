@@ -31,7 +31,7 @@ const Virality = () => {
                   
                   <div className="space-y-6">
                     <div className="flex items-start">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mr-3">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#8c52ff] flex items-center justify-center mr-3">
                         <span className="text-white font-medium">1</span>
                       </div>
                       <div>
@@ -69,7 +69,7 @@ const Virality = () => {
                   
                   <div className="mt-8 flex justify-center">
                     <Button 
-                      className="bg-blue-600 hover:bg-blue-700 px-8"
+                      className="bg-[#8c52ff] hover:bg-[#7a45e6] px-8"
                       onClick={() => setShowForm(true)}
                     >
                       <ArrowUp className="mr-2 h-4 w-4" />
@@ -112,7 +112,7 @@ const Virality = () => {
             <div className="rounded-lg overflow-hidden bg-gray-900 p-4">
               <h3 className="text-white font-medium mb-3">Content Pillar Example</h3>
               <div className="bg-gray-800 rounded-md p-3 mb-3">
-                <h4 className="text-blue-400 text-sm font-medium mb-2">Educational Content</h4>
+                <h4 className="text-[#8c52ff] text-sm font-medium mb-2">Educational Content</h4>
                 <ul className="pl-5 text-gray-300 text-sm space-y-1 list-disc">
                   <li>Industry insights and trends</li>
                   <li>How-to guides and tutorials</li>
@@ -120,7 +120,7 @@ const Virality = () => {
                 </ul>
               </div>
               <div className="flex justify-end">
-                <Button variant="link" size="sm" className="text-blue-400 p-0">
+                <Button variant="link" size="sm" className="text-[#8c52ff] p-0">
                   See more examples <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
@@ -148,7 +148,7 @@ const Virality = () => {
                     <span className="text-white">8.5%</span>
                   </div>
                   <div className="h-2 bg-gray-700 rounded-full">
-                    <div className="h-2 bg-blue-500 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="h-2 bg-[#8c52ff] rounded-full" style={{ width: '85%' }}></div>
                   </div>
                 </div>
                 <div className="mb-2">
@@ -157,7 +157,7 @@ const Virality = () => {
                     <span className="text-white">12.3%</span>
                   </div>
                   <div className="h-2 bg-gray-700 rounded-full">
-                    <div className="h-2 bg-purple-500 rounded-full" style={{ width: '63%' }}></div>
+                    <div className="h-2 bg-[#8c52ff] rounded-full" style={{ width: '63%' }}></div>
                   </div>
                 </div>
                 <div>
