@@ -20,6 +20,12 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
   handleProductPhotoUpload,
   removeProductPhoto
 }) => {
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setBrandLogo(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Brand Visuals</h2>
@@ -30,14 +36,11 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
           <ImageUploader
             id="logo-upload"
             label="Upload Logo"
-            icon={<Upload />}
-            onChange={(e) => {
-              if (e.target.files?.[0]) {
-                setBrandLogo(e.target.files[0]);
-              }
-            }}
+            icon={<Upload className="h-5 w-5" />}
+            onChange={handleLogoUpload}
             image={brandLogo}
             onRemoveImage={() => setBrandLogo(null)}
+            className="h-full"
           />
         </div>
       </div>
@@ -64,22 +67,20 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
             </div>
           ))}
           
-          <div className="flex items-center justify-center h-60 border-2 border-dashed border-gray-700 rounded-md cursor-pointer hover:border-blue-600 transition-colors">
-            <div className="w-full p-4">
-              <ImageUploader
-                id="product-photo-upload"
-                label="Add Product Photo"
-                icon={<Upload className="h-8 w-8" />}
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    handleProductPhotoUpload(e.target.files[0]);
-                  }
-                }}
-                image={null}
-                onRemoveImage={() => {}}
-                className="h-full"
-              />
-            </div>
+          <div className="flex items-center justify-center h-60 border-2 border-dashed border-gray-700 rounded-md">
+            <ImageUploader
+              id="product-photo-upload"
+              label="Add Product Photo"
+              icon={<Upload className="h-8 w-8" />}
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  handleProductPhotoUpload(e.target.files[0]);
+                }
+              }}
+              image={null}
+              onRemoveImage={() => {}}
+              className="h-full w-full"
+            />
           </div>
         </div>
       </div>

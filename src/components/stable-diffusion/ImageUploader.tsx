@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -110,6 +111,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       sendImageToWebhook(e.target.files[0]);
     }
   };
+
+  const handleContainerClick = () => {
+    if (!image && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
   
   return (
     <div className={cn(className)}>
@@ -117,17 +124,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       <div
         className={`mt-1 border-2 border-dashed rounded-md p-6 transition-colors ${
           isDragging ? 'border-primary bg-primary/10' : 'border-gray-300'
-        } ${isUploading ? 'opacity-70' : ''}`}
+        } ${isUploading ? 'opacity-70' : ''} cursor-pointer`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
+        onClick={handleContainerClick}
       >
         <div className="flex flex-col items-center justify-center space-y-2 text-center">
           {!image ? (
             <>
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Upload className="h-5 w-5 text-primary" />
+                {icon}
               </div>
               <div className="text-sm text-gray-500">
                 <span className="font-semibold text-primary">Click to upload</span> or drag and drop
@@ -152,7 +160,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 variant="destructive"
                 size="icon"
                 className="absolute top-2 right-2 rounded-full h-8 w-8"
-                onClick={onRemoveImage}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveImage && onRemoveImage();
+                }}
                 disabled={isUploading}
               >
                 <X className="h-4 w-4" />
@@ -164,7 +175,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className={image ? "hidden" : "hidden"}
+            className="hidden"
+            ref={fileInputRef}
           />
         </div>
       </div>
