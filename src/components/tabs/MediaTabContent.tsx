@@ -25,7 +25,7 @@ const MediaTabContent = ({
   aspectRatio
 }: MediaTabContentProps) => {
   return (
-    <div className="mt-6">
+    <div className="mt-6 space-y-6">
       <ContentGenerator 
         prompt={prompt}
         setPrompt={setPrompt}
@@ -35,20 +35,21 @@ const MediaTabContent = ({
         onGenerate={generateImage}
       />
       
-      {(generatedImage || isGenerating) && (
-        <div className="mt-6">
-          <h3 className="text-white text-sm font-semibold mb-2 flex items-center">
-            {isGenerating ? 
-              <span>Generating your image...</span> : 
-              <span>Your Generated Image:</span>
-            }
-          </h3>
-          <GeneratedImagePreview 
-            imageUrl={generatedImage || ''} 
-            aspectRatio={aspectRatio} 
-          />
-        </div>
-      )}
+      <div>
+        <h3 className="text-white text-sm font-semibold mb-2 flex items-center">
+          {isGenerating ? 
+            <span className="flex items-center">
+              <span className="h-3 w-3 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
+              Generating your image...
+            </span> : 
+            <span>Your Generated Image:</span>
+          }
+        </h3>
+        <GeneratedImagePreview 
+          imageUrl={generatedImage || ''} 
+          aspectRatio={aspectRatio} 
+        />
+      </div>
     </div>
   );
 };

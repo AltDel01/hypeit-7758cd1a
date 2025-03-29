@@ -15,45 +15,47 @@ export class GeminiImageService {
       
       const toastId = toast.loading("Generating image...", { duration: 30000 });
       
+      // Add a timestamp to help identify this specific request in logs
+      const requestId = new Date().toISOString();
+      console.log(`[${requestId}] Starting image generation request`);
+      
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: {
           prompt,
           aspect_ratio: aspectRatio,
           style,
-          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA" // Always use the default key
+          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA", // Default key
+          request_id: requestId // Pass the request ID for tracking
         }
       });
       
       if (error) {
-        console.error("Error invoking generate-image function:", error);
+        console.error(`[${requestId}] Error invoking generate-image function:`, error);
         toast.error(`Failed to generate image: ${error.message}`, { id: toastId });
         return null;
       }
       
       if (data.error) {
-        console.error("API returned error:", data.error);
+        console.error(`[${requestId}] API returned error:`, data.error);
         toast.error(`Failed to generate image: ${data.error}`, { id: toastId });
         return null;
       }
       
       if (!data.imageUrl) {
-        console.error("No image URL returned:", data);
+        console.error(`[${requestId}] No image URL returned:`, data);
         toast.error("Failed to generate image: No image URL returned", { id: toastId });
         return null;
       }
       
-      console.log("Image generated successfully:", data.imageUrl);
+      console.log(`[${requestId}] Image generated successfully`);
       toast.success("Image generated successfully!", { id: toastId });
       
       // Check if the image URL is a base64 image
       if (data.imageUrl.startsWith('data:')) {
-        console.log("Generated image is a base64 image");
+        console.log(`[${requestId}] Generated image is a base64 image`);
       } else {
-        console.log("Generated image is a URL");
+        console.log(`[${requestId}] Generated image is a URL`);
       }
-      
-      // Log the first 100 characters of the image URL to help debug
-      console.log("Image URL preview:", data.imageUrl.substring(0, 100) + "...");
       
       return data.imageUrl;
     } catch (error) {
