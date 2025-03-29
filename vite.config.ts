@@ -5,7 +5,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // Dynamically import the Sentry plugin to avoid errors when it's not available
-let sentryVitePlugin;
+let sentryVitePlugin: any;
 try {
   // Try to import the Sentry plugin, but don't fail if it's not available
   sentryVitePlugin = require("@sentry/vite-plugin").sentryVitePlugin;
