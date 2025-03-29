@@ -1,15 +1,17 @@
 
 import React, { useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, FileDown } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { BrandIdentityFormValues } from '@/types/brand';
 
-// Import PDF components
-import PDFControls from './PDFControls';
+// Import PDF components from the pdf directory
 import CoverPage from './CoverPage';
 import BrandStoryPage from './BrandStoryPage';
 import MarketAudiencePage from './MarketAudiencePage';
 import BrandIdentityPage from './BrandIdentityPage';
+import PDFPreviewContainer from './PDFPreviewContainer';
 
 interface PDFGeneratorProps {
   formData: BrandIdentityFormValues;
@@ -62,9 +64,7 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
   return (
     <div className="space-y-6">
       <PDFControls onGeneratePDF={generatePDF} onBack={onBack} />
-      
-      {/* PDF Preview */}
-      <div className="bg-white rounded-lg shadow-lg max-w-3xl mx-auto overflow-hidden" ref={pdfRef}>
+      <PDFPreviewContainer ref={pdfRef}>
         <CoverPage 
           businessName={formData.businessName}
           brandLogo={brandLogo}
@@ -99,7 +99,31 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           selectedFont={selectedFont}
           brandLogo={brandLogo}
         />
-      </div>
+      </PDFPreviewContainer>
+    </div>
+  );
+};
+
+// Separate component for PDF controls
+const PDFControls: React.FC<{
+  onGeneratePDF: () => void;
+  onBack: () => void;
+}> = ({ onGeneratePDF, onBack }) => {
+  return (
+    <div className="flex items-center justify-between mb-8">
+      <Button
+        variant="outline"
+        onClick={onBack}
+        className="border-gray-700 text-white"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Editor
+      </Button>
+      <Button
+        onClick={onGeneratePDF}
+        className="bg-[#8c52ff] hover:bg-[#7a45e6]"
+      >
+        <FileDown className="mr-2 h-4 w-4" /> Download PDF
+      </Button>
     </div>
   );
 };
