@@ -8,7 +8,6 @@ import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import GeminiImageService from '@/services/GeminiImageService';
 import { feedImages, storyImages } from '@/data/galleryImages';
-import ErrorButton from '@/components/error/ErrorButton';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -98,10 +97,7 @@ const Index = () => {
                 />
               </div>
               
-              {/* Error Button for testing Sentry */}
-              <div className="flex justify-center mt-6">
-                <ErrorButton />
-              </div>
+              {/* Error Button removed */}
             </div>
           </div>
           
