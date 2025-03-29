@@ -16,48 +16,72 @@ const CoverPage: React.FC<CoverPageProps> = ({
   selectedFont,
   productPhotos
 }) => {
+  // Create a dynamic gradient based on selected colors
+  const gradientStyle = {
+    background: selectedColors.length >= 2 
+      ? `linear-gradient(135deg, ${selectedColors[0]} 0%, ${selectedColors[1]} 100%)`
+      : selectedColors[0]
+  };
+
   return (
     <div className="pdf-page w-[210mm] h-[297mm] relative overflow-hidden bg-white text-black">
+      {/* Decorative top accent */}
+      <div className="absolute top-0 left-0 right-0 h-24" style={gradientStyle}></div>
+      
+      {/* Main content - centered with more spacing */}
       <div 
-        className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center"
+        className="absolute inset-0 flex flex-col items-center justify-center p-16 text-center"
         style={{ fontFamily: selectedFont }}
       >
+        {/* Logo with enhanced presentation */}
         {brandLogo && (
-          <div className="mb-8">
+          <div className="mb-10 p-6 bg-white rounded-full shadow-lg">
             <img 
               src={URL.createObjectURL(brandLogo)} 
               alt="Brand Logo" 
-              className="max-h-36"
+              className="max-h-40 max-w-40"
             />
           </div>
         )}
         
-        <h1 className="text-4xl font-bold mb-4">
+        {/* Business name - larger and more prominent */}
+        <h1 className="text-5xl font-bold mb-6 tracking-tight">
           {businessName}
         </h1>
         
-        <h2 className="text-xl mb-8">Brand Identity Guidelines</h2>
+        {/* Subtitle with decorative line */}
+        <div className="flex items-center justify-center w-full mb-10">
+          <div className="h-0.5 w-16 bg-gray-300"></div>
+          <h2 className="text-2xl font-light mx-4 text-gray-700">Brand Identity Guidelines</h2>
+          <div className="h-0.5 w-16 bg-gray-300"></div>
+        </div>
         
-        <div className="flex space-x-4 mb-8">
+        {/* Color swatches in a more stylish layout */}
+        <div className="flex items-center justify-center space-x-6 mb-12">
           {selectedColors.map((color, index) => (
             <div 
               key={index}
-              className="w-16 h-16 rounded-full"
+              className="w-16 h-16 rounded-full shadow-md transform transition-transform hover:scale-110"
               style={{ backgroundColor: color }}
             ></div>
           ))}
         </div>
         
+        {/* Featured image in stylish frame */}
         {productPhotos.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8 relative">
+            <div className="absolute inset-0 transform rotate-3 bg-gray-200 rounded-lg"></div>
             <img 
               src={URL.createObjectURL(productPhotos[0])} 
               alt="Featured Product" 
-              className="max-h-48 rounded-lg shadow-md"
+              className="relative z-10 max-h-48 rounded-lg shadow-lg object-cover"
             />
           </div>
         )}
       </div>
+      
+      {/* Decorative bottom accent */}
+      <div className="absolute bottom-0 left-0 right-0 h-24" style={gradientStyle}></div>
     </div>
   );
 };
