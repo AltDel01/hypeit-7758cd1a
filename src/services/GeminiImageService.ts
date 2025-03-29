@@ -53,6 +53,26 @@ export class GeminiImageService {
       });
       
       if (error || !data.success) {
+        // If the default key was provided directly, try to set it automatically
+        if (!error && data?.message === 'API key is not configured') {
+          try {
+            // Try to apply default key
+            const defaultKey = "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA";
+            const result = await supabase.functions.invoke('test-gemini-key', {
+              body: { 
+                action: 'set',
+                key: defaultKey
+              }
+            });
+            
+            if (result.data?.success) {
+              console.log("Default key applied automatically");
+              return true;
+            }
+          } catch (error) {
+            console.error("Error applying default key:", error);
+          }
+        }
         return false;
       }
       
