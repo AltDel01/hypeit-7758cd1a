@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -58,20 +59,15 @@ export function ColorPicker({
             {Math.round(hsva.h)}°
           </span>
         </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-[#ff0000] via-[#ffff00] via-[#00ff00] via-[#00ffff] via-[#0000ff] via-[#ff00ff] to-[#ff0000] z-0"
-            style={{ height: "0.5rem" }}
-          />
-          <Slider
-            id="hue-slider"
-            value={[hsva.h]}
-            max={360}
-            step={1}
-            onValueChange={handleHueChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
-        </div>
+        <Slider
+          id="hue-slider"
+          value={[hsva.h]}
+          max={360}
+          step={1}
+          onValueChange={handleHueChange}
+          className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+          trackClassName="bg-gradient-to-r from-[#ff0000] via-[#ffff00] via-[#00ff00] via-[#00ffff] via-[#0000ff] via-[#ff00ff] to-[#ff0000] h-4 rounded-full"
+        />
       </div>
       <div className="space-y-2">
         <div className="flex justify-between items-center">
@@ -82,28 +78,26 @@ export function ColorPicker({
             {Math.round(hsva.s * 100)}%
           </span>
         </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full z-0"
-            style={{ 
-              height: "0.5rem",
-              background: `linear-gradient(to right, white, ${hsvaToRgba({
-                h: hsva.h,
-                s: 1,
-                v: hsva.v,
-                a: 1,
-              })})`
-            }}
-          />
-          <Slider
-            id="saturation-slider"
-            value={[hsva.s * 100]}
-            max={100}
-            step={1}
-            onValueChange={handleSaturationChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
-        </div>
+        <Slider
+          id="saturation-slider"
+          value={[hsva.s * 100]}
+          max={100}
+          step={1}
+          onValueChange={handleSaturationChange}
+          className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+          trackClassName={cn(
+            "h-4 rounded-full",
+            "bg-gradient-to-r from-[#ffffff]",
+          )}
+          trackStyle={{
+            background: `linear-gradient(to right, white, ${hsvaToRgba({
+              h: hsva.h,
+              s: 1,
+              v: hsva.v,
+              a: 1,
+            })})`,
+          }}
+        />
       </div>
       <div className="space-y-2">
         <div className="flex justify-between items-center">
@@ -114,28 +108,23 @@ export function ColorPicker({
             {Math.round(hsva.v * 100)}%
           </span>
         </div>
-        <div className="relative">
-          <div 
-            className="absolute inset-0 rounded-full z-0"
-            style={{ 
-              height: "0.5rem",
-              background: `linear-gradient(to right, #000, ${hsvaToRgba({
-                h: hsva.h,
-                s: hsva.s,
-                v: 1,
-                a: 1,
-              })})`
-            }}
-          />
-          <Slider
-            id="value-slider"
-            value={[hsva.v * 100]}
-            max={100}
-            step={1}
-            onValueChange={handleValueChange}
-            className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
-          />
-        </div>
+        <Slider
+          id="value-slider"
+          value={[hsva.v * 100]}
+          max={100}
+          step={1}
+          onValueChange={handleValueChange}
+          className="h-4 [&>span:first-child]:rounded-full [&>span:first-child]:h-4"
+          trackClassName="h-4 rounded-full"
+          trackStyle={{
+            background: `linear-gradient(to right, #000, ${hsvaToRgba({
+              h: hsva.h,
+              s: hsva.s,
+              v: 1,
+              a: 1,
+            })})`,
+          }}
+        />
       </div>
       <div className="flex items-center space-x-2 pt-4">
         <div
