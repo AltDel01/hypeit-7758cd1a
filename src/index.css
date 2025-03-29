@@ -79,6 +79,35 @@
     }
   }
   
+  @keyframes gradient-text {
+    0% { 
+      background-position: 0% 50%;
+      background-image: linear-gradient(45deg, #9b87f5, #8B5CF6, #9b87f5);
+    }
+    33% { 
+      background-position: 100% 50%;
+      background-image: linear-gradient(45deg, #1EAEDB, #33C3F0, #1EAEDB);
+    }
+    66% { 
+      background-position: 0% 50%;
+      background-image: linear-gradient(45deg, #F97316, #fb923c, #F97316);
+    }
+    100% { 
+      background-position: 0% 50%;
+      background-image: linear-gradient(45deg, #9b87f5, #8B5CF6, #9b87f5);
+    }
+  }
+  
+  .animate-gradient-text {
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-text 8s ease infinite;
+    background-image: linear-gradient(45deg, #9b87f5, #1EAEDB, #F97316, #9b87f5);
+    background-size: 300% 300%;
+  }
+  
   .animate-fade-in-up {
     animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
   }
