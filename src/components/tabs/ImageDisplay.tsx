@@ -28,8 +28,11 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
+  // Apply different animation classes based on aspect ratio
+  const animationClass = aspectRatio === "square" ? "animate-feed-scroll" : "animate-story-scroll";
+
   return (
-    <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
+    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
       {generatedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-blue-500">
           <img 
