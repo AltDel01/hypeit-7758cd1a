@@ -5,7 +5,6 @@ import { hexToHsva, hsvaToHex } from "@/lib/color-utils"
 import { ColorPreview } from "@/components/ui/color-picker/color-preview"
 import { ColorSliders } from "@/components/ui/color-picker/color-sliders"
 import { SelectedColor } from "@/components/ui/color-picker/selected-color"
-import { getColorName } from "@/lib/color-utils"
 
 interface ColorPickerProps {
   className?: string
