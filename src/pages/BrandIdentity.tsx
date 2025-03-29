@@ -116,11 +116,12 @@ const BrandIdentity = () => {
   };
 
   // Make sure all the fields are filled before sending to PDF generator
-  const getPDFData = (): BrandIdentityFormValues => {
+  const getPDFData = () => {
     const values = form.getValues();
     
-    // Provide default empty values for any missing fields to satisfy the type requirements
-    return {
+    // Explicitly create a new object with all required properties
+    // that matches the BrandIdentityFormValues type exactly
+    const completeValues: BrandIdentityFormValues = {
       businessName: values.businessName || '',
       brandStory: values.brandStory || '',
       vision: values.vision || '',
@@ -131,6 +132,8 @@ const BrandIdentity = () => {
       market: values.market || '',
       goals: values.goals || ''
     };
+    
+    return completeValues;
   };
 
   return (
