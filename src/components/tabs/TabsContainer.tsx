@@ -42,11 +42,18 @@ const TabsContainer = ({
         <SocialTab 
           value="tiktok" 
           icon={
-            <img 
-              src="/lovable-uploads/be264f03-9166-4358-b191-c18e11efce55.png" 
-              alt="TikTok Logo" 
-              className="w-4 h-4"
-            />
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M19.321 5.562a5.124 5.124 0 0 1-5.006-4.088H10.44v15.709c0 2.058-1.562 3.729-3.441 3.729-1.88 0-3.441-1.671-3.441-3.729 0-2.059 1.562-3.729 3.441-3.729.379 0 .74.066 1.084.18V9.738a7.066 7.066 0 0 0-1.084-.084C3.037 9.654 0 12.969 0 17.014c0 4.043 3.037 7.358 6.779 7.358 3.741 0 6.779-3.315 6.779-7.358V9.192a8.72 8.72 0 0 0 5.483 1.939l.28-5.569z" 
+                fill="currentColor"
+              />
+            </svg>
           } 
           label="TikTok" 
         />
