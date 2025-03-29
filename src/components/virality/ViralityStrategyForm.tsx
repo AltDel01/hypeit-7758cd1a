@@ -102,7 +102,7 @@ const ViralityStrategyForm: React.FC = () => {
   }
 
   return (
-    <Card className="bg-gray-900 text-white border-gray-800">
+    <Card className="bg-gray-900 bg-opacity-60 backdrop-blur-sm text-white border-gray-800">
       <CardContent className="pt-6">
         <ViralityProgressBar currentStep={step} totalSteps={totalSteps} />
         

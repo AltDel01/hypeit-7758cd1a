@@ -25,13 +25,13 @@ const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+      <h2 className="text-xl font-semibold mb-4 text-white">Business Information</h2>
       <FormField
         control={form.control}
         name="businessName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Business Name</FormLabel>
+            <FormLabel className="text-white">Business Name</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Enter your business name" 
@@ -45,7 +45,7 @@ const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
       />
       
       <div className="mt-6">
-        <FormLabel className="block mb-2">Select Font</FormLabel>
+        <FormLabel className="block mb-2 text-white">Select Font</FormLabel>
         <FontSelector
           selectedFont={selectedFont}
           onSelectFont={onSelectFont}

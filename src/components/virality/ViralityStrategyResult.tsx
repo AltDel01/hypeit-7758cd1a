@@ -17,7 +17,7 @@ const ViralityStrategyResult: React.FC<ViralityStrategyResultProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Your Virality Strategy</h2>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-gray-700 text-white">
+          <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
             <Share2 className="mr-2 h-4 w-4" /> Share
           </Button>
           <Button className="bg-green-600 hover:bg-green-700">
@@ -26,7 +26,7 @@ const ViralityStrategyResult: React.FC<ViralityStrategyResultProps> = ({
         </div>
       </div>
       
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="bg-gray-900 bg-opacity-60 backdrop-blur-sm border-gray-700">
         <CardContent className="p-6">
           <div className="space-y-8">
             <div>

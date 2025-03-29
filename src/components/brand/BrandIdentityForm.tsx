@@ -24,7 +24,7 @@ interface BrandIdentityFormProps {
   selectedColors: string[];
   setSelectedColors: React.Dispatch<React.SetStateAction<string[]>>;
   selectedFont: string;
-  setSelectedFont: (font: string) => void;
+  onSelectFont: (font: string) => void;
   handleNext: () => void;
   handlePrevious: () => void;
   handleSubmit: () => void;
@@ -42,7 +42,7 @@ const BrandIdentityForm: React.FC<BrandIdentityFormProps> = ({
   selectedColors,
   setSelectedColors,
   selectedFont,
-  setSelectedFont,
+  onSelectFont,
   handleNext,
   handlePrevious,
   handleSubmit
@@ -54,7 +54,7 @@ const BrandIdentityForm: React.FC<BrandIdentityFormProps> = ({
           <Step1BasicInfo 
             form={form} 
             selectedFont={selectedFont} 
-            onSelectFont={setSelectedFont} 
+            onSelectFont={onSelectFont} 
           />
         );
       case 2:
@@ -84,7 +84,7 @@ const BrandIdentityForm: React.FC<BrandIdentityFormProps> = ({
   };
 
   return (
-    <Card className="bg-gray-900 text-white border-gray-800">
+    <Card className="bg-gray-900 bg-opacity-60 backdrop-blur-sm text-white border-gray-800">
       <CardContent className="pt-6">
         <FormProgress currentStep={step} totalSteps={totalSteps} />
 
