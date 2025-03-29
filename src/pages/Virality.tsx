@@ -1,89 +1,86 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
+import { ArrowUp, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ArrowUp } from 'lucide-react';
 
 const Virality = () => {
+  const [showForm, setShowForm] = useState(false);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#121212]">
       <Navbar />
       <main className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-0">
         {/* Main content area - 3/5 width */}
         <div className="col-span-3 p-8 border-r border-gray-800">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-8">Boost Your Content Virality</h1>
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-4">Boost Your Content Virality</h1>
+            <p className="text-gray-400 mb-8">
+              Create a comprehensive virality strategy tailored to your brand's unique voice, audience, and goals.
+            </p>
             
-            <div className="mb-8">
-              <div className="rounded-md border border-gray-700 p-6 bg-gray-900">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Target Audience</label>
-                    <select className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white">
-                      <option value="">Select your target audience</option>
-                      <option value="gen-z">Gen Z (18-24)</option>
-                      <option value="millennials">Millennials (25-40)</option>
-                      <option value="gen-x">Gen X (41-56)</option>
-                      <option value="boomers">Baby Boomers (57-75)</option>
-                      <option value="custom">Custom Demographics</option>
-                    </select>
-                  </div>
+            {!showForm ? (
+              <div className="mb-8">
+                <div className="rounded-md border border-gray-700 p-6 bg-gray-900">
+                  <h2 className="text-xl font-semibold text-white mb-4">Create Your Virality Strategy</h2>
+                  <p className="text-gray-400 mb-6">
+                    Our AI-powered tool will help you build a comprehensive content strategy 
+                    to increase engagement, grow your audience, and drive conversions.
+                  </p>
                   
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Content Theme</label>
-                    <select className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white">
-                      <option value="">Select content theme</option>
-                      <option value="educational">Educational</option>
-                      <option value="entertaining">Entertaining</option>
-                      <option value="inspirational">Inspirational</option>
-                      <option value="promotional">Promotional</option>
-                      <option value="trending">Trending Topics</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Campaign Goal</label>
-                    <select className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white">
-                      <option value="">Select your campaign goal</option>
-                      <option value="awareness">Brand Awareness</option>
-                      <option value="engagement">Increase Engagement</option>
-                      <option value="conversion">Drive Conversions</option>
-                      <option value="loyalty">Customer Loyalty</option>
-                      <option value="leads">Generate Leads</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Strategy Focus</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center">
-                        <input type="checkbox" id="hashtags" className="mr-2" />
-                        <label htmlFor="hashtags" className="text-gray-300">Trending Hashtags</label>
+                  <div className="space-y-6">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mr-3">
+                        <span className="text-white font-medium">1</span>
                       </div>
-                      <div className="flex items-center">
-                        <input type="checkbox" id="challenges" className="mr-2" />
-                        <label htmlFor="challenges" className="text-gray-300">Viral Challenges</label>
+                      <div>
+                        <h3 className="text-lg font-medium text-white">Define Your Brand</h3>
+                        <p className="text-gray-400 mt-1">
+                          Share your business details, tone of voice, and unique selling points.
+                        </p>
                       </div>
-                      <div className="flex items-center">
-                        <input type="checkbox" id="collaborations" className="mr-2" />
-                        <label htmlFor="collaborations" className="text-gray-300">Influencer Collaborations</label>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center mr-3">
+                        <span className="text-white font-medium">2</span>
                       </div>
-                      <div className="flex items-center">
-                        <input type="checkbox" id="timing" className="mr-2" />
-                        <label htmlFor="timing" className="text-gray-300">Optimal Posting Times</label>
+                      <div>
+                        <h3 className="text-lg font-medium text-white">Analyze Your Audience</h3>
+                        <p className="text-gray-400 mt-1">
+                          Identify your primary and secondary audience demographics, interests, and behaviors.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-600 flex items-center justify-center mr-3">
+                        <span className="text-white font-medium">3</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-white">Build Content Strategy</h3>
+                        <p className="text-gray-400 mt-1">
+                          Develop content pillars, marketing funnel approach, and engagement tactics.
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="mt-8 flex justify-center">
-                  <Button className="bg-blue-600 hover:bg-blue-700 px-8">
-                    <ArrowUp className="mr-2 h-4 w-4" />
-                    Generate Virality Strategy
-                  </Button>
+                  
+                  <div className="mt-8 flex justify-center">
+                    <Button 
+                      className="bg-blue-600 hover:bg-blue-700 px-8"
+                      onClick={() => setShowForm(true)}
+                    >
+                      <ArrowUp className="mr-2 h-4 w-4" />
+                      Create Virality Strategy
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <ViralityStrategyForm />
+            )}
           </div>
         </div>
         
@@ -110,6 +107,23 @@ const Virality = () => {
                   <span className="text-green-400">+67%</span>
                 </li>
               </ul>
+            </div>
+            
+            <div className="rounded-lg overflow-hidden bg-gray-900 p-4">
+              <h3 className="text-white font-medium mb-3">Content Pillar Example</h3>
+              <div className="bg-gray-800 rounded-md p-3 mb-3">
+                <h4 className="text-blue-400 text-sm font-medium mb-2">Educational Content</h4>
+                <ul className="pl-5 text-gray-300 text-sm space-y-1 list-disc">
+                  <li>Industry insights and trends</li>
+                  <li>How-to guides and tutorials</li>
+                  <li>Expert interviews and tips</li>
+                </ul>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="link" size="sm" className="text-blue-400 p-0">
+                  See more examples <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
             </div>
             
             <div className="rounded-lg overflow-hidden bg-gray-900 p-4">

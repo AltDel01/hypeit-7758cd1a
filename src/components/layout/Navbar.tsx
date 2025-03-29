@@ -14,11 +14,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img 
-            src="/lovable-uploads/d753a6a4-7d27-4f13-b2f0-9738bc8626c4.png" 
-            alt="If Viral Logo" 
-            className="h-8 w-8"
-          />
+          <div className="text-2xl font-bold">⟩</div>
         </Link>
 
         {/* Navigation Links */}

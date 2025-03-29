@@ -1,9 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import CustomErrorBoundary from "./components/error/ErrorBoundary";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
@@ -41,24 +43,24 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/brand-identity" element={<BrandIdentity />} />
-      <Route path="/virality" element={<Virality />} />
+      <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
+      <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
+      <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route 
         path="/dashboard" 
-        element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
+        element={<ProtectedRoute><CustomErrorBoundary><Dashboard /></CustomErrorBoundary></ProtectedRoute>} 
       />
-      <Route path="/inpainting" element={<StableDiffusionPage />} />
+      <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
       <Route 
         path="/login" 
-        element={<AuthRoute><Login /></AuthRoute>} 
+        element={<AuthRoute><CustomErrorBoundary><Login /></CustomErrorBoundary></AuthRoute>} 
       />
       <Route 
         path="/signup" 
-        element={<AuthRoute><Signup /></AuthRoute>} 
+        element={<AuthRoute><CustomErrorBoundary><Signup /></CustomErrorBoundary></AuthRoute>} 
       />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
     </Routes>
   );
 };
@@ -70,7 +72,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
+          <CustomErrorBoundary>
+            <AppRoutes />
+          </CustomErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -14,6 +14,7 @@ interface ContentGeneratorProps {
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
   isGenerating: boolean;
   onGenerate: () => void;
+  generatedImage: string | null;
 }
 
 const ContentGenerator = ({ 
@@ -22,7 +23,8 @@ const ContentGenerator = ({
   productImage, 
   setProductImage, 
   isGenerating, 
-  onGenerate 
+  onGenerate,
+  generatedImage
 }: ContentGeneratorProps) => {
   
   const handlePromptSubmit = (e: React.FormEvent) => {
@@ -55,6 +57,21 @@ const ContentGenerator = ({
           </div>
         </div>
       </form>
+      
+      {generatedImage && (
+        <div className="mb-4 border border-blue-500 rounded-md overflow-hidden">
+          <div className="bg-blue-600 px-2 py-1 text-white text-xs">
+            Generated Image
+          </div>
+          <div className="p-2">
+            <img 
+              src={generatedImage} 
+              alt="Generated content" 
+              className="w-full object-contain rounded"
+            />
+          </div>
+        </div>
+      )}
       
       <ImageUploader 
         productImage={productImage} 
