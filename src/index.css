@@ -145,13 +145,12 @@
     }
   }
   
-  /* Updated animation for story scroll to create a perfect loop */
   @keyframes smooth-scroll-down {
     0% {
-      transform: translateY(0);
+      transform: translateY(calc(-100% + 100vh));
     }
     100% {
-      transform: translateY(calc(-50%));
+      transform: translateY(0);
     }
   }
   
