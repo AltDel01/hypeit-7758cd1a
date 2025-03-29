@@ -1,7 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
 import * as Sentry from "@sentry/react";
-import { Replay } from "@sentry/replay";
 import App from './App.tsx'
 import './index.css'
 
@@ -9,9 +8,7 @@ import './index.css'
 // Replace SENTRY_DSN with your actual Sentry DSN
 Sentry.init({
   dsn: "YOUR_SENTRY_DSN", 
-  integrations: [
-    new Replay(),
-  ],
+  integrations: [],
   // Performance monitoring configuration
   tracesSampleRate: 0.1,
   // Session replay configuration
