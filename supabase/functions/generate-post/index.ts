@@ -13,9 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const deepseekApiKey = Deno.env.get('OPENAI_API_KEY');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!deepseekApiKey) {
+    if (!openaiApiKey) {
       console.error('OPENAI_API_KEY is not set in environment variables');
       return new Response(
         JSON.stringify({ error: 'API key not configured on the server' }),
@@ -23,11 +23,11 @@ serve(async (req) => {
       );
     }
 
-    // Validate if the API key format looks like a Deepseek key (they typically start with "sk-or-")
-    if (!deepseekApiKey.startsWith('sk-or-')) {
-      console.error('API key does not appear to be a valid Deepseek key format');
+    // Validate if the API key format looks reasonable
+    if (!openaiApiKey.startsWith('sk-')) {
+      console.error('API key does not appear to be a valid OpenAI key format');
       return new Response(
-        JSON.stringify({ error: 'API key does not appear to be a valid Deepseek key' }),
+        JSON.stringify({ error: 'API key does not appear to be a valid OpenAI key' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -50,14 +50,14 @@ serve(async (req) => {
 
     // Make API request with better error handling
     try {
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${deepseekApiKey}`
+          'Authorization': `Bearer ${openaiApiKey}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
@@ -73,9 +73,9 @@ serve(async (req) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Deepseek API error:', response.status, JSON.stringify(errorData));
+        console.error('OpenAI API error:', response.status, JSON.stringify(errorData));
         
-        let errorMessage = 'Failed to generate post with Deepseek API';
+        let errorMessage = 'Failed to generate post with OpenAI API';
         
         // Extract more specific error information if available
         if (errorData && errorData.error) {
@@ -83,11 +83,11 @@ serve(async (req) => {
           if (errorData.error.type === 'insufficient_quota' || 
               errorData.error.code === 'insufficient_quota' ||
               (errorData.error.message && errorData.error.message.includes('quota'))) {
-            errorMessage = 'Your Deepseek API key has exceeded its quota. Please check your billing details or use a different API key.';
+            errorMessage = 'Your OpenAI API key has exceeded its quota. Please check your billing details or use a different API key.';
           }
           else if (errorData.error.type === 'invalid_request_error' && 
               errorData.error.code === 'invalid_api_key') {
-            errorMessage = 'Invalid Deepseek API key provided';
+            errorMessage = 'Invalid OpenAI API key provided';
           } else if (errorData.error.message) {
             errorMessage = errorData.error.message;
           }
@@ -109,9 +109,9 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (apiError) {
-      console.error('Error communicating with Deepseek API:', apiError);
+      console.error('Error communicating with OpenAI API:', apiError);
       return new Response(
-        JSON.stringify({ error: 'Error communicating with Deepseek API', details: apiError.message }),
+        JSON.stringify({ error: 'Error communicating with OpenAI API', details: apiError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
