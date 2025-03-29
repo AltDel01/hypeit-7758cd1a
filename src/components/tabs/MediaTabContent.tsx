@@ -35,11 +35,16 @@ const MediaTabContent = ({
         onGenerate={generateImage}
       />
       
-      {generatedImage && (
+      {(generatedImage || isGenerating) && (
         <div className="mt-6">
-          <h3 className="text-white text-sm font-medium mb-2">Generated Result:</h3>
+          <h3 className="text-white text-sm font-semibold mb-2 flex items-center">
+            {isGenerating ? 
+              <span>Generating your image...</span> : 
+              <span>Your Generated Image:</span>
+            }
+          </h3>
           <GeneratedImagePreview 
-            imageUrl={generatedImage} 
+            imageUrl={generatedImage || ''} 
             aspectRatio={aspectRatio} 
           />
         </div>

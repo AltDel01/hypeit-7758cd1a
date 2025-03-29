@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Download } from 'lucide-react';
+import { Copy, Download, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
 
 interface GeneratedImagePreviewProps {
@@ -10,6 +10,8 @@ interface GeneratedImagePreviewProps {
 }
 
 const GeneratedImagePreview = ({ imageUrl, aspectRatio }: GeneratedImagePreviewProps) => {
+  const [imageError, setImageError] = useState(false);
+
   const handleDownload = () => {
     const a = document.createElement('a');
     a.href = imageUrl;
@@ -28,19 +30,27 @@ const GeneratedImagePreview = ({ imageUrl, aspectRatio }: GeneratedImagePreviewP
 
   return (
     <div className="rounded-lg overflow-hidden relative group border-4 border-blue-500 shadow-lg">
-      {imageUrl ? (
+      {imageUrl && !imageError ? (
         <img 
           src={imageUrl} 
           alt="Generated AI image" 
           className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
           onError={(e) => {
             console.error("Error loading image:", imageUrl);
-            e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="%234B5563"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Image Failed to Load</text></svg>';
+            setImageError(true);
           }}
         />
       ) : (
-        <div className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} bg-gray-700 flex items-center justify-center`}>
-          <p className="text-white text-sm">No image generated</p>
+        <div className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} bg-gray-700 flex flex-col items-center justify-center p-4`}>
+          {imageError ? (
+            <>
+              <AlertCircle className="h-12 w-12 text-red-500 mb-2" />
+              <p className="text-white text-sm text-center mb-1">Image failed to load</p>
+              <p className="text-gray-400 text-xs text-center">There was an error generating or displaying the image</p>
+            </>
+          ) : (
+            <p className="text-white text-sm">No image generated</p>
+          )}
         </div>
       )}
       <div className="absolute bottom-0 right-0 p-2 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -49,7 +59,7 @@ const GeneratedImagePreview = ({ imageUrl, aspectRatio }: GeneratedImagePreviewP
           variant="secondary" 
           className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
           onClick={handleCopy}
-          disabled={!imageUrl}
+          disabled={!imageUrl || imageError}
         >
           <Copy size={14} />
         </Button>
@@ -58,7 +68,7 @@ const GeneratedImagePreview = ({ imageUrl, aspectRatio }: GeneratedImagePreviewP
           variant="secondary" 
           className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
           onClick={handleDownload}
-          disabled={!imageUrl}
+          disabled={!imageUrl || imageError}
         >
           <Download size={14} />
         </Button>

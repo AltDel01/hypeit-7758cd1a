@@ -107,19 +107,40 @@ serve(async (req) => {
       );
     }
     
-    // Generate a colored placeholder with the first few words of the description as text
+    // Create an enhanced SVG placeholder with a more distinctive appearance
     const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const textColor = '#FFFFFF';
     
-    // Create a short preview of the description (first 30 characters)
-    const shortText = imageDescription.substring(0, 30).trim() + "...";
+    // Get the first 20-30 words of the description for display
+    const shortDescription = imageDescription.split(' ').slice(0, 25).join(' ') + "...";
     
-    // Create an SVG with the text
+    // Calculate dimensions based on aspect ratio
+    const width = 600;
+    const height = aspect_ratio === "1:1" ? 600 : 1067;
+    
+    // Create a more visually appealing SVG with gradient background
     const svgContent = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${aspect_ratio === "1:1" ? "600" : "600"}" height="${aspect_ratio === "1:1" ? "600" : "1067"}" viewBox="0 0 ${aspect_ratio === "1:1" ? "600" : "600"} ${aspect_ratio === "1:1" ? "600" : "1067"}">
-      <rect width="100%" height="100%" fill="${randomColor}"/>
-      <text x="50%" y="50%" font-family="Arial" font-size="24" fill="${textColor}" text-anchor="middle">${shortText}</text>
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${randomColor};stop-opacity:0.9" />
+          <stop offset="100%" style="stop-color:#000000;stop-opacity:0.7" />
+        </linearGradient>
+        <style>
+          .title { font: bold 24px sans-serif; fill: white; text-anchor: middle; }
+          .desc { font: 16px sans-serif; fill: rgba(255,255,255,0.8); text-anchor: middle; }
+          .prompt { font: italic 14px sans-serif; fill: rgba(255,255,255,0.6); text-anchor: middle; }
+        </style>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grad)"/>
+      <text x="50%" y="45%" class="title">AI Image Generation</text>
+      <text x="50%" y="50%" class="desc">Based on your prompt:</text>
+      <foreignObject x="10%" y="55%" width="80%" height="30%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="font: 14px sans-serif; color: rgba(255,255,255,0.9); text-align: center; word-wrap: break-word;">
+          "${prompt.substring(0, 150)}${prompt.length > 150 ? '...' : ''}"
+        </div>
+      </foreignObject>
     </svg>
     `;
     
