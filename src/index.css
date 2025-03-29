@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -80,6 +81,21 @@
   
   .animate-fade-in-up {
     animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+  
+  /* Rainbow cursor animation */
+  @keyframes rainbow-cursor {
+    0% { caret-color: #9b87f5; }
+    20% { caret-color: #D946EF; }
+    40% { caret-color: #F97316; }
+    60% { caret-color: #33C3F0; }
+    80% { caret-color: #1EAEDB; }
+    100% { caret-color: #9b87f5; }
+  }
+  
+  textarea:focus, input:focus {
+    animation: rainbow-cursor 4s linear infinite;
+    caret-color: #9b87f5;
   }
   
   /* Animated scrolling for image galleries */
