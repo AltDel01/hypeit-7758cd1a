@@ -60,9 +60,9 @@
   }
   
   .shadow-glow {
-    text-shadow: 0 0 10px rgba(155, 135, 245, 0.8), 
-                 0 0 20px rgba(155, 135, 245, 0.5), 
-                 0 0 30px rgba(155, 135, 245, 0.3);
+    text-shadow: 0 0 10px rgba(234, 56, 76, 0.8), 
+                 0 0 20px rgba(234, 56, 76, 0.5), 
+                 0 0 30px rgba(234, 56, 76, 0.3);
   }
   
   @keyframes pop {
