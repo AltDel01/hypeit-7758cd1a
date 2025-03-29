@@ -21,7 +21,7 @@ const DefaultErrorFallback = () => (
 );
 
 const CustomErrorBoundary = ({ children, fallback }: ErrorBoundaryProps) => {
-  // Create an element with the fallback content, not just a string
+  // Ensure fallback is a React element
   const fallbackElement = fallback || <DefaultErrorFallback />;
   
   return (

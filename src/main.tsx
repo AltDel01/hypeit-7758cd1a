@@ -1,7 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/browser";
 import App from './App.tsx'
 import './index.css'
 
@@ -10,7 +9,6 @@ import './index.css'
 Sentry.init({
   dsn: "YOUR_SENTRY_DSN", 
   integrations: [
-    new BrowserTracing(),
     new Sentry.Replay(),
   ],
   // Performance monitoring configuration
