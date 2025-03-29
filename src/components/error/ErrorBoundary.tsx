@@ -21,8 +21,10 @@ const DefaultErrorFallback = () => (
 );
 
 const CustomErrorBoundary = ({ children, fallback }: ErrorBoundaryProps) => {
-  // Ensure fallback is a React element
-  const fallbackElement = fallback || <DefaultErrorFallback />;
+  // Convert fallback to a proper React element or function
+  const fallbackElement = fallback ? 
+    (typeof fallback === 'function' ? fallback : () => <>{fallback}</>) : 
+    () => <DefaultErrorFallback />;
   
   return (
     <Sentry.ErrorBoundary fallback={fallbackElement}>

@@ -1,6 +1,7 @@
 
 import { createRoot } from 'react-dom/client'
 import * as Sentry from "@sentry/react";
+import { Replay } from "@sentry/replay";
 import App from './App.tsx'
 import './index.css'
 
@@ -9,7 +10,7 @@ import './index.css'
 Sentry.init({
   dsn: "YOUR_SENTRY_DSN", 
   integrations: [
-    new Sentry.Replay(),
+    new Replay(),
   ],
   // Performance monitoring configuration
   tracesSampleRate: 0.1,
