@@ -40,7 +40,7 @@ const MediaTabContent = ({
           {isGenerating ? 
             <span className="flex items-center">
               <span className="h-3 w-3 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
-              Generating your image...
+              Generating your image with DALL-E (may take up to 30 seconds)...
             </span> : 
             <span>Your Generated Image:</span>
           }
