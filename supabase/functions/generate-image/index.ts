@@ -111,16 +111,11 @@ serve(async (req) => {
     // For this example, we'll use a placeholder image. In a real implementation,
     // you would integrate with an image generation API like DALL-E, Stable Diffusion, etc.
     
-    // Placeholder implementation - generate a colorful placeholder image
-    // In a real implementation, you would replace this with an actual image generation API call
+    // Generate a placeholder image based on the aspect ratio
     const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const placeholderImageUrl = `https://placehold.co/600x${aspect_ratio === "1:1" ? "600" : "1067"}/${randomColor.substring(1)}/FFFFFF?text=AI+Generated+Image`;
     
-    // Here's where you would typically call an image generation API with the imageDescription
-    
-    // For now, we'll just return the placeholder URL
-    // In a real implementation, this would be the base64 data of the generated image
     console.log('Successfully generated image placeholder');
     
     // Create a data URL from the placeholder

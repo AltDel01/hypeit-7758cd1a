@@ -22,10 +22,16 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
     toast.success("Image downloaded");
   };
 
+  const handleCopy = (imageUrl: string) => {
+    navigator.clipboard.writeText(imageUrl)
+      .then(() => toast.success("Image URL copied to clipboard"))
+      .catch(err => toast.error("Failed to copy URL: " + err.message));
+  };
+
   return (
     <div className="grid grid-cols-1 gap-5 animate-feed-scroll scrollbar-hide">
       {generatedImage && showGenerated ? (
-        <div className="rounded-lg overflow-hidden relative group mb-5">
+        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-blue-500">
           <img 
             src={generatedImage} 
             alt="Generated AI image" 
@@ -35,11 +41,22 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
             <Button 
               size="sm" 
               variant="ghost" 
+              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
+              onClick={() => handleCopy(generatedImage)}
+            >
+              <Copy size={14} />
+            </Button>
+            <Button 
+              size="sm" 
+              variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
               onClick={() => handleDownload(generatedImage)}
             >
               <Copy size={14} />
             </Button>
+          </div>
+          <div className="absolute top-0 left-0 bg-blue-600 text-white px-2 py-1 text-xs">
+            Generated Image
           </div>
         </div>
       ) : null}

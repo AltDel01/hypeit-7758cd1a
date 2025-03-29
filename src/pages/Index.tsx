@@ -18,16 +18,26 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   
   const generateImage = async () => {
+    if (!prompt.trim()) {
+      toast.error("Please enter a prompt to generate an image");
+      return;
+    }
+    
     setIsGenerating(true);
     try {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
+      console.log(`Generating image with aspect ratio: ${aspectRatio}`);
+      
       const imageUrl = await GeminiImageService.generateImage({
         prompt,
         aspectRatio,
       });
       
       if (imageUrl) {
+        console.log(`Image generated, URL: ${imageUrl}`);
         setGeneratedImage(imageUrl);
+      } else {
+        console.error("No image URL returned from generation service");
       }
     } catch (error) {
       console.error("Error generating image:", error);

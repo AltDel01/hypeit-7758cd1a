@@ -36,7 +36,7 @@ export class GeminiImageService {
         return null;
       }
       
-      console.log("Image generated successfully");
+      console.log("Image generated successfully:", data.imageUrl);
       toast.success("Image generated successfully!");
       
       return data.imageUrl;
