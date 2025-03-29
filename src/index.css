@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -56,6 +57,30 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  .shadow-glow {
+    text-shadow: 0 0 10px rgba(155, 135, 245, 0.8), 
+                 0 0 20px rgba(155, 135, 245, 0.5), 
+                 0 0 30px rgba(155, 135, 245, 0.3);
+  }
+  
+  @keyframes pop {
+    0% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
   }
   
   /* Animated scrolling for image galleries */
