@@ -80,7 +80,7 @@ const Index = () => {
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
           <div className="col-span-5 p-6 border-r border-gray-800">
             <div className="max-w-xl mx-auto">
-              <h1 className="text-2xl font-extrabold text-white mb-6 text-center leading-tight">
+              <h1 className="text-2xl font-extrabold mb-6 text-center leading-tight bg-gradient-to-r from-purple-400 via-purple-500 to-purple-700 text-transparent bg-clip-text">
                 Create One Month Social Media Content <br />Within Minutes
               </h1>
               
