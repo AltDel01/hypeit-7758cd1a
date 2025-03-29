@@ -3,30 +3,47 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { sentryVitePlugin } from "@sentry/vite-plugin";
+
+// Dynamically import the Sentry plugin to avoid errors when it's not available
+let sentryVitePlugin;
+try {
+  // Try to import the Sentry plugin, but don't fail if it's not available
+  sentryVitePlugin = require("@sentry/vite-plugin").sentryVitePlugin;
+} catch (error) {
+  console.warn("Sentry Vite plugin couldn't be loaded. Sentry features will be disabled.");
+}
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
+export default defineConfig(({ mode }) => {
+  const plugins = [
     react(),
-    mode === 'development' &&
-    componentTagger(),
-    sentryVitePlugin({
-      org: "lovable",
-      project: "branding-bounce",
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-    }),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean);
+
+  // Only add the Sentry plugin if it was successfully imported and we have an auth token
+  if (sentryVitePlugin && process.env.SENTRY_AUTH_TOKEN) {
+    plugins.push(
+      sentryVitePlugin({
+        org: "lovable",
+        project: "branding-bounce",
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+      })
+    );
+  }
+
+  return {
+    server: {
+      host: "::",
+      port: 8080,
     },
-  },
-  build: {
-    sourcemap: true, // Generate source maps for production builds
-  },
-}));
+    plugins,
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      sourcemap: true, // Generate source maps for production builds
+    },
+  };
+});
