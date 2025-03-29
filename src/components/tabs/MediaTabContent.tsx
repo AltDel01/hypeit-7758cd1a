@@ -9,6 +9,7 @@ interface MediaTabContentProps {
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
   isGenerating: boolean;
   generateImage: () => void;
+  generatedImage: string | null;
 }
 
 const MediaTabContent = ({ 
@@ -17,7 +18,8 @@ const MediaTabContent = ({
   productImage, 
   setProductImage, 
   isGenerating, 
-  generateImage 
+  generateImage,
+  generatedImage
 }: MediaTabContentProps) => {
   return (
     <div className="mt-6">
@@ -28,6 +30,7 @@ const MediaTabContent = ({
         setProductImage={setProductImage}
         isGenerating={isGenerating}
         onGenerate={generateImage}
+        generatedImage={generatedImage}
       />
     </div>
   );

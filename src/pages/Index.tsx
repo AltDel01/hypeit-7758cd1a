@@ -94,6 +94,7 @@ const Index = () => {
                   generateImage={generateImage}
                   setXText={setXText}
                   setLinkedinText={setLinkedinText}
+                  generatedImage={generatedImage}
                 />
               </div>
               

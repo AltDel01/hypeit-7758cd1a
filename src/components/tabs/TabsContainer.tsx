@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import SocialTab from './SocialTab';
@@ -18,6 +17,7 @@ interface TabsContainerProps {
   generateImage: () => void;
   setXText: React.Dispatch<React.SetStateAction<string>>;
   setLinkedinText: React.Dispatch<React.SetStateAction<string>>;
+  generatedImage: string | null;
 }
 
 const TabsContainer = ({
@@ -30,7 +30,8 @@ const TabsContainer = ({
   isGenerating,
   generateImage,
   setXText,
-  setLinkedinText
+  setLinkedinText,
+  generatedImage
 }: TabsContainerProps) => {
   return (
     <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
@@ -50,6 +51,7 @@ const TabsContainer = ({
           setProductImage={setProductImage}
           isGenerating={isGenerating}
           generateImage={generateImage}
+          generatedImage={generatedImage}
         />
       </TabsContent>
       
@@ -61,6 +63,7 @@ const TabsContainer = ({
           setProductImage={setProductImage}
           isGenerating={isGenerating}
           generateImage={generateImage}
+          generatedImage={generatedImage}
         />
       </TabsContent>
       
