@@ -12,6 +12,12 @@ Sentry.init({
   // Session replay configuration
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+  
+  // Enable source maps support
+  integrations: [],
+  
+  // Enable release tracking
+  release: import.meta.env.VITE_SENTRY_RELEASE || "development",
 });
 
 createRoot(document.getElementById("root")!).render(
