@@ -31,8 +31,8 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Apply different animation classes based on aspect ratio
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
-  // Create multiple copies of images for smoother looping
-  const displayImages = [...images, ...images, ...images, ...images];
+  // Create multiple copies of images for smoother looping - increase for better looping
+  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
