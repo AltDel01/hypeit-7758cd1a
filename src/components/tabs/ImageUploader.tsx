@@ -57,7 +57,7 @@ const ImageUploader = ({ productImage, setProductImage, className }: ImageUpload
           <Upload size={16} className="text-gray-600 mx-auto mb-1" />
           <p className="text-gray-400 text-xs">Drop your product image here or</p>
           <Button 
-            className="mt-1 bg-[#6E59A5] hover:bg-[#5d4a8e] text-xs px-2 py-0.5 h-5"
+            className="mt-1 bg-[#8c52ff] hover:bg-[#7a45e6] text-xs px-2 py-0.5 h-5"
             onClick={handleUploadButtonClick}
           >
             Upload Image

@@ -50,7 +50,7 @@ const ContentGenerator = ({
             className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
           />
           <div className="flex justify-end">
-            <Button type="submit" className="bg-[#6E59A5] hover:bg-[#5d4a8e] h-6 px-2 py-0.5 text-xs">
+            <Button type="submit" className="bg-[#8c52ff] hover:bg-[#7a45e6] h-6 px-2 py-0.5 text-xs">
               <Send className="mr-1 h-3 w-3" />
               Send
             </Button>
@@ -59,8 +59,8 @@ const ContentGenerator = ({
       </form>
       
       {generatedImage && (
-        <div className="mb-4 border border-[#6E59A5] rounded-md overflow-hidden">
-          <div className="bg-[#6E59A5] px-2 py-1 text-white text-xs">
+        <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
+          <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs">
             Generated Image
           </div>
           <div className="p-2">

@@ -13,7 +13,7 @@ const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps
   return (
     <div className="flex justify-center mt-5">
       <Button 
-        className="bg-[#6E59A5] hover:bg-[#5d4a8e] px-6 h-8 text-sm"
+        className="bg-[#8c52ff] hover:bg-[#7a45e6] px-6 h-8 text-sm"
         disabled={disabled || isGenerating}
         onClick={onClick}
       >

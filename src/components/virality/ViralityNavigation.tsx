@@ -39,7 +39,7 @@ const ViralityNavigation: React.FC<ViralityNavigationProps> = ({
         <Button 
           type="button" 
           onClick={onNext}
-          className={`${currentStep === 1 ? '' : 'ml-auto'} bg-[#6E59A5] hover:bg-[#5d4a8e]`}
+          className={`${currentStep === 1 ? '' : 'ml-auto'} bg-[#8c52ff] hover:bg-[#7a45e6]`}
         >
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
