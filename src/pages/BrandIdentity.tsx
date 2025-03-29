@@ -115,6 +115,24 @@ const BrandIdentity = () => {
     setProductPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Make sure all the fields are filled before sending to PDF generator
+  const getPDFData = (): BrandIdentityFormValues => {
+    const values = form.getValues();
+    
+    // Provide default empty values for any missing fields to satisfy the type requirements
+    return {
+      businessName: values.businessName || '',
+      brandStory: values.brandStory || '',
+      vision: values.vision || '',
+      mission: values.mission || '',
+      coreValues: values.coreValues || '',
+      coreServices: values.coreServices || '',
+      audience: values.audience || '',
+      market: values.market || '',
+      goals: values.goals || ''
+    };
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#121212]">
       <Navbar />
@@ -458,7 +476,7 @@ const BrandIdentity = () => {
           ) : (
             /* PDF Preview Section */
             <PDFGenerator 
-              formData={form.getValues()}
+              formData={getPDFData()}
               brandLogo={brandLogo}
               productPhotos={productPhotos}
               selectedColors={selectedColors}
