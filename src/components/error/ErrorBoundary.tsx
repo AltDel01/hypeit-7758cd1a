@@ -21,8 +21,11 @@ const DefaultErrorFallback = () => (
 );
 
 const CustomErrorBoundary = ({ children, fallback }: ErrorBoundaryProps) => {
+  // Create an element with the fallback content, not just a string
+  const fallbackElement = fallback || <DefaultErrorFallback />;
+  
   return (
-    <Sentry.ErrorBoundary fallback={fallback || <DefaultErrorFallback />}>
+    <Sentry.ErrorBoundary fallback={fallbackElement}>
       {children}
     </Sentry.ErrorBoundary>
   );
