@@ -75,7 +75,7 @@ const Index = () => {
           <div className="col-span-5 p-6 border-r border-gray-800">
             <div className="max-w-xl mx-auto">
               <h1 className="text-4xl font-black mb-6 text-center leading-tight animate-gradient-text animate-fade-in-up">
-                Create One Month<br />Social Media Content Within Minutes
+                Create One Month Social Media<br />Content Within Minutes
               </h1>
               
               <div className="mb-6">
