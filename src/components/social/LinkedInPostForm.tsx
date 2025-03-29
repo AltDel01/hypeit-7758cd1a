@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import QwenKeyInput from "@/components/api/QwenKeyInput";
-import { AlertCircle, Info } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { 
   Dialog,
   DialogContent,
@@ -35,8 +35,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
   const [showQuotaError, setShowQuotaError] = useState(false);
-  const [isFallbackContent, setIsFallbackContent] = useState(false);
-  const [fallbackWarning, setFallbackWarning] = useState<string | null>(null);
 
   useEffect(() => {
     // Check API key status on component mount
@@ -68,8 +66,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
 
     // Clear previous error and post
     setErrorMessage(null);
-    setIsFallbackContent(false);
-    setFallbackWarning(null);
     setIsGenerating(true);
     
     const prompt = industry 
@@ -104,24 +100,10 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
         return;
       }
 
-      // Check if this is fallback content
-      if (data.isFallback) {
-        setIsFallbackContent(true);
-        if (data.warning) {
-          setFallbackWarning(data.warning);
-          toast.warning("Using fallback content generator due to API limitations");
-        }
-      }
-
       const generatedText = data.text;
       setGeneratedPost(generatedText);
       onGeneratePost(generatedText);
-      
-      if (!data.isFallback) {
-        toast.success("LinkedIn post generated successfully!");
-      } else {
-        toast.info("Post generated using fallback system");
-      }
+      toast.success("LinkedIn post generated successfully!");
     } catch (error) {
       console.error('Error generating post:', error);
       setErrorMessage("Server error. Please try again later.");
@@ -204,15 +186,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
         </Alert>
       )}
       
-      {isFallbackContent && fallbackWarning && (
-        <Alert>
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertDescription>
-            {fallbackWarning}
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <Button 
         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         disabled={!idea.trim() || isGenerating}
@@ -223,11 +196,6 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       
       {generatedPost && (
         <div className="mt-6 bg-gray-800 p-4 rounded-md relative border border-gray-700">
-          {isFallbackContent && (
-            <div className="mb-2 text-xs text-amber-400 italic">
-              Note: This content was generated using a fallback system due to API limitations.
-            </div>
-          )}
           <p className="text-sm text-white whitespace-pre-line">{generatedPost}</p>
           <Button
             variant="ghost"

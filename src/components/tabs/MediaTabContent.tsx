@@ -1,6 +1,7 @@
 
 import React from 'react';
 import ContentGenerator from './ContentGenerator';
+import GeneratedImagePreview from './GeneratedImagePreview';
 
 interface MediaTabContentProps {
   prompt: string;
@@ -10,6 +11,7 @@ interface MediaTabContentProps {
   isGenerating: boolean;
   generateImage: () => void;
   generatedImage: string | null;
+  aspectRatio: "square" | "story";
 }
 
 const MediaTabContent = ({ 
@@ -19,7 +21,8 @@ const MediaTabContent = ({
   setProductImage, 
   isGenerating, 
   generateImage,
-  generatedImage
+  generatedImage,
+  aspectRatio
 }: MediaTabContentProps) => {
   return (
     <div className="mt-6">
@@ -30,8 +33,16 @@ const MediaTabContent = ({
         setProductImage={setProductImage}
         isGenerating={isGenerating}
         onGenerate={generateImage}
-        generatedImage={generatedImage}
       />
+      
+      {generatedImage && (
+        <div className="mt-6">
+          <GeneratedImagePreview 
+            imageUrl={generatedImage} 
+            aspectRatio={aspectRatio} 
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { toast } from "sonner";
@@ -18,20 +17,6 @@ const Index = () => {
   const [linkedinText, setLinkedinText] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   
-  // Set user context for Sentry (usually done after authentication)
-  useEffect(() => {
-    // This would typically use actual user data from your auth system
-    Sentry.setUser({
-      id: "example-user-id",
-      email: "example@user.com",
-      username: "exampleUser"
-    });
-    
-    // Set extra context that might be useful
-    Sentry.setTag("page", "index");
-    Sentry.setTag("feature", "image-generation");
-  }, []);
-  
   const generateImage = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter a prompt to generate an image");
@@ -43,13 +28,6 @@ const Index = () => {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       
-      // Set context for the current operation
-      Sentry.setContext("image_generation", {
-        prompt: prompt,
-        aspectRatio: aspectRatio,
-        timestamp: new Date().toISOString()
-      });
-      
       const imageUrl = await GeminiImageService.generateImage({
         prompt,
         aspectRatio,
@@ -60,18 +38,20 @@ const Index = () => {
         setGeneratedImage(imageUrl);
       } else {
         console.error("No image URL returned from generation service");
-        // Capture a handled exception
-        Sentry.captureMessage("Image generation failed - No URL returned", "error");
+        toast.error("Failed to generate image");
       }
     } catch (error) {
       console.error("Error generating image:", error);
-      // Capture the exception
-      Sentry.captureException(error);
       toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsGenerating(false);
     }
   };
+
+  // Clear generated image when switching tabs
+  useEffect(() => {
+    setGeneratedImage(null);
+  }, [activeTab]);
 
   return (
     <AuroraBackground>
@@ -97,15 +77,13 @@ const Index = () => {
                   generatedImage={generatedImage}
                 />
               </div>
-              
-              {/* Error Button removed */}
             </div>
           </div>
           
           <ImageGallery 
             feedImages={feedImages}
             storyImages={storyImages}
-            generatedImage={generatedImage}
+            generatedImage={null} // No longer displaying the generated image in the gallery
             activeTab={activeTab}
           />
         </main>

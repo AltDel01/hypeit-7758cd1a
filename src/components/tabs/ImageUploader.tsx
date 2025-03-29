@@ -3,15 +3,13 @@ import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Upload, X } from 'lucide-react';
-import { cn } from "@/lib/utils";
 
 interface ImageUploaderProps {
   productImage: File | null;
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
-  className?: string;
 }
 
-const ImageUploader = ({ productImage, setProductImage, className }: ImageUploaderProps) => {
+const ImageUploader = ({ productImage, setProductImage }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +46,7 @@ const ImageUploader = ({ productImage, setProductImage, className }: ImageUpload
   
   return (
     <div 
-      className={cn(`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6`, className)}
+      className={`flex items-center justify-center h-16 border-2 border-dashed border-gray-700 rounded-md mb-6`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >

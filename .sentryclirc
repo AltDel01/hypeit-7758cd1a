@@ -1,8 +1,0 @@
-
-[auth]
-token=__WILL_BE_REPLACED_BY_USER__
-
-[defaults]
-org=lovable
-project=branding-bounce
-url=https://sentry.io/

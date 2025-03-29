@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import SocialTab from './SocialTab';
@@ -52,6 +53,7 @@ const TabsContainer = ({
           isGenerating={isGenerating}
           generateImage={generateImage}
           generatedImage={generatedImage}
+          aspectRatio="square"
         />
       </TabsContent>
       
@@ -64,6 +66,7 @@ const TabsContainer = ({
           isGenerating={isGenerating}
           generateImage={generateImage}
           generatedImage={generatedImage}
+          aspectRatio="story"
         />
       </TabsContent>
       
