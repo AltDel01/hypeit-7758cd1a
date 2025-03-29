@@ -36,8 +36,6 @@ const Index = () => {
       if (imageUrl) {
         console.log(`Image generated, URL: ${imageUrl}`);
         setGeneratedImage(imageUrl);
-        // Scroll to top to show the generated image
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         console.error("No image URL returned from generation service");
         toast.error("Failed to generate image");
@@ -76,6 +74,7 @@ const Index = () => {
                   generateImage={generateImage}
                   setXText={setXText}
                   setLinkedinText={setLinkedinText}
+                  generatedImage={generatedImage}
                 />
               </div>
             </div>
@@ -84,7 +83,7 @@ const Index = () => {
           <ImageGallery 
             feedImages={feedImages}
             storyImages={storyImages}
-            generatedImage={generatedImage}
+            generatedImage={null} // No longer displaying the generated image in the gallery
             activeTab={activeTab}
           />
         </main>
