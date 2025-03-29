@@ -13,49 +13,31 @@ export class GeminiImageService {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}`);
       
-      const toastId = toast.loading("Generating image...", { duration: 30000 });
-      
-      // Add a timestamp to help identify this specific request in logs
-      const requestId = new Date().toISOString();
-      console.log(`[${requestId}] Starting image generation request`);
+      toast.info("Generating image...", { duration: 5000 });
       
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: {
           prompt,
           aspect_ratio: aspectRatio,
           style,
-          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA", // Default key
-          request_id: requestId // Pass the request ID for tracking
+          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA" // Always use the default key
         }
       });
       
       if (error) {
-        console.error(`[${requestId}] Error invoking generate-image function:`, error);
-        toast.error(`Failed to generate image: ${error.message}`, { id: toastId });
+        console.error("Error invoking generate-image function:", error);
+        toast.error(`Failed to generate image: ${error.message}`);
         return null;
       }
       
       if (data.error) {
-        console.error(`[${requestId}] API returned error:`, data.error);
-        toast.error(`Failed to generate image: ${data.error}`, { id: toastId });
+        console.error("API returned error:", data.error);
+        toast.error(`Failed to generate image: ${data.error}`);
         return null;
       }
       
-      if (!data.imageUrl) {
-        console.error(`[${requestId}] No image URL returned:`, data);
-        toast.error("Failed to generate image: No image URL returned", { id: toastId });
-        return null;
-      }
-      
-      console.log(`[${requestId}] Image generated successfully`);
-      toast.success("Image generated successfully!", { id: toastId });
-      
-      // Check if the image URL is a base64 image
-      if (data.imageUrl.startsWith('data:')) {
-        console.log(`[${requestId}] Generated image is a base64 image`);
-      } else {
-        console.log(`[${requestId}] Generated image is a URL`);
-      }
+      console.log("Image generated successfully:", data.imageUrl);
+      toast.success("Image generated successfully!");
       
       return data.imageUrl;
     } catch (error) {

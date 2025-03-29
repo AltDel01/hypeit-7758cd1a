@@ -106,117 +106,38 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Create a better visual placeholder SVG
-    const width = aspect_ratio === "1:1" ? 1200 : 1080;
-    const height = aspect_ratio === "1:1" ? 1200 : 1920;
     
-    // Extract a title from the prompt (first sentence or first 50 chars)
-    const title = prompt.split('.')[0].substring(0, 50) + (prompt.length > 50 ? '...' : '');
+    // Now we'll use a different API to generate the actual image based on the description
+    // For this example, we'll use a placeholder image. In a real implementation,
+    // you would integrate with an image generation API like DALL-E, Stable Diffusion, etc.
     
-    // Get a short summary of the description (first 150 chars)
-    const shortDesc = imageDescription.substring(0, 150) + '...';
-    
-    // Select a color scheme based on some keywords in the prompt
-    let primaryColor = '#4F46E5'; // Default blue
-    let secondaryColor = '#818CF8';
-    let textColor = '#FFFFFF';
-    
-    if (prompt.toLowerCase().includes('food') || prompt.toLowerCase().includes('restaurant')) {
-      primaryColor = '#F59E0B'; // Amber for food
-      secondaryColor = '#FBBF24';
-    } else if (prompt.toLowerCase().includes('nature') || prompt.toLowerCase().includes('green')) {
-      primaryColor = '#10B981'; // Green for nature
-      secondaryColor = '#34D399';
-    } else if (prompt.toLowerCase().includes('luxury') || prompt.toLowerCase().includes('premium')) {
-      primaryColor = '#8B5CF6'; // Purple for luxury
-      secondaryColor = '#A78BFA';
-    } else if (prompt.toLowerCase().includes('tech') || prompt.toLowerCase().includes('digital')) {
-      primaryColor = '#2563EB'; // Blue for tech
-      secondaryColor = '#60A5FA';
-    } else if (prompt.toLowerCase().includes('beauty') || prompt.toLowerCase().includes('cosmetic')) {
-      primaryColor = '#EC4899'; // Pink for beauty
-      secondaryColor = '#F472B6';
-    }
-    
-    // Create an improved SVG placeholder with a gradient, stylized title and description
-    const svgContent = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${secondaryColor};stop-opacity:0.8" />
-        </linearGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="20" />
-          <feOffset dx="0" dy="0" result="offsetblur" />
-          <feComponentTransfer>
-            <feFuncA type="linear" slope="0.5" />
-          </feComponentTransfer>
-          <feMerge>
-            <feMergeNode />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <style>
-          .title { 
-            font: bold 48px sans-serif; 
-            fill: ${textColor}; 
-            text-anchor: middle;
-            filter: url(#shadow);
-          }
-          .subtitle { 
-            font: bold 24px sans-serif; 
-            fill: ${textColor}; 
-            text-anchor: middle;
-            opacity: 0.9;
-          }
-          .prompt { 
-            font: 18px sans-serif; 
-            fill: ${textColor}; 
-            text-anchor: middle;
-            opacity: 0.7;
-          }
-          .description {
-            font: 16px sans-serif;
-            fill: ${textColor};
-            text-anchor: middle;
-            opacity: 0.8;
-          }
-        </style>
-      </defs>
-      
-      <!-- Background with gradient -->
-      <rect width="100%" height="100%" fill="url(#grad)" />
-      
-      <!-- Decorative elements -->
-      <circle cx="${width * 0.85}" cy="${height * 0.15}" r="${width * 0.1}" fill="rgba(255,255,255,0.1)" />
-      <circle cx="${width * 0.15}" cy="${height * 0.85}" r="${width * 0.15}" fill="rgba(0,0,0,0.1)" />
-      
-      <!-- Title and content -->
-      <g transform="translate(${width/2}, ${height/2 - 100})">
-        <text class="title" y="-80">AI Image Generator</text>
-        <text class="subtitle" y="-20">Based on your prompt:</text>
-        
-        <foreignObject x="-${width * 0.4}" y="20" width="${width * 0.8}" height="${height * 0.3}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font: 18px sans-serif; color: white; text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; max-height: 100%; overflow: auto; word-wrap: break-word;">
-            "${prompt}"
-          </div>
-        </foreignObject>
-        
-        <text class="prompt" y="${height * 0.25}">Preview Only - Real image will be generated soon</text>
-      </g>
-    </svg>
-    `;
-    
-    // Convert SVG to base64
-    const base64 = btoa(svgContent);
+    // Generate a placeholder image based on the aspect ratio
+    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const placeholderImageUrl = `https://placehold.co/600x${aspect_ratio === "1:1" ? "600" : "1067"}/${randomColor.substring(1)}/FFFFFF?text=AI+Generated+Image`;
     
     console.log('Successfully generated image placeholder');
     
+    // Create a data URL from the placeholder
+    const placeholderResponse = await fetch(placeholderImageUrl);
+    const imageBlob = await placeholderResponse.blob();
+    const reader = new FileReader();
+    
+    // Convert blob to base64
+    const base64Data = await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        // Extract just the base64 data part
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.readAsDataURL(imageBlob);
+    });
+    
     return new Response(
       JSON.stringify({ 
-        imageUrl: `data:image/svg+xml;base64,${base64}`,
+        imageUrl: `data:image/jpeg;base64,${base64Data}`,
         description: imageDescription,
         message: 'Image generated successfully' 
       }),
