@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/stable-diffusion/ImageUploader';
-import { Upload } from 'lucide-react';
+import { Upload, Plus, Image } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Step3VisualsProps {
   brandLogo: File | null;
@@ -20,9 +21,48 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
   handleProductPhotoUpload,
   removeProductPhoto
 }) => {
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setBrandLogo(e.target.files[0]);
+    }
+  };
+  
+  const handleMultiplePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // Convert FileList to Array to access forEach
+      const filesArray = Array.from(e.target.files);
+      
+      // Check file size and type
+      filesArray.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast({
+            title: "File too large",
+            description: `${file.name} exceeds the 10MB limit`,
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        if (!file.type.match('image/(jpeg|jpg|png|gif)')) {
+          toast({
+            title: "Invalid file type",
+            description: "Only PNG, JPG, and GIF files are allowed",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        handleProductPhotoUpload(file);
+      });
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -50,16 +90,16 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
           {productPhotos.map((photo, index) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative h-40 bg-gray-800 rounded-md overflow-hidden">
               <img 
                 src={URL.createObjectURL(photo)} 
                 alt={`Product ${index + 1}`} 
-                className="w-full h-40 object-cover rounded-md"
+                className="w-full h-full object-cover"
               />
               <Button 
                 variant="destructive" 
-                size="sm" 
-                className="absolute top-2 right-2"
+                size="icon"
+                className="absolute top-2 right-2 h-6 w-6 rounded-full"
                 onClick={() => removeProductPhoto(index)}
               >
                 &times;
@@ -67,20 +107,22 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
             </div>
           ))}
           
-          <div className="flex items-center justify-center h-60 border-2 border-dashed border-gray-700 rounded-md">
-            <ImageUploader
-              id="product-photo-upload"
-              label="Add Product Photo"
-              icon={<Upload className="h-8 w-8" />}
-              onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  handleProductPhotoUpload(e.target.files[0]);
-                }
-              }}
-              image={null}
-              onRemoveImage={() => {}}
-              className="h-full w-full"
+          <div 
+            onClick={triggerFileInput}
+            className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-gray-700 rounded-md cursor-pointer hover:bg-gray-800 transition-colors"
+          >
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              className="hidden" 
+              multiple 
+              accept="image/png, image/jpeg, image/gif"
+              onChange={handleMultiplePhotoUpload}
             />
+            <Plus className="h-10 w-10 text-blue-400 mb-2" />
+            <p className="text-sm font-medium text-blue-400">Add Product Photo</p>
+            <p className="text-xs text-gray-400 mt-1">Click to upload or drag and drop</p>
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
           </div>
         </div>
       </div>

@@ -23,6 +23,9 @@ const CoverPage: React.FC<CoverPageProps> = ({
       : selectedColors[0]
   };
 
+  // Get the first product photo to feature on the cover
+  const featuredPhoto = productPhotos.length > 0 ? productPhotos[0] : null;
+
   return (
     <div className="pdf-page w-[210mm] h-[297mm] relative overflow-hidden bg-white text-black">
       {/* Decorative top accent */}
@@ -68,11 +71,11 @@ const CoverPage: React.FC<CoverPageProps> = ({
         </div>
         
         {/* Featured image in stylish frame */}
-        {productPhotos.length > 0 && (
+        {featuredPhoto && (
           <div className="mt-8 relative">
             <div className="absolute inset-0 transform rotate-3 bg-gray-200 rounded-lg"></div>
             <img 
-              src={URL.createObjectURL(productPhotos[0])} 
+              src={URL.createObjectURL(featuredPhoto)} 
               alt="Featured Product" 
               className="relative z-10 max-h-48 rounded-lg shadow-lg object-cover"
             />
