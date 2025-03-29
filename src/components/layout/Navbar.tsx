@@ -14,8 +14,15 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <div className="text-2xl font-extrabold text-white">
-            HYPE<span className="text-[#8c52ff]">IT</span>
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
+              alt="HYPEIT Logo" 
+              className="h-8 w-8 mr-2"
+            />
+            <div className="text-2xl font-extrabold text-white">
+              HYPE<span className="text-[#8c52ff]">IT</span>
+            </div>
           </div>
         </Link>
 
