@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -125,6 +126,21 @@
   textarea:focus, input:focus {
     animation: rainbow-cursor 4s linear infinite;
     caret-color: #8c52ff;
+  }
+  
+  /* Glowing cursor effect */
+  input::selection, textarea::selection {
+    background-color: rgba(140, 82, 255, 0.2);
+    color: white;
+  }
+  
+  /* Create glowing cursor */
+  input, textarea {
+    caret-color: #8c52ff;
+  }
+  
+  input:focus, textarea:focus {
+    box-shadow: 0 0 5px rgba(140, 82, 255, 0.5);
   }
   
   /* Animated scrolling for image galleries with different scroll directions */
