@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -41,29 +42,26 @@ serve(async (req) => {
       );
     }
     
-    // Try to parse as JSON, but handle text responses
+    // Get the response as text first
+    const responseText = await webhookResponse.text();
     let responseData;
-    const contentType = webhookResponse.headers.get('content-type');
     
-    if (contentType && contentType.includes('application/json')) {
-      // It's JSON, parse it normally
-      responseData = await webhookResponse.json();
-    } else {
-      // It's not JSON, handle as text
-      const text = await webhookResponse.text();
+    // If the response is "Accepted", create a placeholder response
+    if (responseText === "Accepted") {
       console.log("Successfully generated image placeholder");
-      
-      // If the response is "Accepted", create a placeholder response
-      if (text === "Accepted") {
-        responseData = { 
-          status: "accepted",
-          message: "Image generation request accepted",
-          // You might want to provide a placeholder image URL here
-          imageUrl: "https://via.placeholder.com/600x600?text=Generating+Image..."
-        };
-      } else {
-        // Otherwise use the text as error
-        responseData = { error: text };
+      responseData = { 
+        status: "accepted",
+        message: "Image generation request accepted",
+        imageUrl: "https://via.placeholder.com/600x600?text=Generating+Image..."
+      };
+    } else {
+      // Try to parse as JSON
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (error) {
+        // If parsing fails, use the text as error
+        console.error("Failed to parse webhook response as JSON:", error);
+        responseData = { error: `Failed to parse response: ${responseText}` };
       }
     }
     
