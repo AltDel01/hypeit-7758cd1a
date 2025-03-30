@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -32,6 +31,7 @@ serve(async (req) => {
       })
     });
     
+    // First check if the response is OK
     if (!webhookResponse.ok) {
       const errorText = await webhookResponse.text();
       console.error("Error from webhook:", errorText);
@@ -41,11 +41,34 @@ serve(async (req) => {
       );
     }
     
-    // Forward the webhook response back to the client
-    const webhookData = await webhookResponse.json();
+    // Try to parse as JSON, but handle text responses
+    let responseData;
+    const contentType = webhookResponse.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      // It's JSON, parse it normally
+      responseData = await webhookResponse.json();
+    } else {
+      // It's not JSON, handle as text
+      const text = await webhookResponse.text();
+      console.log("Successfully generated image placeholder");
+      
+      // If the response is "Accepted", create a placeholder response
+      if (text === "Accepted") {
+        responseData = { 
+          status: "accepted",
+          message: "Image generation request accepted",
+          // You might want to provide a placeholder image URL here
+          imageUrl: "https://via.placeholder.com/600x600?text=Generating+Image..."
+        };
+      } else {
+        // Otherwise use the text as error
+        responseData = { error: text };
+      }
+    }
     
     return new Response(
-      JSON.stringify(webhookData),
+      JSON.stringify(responseData),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
     

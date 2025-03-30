@@ -37,7 +37,31 @@ export class GeminiImageService {
         return null;
       }
       
-      const data = await response.json();
+      // Check content type to determine how to handle response
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        // It's JSON, parse it normally
+        data = await response.json();
+      } else {
+        // Handle text response (like "Accepted")
+        const text = await response.text();
+        
+        if (text === "Accepted") {
+          toast.success("Image generation request accepted!");
+          console.log("Image generation request accepted");
+          
+          // Return a placeholder image URL or null depending on your UI needs
+          // You can uncomment the line below to return a placeholder
+          return "https://via.placeholder.com/600x600?text=Generating+Image...";
+        } else {
+          // If it's not "Accepted", treat as an error
+          console.error("Unexpected text response:", text);
+          toast.error(`Failed to generate image: Unexpected response`);
+          return null;
+        }
+      }
       
       if (data.error) {
         console.error("Webhook returned error:", data.error);
