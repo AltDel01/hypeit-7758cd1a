@@ -15,23 +15,32 @@ export class GeminiImageService {
       
       toast.info("Generating image...", { duration: 5000 });
       
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: {
+      // Use webhook instead of supabase function
+      const webhookUrl = "https://hook.us2.make.com/yi8ng2m5p82cduxohbugpqaarphi5ofu";
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           prompt,
           aspect_ratio: aspectRatio,
-          style,
-          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA" // Always use the default key
-        }
+          style
+        })
       });
       
-      if (error) {
-        console.error("Error invoking generate-image function:", error);
-        toast.error(`Failed to generate image: ${error.message}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error from webhook:", errorText);
+        toast.error(`Failed to generate image: ${response.statusText}`);
         return null;
       }
       
+      const data = await response.json();
+      
       if (data.error) {
-        console.error("API returned error:", data.error);
+        console.error("Webhook returned error:", data.error);
         toast.error(`Failed to generate image: ${data.error}`);
         return null;
       }
