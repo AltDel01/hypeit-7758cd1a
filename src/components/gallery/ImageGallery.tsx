@@ -11,9 +11,8 @@ interface ImageGalleryProps {
 
 const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: ImageGalleryProps) => {
   return (
-    <div className="col-span-7 grid grid-cols-12 gap-4 h-[calc(100vh-64px)] overflow-hidden">
-      <h2 className="col-span-12 text-xl font-semibold text-center text-white mb-2">Image Gallery</h2>
-      <div className="col-span-6 p-4 overflow-auto max-h-full">
+    <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
         <ImageDisplay 
           images={feedImages}
           generatedImage={generatedImage}
@@ -22,7 +21,7 @@ const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: Im
         />
       </div>
       
-      <div className="col-span-6 p-4 overflow-auto max-h-full">
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
         <ImageDisplay 
           images={storyImages}
           generatedImage={generatedImage}

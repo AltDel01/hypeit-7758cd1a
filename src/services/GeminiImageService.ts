@@ -13,58 +13,33 @@ export class GeminiImageService {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}`);
       
-      toast.info("Sending request to generate image...", { duration: 5000 });
+      toast.info("Generating image...", { duration: 5000 });
       
-      // Use the webhook instead of the API
-      const webhookUrl = "https://hook.us2.make.com/yi8ng2m5p82cduxohbugpqaarphi5ofu";
-      
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: {
           prompt,
-          aspectRatio,
+          aspect_ratio: aspectRatio,
           style,
-          timestamp: new Date().toISOString()
-        })
+          api_key: "AIzaSyByaR6_jgZFigOSe9lu1g2e-Pr8YCnhhZA" // Always use the default key
+        }
       });
       
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("Webhook returned error:", errorData);
-        toast.error(`Failed to generate image: Webhook error (${response.status})`);
+      if (error) {
+        console.error("Error invoking generate-image function:", error);
+        toast.error(`Failed to generate image: ${error.message}`);
         return null;
       }
       
-      // Check if the response is JSON
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        // For non-JSON responses (e.g. if the webhook returns an image directly)
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
-        toast.success("Image generated successfully!");
-        return imageUrl;
-      }
-      
-      // Process JSON response
-      if (data && data.imageUrl) {
-        console.log("Image generated successfully");
-        toast.success("Image generated successfully!");
-        return data.imageUrl;
-      } else if (data && data.error) {
-        console.error("Webhook returned error:", data.error);
+      if (data.error) {
+        console.error("API returned error:", data.error);
         toast.error(`Failed to generate image: ${data.error}`);
         return null;
-      } else {
-        console.error("Unexpected webhook response format:", data);
-        toast.error("Failed to generate image: Unexpected response format");
-        return null;
       }
+      
+      console.log("Image generated successfully:", data.imageUrl);
+      toast.success("Image generated successfully!");
+      
+      return data.imageUrl;
     } catch (error) {
       console.error("Error generating image:", error);
       toast.error(`Error generating image: ${error instanceof Error ? error.message : String(error)}`);
