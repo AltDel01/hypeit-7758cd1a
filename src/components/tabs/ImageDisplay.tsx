@@ -1,97 +1,51 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Copy, Download } from 'lucide-react';
-import { toast } from "sonner";
 
 interface ImageDisplayProps {
   images: { src: string; alt: string }[];
   generatedImage: string | null;
   showGenerated: boolean;
-  aspectRatio: "square" | "story";
+  aspectRatio: 'square' | 'story';
 }
 
-const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: ImageDisplayProps) => {
-  const handleDownload = (imageUrl: string) => {
-    const a = document.createElement('a');
-    a.href = imageUrl;
-    a.download = `generated-${aspectRatio === "square" ? "image" : "story"}.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success("Image downloaded");
-  };
-
-  const handleCopy = (imageUrl: string) => {
-    navigator.clipboard.writeText(imageUrl)
-      .then(() => toast.success("Image URL copied to clipboard"))
-      .catch(err => toast.error("Failed to copy URL: " + err.message));
-  };
-
-  // Apply different animation classes based on aspect ratio
-  const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
-
-  // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+const ImageDisplay = ({
+  images,
+  generatedImage,
+  showGenerated,
+  aspectRatio
+}: ImageDisplayProps) => {
+  // Set aspect ratio class based on the type
+  const aspectRatioClass = aspectRatio === 'square' 
+    ? 'aspect-square' 
+    : 'aspect-[9/16]';
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
-      {generatedImage && showGenerated ? (
-        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
-          <img 
-            src={generatedImage} 
-            alt="Generated AI image" 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
-          />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(generatedImage)}
-            >
-              <Copy size={14} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(generatedImage)}
-            >
-              <Download size={14} />
-            </Button>
-          </div>
-          <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
-            Generated Image
+    <div className="grid grid-cols-2 gap-4">
+      {showGenerated && generatedImage && (
+        <div className="col-span-2 mb-4">
+          <div className="border-2 border-purple-500 rounded-lg overflow-hidden">
+            <div className="bg-purple-500 text-white text-xs px-3 py-1">
+              Your Generated {aspectRatio === 'square' ? 'Feed' : 'Story'} Image
+            </div>
+            <div className={`w-full ${aspectRatioClass} relative`}>
+              <img
+                src={generatedImage}
+                alt="Generated image"
+                className="w-full h-full object-cover absolute top-0 left-0"
+              />
+            </div>
           </div>
         </div>
-      ) : null}
+      )}
       
-      {/* Display multiple copies of images for a smooth looping effect */}
-      {displayImages.map((image, index) => (
-        <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
-          <img 
-            src={image.src} 
-            alt={image.alt} 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
-          />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(image.src)}
-            >
-              <Copy size={14} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(image.src)}
-            >
-              <Download size={14} />
-            </Button>
+      {images.map((image, index) => (
+        <div key={index} className="overflow-hidden rounded-lg border border-gray-700 bg-gray-900/50 transition-all hover:shadow-lg hover:shadow-purple-500/20">
+          <div className={`w-full ${aspectRatioClass} relative`}>
+            <img
+              src={image.src}
+              alt={image.alt}
+              className="w-full h-full object-cover absolute top-0 left-0"
+            />
           </div>
         </div>
       ))}
