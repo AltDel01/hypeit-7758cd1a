@@ -51,8 +51,8 @@ export async function pollForImageResult({
     if (error) {
       console.error("Error polling for image status:", error);
       
-      // After more than half the retries, try a fallback image
-      if (retries < 5) {
+      // Use a fallback image more aggressively
+      if (retries < 7) {
         const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
         dispatchImageGeneratedEvent(fallbackImage, prompt);
         toast.info("Using fallback image generation source");
@@ -76,11 +76,28 @@ export async function pollForImageResult({
     // If we have an image URL, we're done
     if (data && data.imageUrl && data.imageUrl !== "https://via.placeholder.com/600x600?text=Generating+Image...") {
       console.log("Image ready:", data.imageUrl);
-      toast.success("Image generation completed!");
       
-      // Dispatch a custom event to update UI components with the new image
-      dispatchImageGeneratedEvent(data.imageUrl, prompt);
-      return;
+      // Add a validation check for the image URL
+      try {
+        // Try to validate the image URL first
+        const imageCheck = await fetch(data.imageUrl, { method: 'HEAD' });
+        if (imageCheck.ok) {
+          toast.success("Image generation completed!");
+          
+          // Dispatch a custom event to update UI components with the new image
+          dispatchImageGeneratedEvent(data.imageUrl, prompt);
+          return;
+        } else {
+          throw new Error("Image URL returned non-OK status");
+        }
+      } catch (imgError) {
+        console.error("Image URL validation failed:", imgError);
+        // If validation fails, use a fallback
+        const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
+        dispatchImageGeneratedEvent(fallbackImage, prompt);
+        toast.info("Using fallback image source (validation failed)");
+        return;
+      }
     }
     
     // If it's still processing, continue polling
@@ -119,7 +136,7 @@ export async function pollForImageResult({
     }), delay);
   } catch (error) {
     console.error("Error in polling:", error);
-    // Continue polling despite error
+    // Continue polling despite error with reduced retries
     setTimeout(() => pollForImageResult({
       requestId, 
       prompt, 
@@ -139,8 +156,14 @@ export async function pollForImageResult({
  */
 export function dispatchImageGeneratedEvent(imageUrl: string, prompt: string): void {
   console.log(`Dispatching imageGenerated event with URL: ${imageUrl}`);
+  
+  // For unsplash URLs, add a timestamp to prevent caching
+  const finalUrl = imageUrl.includes('unsplash.com') 
+    ? `${imageUrl}&t=${Date.now()}` 
+    : imageUrl;
+    
   const event = new CustomEvent('imageGenerated', { 
-    detail: { imageUrl, prompt } 
+    detail: { imageUrl: finalUrl, prompt } 
   });
   window.dispatchEvent(event);
 }

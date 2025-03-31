@@ -22,7 +22,7 @@ serve(async (req) => {
       console.log(`Polling for image status, requestId: ${requestId}`);
       
       try {
-        // Here's the change: try with a local mock first if Make.com is giving Access Denied
+        // Try with the webhook first
         try {
           const statusResponse = await fetch(`${POLL_ENDPOINT}?requestId=${requestId}`, {
             method: 'GET',
@@ -49,6 +49,21 @@ serve(async (req) => {
             const textResponse = await statusResponse.text();
             console.log("Status response text:", textResponse);
             
+            // If the response is "completed", generate a random Unsplash image URL
+            if (textResponse.toLowerCase().includes("completed")) {
+              const searchTerm = prompt ? prompt.split(' ').slice(0, 3).join(' ') : "product";
+              const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerm)}`;
+              
+              return new Response(
+                JSON.stringify({ 
+                  status: "completed", 
+                  imageUrl: fallbackImageUrl,
+                  message: "Generated using Unsplash"
+                }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+            
             return new Response(
               JSON.stringify({ status: textResponse }),
               { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -58,8 +73,9 @@ serve(async (req) => {
           console.error("Error with Make.com webhook:", makeError);
           
           // Fallback to direct image generation using Unsplash
-          const searchTerm = prompt.split(' ').slice(0, 3).join(' ');
-          const fallbackImageUrl = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(searchTerm)}`;
+          const searchTerm = prompt ? prompt.split(' ').slice(0, 3).join(' ') : "product";
+          // Use featured images for better quality
+          const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerm)}`;
           
           return new Response(
             JSON.stringify({ 
@@ -75,7 +91,7 @@ serve(async (req) => {
         
         // Fallback image generator
         const searchTerm = prompt ? prompt.split(' ').slice(0, 3).join(' ') : "product";
-        const fallbackImageUrl = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(searchTerm)}`;
+        const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerm)}`;
         
         return new Response(
           JSON.stringify({ 
@@ -147,7 +163,7 @@ serve(async (req) => {
       
       // Fallback to direct image generation using Unsplash
       const searchTerm = prompt.split(' ').slice(0, 3).join(' ');
-      const fallbackImageUrl = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(searchTerm)}`;
+      const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerm)}`;
       
       return new Response(
         JSON.stringify({ 

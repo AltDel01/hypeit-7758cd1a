@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from 'lucide-react';
+import { Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageUploader from './ImageUploader';
 import GenerateButton from './GenerateButton';
@@ -29,11 +29,15 @@ const ContentGenerator = ({
   
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<boolean>(false);
   
   // Update local generated image when the prop changes
   useEffect(() => {
     console.log("generatedImage prop changed:", generatedImage);
-    setLocalGeneratedImage(generatedImage);
+    if (generatedImage && generatedImage !== localGeneratedImage) {
+      setLocalGeneratedImage(generatedImage);
+      setImageError(false);
+    }
   }, [generatedImage]);
   
   // Update product image status
@@ -45,7 +49,19 @@ const ContentGenerator = ({
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Image generated event received:", event.detail);
-      setLocalGeneratedImage(event.detail.imageUrl);
+      if (event.detail.imageUrl) {
+        setLocalGeneratedImage(event.detail.imageUrl);
+        setImageError(false);
+        
+        // Preload the image to ensure it loads correctly
+        const img = new Image();
+        img.src = event.detail.imageUrl;
+        img.onload = () => console.log("Image preloaded successfully");
+        img.onerror = () => {
+          console.error("Failed to preload image");
+          setImageError(true);
+        };
+      }
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
@@ -65,6 +81,22 @@ const ContentGenerator = ({
     }
     
     onGenerate();
+  };
+
+  const handleImageRetry = () => {
+    if (localGeneratedImage) {
+      // Force image reload
+      const timestamp = new Date().getTime();
+      const imageWithCacheBuster = localGeneratedImage.includes('?') 
+        ? `${localGeneratedImage}&t=${timestamp}` 
+        : `${localGeneratedImage}?t=${timestamp}`;
+      
+      setLocalGeneratedImage(imageWithCacheBuster);
+      setImageError(false);
+    } else {
+      // If no image, trigger generation
+      onGenerate();
+    }
   };
 
   return (
@@ -88,21 +120,43 @@ const ContentGenerator = ({
       
       {localGeneratedImage && (
         <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
-          <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs">
-            Generated Image
+          <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
+            <span>Generated Image</span>
+            {imageError && (
+              <Button 
+                onClick={handleImageRetry} 
+                variant="ghost" 
+                className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6]"
+              >
+                Retry
+              </Button>
+            )}
           </div>
-          <div className="p-2 bg-white">
-            <img 
-              src={localGeneratedImage} 
-              alt="Generated content" 
-              className="w-full h-48 object-contain rounded"
-              onError={(e) => {
-                console.log("Image failed to load, using fallback");
-                const target = e.target as HTMLImageElement;
-                target.src = "https://via.placeholder.com/600x600?text=Image+Generation+Error";
-                toast.error("Failed to load generated image");
-              }}
-            />
+          <div className="p-2 bg-gray-800 min-h-[200px] flex items-center justify-center">
+            {imageError ? (
+              <div className="text-center p-4">
+                <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <p className="text-sm text-red-400">Failed to load image</p>
+                <Button 
+                  onClick={handleImageRetry}
+                  className="mt-2 bg-[#8c52ff] hover:bg-[#7a45e6] text-xs"
+                >
+                  Retry Loading
+                </Button>
+              </div>
+            ) : (
+              <img 
+                key={localGeneratedImage} // Force re-render when URL changes
+                src={localGeneratedImage} 
+                alt="Generated content" 
+                className="w-full h-48 object-contain rounded"
+                onError={(e) => {
+                  console.log("Image failed to load, marking as error");
+                  setImageError(true);
+                  // Don't set fallback src here, we'll show an error UI instead
+                }}
+              />
+            )}
           </div>
         </div>
       )}
