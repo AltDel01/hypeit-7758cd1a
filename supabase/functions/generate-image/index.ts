@@ -62,98 +62,134 @@ serve(async (req) => {
 /**
  * Handles a request to check the status of an image generation
  */
-async function handlePollingRequest(requestData: { requestId: string, checkOnly?: boolean }) {
-  const { requestId, checkOnly } = requestData;
+async function handlePollingRequest(requestData: { 
+  requestId: string, 
+  checkOnly?: boolean,
+  prompt?: string 
+}): Promise<Response> {
+  const { requestId, checkOnly, prompt = "product" } = requestData;
   console.log(`Polling for image status, requestId: ${requestId}, checkOnly: ${checkOnly}`);
   
   try {
     // For direct status checks (without webhook), return a mock response
     if (checkOnly) {
-      console.log("Providing mock response for status check");
-      // This simulates a completed image generation
-      const prompt = requestData.prompt || "product";
-      const fallbackImageUrl = generateUnsplashUrl(prompt);
-      
-      return new Response(
-        JSON.stringify({ 
-          status: "completed", 
-          imageUrl: fallbackImageUrl,
-          message: "Generated using Unsplash (direct fallback)" 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return handleDirectStatusCheck(prompt);
     }
     
     // Make the status check request to the Make.com webhook
-    const statusResponse = await fetch(`${POLL_ENDPOINT}?requestId=${requestId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!statusResponse.ok) {
-      throw new Error(`Status check error: ${statusResponse.statusText}`);
-    }
-    
-    // Try to parse the response as JSON
-    try {
-      const statusData = await statusResponse.json();
-      console.log("Status response:", statusData);
-      
-      // If completed but no image URL, generate a fallback
-      if (statusData.status === "completed" && !statusData.imageUrl) {
-        const prompt = statusData.prompt || "product";
-        const fallbackImageUrl = generateUnsplashUrl(prompt);
-        statusData.imageUrl = fallbackImageUrl;
-        statusData.message = "Generated using Unsplash (fallback)";
-      }
-      
-      return new Response(
-        JSON.stringify(statusData),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } catch (jsonError) {
-      // If not JSON, handle as text
-      const textResponse = await statusResponse.text();
-      console.log("Status response text:", textResponse);
-      
-      // If the response is "completed", generate a fallback
-      if (textResponse.toLowerCase().includes("completed")) {
-        const fallbackImageUrl = generateUnsplashUrl("product");
-        
-        return new Response(
-          JSON.stringify({ 
-            status: "completed", 
-            imageUrl: fallbackImageUrl,
-            message: "Generated using Unsplash"
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ status: textResponse }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    return await checkStatusWithWebhook(requestId, prompt);
   } catch (error) {
-    console.error("Error polling for status:", error);
-    
-    // Use fallback image generator for any polling errors
-    const prompt = requestData.prompt || "product";
+    return handlePollingError(error, prompt);
+  }
+}
+
+/**
+ * Handles direct status checks without calling the webhook
+ */
+function handleDirectStatusCheck(prompt: string): Response {
+  console.log("Providing mock response for status check");
+  // This simulates a completed image generation
+  const fallbackImageUrl = generateUnsplashUrl(prompt);
+  
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using Unsplash (direct fallback)" 
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Checks the status of an image generation with the webhook
+ */
+async function checkStatusWithWebhook(requestId: string, prompt: string): Promise<Response> {
+  const statusResponse = await fetch(`${POLL_ENDPOINT}?requestId=${requestId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  if (!statusResponse.ok) {
+    throw new Error(`Status check error: ${statusResponse.statusText}`);
+  }
+  
+  // Try to parse the response as JSON
+  try {
+    return await handleJsonStatusResponse(statusResponse, prompt);
+  } catch (jsonError) {
+    // If not JSON, handle as text
+    return await handleTextStatusResponse(statusResponse, prompt);
+  }
+}
+
+/**
+ * Handles JSON status responses
+ */
+async function handleJsonStatusResponse(response: Response, prompt: string): Promise<Response> {
+  const statusData = await response.json();
+  console.log("Status response:", statusData);
+  
+  // If completed but no image URL, generate a fallback
+  if (statusData.status === "completed" && !statusData.imageUrl) {
+    const fallbackImageUrl = generateUnsplashUrl(prompt);
+    statusData.imageUrl = fallbackImageUrl;
+    statusData.message = "Generated using Unsplash (fallback)";
+  }
+  
+  return new Response(
+    JSON.stringify(statusData),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles text status responses
+ */
+async function handleTextStatusResponse(response: Response, prompt: string): Promise<Response> {
+  const textResponse = await response.text();
+  console.log("Status response text:", textResponse);
+  
+  // If the response is "completed", generate a fallback
+  if (textResponse.toLowerCase().includes("completed")) {
     const fallbackImageUrl = generateUnsplashUrl(prompt);
     
     return new Response(
       JSON.stringify({ 
         status: "completed", 
         imageUrl: fallbackImageUrl,
-        message: "Generated using fallback system due to polling error",
-        error: error instanceof Error ? error.message : String(error)
+        message: "Generated using Unsplash"
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
+  
+  return new Response(
+    JSON.stringify({ status: textResponse }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles errors during polling
+ */
+function handlePollingError(error: unknown, prompt: string): Response {
+  console.error("Error polling for status:", error);
+  
+  // Use fallback image generator for any polling errors
+  const fallbackImageUrl = generateUnsplashUrl(prompt);
+  
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using fallback system due to polling error",
+      error: error instanceof Error ? error.message : String(error)
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
 }
 
 /**
@@ -163,7 +199,7 @@ async function handleGenerationRequest(requestData: {
   prompt: string;
   aspect_ratio?: string;
   style?: string;
-}) {
+}): Promise<Response> {
   const { prompt, aspect_ratio = "1:1", style } = requestData;
   console.log(`Generating image with prompt: ${prompt}, aspect ratio: ${aspect_ratio}, style: ${style || 'default'}`);
   
@@ -173,106 +209,151 @@ async function handleGenerationRequest(requestData: {
     
     // Attempt to generate image using the webhook
     try {
-      const webhookResponse = await fetch(GENERATION_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt,
-          aspect_ratio,
-          style
-        })
-      });
-      
-      if (!webhookResponse.ok) {
-        throw new Error(`Webhook error: ${webhookResponse.statusText}`);
-      }
-      
-      // Get the response as text first
-      const responseText = await webhookResponse.text();
-      
-      // Handle "Accepted" response
-      if (responseText === "Accepted") {
-        console.log("Successfully generated image placeholder");
-        // Generate a unique request ID
-        const generatedRequestId = crypto.randomUUID();
-        
-        // Return with both a placeholder and the fallback URL
-        return new Response(
-          JSON.stringify({ 
-            status: "completed",
-            message: "Image generation completed with fallback",
-            requestId: generatedRequestId,
-            prompt,
-            imageUrl: fallbackImageUrl
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      // Try to parse as JSON
-      try {
-        const responseData = JSON.parse(responseText);
-        
-        // If we have an image URL in the response, use it
-        if (responseData.imageUrl) {
-          return new Response(
-            JSON.stringify(responseData),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        
-        // Otherwise use the fallback
-        return new Response(
-          JSON.stringify({ 
-            status: "completed", 
-            imageUrl: fallbackImageUrl,
-            message: "Generated using fallback system (incomplete response)" 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      } catch (parseError) {
-        // If we couldn't parse the response, use a fallback
-        return new Response(
-          JSON.stringify({ 
-            status: "completed", 
-            imageUrl: fallbackImageUrl,
-            message: "Generated using fallback system (parse error)" 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      return await generateWithWebhook(prompt, aspect_ratio, style, fallbackImageUrl);
     } catch (webhookError) {
-      // If there was an error with the webhook, just use the fallback URL
-      console.error("Webhook error:", webhookError);
-      
-      return new Response(
-        JSON.stringify({ 
-          status: "completed", 
-          imageUrl: fallbackImageUrl,
-          message: "Generated using fallback system due to webhook error",
-          error: webhookError instanceof Error ? webhookError.message : String(webhookError)
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return handleWebhookError(webhookError, fallbackImageUrl);
     }
   } catch (error) {
-    console.error("General generation error:", error);
-    
-    // Use fallback image generator
-    const fallbackImageUrl = generateUnsplashUrl(prompt);
-    
+    return handleGeneralGenerationError(error, prompt);
+  }
+}
+
+/**
+ * Attempts to generate an image using the webhook
+ */
+async function generateWithWebhook(
+  prompt: string, 
+  aspect_ratio: string, 
+  style: string | undefined, 
+  fallbackImageUrl: string
+): Promise<Response> {
+  const webhookResponse = await fetch(GENERATION_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      prompt,
+      aspect_ratio,
+      style
+    })
+  });
+  
+  if (!webhookResponse.ok) {
+    throw new Error(`Webhook error: ${webhookResponse.statusText}`);
+  }
+  
+  // Get the response as text first
+  const responseText = await webhookResponse.text();
+  
+  // Handle "Accepted" response
+  if (responseText === "Accepted") {
+    return handleAcceptedResponse(prompt, fallbackImageUrl);
+  }
+  
+  // Try to parse as JSON
+  try {
+    return handleJsonGenerationResponse(responseText, fallbackImageUrl);
+  } catch (parseError) {
+    return handleTextGenerationResponse(fallbackImageUrl);
+  }
+}
+
+/**
+ * Handles an "Accepted" response from the webhook
+ */
+function handleAcceptedResponse(prompt: string, fallbackImageUrl: string): Response {
+  console.log("Successfully generated image placeholder");
+  // Generate a unique request ID
+  const generatedRequestId = crypto.randomUUID();
+  
+  // Return with both a placeholder and the fallback URL
+  return new Response(
+    JSON.stringify({ 
+      status: "completed",
+      message: "Image generation completed with fallback",
+      requestId: generatedRequestId,
+      prompt,
+      imageUrl: fallbackImageUrl
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles a JSON generation response
+ */
+function handleJsonGenerationResponse(responseText: string, fallbackImageUrl: string): Response {
+  const responseData = JSON.parse(responseText);
+  
+  // If we have an image URL in the response, use it
+  if (responseData.imageUrl) {
     return new Response(
-      JSON.stringify({ 
-        status: "completed", 
-        imageUrl: fallbackImageUrl,
-        message: "Generated using fallback system due to general error",
-        error: error instanceof Error ? error.message : String(error)
-      }),
+      JSON.stringify(responseData),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
+  
+  // Otherwise use the fallback
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using fallback system (incomplete response)" 
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles a text generation response
+ */
+function handleTextGenerationResponse(fallbackImageUrl: string): Response {
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using fallback system (parse error)" 
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles errors from the webhook
+ */
+function handleWebhookError(error: unknown, fallbackImageUrl: string): Response {
+  console.error("Webhook error:", error);
+  
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using fallback system due to webhook error",
+      error: error instanceof Error ? error.message : String(error)
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+/**
+ * Handles general generation errors
+ */
+function handleGeneralGenerationError(error: unknown, prompt: string): Response {
+  console.error("General generation error:", error);
+  
+  // Use fallback image generator
+  const fallbackImageUrl = generateUnsplashUrl(prompt);
+  
+  return new Response(
+    JSON.stringify({ 
+      status: "completed", 
+      imageUrl: fallbackImageUrl,
+      message: "Generated using fallback system due to general error",
+      error: error instanceof Error ? error.message : String(error)
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
 }
 
 /**
