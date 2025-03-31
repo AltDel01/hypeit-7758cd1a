@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Wand2, Upload, CircleOff, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Upload } from 'lucide-react';
 import ImageUploader from './ImageUploader';
-import PromptInput from './PromptInput';
-import SliderControl from './SliderControl';
 import ModelLoader from './ModelLoader';
-import MaskDrawingCanvas from './MaskDrawingCanvas';
+import FormHeader from './sections/FormHeader';
+import MaskSection from './sections/MaskSection';
+import PromptSection from './sections/PromptSection';
+import WebhookToggle from './controls/WebhookToggle';
+import GenerateButton from './controls/GenerateButton';
 
 interface InpaintingFormProps {
   isModelLoading: boolean;
@@ -94,19 +94,7 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Stable Diffusion Inpainting</h2>
-        <p className="text-gray-500 mb-4">
-          Upload an image and draw a mask, then provide a prompt to inpaint the masked area.
-        </p>
-      </div>
-      
-      {errorMessage && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
+      <FormHeader errorMessage={errorMessage} />
       
       {isModelLoading ? (
         <ModelLoader loadingStatus={loadingStatus} loadingProgress={loadingProgress} />
@@ -121,109 +109,40 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
             onRemoveImage={handleRemoveOriginalImage}
           />
           
-          {originalImage && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Mask</h3>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant={maskDrawingMode ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setMaskDrawingMode(true)}
-                  >
-                    Draw Mask
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={!maskDrawingMode ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setMaskDrawingMode(false)}
-                  >
-                    Upload Mask
-                  </Button>
-                </div>
-              </div>
-              
-              {maskDrawingMode ? (
-                <MaskDrawingCanvas 
-                  originalImage={originalImage}
-                  onChange={handleMaskDrawingChange}
-                />
-              ) : (
-                <ImageUploader
-                  id="mask-image"
-                  label="Mask Image (white areas will be inpainted)"
-                  icon={<CircleOff size={16} />}
-                  onChange={handleMaskImageUpload}
-                  image={maskImage}
-                  onRemoveImage={handleRemoveMaskImage}
-                />
-              )}
-            </div>
-          )}
-          
-          <PromptInput
-            id="prompt"
-            label="Prompt"
-            placeholder="Describe what you want to add to the masked area..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+          <MaskSection
+            originalImage={originalImage}
+            maskImage={maskImage}
+            setMaskImage={setMaskImage}
+            maskDrawingMode={maskDrawingMode}
+            setMaskDrawingMode={setMaskDrawingMode}
+            onMaskDrawingChange={handleMaskDrawingChange}
+            onMaskImageUpload={handleMaskImageUpload}
+            onRemoveMaskImage={handleRemoveMaskImage}
           />
           
-          <PromptInput
-            id="negative-prompt"
-            label="Negative Prompt (Optional)"
-            placeholder="What you don't want to see..."
-            value={negativePrompt}
-            onChange={(e) => setNegativePrompt(e.target.value)}
-            rows={2}
-          />
-          
-          <SliderControl
-            id="inference-steps"
-            label="Inference Steps"
-            min={10}
-            max={50}
-            step={1}
-            value={numInferenceSteps}
-            onChange={(value) => setNumInferenceSteps(value[0])}
-          />
-          
-          <SliderControl
-            id="guidance-scale"
-            label="Guidance Scale"
-            min={1}
-            max={15}
-            step={0.1}
-            value={guidanceScale}
-            onChange={(value) => setGuidanceScale(value[0])}
-            displayValue={guidanceScale.toFixed(1)}
+          <PromptSection
+            prompt={prompt}
+            setPrompt={setPrompt}
+            negativePrompt={negativePrompt}
+            setNegativePrompt={setNegativePrompt}
+            numInferenceSteps={numInferenceSteps}
+            setNumInferenceSteps={setNumInferenceSteps}
+            guidanceScale={guidanceScale}
+            setGuidanceScale={setGuidanceScale}
           />
           
           {setUseWebhook && (
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="use-webhook"
-                checked={useWebhook}
-                onChange={(e) => setUseWebhook(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="use-webhook" className="text-sm text-gray-700">
-                Also send to webhook (for advanced processing)
-              </label>
-            </div>
+            <WebhookToggle 
+              useWebhook={useWebhook} 
+              setUseWebhook={setUseWebhook} 
+            />
           )}
           
-          <Button
-            className="w-full"
-            disabled={isGenerating || !originalImage || !maskImage || !prompt}
+          <GenerateButton
+            isGenerating={isGenerating}
+            disabled={!originalImage || !maskImage || !prompt}
             onClick={onGenerate}
-          >
-            {isGenerating ? "Generating..." : "Generate"}
-            <Wand2 className="ml-2 h-4 w-4" />
-          </Button>
+          />
         </div>
       )}
     </div>
