@@ -79,38 +79,55 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
       <div className="flex items-center justify-center flex-col space-y-4">
         <div className="relative h-40 w-40">
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">{timeRemaining}s</div>
+            <div className="text-3xl font-bold text-white">{timeRemaining}s</div>
           </div>
           <svg className="animate-spin h-full w-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#9b87f5" />
+                <stop offset="50%" stopColor="#8c52ff" />
+                <stop offset="100%" stopColor="#D946EF" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
             <circle 
-              className="opacity-25" 
+              className="opacity-10" 
               cx="50" 
               cy="50" 
               r="45" 
-              stroke="currentColor" 
+              stroke="#ffffff" 
               strokeWidth="8" 
               fill="none" 
             />
             <circle 
-              className="opacity-75 text-primary" 
               cx="50" 
               cy="50" 
               r="45" 
-              stroke="currentColor" 
+              stroke="url(#progressGradient)" 
               strokeWidth="8" 
               fill="none" 
               strokeDasharray="283" 
               strokeDashoffset={283 * (1 - loadingProgress / 100)} 
+              filter="url(#glow)"
+              className="drop-shadow-[0_0_8px_rgba(140,82,255,0.8)]"
             />
           </svg>
         </div>
         <div className="w-full max-w-xs">
-          <Progress value={loadingProgress} className="h-2" />
+          <Progress value={loadingProgress} className="h-2 bg-gray-800">
+            <div 
+              className="h-full bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF] rounded-full"
+              style={{ width: `${loadingProgress}%` }}
+            />
+          </Progress>
         </div>
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-gray-400">
           Applying your prompt to the image...
           <br />
-          This may take up to a minute
+          <span className="text-xs text-gray-500">This may take up to a minute</span>
         </p>
       </div>
     );
@@ -120,7 +137,7 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
     <div className="space-y-4">
       <h3 className="text-xl font-bold">Result</h3>
       {isLoading ? (
-        <div className="aspect-square w-full max-h-[500px] overflow-hidden rounded-md border bg-gray-50 flex items-center justify-center">
+        <div className="aspect-square w-full max-h-[500px] overflow-hidden rounded-md border bg-gray-900 flex items-center justify-center">
           <LoadingAnimation />
         </div>
       ) : resultImage ? (
@@ -132,7 +149,7 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
           />
         </div>
       ) : (
-        <div className="flex items-center justify-center aspect-square w-full max-h-[500px] rounded-md border bg-gray-50">
+        <div className="flex items-center justify-center aspect-square w-full max-h-[500px] rounded-md border bg-gray-900">
           <p className="text-gray-500">
             Inpainted image will appear here
           </p>

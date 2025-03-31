@@ -17,9 +17,11 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [retryCount, setRetryCount] = useState<number>(0);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [processingText, setProcessingText] = useState<string>("Loading image...");
+  const [processingDetail, setProcessingDetail] = useState<string>("");
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
   const progressTextIntervalRef = useRef<number | null>(null);
+  const detailIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -52,15 +54,34 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         "Finalizing image..."
       ];
       
+      // Processing detail text
+      const detailTexts = [
+        "Analyzing image structure...",
+        "Processing visual elements...",
+        "Optimizing for quality...",
+        "Our AI is carefully transforming your image. This typically takes around 60 seconds to ensure the highest quality results."
+      ];
+      
       let textIndex = 0;
+      let detailIndex = 0;
+      
       if (progressTextIntervalRef.current) {
         window.clearInterval(progressTextIntervalRef.current);
+      }
+      
+      if (detailIntervalRef.current) {
+        window.clearInterval(detailIntervalRef.current);
       }
       
       progressTextIntervalRef.current = window.setInterval(() => {
         textIndex = (textIndex + 1) % processingTexts.length;
         setProcessingText(processingTexts[textIndex]);
       }, 3000);
+      
+      detailIntervalRef.current = window.setInterval(() => {
+        detailIndex = (detailIndex + 1) % detailTexts.length;
+        setProcessingDetail(detailTexts[detailIndex]);
+      }, 5000);
     }
     
     return () => {
@@ -69,6 +90,9 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       }
       if (progressTextIntervalRef.current) {
         window.clearInterval(progressTextIntervalRef.current);
+      }
+      if (detailIntervalRef.current) {
+        window.clearInterval(detailIntervalRef.current);
       }
     };
   }, [imageUrl]);
@@ -85,6 +109,9 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (progressTextIntervalRef.current) {
       window.clearInterval(progressTextIntervalRef.current);
     }
+    if (detailIntervalRef.current) {
+      window.clearInterval(detailIntervalRef.current);
+    }
   };
 
   const handleImageError = () => {
@@ -97,6 +124,9 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     }
     if (progressTextIntervalRef.current) {
       window.clearInterval(progressTextIntervalRef.current);
+    }
+    if (detailIntervalRef.current) {
+      window.clearInterval(detailIntervalRef.current);
     }
     
     // Auto-retry once for Unsplash images
@@ -130,30 +160,42 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           </Button>
         )}
       </div>
-      <div className="p-2 bg-gray-800 min-h-[200px] flex items-center justify-center">
+      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
         {(imageLoading || isPlaceholder) && !imageError ? (
-          <div className="animate-pulse flex flex-col items-center justify-center w-full space-y-6">
+          <div className="flex flex-col items-center justify-center w-full space-y-6">
             <div className="relative h-24 w-24">
-              <svg className="animate-spin h-full w-full text-[#8c52ff]" viewBox="0 0 100 100">
+              <svg className="animate-spin h-full w-full" viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="imagePreviewGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#9b87f5" />
+                    <stop offset="50%" stopColor="#8c52ff" />
+                    <stop offset="100%" stopColor="#D946EF" />
+                  </linearGradient>
+                  <filter id="imagePreviewGlow">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
                 <circle 
-                  className="opacity-25" 
+                  className="opacity-10" 
                   cx="50" 
                   cy="50" 
                   r="45" 
-                  stroke="currentColor" 
+                  stroke="#ffffff" 
                   strokeWidth="8" 
                   fill="none" 
                 />
                 <circle 
-                  className="opacity-75" 
                   cx="50" 
                   cy="50" 
                   r="45" 
-                  stroke="currentColor" 
+                  stroke="url(#imagePreviewGradient)" 
                   strokeWidth="8" 
                   fill="none" 
                   strokeDasharray="283" 
                   strokeDashoffset={283 * (1 - loadingProgress / 100)} 
+                  filter="url(#imagePreviewGlow)"
+                  className="drop-shadow-[0_0_8px_rgba(140,82,255,0.8)]"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -161,9 +203,17 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
               </div>
             </div>
             <div className="w-full max-w-[80%] space-y-2">
-              <Progress value={loadingProgress} className="h-1.5 bg-gray-700/30" />
+              <div className="relative h-1.5 bg-gray-800/30 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF] rounded-full transition-all"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
               <p className="text-xs text-center text-gray-300">
                 {processingText}
+              </p>
+              <p className="text-[10px] text-center text-gray-500 mt-4 max-w-[220px] mx-auto">
+                {processingDetail}
               </p>
             </div>
           </div>
