@@ -31,6 +31,7 @@ const ContentGenerator = ({
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
   const imageRef = useRef<HTMLImageElement>(null);
   
   // Update local generated image when the prop changes
@@ -39,6 +40,7 @@ const ContentGenerator = ({
     if (generatedImage && generatedImage !== localGeneratedImage) {
       setLocalGeneratedImage(generatedImage);
       setImageError(false);
+      setImageLoading(true);
     }
   }, [generatedImage]);
   
@@ -53,13 +55,15 @@ const ContentGenerator = ({
       console.log("Image generated event received:", event.detail);
       if (event.detail.imageUrl) {
         // Add a cache-buster to the URL
+        const timestamp = Date.now();
         const url = event.detail.imageUrl.includes('?') 
-          ? `${event.detail.imageUrl}&cb=${Date.now()}` 
-          : `${event.detail.imageUrl}?cb=${Date.now()}`;
+          ? `${event.detail.imageUrl}&cb=${timestamp}` 
+          : `${event.detail.imageUrl}?cb=${timestamp}`;
           
         setLocalGeneratedImage(url);
         setImageError(false);
         setRetryCount(0);
+        setImageLoading(true);
       }
     };
     
@@ -84,6 +88,7 @@ const ContentGenerator = ({
 
   const handleImageRetry = () => {
     setRetryCount(prev => prev + 1);
+    setImageLoading(true);
     
     if (localGeneratedImage) {
       // Force image reload with a new cache buster
@@ -119,6 +124,23 @@ const ContentGenerator = ({
     }
   };
 
+  const handleImageLoad = () => {
+    console.log("Image loaded successfully");
+    setImageError(false);
+    setImageLoading(false);
+  };
+
+  const handleImageError = () => {
+    console.log("Image failed to load, marking as error");
+    setImageError(true);
+    setImageLoading(false);
+    
+    // Auto-retry once for Unsplash images
+    if (localGeneratedImage?.includes('unsplash.com') && retryCount === 0) {
+      setTimeout(handleImageRetry, 500);
+    }
+  };
+
   return (
     <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
       <form onSubmit={handlePromptSubmit} className="mb-4">
@@ -142,7 +164,7 @@ const ContentGenerator = ({
         <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
           <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
             <span>Generated Image</span>
-            {imageError && (
+            {(imageError || retryCount > 0) && (
               <Button 
                 onClick={handleImageRetry} 
                 variant="ghost" 
@@ -154,7 +176,12 @@ const ContentGenerator = ({
             )}
           </div>
           <div className="p-2 bg-gray-800 min-h-[200px] flex items-center justify-center">
-            {imageError ? (
+            {imageLoading && !imageError ? (
+              <div className="animate-pulse flex flex-col items-center justify-center">
+                <div className="h-10 w-10 rounded-full bg-[#8c52ff]/30 mb-2"></div>
+                <p className="text-xs text-gray-300">Loading image...</p>
+              </div>
+            ) : imageError ? (
               <div className="text-center p-4">
                 <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                 <p className="text-sm text-red-400">Failed to load image</p>
@@ -173,14 +200,8 @@ const ContentGenerator = ({
                 src={localGeneratedImage} 
                 alt="Generated content" 
                 className="w-full h-48 object-contain rounded"
-                onError={(e) => {
-                  console.log("Image failed to load, marking as error");
-                  setImageError(true);
-                }}
-                onLoad={() => {
-                  console.log("Image loaded successfully");
-                  setImageError(false);
-                }}
+                onError={handleImageError}
+                onLoad={handleImageLoad}
               />
             )}
           </div>

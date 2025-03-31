@@ -29,7 +29,7 @@ export async function pollForImageResult({
     console.log("Maximum polling retries reached");
     toast.error("Image generation is taking longer than expected. Please try again later.");
     
-    // Provide a more reliable fallback image
+    // Always provide a fallback image when maximum retries reached
     generateFallbackImage(prompt);
     return;
   }
@@ -90,7 +90,9 @@ export async function pollForImageResult({
         }
         
         // For other URLs, validate them first
-        const imageCheck = await fetch(data.imageUrl, { method: 'HEAD' });
+        const imageCheck = await fetch(data.imageUrl, { method: 'HEAD' })
+          .catch(() => ({ ok: false })); // Handle network errors
+          
         if (imageCheck.ok) {
           toast.success("Image generation completed!");
           dispatchImageGeneratedEvent(data.imageUrl, prompt);
@@ -166,17 +168,19 @@ export async function pollForImageResult({
  */
 function generateFallbackImage(prompt: string): void {
   // Extract key terms from the prompt for better image search
-  const searchTerms = prompt
+  const cleanPrompt = prompt.replace(/generate|post|wording:|image|attached|instagram story/gi, '');
+  
+  const searchTerms = cleanPrompt
     .split(' ')
     .filter(word => word.length > 3)
-    .slice(0, 3)
+    .slice(0, 5)
     .join(',');
   
   // Generate a cache-busting parameter
   const cacheBuster = Date.now();
   
   // Create a fallback Unsplash URL with search terms and dimensions
-  let fallbackUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}`;
+  let fallbackUrl = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(searchTerms || 'product')}`;
   
   // Add cache-busting parameter
   fallbackUrl = `${fallbackUrl}&t=${cacheBuster}`;

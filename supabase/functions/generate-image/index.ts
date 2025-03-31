@@ -221,16 +221,32 @@ serve(async (req) => {
  * @returns A URL for an Unsplash image
  */
 function generateUnsplashUrl(prompt: string): string {
+  // Clean up the prompt to remove common instructions
+  const cleanPrompt = prompt.replace(/generate|post|wording:|image|attached|instagram story/gi, '');
+  
   // Extract key terms from the prompt (words longer than 3 characters)
-  const searchTerms = prompt
+  const searchTerms = cleanPrompt
     .split(' ')
     .filter(word => word.length > 3)
-    .slice(0, 3)
+    .slice(0, 5)
     .join(',');
   
   // Add cache-busting parameter
   const timestamp = Date.now();
   
-  // Use featured images for better quality, and control size
-  return `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
+  // Try to extract color information
+  const colorMatch = cleanPrompt.match(/(?:cream|white|black|blue|red|green|yellow|purple|pink|orange|brown|gray|grey)/i);
+  const colorTerm = colorMatch ? colorMatch[0] : '';
+  
+  // Try to extract product type
+  const productMatch = cleanPrompt.match(/(?:skincare|makeup|serum|moisturizer|cleanser|toner|cream|lotion)/i);
+  const productTerm = productMatch ? productMatch[0] : 'product';
+  
+  // Combine specific terms with general search
+  const finalSearchTerms = [productTerm, colorTerm, 'photography', 'premium']
+    .filter(Boolean)
+    .join(',');
+  
+  // Use high quality featured images
+  return `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(finalSearchTerms || searchTerms || 'skincare,product')}&t=${timestamp}`;
 }
