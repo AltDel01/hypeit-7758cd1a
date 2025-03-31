@@ -28,6 +28,10 @@ export async function pollForImageResult({
   if (retries <= 0) {
     console.log("Maximum polling retries reached");
     toast.error("Image generation is taking longer than expected. Please try again later.");
+    
+    // Provide a fallback image or placeholder in case of timeout
+    const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
+    dispatchImageGeneratedEvent(fallbackImage, prompt);
     return;
   }
   
@@ -46,6 +50,15 @@ export async function pollForImageResult({
     
     if (error) {
       console.error("Error polling for image status:", error);
+      
+      // After more than half the retries, try a fallback image
+      if (retries < 5) {
+        const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
+        dispatchImageGeneratedEvent(fallbackImage, prompt);
+        toast.info("Using fallback image generation source");
+        return;
+      }
+      
       // Continue polling despite error
       setTimeout(() => pollForImageResult({
         requestId, 
@@ -87,6 +100,11 @@ export async function pollForImageResult({
     if (data && data.error) {
       console.error("Error from poll:", data.error);
       toast.error(`Image generation failed: ${data.error}`);
+      
+      // Use fallback image source
+      const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
+      dispatchImageGeneratedEvent(fallbackImage, prompt);
+      toast.info("Using fallback image generation source");
       return;
     }
     

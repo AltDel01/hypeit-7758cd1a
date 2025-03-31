@@ -91,11 +91,17 @@ const ContentGenerator = ({
           <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs">
             Generated Image
           </div>
-          <div className="p-2">
+          <div className="p-2 bg-white">
             <img 
               src={localGeneratedImage} 
               alt="Generated content" 
-              className="w-full object-contain rounded"
+              className="w-full h-48 object-contain rounded"
+              onError={(e) => {
+                console.log("Image failed to load, using fallback");
+                const target = e.target as HTMLImageElement;
+                target.src = "https://via.placeholder.com/600x600?text=Image+Generation+Error";
+                toast.error("Failed to load generated image");
+              }}
             />
           </div>
         </div>
