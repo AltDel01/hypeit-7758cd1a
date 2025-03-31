@@ -1,7 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { pollForImageResult, dispatchImageGeneratedEvent } from "@/utils/imagePolling";
+import { 
+  pollForImageResult, 
+  dispatchImageGeneratedEvent 
+} from "@/utils/image";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
 
 export class GeminiImageService {
