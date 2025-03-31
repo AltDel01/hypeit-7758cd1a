@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateFallbackImage } from './imageFallback';
 import { dispatchImageGeneratedEvent } from './imageEvents';
+import { isValidImageUrl } from './imageValidation';
 
 export interface PollImageParams {
   requestId: string;
@@ -45,53 +46,38 @@ export async function pollForImageResult({
     console.log(`Polling for image result, requestId: ${requestId}, retries left: ${currentRetries}`);
     
     // Wait for the specified delay
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await delayExecution(delay);
     
-    // Call the edge function with the requestId to check status
-    const { data, error } = await supabase.functions.invoke("generate-image", {
-      body: {
-        requestId,
-        checkOnly: true // Add a flag to indicate this is just a status check
-      }
-    });
+    // Check the status of the image generation request
+    const result = await checkImageStatus(requestId);
     
-    if (error) {
-      console.error("Error polling for image status:", error);
-      // Use a shorter retry interval when there are API errors
-      setTimeout(() => pollForImageResult({
+    if (result.error) {
+      handlePollingError(result.error, {
         requestId, prompt, aspectRatio, style, 
-        retries: currentRetries - 1, 
-        delay: Math.max(1000, delay / 2) // Reduce delay but not below 1 second
-      }), Math.max(1000, delay / 2));
+        retries: currentRetries, delay
+      });
       return;
     }
     
-    console.log("Poll response:", data);
-    
     // If we have an image URL, validate and use it
-    if (data?.imageUrl && isValidImageUrl(data.imageUrl)) {
-      await processImageUrl(data.imageUrl, prompt);
+    if (result.imageUrl && isValidImageUrl(result.imageUrl)) {
+      await processImageUrl(result.imageUrl, prompt);
       return;
     }
     
     // Handle different status responses
-    if (data?.status === "processing" || data?.status === "accepted") {
-      // Continue polling with reduced retry count
-      setTimeout(() => pollForImageResult({
-        requestId, 
-        prompt, 
-        aspectRatio, 
-        style, 
-        retries: currentRetries - 1, 
-        delay
-      }), delay);
+    if (result.status === "processing" || result.status === "accepted") {
+      scheduleNextPoll({
+        requestId, prompt, aspectRatio, style,
+        retries: currentRetries - 1, delay
+      });
       return;
     }
     
     // If we got an error from the API
-    if (data?.error) {
-      console.error("Error from poll:", data.error);
-      toast.error(`Image generation failed: ${data.error}`);
+    if (result.apiError) {
+      console.error("Error from poll:", result.apiError);
+      toast.error(`Image generation failed: ${result.apiError}`);
       
       // Use fallback image source
       await useFallbackImage(prompt, aspectRatio);
@@ -99,44 +85,82 @@ export async function pollForImageResult({
     }
     
     // If we don't know the status, continue polling with a shorter retry count
-    setTimeout(() => pollForImageResult({
-      requestId, 
-      prompt, 
-      aspectRatio, 
-      style, 
-      retries: currentRetries - 1, 
-      delay
-    }), delay);
+    scheduleNextPoll({
+      requestId, prompt, aspectRatio, style,
+      retries: currentRetries - 1, delay
+    });
     
   } catch (error) {
-    console.error("Error in polling:", error);
-    // Use a shorter retry interval when there are exceptions
-    setTimeout(() => pollForImageResult({
-      requestId, 
-      prompt, 
-      aspectRatio, 
-      style, 
-      retries: currentRetries - 1, 
-      delay: Math.max(1000, delay / 2)
-    }), Math.max(1000, delay / 2));
+    handlePollingError(error, {
+      requestId, prompt, aspectRatio, style,
+      retries: currentRetries, delay
+    });
   }
 }
 
 /**
- * Checks if an image URL is valid and not a placeholder
+ * Calls the Supabase function to check the status of an image generation request
  * 
- * @param url - The URL to check
- * @returns True if the URL is valid and not a placeholder
+ * @param requestId - The ID of the image generation request to check
+ * @returns The status check result
  */
-function isValidImageUrl(url: string): boolean {
-  if (!url) return false;
+async function checkImageStatus(requestId: string) {
+  const { data, error } = await supabase.functions.invoke("generate-image", {
+    body: {
+      requestId,
+      checkOnly: true // Add a flag to indicate this is just a status check
+    }
+  });
   
-  // Check if it's not a placeholder image
-  if (url.includes('placeholder.com') || url.includes('Generating+Image')) {
-    return false;
+  if (error) {
+    return { error };
   }
   
-  return true;
+  console.log("Poll response:", data);
+  
+  return { 
+    status: data?.status,
+    imageUrl: data?.imageUrl,
+    apiError: data?.error,
+    data
+  };
+}
+
+/**
+ * Delays execution for the specified time
+ * 
+ * @param ms - The delay in milliseconds
+ * @returns A promise that resolves after the delay
+ */
+async function delayExecution(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Schedules the next polling attempt
+ * 
+ * @param params - The polling parameters
+ */
+function scheduleNextPoll(params: PollImageParams): void {
+  setTimeout(() => pollForImageResult(params), params.delay);
+}
+
+/**
+ * Handles errors that occur during polling
+ * 
+ * @param error - The error that occurred
+ * @param params - The polling parameters
+ */
+function handlePollingError(error: any, params: PollImageParams): void {
+  console.error("Error in polling:", error);
+  // Use a shorter retry interval when there are exceptions
+  const shorterDelay = Math.max(1000, params.delay / 2);
+  
+  setTimeout(() => pollForImageResult({
+    ...params,
+    retries: params.retries - 1,
+    delay: shorterDelay
+  }), shorterDelay);
 }
 
 /**
