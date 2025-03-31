@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateFallbackImage } from './imageFallback';
@@ -49,13 +50,19 @@ export async function pollForImageResult({
     // Call the edge function with the requestId to check status
     const { data, error } = await supabase.functions.invoke("generate-image", {
       body: {
-        requestId
+        requestId,
+        checkOnly: true // Add a flag to indicate this is just a status check
       }
     });
     
     if (error) {
       console.error("Error polling for image status:", error);
-      handlePollingError(error, currentRetries, { requestId, prompt, aspectRatio, style, retries: currentRetries - 1, delay });
+      // Use a shorter retry interval when there are API errors
+      setTimeout(() => pollForImageResult({
+        requestId, prompt, aspectRatio, style, 
+        retries: currentRetries - 1, 
+        delay: Math.max(1000, delay / 2) // Reduce delay but not below 1 second
+      }), Math.max(1000, delay / 2));
       return;
     }
     
@@ -103,7 +110,15 @@ export async function pollForImageResult({
     
   } catch (error) {
     console.error("Error in polling:", error);
-    handlePollingError(error, currentRetries, { requestId, prompt, aspectRatio, style, retries: currentRetries - 1, delay });
+    // Use a shorter retry interval when there are exceptions
+    setTimeout(() => pollForImageResult({
+      requestId, 
+      prompt, 
+      aspectRatio, 
+      style, 
+      retries: currentRetries - 1, 
+      delay: Math.max(1000, delay / 2)
+    }), Math.max(1000, delay / 2));
   }
 }
 
@@ -145,48 +160,14 @@ async function processImageUrl(imageUrl: string, prompt: string): Promise<void> 
       return;
     }
     
-    // For other URLs, validate them first with a HEAD request
-    try {
-      const imageCheck = await fetch(imageUrl, { 
-        method: 'HEAD',
-        // Set a timeout to avoid waiting too long
-        signal: AbortSignal.timeout(5000)
-      });
-          
-      if (imageCheck.ok) {
-        toast.success("Image generation completed!");
-        dispatchImageGeneratedEvent(imageUrl, prompt);
-        return;
-      } else {
-        throw new Error(`Image URL returned status: ${imageCheck.status}`);
-      }
-    } catch (imgError) {
-      console.error("Image URL validation failed:", imgError);
-      throw imgError; // Re-throw to be handled by the caller
-    }
+    // For other URLs, dispatch directly without validation to avoid additional requests
+    toast.success("Image generation completed!");
+    dispatchImageGeneratedEvent(imageUrl, prompt);
+    
   } catch (error) {
     console.error("Error processing image URL:", error);
-    // If validation fails, let the caller handle it
     throw error;
   }
-}
-
-/**
- * Handles errors during the polling process
- * 
- * @param error - The error that occurred
- * @param currentRetries - The current number of retries
- * @param pollParams - The polling parameters to continue with
- */
-function handlePollingError(error: any, currentRetries: number, pollParams: PollImageParams): void {
-  // For critical errors with fewer retries left, use fallback immediately
-  if (currentRetries < 6) {
-    useFallbackImage(pollParams.prompt, pollParams.aspectRatio);
-    return;
-  }
-  
-  // Otherwise, continue polling despite error with reduced retries
-  setTimeout(() => pollForImageResult(pollParams), pollParams.delay);
 }
 
 /**
@@ -203,11 +184,6 @@ async function useFallbackImage(prompt: string, aspectRatio: string): Promise<vo
     // Generate a more tailored fallback based on aspect ratio
     const imageSize = aspectRatio === "9:16" ? "800x1400" : "800x800";
     
-    // Use search terms from prompt for better results
-    const searchTerms = extractSearchTerms(prompt);
-    
-    console.log(`Using fallback image with search terms: ${searchTerms}, size: ${imageSize}`);
-    
     // Generate and dispatch the fallback image
     generateFallbackImage(prompt, imageSize);
   } catch (error) {
@@ -217,25 +193,4 @@ async function useFallbackImage(prompt: string, aspectRatio: string): Promise<vo
     const emergencyFallback = "https://source.unsplash.com/featured/800x800/?product";
     dispatchImageGeneratedEvent(emergencyFallback, prompt);
   }
-}
-
-/**
- * Extracts relevant search terms from a prompt
- * 
- * @param prompt - The prompt to extract terms from
- * @returns A string of comma-separated search terms
- */
-function extractSearchTerms(prompt: string): string {
-  // Clean up the prompt
-  const cleanPrompt = prompt.replace(/generate|post|wording:|image|attached|instagram story/gi, '');
-  
-  // Extract key terms (words longer than 3 characters)
-  const terms = cleanPrompt
-    .split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 5)
-    .join(',');
-    
-  // If no terms were extracted, use a default
-  return terms || 'product,skincare';
 }

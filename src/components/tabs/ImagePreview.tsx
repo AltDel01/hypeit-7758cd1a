@@ -16,8 +16,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [imageLoading, setImageLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [processingText, setProcessingText] = useState<string>("Loading image...");
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
+  const progressTextIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -30,18 +32,43 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         window.clearInterval(progressIntervalRef.current);
       }
       
+      // Realistic progress animation
       progressIntervalRef.current = window.setInterval(() => {
         setLoadingProgress(prev => {
-          // Move progress to 90% during loading, the final 10% will complete when image loads
-          const newProgress = prev + (90 - prev) * 0.1;
-          return newProgress < 90 ? newProgress : 90;
+          if (prev < 20) return prev + 1;
+          if (prev < 50) return prev + 0.5;
+          if (prev < 80) return prev + 0.2;
+          if (prev < 90) return prev + 0.1;
+          return prev;
         });
-      }, 200);
+      }, 300);
+      
+      // Rotating processing text
+      const processingTexts = [
+        "Loading image...",
+        "Analyzing content...",
+        "Applying style...",
+        "Enhancing details...",
+        "Finalizing image..."
+      ];
+      
+      let textIndex = 0;
+      if (progressTextIntervalRef.current) {
+        window.clearInterval(progressTextIntervalRef.current);
+      }
+      
+      progressTextIntervalRef.current = window.setInterval(() => {
+        textIndex = (textIndex + 1) % processingTexts.length;
+        setProcessingText(processingTexts[textIndex]);
+      }, 3000);
     }
     
     return () => {
       if (progressIntervalRef.current) {
         window.clearInterval(progressIntervalRef.current);
+      }
+      if (progressTextIntervalRef.current) {
+        window.clearInterval(progressTextIntervalRef.current);
       }
     };
   }, [imageUrl]);
@@ -55,6 +82,9 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
     }
+    if (progressTextIntervalRef.current) {
+      window.clearInterval(progressTextIntervalRef.current);
+    }
   };
 
   const handleImageError = () => {
@@ -64,6 +94,9 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
+    }
+    if (progressTextIntervalRef.current) {
+      window.clearInterval(progressTextIntervalRef.current);
     }
     
     // Auto-retry once for Unsplash images
@@ -77,6 +110,8 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     setImageLoading(true);
     onRetry();
   };
+
+  const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
 
   if (!imageUrl) return null;
 
@@ -96,13 +131,39 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         )}
       </div>
       <div className="p-2 bg-gray-800 min-h-[200px] flex items-center justify-center">
-        {imageLoading && !imageError ? (
-          <div className="animate-pulse flex flex-col items-center justify-center w-full space-y-4">
-            <Skeleton className="h-32 w-32 rounded-md bg-gray-700/30" />
+        {(imageLoading || isPlaceholder) && !imageError ? (
+          <div className="animate-pulse flex flex-col items-center justify-center w-full space-y-6">
+            <div className="relative h-24 w-24">
+              <svg className="animate-spin h-full w-full text-[#8c52ff]" viewBox="0 0 100 100">
+                <circle 
+                  className="opacity-25" 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  stroke="currentColor" 
+                  strokeWidth="8" 
+                  fill="none" 
+                />
+                <circle 
+                  className="opacity-75" 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  stroke="currentColor" 
+                  strokeWidth="8" 
+                  fill="none" 
+                  strokeDasharray="283" 
+                  strokeDashoffset={283 * (1 - loadingProgress / 100)} 
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold text-white">{Math.round(loadingProgress)}%</span>
+              </div>
+            </div>
             <div className="w-full max-w-[80%] space-y-2">
-              <Progress value={loadingProgress} className="h-1 bg-gray-700/30" />
+              <Progress value={loadingProgress} className="h-1.5 bg-gray-700/30" />
               <p className="text-xs text-center text-gray-300">
-                {loadingProgress < 100 ? 'Loading image...' : 'Processing complete'}
+                {processingText}
               </p>
             </div>
           </div>
