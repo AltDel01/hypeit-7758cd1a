@@ -1,0 +1,53 @@
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Input and textarea styles */
+  textarea:focus, input:focus {
+    animation: rainbow-cursor 4s linear infinite;
+    caret-color: #8c52ff;
+  }
+  
+  input::selection, textarea::selection {
+    background-color: rgba(140, 82, 255, 0.2);
+    color: white;
+  }
+  
+  input, textarea {
+    caret-color: #8c52ff;
+  }
+  
+  input:focus, textarea:focus {
+    box-shadow: 0 0 5px rgba(140, 82, 255, 0.5);
+  }
+  
+  /* Animation pause on hover */
+  .animate-feed-scroll-down:hover,
+  .animate-story-scroll-up:hover {
+    animation-play-state: paused;
+  }
+  
+  /* Scrollbar utilities */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Show scrollbars on mobile only */
+  @media (max-width: 768px) {
+    .md\:scrollbar-hide::-webkit-scrollbar {
+      display: initial;
+    }
+    
+    .md\:scrollbar-hide {
+      -ms-overflow-style: auto;
+      scrollbar-width: auto;
+    }
+  }
+}
