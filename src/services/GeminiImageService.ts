@@ -1,14 +1,16 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-export interface GenerateImageParams {
-  prompt: string;
-  aspectRatio?: "1:1" | "9:16";
-  style?: string;
-}
+import { pollForImageResult } from "@/utils/imagePolling";
+import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
 
 export class GeminiImageService {
+  /**
+   * Generates an image based on the provided parameters
+   * 
+   * @param params - The image generation parameters
+   * @returns A promise that resolves to the image URL or null
+   */
   static async generateImage({ prompt, aspectRatio = "1:1", style }: GenerateImageParams): Promise<string | null> {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}`);
@@ -38,34 +40,37 @@ export class GeminiImageService {
       
       console.log("Initial response from generate-image function:", data);
       
+      // Parse the response
+      const response = data as ImageGenerationResponse;
+      
       // If we got an accepted status with a requestId, start polling
-      if (data.status === "accepted" && data.requestId) {
+      if (response.status === "accepted" && response.requestId) {
         toast.success("Image generation request accepted!");
         
         // Return the placeholder image URL for immediate display
-        const placeholderUrl = data.imageUrl || "https://via.placeholder.com/600x600?text=Generating+Image...";
+        const placeholderUrl = response.imageUrl || "https://via.placeholder.com/600x600?text=Generating+Image...";
         
         // Start polling in the background
-        this.pollForImageResult(data.requestId, prompt, aspectRatio, style);
+        this.startPolling(response.requestId, prompt, aspectRatio, style);
         
         return placeholderUrl;
       }
       
       // If we got a direct image URL
-      if (data.imageUrl) {
-        console.log("Image generated successfully:", data.imageUrl);
+      if (response.imageUrl) {
+        console.log("Image generated successfully:", response.imageUrl);
         toast.success("Image generated successfully!");
-        return data.imageUrl;
+        return response.imageUrl;
       }
       
       // Handle error case
-      if (data.error) {
-        console.error("Error from generate-image function:", data.error);
-        toast.error(`Failed to generate image: ${data.error}`);
+      if (response.error) {
+        console.error("Error from generate-image function:", response.error);
+        toast.error(`Failed to generate image: ${response.error}`);
         return null;
       }
       
-      console.error("Unexpected response format:", data);
+      console.error("Unexpected response format:", response);
       toast.error("Received unexpected response from the image generation service");
       return null;
     } catch (error) {
@@ -75,69 +80,29 @@ export class GeminiImageService {
     }
   }
   
-  static async pollForImageResult(requestId: string, prompt: string, aspectRatio: string, style?: string, retries = 10, delay = 3000): Promise<void> {
-    if (retries <= 0) {
-      console.log("Maximum polling retries reached");
-      toast.error("Image generation is taking longer than expected. Please try again later.");
-      return;
-    }
-    
-    try {
-      console.log(`Polling for image result, requestId: ${requestId}, retries left: ${retries}`);
-      
-      // Wait for the specified delay
-      await new Promise(resolve => setTimeout(resolve, delay));
-      
-      // Call the edge function with the requestId to check status
-      const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: {
-          requestId
-        }
-      });
-      
-      if (error) {
-        console.error("Error polling for image status:", error);
-        // Continue polling despite error
-        setTimeout(() => this.pollForImageResult(requestId, prompt, aspectRatio, style, retries - 1, delay), delay);
-        return;
-      }
-      
-      console.log("Poll response:", data);
-      
-      // If we have an image URL, we're done
-      if (data && data.imageUrl && data.imageUrl !== "https://via.placeholder.com/600x600?text=Generating+Image...") {
-        console.log("Image ready:", data.imageUrl);
-        toast.success("Image generation completed!");
-        
-        // Dispatch a custom event to update UI components with the new image
-        const event = new CustomEvent('imageGenerated', { detail: { imageUrl: data.imageUrl, prompt } });
-        window.dispatchEvent(event);
-        return;
-      }
-      
-      // If it's still processing, continue polling
-      if (data && (data.status === "processing" || data.status === "accepted")) {
-        setTimeout(() => this.pollForImageResult(requestId, prompt, aspectRatio, style, retries - 1, delay), delay);
-        return;
-      }
-      
-      // If we got an error, stop polling
-      if (data && data.error) {
-        console.error("Error from poll:", data.error);
-        toast.error(`Image generation failed: ${data.error}`);
-        return;
-      }
-      
-      // If we don't know the status, continue polling with a shorter retry count
-      setTimeout(() => this.pollForImageResult(requestId, prompt, aspectRatio, style, retries - 1, delay), delay);
-    } catch (error) {
-      console.error("Error in polling:", error);
-      // Continue polling despite error
-      setTimeout(() => this.pollForImageResult(requestId, prompt, aspectRatio, style, retries - 1, delay), delay);
-    }
+  /**
+   * Starts the polling process for an image generation request
+   * 
+   * @param requestId - The ID of the image generation request
+   * @param prompt - The prompt used to generate the image
+   * @param aspectRatio - The aspect ratio of the generated image
+   * @param style - The style of the generated image (optional)
+   */
+  private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string): void {
+    pollForImageResult({
+      requestId,
+      prompt,
+      aspectRatio,
+      style
+    });
   }
   
-  // This method always returns true now, effectively bypassing the check
+  /**
+   * Checks the status of the API key
+   * This method always returns true now, effectively bypassing the check
+   * 
+   * @returns A promise that resolves to true
+   */
   static async checkApiKeyStatus(): Promise<boolean> {
     return true;
   }
