@@ -14,10 +14,13 @@ interface ImageDisplayProps {
 const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: ImageDisplayProps) => {
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
   
+  // Update when prop changes
   useEffect(() => {
+    console.log("ImageDisplay - generatedImage prop updated:", generatedImage);
     setLocalGeneratedImage(generatedImage);
   }, [generatedImage]);
   
+  // Listen for generated image events
   useEffect(() => {
     // Listen for the imageGenerated event
     const handleImageGenerated = (event: CustomEvent) => {

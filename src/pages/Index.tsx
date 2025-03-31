@@ -29,6 +29,20 @@ const Index = () => {
     Sentry.setTag("feature", "image-generation");
   }, []);
   
+  // Listen for imageGenerated events
+  useEffect(() => {
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Index.tsx caught image generated event:", event.detail);
+      setGeneratedImage(event.detail.imageUrl);
+    };
+    
+    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+    };
+  }, []);
+  
   const generateImage = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter a prompt to generate an image");

@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { pollForImageResult } from "@/utils/imagePolling";
+import { pollForImageResult, dispatchImageGeneratedEvent } from "@/utils/imagePolling";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
 
 export class GeminiImageService {
@@ -53,6 +53,9 @@ export class GeminiImageService {
         // Start polling in the background
         this.startPolling(response.requestId, prompt, aspectRatio, style);
         
+        // Immediately dispatch an event with the placeholder image
+        dispatchImageGeneratedEvent(placeholderUrl, prompt);
+        
         return placeholderUrl;
       }
       
@@ -60,6 +63,10 @@ export class GeminiImageService {
       if (response.imageUrl) {
         console.log("Image generated successfully:", response.imageUrl);
         toast.success("Image generated successfully!");
+        
+        // Dispatch event with the final image
+        dispatchImageGeneratedEvent(response.imageUrl, prompt);
+        
         return response.imageUrl;
       }
       

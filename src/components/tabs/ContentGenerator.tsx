@@ -32,6 +32,7 @@ const ContentGenerator = ({
   
   // Update local generated image when the prop changes
   useEffect(() => {
+    console.log("generatedImage prop changed:", generatedImage);
     setLocalGeneratedImage(generatedImage);
   }, [generatedImage]);
   

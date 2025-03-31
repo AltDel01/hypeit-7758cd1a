@@ -66,8 +66,7 @@ export async function pollForImageResult({
       toast.success("Image generation completed!");
       
       // Dispatch a custom event to update UI components with the new image
-      const event = new CustomEvent('imageGenerated', { detail: { imageUrl: data.imageUrl, prompt } });
-      window.dispatchEvent(event);
+      dispatchImageGeneratedEvent(data.imageUrl, prompt);
       return;
     }
     
@@ -121,6 +120,7 @@ export async function pollForImageResult({
  * @param prompt - The prompt used to generate the image
  */
 export function dispatchImageGeneratedEvent(imageUrl: string, prompt: string): void {
+  console.log(`Dispatching imageGenerated event with URL: ${imageUrl}`);
   const event = new CustomEvent('imageGenerated', { 
     detail: { imageUrl, prompt } 
   });
