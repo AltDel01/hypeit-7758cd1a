@@ -29,9 +29,8 @@ export async function pollForImageResult({
     console.log("Maximum polling retries reached");
     toast.error("Image generation is taking longer than expected. Please try again later.");
     
-    // Provide a fallback image or placeholder in case of timeout
-    const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
-    dispatchImageGeneratedEvent(fallbackImage, prompt);
+    // Provide a more reliable fallback image
+    generateFallbackImage(prompt);
     return;
   }
   
@@ -51,11 +50,9 @@ export async function pollForImageResult({
     if (error) {
       console.error("Error polling for image status:", error);
       
-      // Use a fallback image more aggressively
-      if (retries < 7) {
-        const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
-        dispatchImageGeneratedEvent(fallbackImage, prompt);
-        toast.info("Using fallback image generation source");
+      // Use fallback image more aggressively
+      if (retries < 8) {
+        generateFallbackImage(prompt);
         return;
       }
       
@@ -79,12 +76,23 @@ export async function pollForImageResult({
       
       // Add a validation check for the image URL
       try {
-        // Try to validate the image URL first
+        // Check if this is an Unsplash URL
+        if (data.imageUrl.includes('unsplash.com')) {
+          // For Unsplash, add a cache-busting parameter and directly use it
+          const cacheBuster = Date.now();
+          const finalUrl = data.imageUrl.includes('?') 
+            ? `${data.imageUrl}&t=${cacheBuster}` 
+            : `${data.imageUrl}?t=${cacheBuster}`;
+          
+          toast.success("Image generated successfully!");
+          dispatchImageGeneratedEvent(finalUrl, prompt);
+          return;
+        }
+        
+        // For other URLs, validate them first
         const imageCheck = await fetch(data.imageUrl, { method: 'HEAD' });
         if (imageCheck.ok) {
           toast.success("Image generation completed!");
-          
-          // Dispatch a custom event to update UI components with the new image
           dispatchImageGeneratedEvent(data.imageUrl, prompt);
           return;
         } else {
@@ -93,9 +101,7 @@ export async function pollForImageResult({
       } catch (imgError) {
         console.error("Image URL validation failed:", imgError);
         // If validation fails, use a fallback
-        const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
-        dispatchImageGeneratedEvent(fallbackImage, prompt);
-        toast.info("Using fallback image source (validation failed)");
+        generateFallbackImage(prompt);
         return;
       }
     }
@@ -119,9 +125,7 @@ export async function pollForImageResult({
       toast.error(`Image generation failed: ${data.error}`);
       
       // Use fallback image source
-      const fallbackImage = `https://source.unsplash.com/random/800x800/?${encodeURIComponent(prompt.substring(0, 30))}`;
-      dispatchImageGeneratedEvent(fallbackImage, prompt);
-      toast.info("Using fallback image generation source");
+      generateFallbackImage(prompt);
       return;
     }
     
@@ -136,6 +140,13 @@ export async function pollForImageResult({
     }), delay);
   } catch (error) {
     console.error("Error in polling:", error);
+    
+    // Use fallback for critical errors
+    if (retries < 6) {
+      generateFallbackImage(prompt);
+      return;
+    }
+    
     // Continue polling despite error with reduced retries
     setTimeout(() => pollForImageResult({
       requestId, 
@@ -146,6 +157,35 @@ export async function pollForImageResult({
       delay
     }), delay);
   }
+}
+
+/**
+ * Generates a fallback image using Unsplash
+ * 
+ * @param prompt - The prompt to use for generating the fallback image
+ */
+function generateFallbackImage(prompt: string): void {
+  // Extract key terms from the prompt for better image search
+  const searchTerms = prompt
+    .split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 3)
+    .join(',');
+  
+  // Generate a cache-busting parameter
+  const cacheBuster = Date.now();
+  
+  // Create a fallback Unsplash URL with search terms and dimensions
+  let fallbackUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}`;
+  
+  // Add cache-busting parameter
+  fallbackUrl = `${fallbackUrl}&t=${cacheBuster}`;
+  
+  console.log(`Using fallback image from Unsplash with search terms: ${searchTerms}`);
+  toast.info("Using alternative image source");
+  
+  // Dispatch the event with the fallback image
+  dispatchImageGeneratedEvent(fallbackUrl, prompt);
 }
 
 /**

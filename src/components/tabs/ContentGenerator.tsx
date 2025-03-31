@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Textarea } from "@/components/ui/textarea";
-import { Send, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageUploader from './ImageUploader';
 import GenerateButton from './GenerateButton';
@@ -30,6 +30,8 @@ const ContentGenerator = ({
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const imageRef = useRef<HTMLImageElement>(null);
   
   // Update local generated image when the prop changes
   useEffect(() => {
@@ -50,17 +52,14 @@ const ContentGenerator = ({
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Image generated event received:", event.detail);
       if (event.detail.imageUrl) {
-        setLocalGeneratedImage(event.detail.imageUrl);
+        // Add a cache-buster to the URL
+        const url = event.detail.imageUrl.includes('?') 
+          ? `${event.detail.imageUrl}&cb=${Date.now()}` 
+          : `${event.detail.imageUrl}?cb=${Date.now()}`;
+          
+        setLocalGeneratedImage(url);
         setImageError(false);
-        
-        // Preload the image to ensure it loads correctly
-        const img = new Image();
-        img.src = event.detail.imageUrl;
-        img.onload = () => console.log("Image preloaded successfully");
-        img.onerror = () => {
-          console.error("Failed to preload image");
-          setImageError(true);
-        };
+        setRetryCount(0);
       }
     };
     
@@ -84,15 +83,36 @@ const ContentGenerator = ({
   };
 
   const handleImageRetry = () => {
+    setRetryCount(prev => prev + 1);
+    
     if (localGeneratedImage) {
-      // Force image reload
-      const timestamp = new Date().getTime();
-      const imageWithCacheBuster = localGeneratedImage.includes('?') 
-        ? `${localGeneratedImage}&t=${timestamp}` 
-        : `${localGeneratedImage}?t=${timestamp}`;
+      // Force image reload with a new cache buster
+      const timestamp = Date.now();
       
-      setLocalGeneratedImage(imageWithCacheBuster);
+      if (localGeneratedImage.includes('unsplash.com')) {
+        // For Unsplash URLs, create a completely new request to get a different image
+        const searchTerms = prompt
+          .split(' ')
+          .filter(word => word.length > 3)
+          .slice(0, 3)
+          .join(',');
+        
+        const newUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
+        setLocalGeneratedImage(newUrl);
+        toast.info("Fetching a new image...");
+      } else {
+        // For other URLs, just add a cache buster
+        const imageWithCacheBuster = localGeneratedImage.includes('?') 
+          ? `${localGeneratedImage}&t=${timestamp}` 
+          : `${localGeneratedImage}?t=${timestamp}`;
+        
+        setLocalGeneratedImage(imageWithCacheBuster);
+      }
+      
       setImageError(false);
+    } else if (retryCount > 2) {
+      // If we've tried a few times and still no image, trigger a new generation
+      onGenerate();
     } else {
       // If no image, trigger generation
       onGenerate();
@@ -126,8 +146,9 @@ const ContentGenerator = ({
               <Button 
                 onClick={handleImageRetry} 
                 variant="ghost" 
-                className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6]"
+                className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
               >
+                <RefreshCw className="h-3 w-3 mr-1" />
                 Retry
               </Button>
             )}
@@ -139,21 +160,26 @@ const ContentGenerator = ({
                 <p className="text-sm text-red-400">Failed to load image</p>
                 <Button 
                   onClick={handleImageRetry}
-                  className="mt-2 bg-[#8c52ff] hover:bg-[#7a45e6] text-xs"
+                  className="mt-2 bg-[#8c52ff] hover:bg-[#7a45e6] text-xs flex items-center gap-1"
                 >
+                  <RefreshCw className="h-3 w-3" />
                   Retry Loading
                 </Button>
               </div>
             ) : (
               <img 
-                key={localGeneratedImage} // Force re-render when URL changes
+                ref={imageRef}
+                key={`${localGeneratedImage}-${retryCount}`} // Force re-render when URL changes or retry count increases
                 src={localGeneratedImage} 
                 alt="Generated content" 
                 className="w-full h-48 object-contain rounded"
                 onError={(e) => {
                   console.log("Image failed to load, marking as error");
                   setImageError(true);
-                  // Don't set fallback src here, we'll show an error UI instead
+                }}
+                onLoad={() => {
+                  console.log("Image loaded successfully");
+                  setImageError(false);
                 }}
               />
             )}
