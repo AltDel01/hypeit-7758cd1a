@@ -28,13 +28,20 @@ const ContentGenerator = ({
 }: ContentGeneratorProps) => {
   
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
+  const [hasProductImage, setHasProductImage] = useState<boolean>(false);
   
+  // Update local generated image when the prop changes
   useEffect(() => {
     setLocalGeneratedImage(generatedImage);
   }, [generatedImage]);
   
+  // Update product image status
   useEffect(() => {
-    // Listen for the imageGenerated event
+    setHasProductImage(productImage !== null);
+  }, [productImage]);
+  
+  // Listen for the imageGenerated event
+  useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Image generated event received:", event.detail);
       setLocalGeneratedImage(event.detail.imageUrl);
@@ -97,6 +104,13 @@ const ContentGenerator = ({
         productImage={productImage} 
         setProductImage={setProductImage} 
       />
+      
+      {/* Show the uploaded product image status */}
+      {hasProductImage && (
+        <div className="mt-2 mb-3 text-xs text-green-400 text-center">
+          Product image uploaded successfully
+        </div>
+      )}
       
       <GenerateButton 
         isGenerating={isGenerating} 

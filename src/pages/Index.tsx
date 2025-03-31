@@ -39,24 +39,40 @@ const Index = () => {
     try {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
+      console.log(`Product image available: ${productImage !== null}`);
+      
+      // Log product image details if available
+      if (productImage) {
+        console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
+      }
       
       Sentry.setContext("image_generation", {
         prompt: prompt,
         aspectRatio: aspectRatio,
+        hasProductImage: productImage !== null,
         timestamp: new Date().toISOString()
       });
       
+      // Update prompt to include reference to the product image if one is uploaded
+      let enhancedPrompt = prompt;
+      if (productImage) {
+        enhancedPrompt += ` - Create an image that features this product prominently.`;
+      }
+      
       const imageUrl = await GeminiImageService.generateImage({
-        prompt,
+        prompt: enhancedPrompt,
         aspectRatio,
+        style: productImage ? "product-focused" : undefined
       });
       
       if (imageUrl) {
         console.log(`Image generated, URL: ${imageUrl}`);
         setGeneratedImage(imageUrl);
+        toast.success("Image generated successfully!");
       } else {
         console.error("No image URL returned from generation service");
         Sentry.captureMessage("Image generation failed - No URL returned", "error");
+        toast.error("Failed to generate image - no URL returned");
       }
     } catch (error) {
       console.error("Error generating image:", error);

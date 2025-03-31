@@ -89,6 +89,8 @@ export class GeminiImageService {
    * @param style - The style of the generated image (optional)
    */
   private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string): void {
+    console.log(`Starting polling for generated image with requestId: ${requestId}`);
+    
     pollForImageResult({
       requestId,
       prompt,
