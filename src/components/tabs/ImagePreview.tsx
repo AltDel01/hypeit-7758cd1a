@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 
 interface ImagePreviewProps {
   imageUrl: string | null;
@@ -13,25 +15,56 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [imageError, setImageError] = useState<boolean>(false);
   const [imageLoading, setImageLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const imageRef = useRef<HTMLImageElement>(null);
+  const progressIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
       setImageLoading(true);
       setImageError(false);
+      
+      // Start animated progress
+      setLoadingProgress(0);
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
+      
+      progressIntervalRef.current = window.setInterval(() => {
+        setLoadingProgress(prev => {
+          // Move progress to 90% during loading, the final 10% will complete when image loads
+          const newProgress = prev + (90 - prev) * 0.1;
+          return newProgress < 90 ? newProgress : 90;
+        });
+      }, 200);
     }
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
+    };
   }, [imageUrl]);
 
   const handleImageLoad = () => {
     console.log("Image loaded successfully");
     setImageError(false);
     setImageLoading(false);
+    setLoadingProgress(100);
+    
+    if (progressIntervalRef.current) {
+      window.clearInterval(progressIntervalRef.current);
+    }
   };
 
   const handleImageError = () => {
     console.log("Image failed to load, marking as error");
     setImageError(true);
     setImageLoading(false);
+    
+    if (progressIntervalRef.current) {
+      window.clearInterval(progressIntervalRef.current);
+    }
     
     // Auto-retry once for Unsplash images
     if (imageUrl?.includes('unsplash.com') && retryCount === 0) {
@@ -64,9 +97,14 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       </div>
       <div className="p-2 bg-gray-800 min-h-[200px] flex items-center justify-center">
         {imageLoading && !imageError ? (
-          <div className="animate-pulse flex flex-col items-center justify-center">
-            <div className="h-10 w-10 rounded-full bg-[#8c52ff]/30 mb-2"></div>
-            <p className="text-xs text-gray-300">Loading image...</p>
+          <div className="animate-pulse flex flex-col items-center justify-center w-full space-y-4">
+            <Skeleton className="h-32 w-32 rounded-md bg-gray-700/30" />
+            <div className="w-full max-w-[80%] space-y-2">
+              <Progress value={loadingProgress} className="h-1 bg-gray-700/30" />
+              <p className="text-xs text-center text-gray-300">
+                {loadingProgress < 100 ? 'Loading image...' : 'Processing complete'}
+              </p>
+            </div>
           </div>
         ) : imageError ? (
           <div className="text-center p-4">
