@@ -15,7 +15,7 @@ export class GeminiImageService {
       
       toast.info("Generating image...", { duration: 5000 });
       
-      const webhookUrl = "https://hook.us2.make.com/yi8ng2m5p82cduxohbugpqaarphi5ofu";
+      const webhookUrl = "https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6";
       
       const response = await fetch(webhookUrl, {
         method: 'POST',

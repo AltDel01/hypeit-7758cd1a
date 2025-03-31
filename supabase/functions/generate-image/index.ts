@@ -17,8 +17,8 @@ serve(async (req) => {
     
     console.log(`Generating image with prompt: ${prompt}, aspect ratio: ${aspect_ratio}, style: ${style || 'default'}`);
 
-    // Now we'll forward this request to the webhook URL
-    const webhookUrl = "https://hook.us2.make.com/yi8ng2m5p82cduxohbugpqaarphi5ofu";
+    // Now we'll forward this request to the webhook URL - UPDATED
+    const webhookUrl = "https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6";
     
     const webhookResponse = await fetch(webhookUrl, {
       method: 'POST',
