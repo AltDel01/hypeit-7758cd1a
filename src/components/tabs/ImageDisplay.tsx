@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
 import { toast } from "sonner";
@@ -12,6 +12,29 @@ interface ImageDisplayProps {
 }
 
 const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: ImageDisplayProps) => {
+  const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
+  
+  useEffect(() => {
+    setLocalGeneratedImage(generatedImage);
+  }, [generatedImage]);
+  
+  useEffect(() => {
+    // Listen for the imageGenerated event
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Image display caught generated event:", event.detail);
+      
+      if (showGenerated) {
+        setLocalGeneratedImage(event.detail.imageUrl);
+      }
+    };
+    
+    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+    };
+  }, [showGenerated]);
+  
   const handleDownload = (imageUrl: string) => {
     const a = document.createElement('a');
     a.href = imageUrl;
@@ -36,10 +59,10 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
-      {generatedImage && showGenerated ? (
+      {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
-            src={generatedImage} 
+            src={localGeneratedImage} 
             alt="Generated AI image" 
             className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
           />
@@ -48,7 +71,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(generatedImage)}
+              onClick={() => handleCopy(localGeneratedImage)}
             >
               <Copy size={14} />
             </Button>
@@ -56,7 +79,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(generatedImage)}
+              onClick={() => handleDownload(localGeneratedImage)}
             >
               <Download size={14} />
             </Button>

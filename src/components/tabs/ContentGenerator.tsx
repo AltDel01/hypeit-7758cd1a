@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,26 @@ const ContentGenerator = ({
   onGenerate,
   generatedImage
 }: ContentGeneratorProps) => {
+  
+  const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
+  
+  useEffect(() => {
+    setLocalGeneratedImage(generatedImage);
+  }, [generatedImage]);
+  
+  useEffect(() => {
+    // Listen for the imageGenerated event
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Image generated event received:", event.detail);
+      setLocalGeneratedImage(event.detail.imageUrl);
+    };
+    
+    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+    };
+  }, []);
   
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,14 +78,14 @@ const ContentGenerator = ({
         </div>
       </form>
       
-      {generatedImage && (
+      {localGeneratedImage && (
         <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
           <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs">
             Generated Image
           </div>
           <div className="p-2">
             <img 
-              src={generatedImage} 
+              src={localGeneratedImage} 
               alt="Generated content" 
               className="w-full object-contain rounded"
             />
