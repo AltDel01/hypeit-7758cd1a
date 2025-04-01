@@ -76,7 +76,8 @@ const Index = () => {
       const imageUrl = await GeminiImageService.generateImage({
         prompt: enhancedPrompt,
         aspectRatio,
-        style: productImage ? "product-focused" : undefined
+        style: productImage ? "product-focused" : undefined,
+        productImage // Pass the product image to the service
       });
       
       if (imageUrl) {

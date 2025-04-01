@@ -1,20 +1,20 @@
 
-/**
- * Parameters for generating an image 
- */
 export interface GenerateImageParams {
   prompt: string;
-  aspectRatio?: "1:1" | "9:16";
+  aspectRatio?: string;
   style?: string;
+  productImage?: File | null;
 }
 
-/**
- * Response from the image generation service
- */
 export interface ImageGenerationResponse {
-  imageUrl?: string;
-  requestId?: string;
-  status?: string;
-  error?: string;
+  status: string;
   message?: string;
+  requestId?: string;
+  imageUrl?: string;
+  error?: string;
+}
+
+export interface ImageGenerationProgress {
+  status: string;
+  progress?: number;
 }

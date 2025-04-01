@@ -199,9 +199,23 @@ async function handleGenerationRequest(requestData: {
   prompt: string;
   aspect_ratio?: string;
   style?: string;
+  product_image?: string;
+  product_image_name?: string;
+  product_image_type?: string;
 }): Promise<Response> {
-  const { prompt, aspect_ratio = "1:1", style } = requestData;
+  const { 
+    prompt, 
+    aspect_ratio = "1:1", 
+    style, 
+    product_image,
+    product_image_name,
+    product_image_type
+  } = requestData;
+  
   console.log(`Generating image with prompt: ${prompt}, aspect ratio: ${aspect_ratio}, style: ${style || 'default'}`);
+  if (product_image) {
+    console.log(`Product image provided: ${product_image_name}, type: ${product_image_type}`);
+  }
   
   try {
     // Generate a fallback URL immediately for faster responses
@@ -209,7 +223,7 @@ async function handleGenerationRequest(requestData: {
     
     // Attempt to generate image using the webhook
     try {
-      return await generateWithWebhook(prompt, aspect_ratio, style, fallbackImageUrl);
+      return await generateWithWebhook(prompt, aspect_ratio, style, product_image, product_image_name, product_image_type, fallbackImageUrl);
     } catch (webhookError) {
       return handleWebhookError(webhookError, fallbackImageUrl);
     }
@@ -224,19 +238,32 @@ async function handleGenerationRequest(requestData: {
 async function generateWithWebhook(
   prompt: string, 
   aspect_ratio: string, 
-  style: string | undefined, 
+  style: string | undefined,
+  product_image: string | undefined,
+  product_image_name: string | undefined,
+  product_image_type: string | undefined,
   fallbackImageUrl: string
 ): Promise<Response> {
+  // Create the request body
+  const requestBody: any = {
+    prompt,
+    aspect_ratio,
+    style
+  };
+  
+  // Add product image data if available
+  if (product_image) {
+    requestBody.product_image = product_image;
+    requestBody.product_image_name = product_image_name;
+    requestBody.product_image_type = product_image_type;
+  }
+  
   const webhookResponse = await fetch(GENERATION_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      prompt,
-      aspect_ratio,
-      style
-    })
+    body: JSON.stringify(requestBody)
   });
   
   if (!webhookResponse.ok) {

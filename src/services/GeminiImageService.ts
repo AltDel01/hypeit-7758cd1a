@@ -14,19 +14,38 @@ export class GeminiImageService {
    * @param params - The image generation parameters
    * @returns A promise that resolves to the image URL or null
    */
-  static async generateImage({ prompt, aspectRatio = "1:1", style }: GenerateImageParams): Promise<string | null> {
+  static async generateImage({ prompt, aspectRatio = "1:1", style, productImage }: GenerateImageParams): Promise<string | null> {
     try {
-      console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}`);
+      console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}`);
       
       toast.info("Generating image...", { duration: 5000 });
       
+      // Create request body
+      const requestBody: any = {
+        prompt,
+        aspect_ratio: aspectRatio,
+        style
+      };
+      
+      // If productImage is provided, convert it to base64 for sending to the webhook
+      if (productImage) {
+        console.log("Processing product image for webhook...");
+        try {
+          const imageBase64 = await this.fileToBase64(productImage);
+          requestBody.product_image = imageBase64;
+          requestBody.product_image_name = productImage.name;
+          requestBody.product_image_type = productImage.type;
+          
+          console.log("Product image processed successfully");
+        } catch (imageError) {
+          console.error("Error processing product image:", imageError);
+          // Continue with generation even if image processing fails
+        }
+      }
+      
       // Call the Supabase edge function
       const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: {
-          prompt,
-          aspect_ratio: aspectRatio,
-          style
-        }
+        body: requestBody
       });
       
       if (error) {
@@ -106,6 +125,31 @@ export class GeminiImageService {
       prompt,
       aspectRatio,
       style
+    });
+  }
+  
+  /**
+   * Converts a file to a base64 string
+   * 
+   * @param file - The file to convert
+   * @returns A promise that resolves to the base64 string
+   */
+  private static async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          // Extract the base64 part from the Data URL
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        } else {
+          reject(new Error('Failed to convert file to base64'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
     });
   }
   

@@ -1,3 +1,4 @@
+
 import { corsHeaders, GENERATION_ENDPOINT } from "./config.ts";
 import { generateUnsplashUrl } from "./unsplash.ts";
 
@@ -8,14 +9,28 @@ interface GenerationRequestData {
   prompt: string;
   aspect_ratio?: string;
   style?: string;
+  product_image?: string;
+  product_image_name?: string;
+  product_image_type?: string;
 }
 
 /**
  * Handles the initial request to generate an image
  */
 export async function handleGenerationRequest(requestData: GenerationRequestData): Promise<Response> {
-  const { prompt, aspect_ratio = "1:1", style } = requestData;
+  const { 
+    prompt, 
+    aspect_ratio = "1:1", 
+    style,
+    product_image,
+    product_image_name,
+    product_image_type
+  } = requestData;
+  
   console.log(`Generating image with prompt: ${prompt}, aspect ratio: ${aspect_ratio}, style: ${style || 'default'}`);
+  if (product_image) {
+    console.log(`Product image provided: ${product_image_name}, type: ${product_image_type}`);
+  }
   
   try {
     // Generate a fallback URL immediately for faster responses
@@ -23,7 +38,7 @@ export async function handleGenerationRequest(requestData: GenerationRequestData
     
     // Attempt to generate image using the webhook
     try {
-      return await generateWithWebhook(prompt, aspect_ratio, style, fallbackImageUrl);
+      return await generateWithWebhook(requestData, fallbackImageUrl);
     } catch (webhookError) {
       return handleWebhookError(webhookError, fallbackImageUrl);
     }
@@ -36,21 +51,18 @@ export async function handleGenerationRequest(requestData: GenerationRequestData
  * Attempts to generate an image using the webhook
  */
 async function generateWithWebhook(
-  prompt: string, 
-  aspect_ratio: string, 
-  style: string | undefined, 
+  requestData: GenerationRequestData,
   fallbackImageUrl: string
 ): Promise<Response> {
+  // Make a copy of the request data to avoid modifying the original
+  const webhookRequestBody = { ...requestData };
+  
   const webhookResponse = await fetch(GENERATION_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      prompt,
-      aspect_ratio,
-      style
-    })
+    body: JSON.stringify(webhookRequestBody)
   });
   
   if (!webhookResponse.ok) {
@@ -62,7 +74,7 @@ async function generateWithWebhook(
   
   // Handle "Accepted" response
   if (responseText === "Accepted") {
-    return handleAcceptedResponse(prompt, fallbackImageUrl);
+    return handleAcceptedResponse(requestData.prompt, fallbackImageUrl);
   }
   
   // Try to parse as JSON
