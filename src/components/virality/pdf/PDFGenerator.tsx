@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileDown } from 'lucide-react';
 import { toPng } from 'html-to-image';
@@ -24,11 +24,41 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
   onBack
 }) => {
   const pdfRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const progressIntervalRef = useRef<number | null>(null);
+  
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
   
   const generatePDF = async () => {
     if (!pdfRef.current) return;
     
     try {
+      setIsGenerating(true);
+      
+      // Start progress animation
+      setLoadingProgress(0);
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
+      
+      progressIntervalRef.current = window.setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev < 20) return prev + 2;
+          if (prev < 50) return prev + 1;
+          if (prev < 80) return prev + 0.5;
+          if (prev < 90) return prev + 0.2;
+          return prev;
+        });
+      }, 200);
+      
       const pdf = new jsPDF('p', 'mm', 'a4', true);
       
       // Use html-to-image to convert each page to an image
@@ -47,17 +77,42 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.addImage(image, 'PNG', 0, 0, 210, 297);
       }
       
+      // Complete the progress
+      setLoadingProgress(100);
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
+      
       // Save the PDF
       pdf.save(`${strategyData.businessInfo.businessName.replace(/\s+/g, '-')}-virality-strategy.pdf`);
+      
+      // Reset generating state after a small delay for smooth UX
+      setTimeout(() => {
+        setIsGenerating(false);
+      }, 500);
+      
     } catch (error) {
       console.error('Error generating PDF:', error);
+      setIsGenerating(false);
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+      }
     }
   };
   
   return (
     <div className="space-y-6">
-      <PDFControls onGeneratePDF={generatePDF} onBack={onBack} />
-      <PDFPreviewContainer ref={pdfRef}>
+      <PDFControls 
+        onGeneratePDF={generatePDF} 
+        onBack={onBack}
+        isGenerating={isGenerating}
+      />
+      
+      <PDFPreviewContainer 
+        ref={pdfRef}
+        isGenerating={isGenerating}
+        loadingProgress={loadingProgress}
+      >
         <CoverPage 
           businessName={strategyData.businessInfo.businessName}
           tagline={strategyData.businessInfo.tagline}
@@ -93,21 +148,24 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
 const PDFControls: React.FC<{
   onGeneratePDF: () => void;
   onBack: () => void;
-}> = ({ onGeneratePDF, onBack }) => {
+  isGenerating: boolean;
+}> = ({ onGeneratePDF, onBack, isGenerating }) => {
   return (
     <div className="flex items-center justify-between mb-8">
       <Button
         variant="outline"
         onClick={onBack}
         className="border-gray-700 text-white"
+        disabled={isGenerating}
       >
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Editor
       </Button>
       <Button
         onClick={onGeneratePDF}
         className="bg-[#8c52ff] hover:bg-[#7a45e6]"
+        disabled={isGenerating}
       >
-        <FileDown className="mr-2 h-4 w-4" /> Download PDF
+        <FileDown className="mr-2 h-4 w-4" /> {isGenerating ? 'Generating...' : 'Download PDF'}
       </Button>
     </div>
   );

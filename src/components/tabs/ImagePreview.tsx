@@ -145,25 +145,16 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
 
   if (!imageUrl) return null;
 
-  return (
-    <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
-      <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
-        <span>Generated Image</span>
-        {(imageError || retryCount > 0) && (
-          <Button 
-            onClick={handleImageRetry} 
-            variant="ghost" 
-            className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Retry
-          </Button>
-        )}
-      </div>
-      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
-        {(imageLoading || isPlaceholder) && !imageError ? (
-          <div className="flex flex-col items-center justify-center w-full space-y-6">
-            <div className="relative h-24 w-24">
+  // Only show the loading state when image is loading or is a placeholder
+  if ((imageLoading || isPlaceholder) && !imageError) {
+    return (
+      <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
+        <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
+          <span>Generated Image</span>
+        </div>
+        <div className="p-4 bg-gray-900 flex flex-col items-center justify-center">
+          <div className="w-full max-w-xs flex flex-col items-center">
+            <div className="relative h-20 w-20 mb-4">
               <svg className="animate-spin h-full w-full" viewBox="0 0 100 100">
                 <defs>
                   <linearGradient id="imagePreviewGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -202,6 +193,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
                 <span className="text-xl font-bold text-white">{Math.round(loadingProgress)}%</span>
               </div>
             </div>
+            
             <div className="w-full max-w-[80%] space-y-2">
               <div className="relative h-1.5 bg-gray-800/30 rounded-full overflow-hidden">
                 <div 
@@ -209,15 +201,36 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
                   style={{ width: `${loadingProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-center text-gray-300">
+              <p className="text-sm text-center text-gray-300">
                 {processingText}
               </p>
-              <p className="text-[10px] text-center text-gray-500 mt-4 max-w-[220px] mx-auto">
-                {processingDetail}
+              <p className="text-xs text-center text-gray-500 mt-2 max-w-[280px] mx-auto">
+                {processingDetail || "Enhancing details..."}
               </p>
             </div>
           </div>
-        ) : imageError ? (
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
+      <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
+        <span>Generated Image</span>
+        {(imageError || retryCount > 0) && (
+          <Button 
+            onClick={handleImageRetry} 
+            variant="ghost" 
+            className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Retry
+          </Button>
+        )}
+      </div>
+      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
+        {imageError ? (
           <div className="text-center p-4">
             <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
             <p className="text-sm text-red-400">Failed to load image</p>
