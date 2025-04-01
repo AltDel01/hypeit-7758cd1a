@@ -6,7 +6,7 @@ import {
   dispatchImageGeneratedEvent 
 } from './image';
 import { generateFallbackImage } from './image/imageFallback';
-import type { PollImageParams } from './image/imagePolling';
+import type { PollImageParams } from './image/polling/types';
 
 // Re-export everything
 export { 

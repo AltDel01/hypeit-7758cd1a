@@ -3,3 +3,4 @@
 export * from './imageEvents';
 export * from './imageFallback';
 export * from './imagePolling';
+export * from './imageValidation';
