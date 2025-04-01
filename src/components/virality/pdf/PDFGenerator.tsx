@@ -4,30 +4,23 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileDown } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
-import { BrandIdentityFormValues } from '@/types/brand';
+import { ViralityStrategyData } from '@/hooks/useViralityStrategyForm';
 
 // Import PDF components from the pdf directory
-import CoverPage from './pdf/CoverPage';
-import BrandStoryPage from './pdf/BrandStoryPage';
-import MarketAudiencePage from './pdf/MarketAudiencePage';
-import BrandIdentityPage from './pdf/BrandIdentityPage';
-import PDFPreviewContainer from './pdf/PDFPreviewContainer';
+import CoverPage from './CoverPage';
+import BusinessOverviewPage from './BusinessOverviewPage';
+import AudiencePage from './AudiencePage';
+import ContentStrategyPage from './ContentStrategyPage';
+import EngagementPage from './EngagementPage';
+import PDFPreviewContainer from './PDFPreviewContainer';
 
 interface PDFGeneratorProps {
-  formData: BrandIdentityFormValues;
-  brandLogo: File | null;
-  productPhotos: File[];
-  selectedColors: string[];
-  selectedFont: string;
+  strategyData: ViralityStrategyData;
   onBack: () => void;
 }
 
 export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
-  formData,
-  brandLogo,
-  productPhotos,
-  selectedColors,
-  selectedFont,
+  strategyData,
   onBack
 }) => {
   const pdfRef = useRef<HTMLDivElement>(null);
@@ -55,7 +48,7 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       }
       
       // Save the PDF
-      pdf.save(`${formData.businessName.replace(/\s+/g, '-')}-brand-identity.pdf`);
+      pdf.save(`${strategyData.businessInfo.businessName.replace(/\s+/g, '-')}-virality-strategy.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
@@ -66,38 +59,30 @@ export const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       <PDFControls onGeneratePDF={generatePDF} onBack={onBack} />
       <PDFPreviewContainer ref={pdfRef}>
         <CoverPage 
-          businessName={formData.businessName}
-          brandLogo={brandLogo}
-          selectedColors={selectedColors}
-          selectedFont={selectedFont}
-          productPhotos={productPhotos}
+          businessName={strategyData.businessInfo.businessName}
+          tagline={strategyData.businessInfo.tagline}
         />
         
-        <BrandStoryPage 
-          brandStory={formData.brandStory}
-          vision={formData.vision}
-          mission={formData.mission}
-          coreValues={formData.coreValues}
-          selectedColors={selectedColors}
-          selectedFont={selectedFont}
-          productPhotos={productPhotos}
+        <BusinessOverviewPage 
+          businessInfo={strategyData.businessInfo}
+          toneOfVoice={strategyData.toneOfVoice}
         />
         
-        <MarketAudiencePage 
-          coreServices={formData.coreServices}
-          audience={formData.audience}
-          market={formData.market}
-          goals={formData.goals}
-          selectedColors={selectedColors}
-          selectedFont={selectedFont}
-          productPhotos={productPhotos}
+        <AudiencePage 
+          audience={strategyData.audience}
+          competitors={strategyData.competitors}
         />
         
-        <BrandIdentityPage 
-          businessName={formData.businessName}
-          selectedColors={selectedColors}
-          selectedFont={selectedFont}
-          brandLogo={brandLogo}
+        <ContentStrategyPage 
+          contentPillars={strategyData.contentPillars}
+          marketingFunnel={strategyData.marketingFunnel}
+          influencerStrategy={strategyData.influencerStrategy}
+        />
+        
+        <EngagementPage 
+          engagementStrategy={strategyData.engagementStrategy}
+          seoStrategy={strategyData.seoStrategy}
+          socialMediaRecommendation={strategyData.socialMediaRecommendation}
         />
       </PDFPreviewContainer>
     </div>
@@ -120,7 +105,7 @@ const PDFControls: React.FC<{
       </Button>
       <Button
         onClick={onGeneratePDF}
-        className="bg-blue-600 hover:bg-blue-700"
+        className="bg-[#8c52ff] hover:bg-[#7a45e6]"
       >
         <FileDown className="mr-2 h-4 w-4" /> Download PDF
       </Button>

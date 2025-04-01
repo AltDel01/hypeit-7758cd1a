@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Share2 } from 'lucide-react';
+import { Download, Share2, FileDown } from 'lucide-react';
 import { ViralityStrategyData } from '@/hooks/useViralityStrategyForm';
+import { PDFGenerator } from './pdf/PDFGenerator';
 
 interface ViralityStrategyResultProps {
   strategyData: ViralityStrategyData;
@@ -12,6 +13,17 @@ interface ViralityStrategyResultProps {
 const ViralityStrategyResult: React.FC<ViralityStrategyResultProps> = ({
   strategyData
 }) => {
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  
+  if (showPdfPreview) {
+    return (
+      <PDFGenerator 
+        strategyData={strategyData}
+        onBack={() => setShowPdfPreview(false)}
+      />
+    );
+  }
+  
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -20,8 +32,11 @@ const ViralityStrategyResult: React.FC<ViralityStrategyResultProps> = ({
           <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
             <Share2 className="mr-2 h-4 w-4" /> Share
           </Button>
-          <Button className="bg-green-600 hover:bg-green-700">
-            <Download className="mr-2 h-4 w-4" /> Download PDF
+          <Button 
+            className="bg-[#8c52ff] hover:bg-[#7a45e6]"
+            onClick={() => setShowPdfPreview(true)}
+          >
+            <FileDown className="mr-2 h-4 w-4" /> Generate PDF
           </Button>
         </div>
       </div>
