@@ -3,6 +3,14 @@ import { dispatchImageGeneratedEvent } from './imageEvents';
 import { toast } from "sonner";
 
 /**
+ * Interface for fallback generation options
+ */
+export interface FallbackOptions {
+  suppressToast?: boolean;
+  includeStyle?: boolean;
+}
+
+/**
  * Generates a fallback image using Unsplash
  * 
  * @param prompt - The prompt to use for generating the fallback image
@@ -20,16 +28,11 @@ export function generateFallbackImage(
     // Extract search terms from the prompt for better searching
     const searchTerms = generateSearchTerms(prompt);
     
-    // Create a cache-busting timestamp
-    const cacheBuster = Date.now();
-    
-    // Generate the appropriate Unsplash URL based on the extracted terms
-    const fallbackUrl = `https://source.unsplash.com/featured/${imageSize}/?${encodeURIComponent(searchTerms)}&t=${cacheBuster}`;
+    // Create the fallback URL
+    const fallbackUrl = createFallbackImageUrl(searchTerms, imageSize);
     
     // Show a toast message (unless suppressed)
-    if (!options.suppressToast) {
-      toast.info("Using alternative image source", { id: "fallback-image" });
-    }
+    showFallbackToastIfNeeded(options);
     
     console.log(`Fallback image URL: ${fallbackUrl} with search terms: ${searchTerms}`);
     
@@ -42,11 +45,23 @@ export function generateFallbackImage(
 }
 
 /**
- * Interface for fallback generation options
+ * Creates the Unsplash URL with appropriate search terms and cache busting
  */
-export interface FallbackOptions {
-  suppressToast?: boolean;
-  includeStyle?: boolean;
+function createFallbackImageUrl(searchTerms: string, imageSize: string): string {
+  // Create a cache-busting timestamp
+  const cacheBuster = Date.now();
+  
+  // Generate the appropriate Unsplash URL based on the extracted terms
+  return `https://source.unsplash.com/featured/${imageSize}/?${encodeURIComponent(searchTerms)}&t=${cacheBuster}`;
+}
+
+/**
+ * Shows a toast notification for fallback image generation if not suppressed
+ */
+function showFallbackToastIfNeeded(options: FallbackOptions): void {
+  if (!options.suppressToast) {
+    toast.info("Using alternative image source", { id: "fallback-image" });
+  }
 }
 
 /**
@@ -57,7 +72,7 @@ export interface FallbackOptions {
  */
 export function generateSearchTerms(prompt: string): string {
   // Clean up the prompt by removing common instruction words
-  const cleanPrompt = prompt.replace(/generate|post|wording:|image|attached|instagram story/gi, '');
+  const cleanPrompt = cleanupPrompt(prompt);
   
   // Extract key terms from the prompt
   const keyTerms = extractKeyTerms(cleanPrompt);
@@ -68,6 +83,13 @@ export function generateSearchTerms(prompt: string): string {
   
   // Combine the terms for better Unsplash results
   return combineSearchTerms(keyTerms, productType, colorTerm);
+}
+
+/**
+ * Cleans up the prompt by removing common instruction words
+ */
+function cleanupPrompt(prompt: string): string {
+  return prompt.replace(/generate|post|wording:|image|attached|instagram story/gi, '');
 }
 
 /**
@@ -116,12 +138,19 @@ function extractColorTerm(prompt: string): string {
  */
 function combineSearchTerms(keyTerms: string, productType: string, colorTerm: string): string {
   // Create a list of specific terms for better image results
-  const specificTerms = [productType, colorTerm, 'photography', 'premium']
-    .filter(Boolean) // Remove empty strings
-    .join(',');
+  const specificTerms = buildSpecificTerms(productType, colorTerm);
   
   // Use specific terms if available, otherwise use key terms or fallback
   return specificTerms || keyTerms || 'skincare,product';
+}
+
+/**
+ * Builds a comma-separated list of specific search terms
+ */
+function buildSpecificTerms(productType: string, colorTerm: string): string {
+  return [productType, colorTerm, 'photography', 'premium']
+    .filter(Boolean) // Remove empty strings
+    .join(',');
 }
 
 /**
