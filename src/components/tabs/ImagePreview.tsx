@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
+import ImageLoadingState from '@/components/ui/loading/ImageLoadingState';
+import ImageErrorState from './ImageErrorState';
 
 interface ImagePreviewProps {
   imageUrl: string | null;
@@ -16,12 +16,8 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [imageLoading, setImageLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
-  const [processingText, setProcessingText] = useState<string>("Loading image...");
-  const [processingDetail, setProcessingDetail] = useState<string>("");
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
-  const progressTextIntervalRef = useRef<number | null>(null);
-  const detailIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -44,55 +40,11 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           return prev;
         });
       }, 300);
-      
-      // Rotating processing text
-      const processingTexts = [
-        "Loading image...",
-        "Analyzing content...",
-        "Applying style...",
-        "Enhancing details...",
-        "Finalizing image..."
-      ];
-      
-      // Processing detail text
-      const detailTexts = [
-        "Analyzing image structure...",
-        "Processing visual elements...",
-        "Optimizing for quality...",
-        "Our AI is carefully transforming your image. This typically takes around 60 seconds to ensure the highest quality results."
-      ];
-      
-      let textIndex = 0;
-      let detailIndex = 0;
-      
-      if (progressTextIntervalRef.current) {
-        window.clearInterval(progressTextIntervalRef.current);
-      }
-      
-      if (detailIntervalRef.current) {
-        window.clearInterval(detailIntervalRef.current);
-      }
-      
-      progressTextIntervalRef.current = window.setInterval(() => {
-        textIndex = (textIndex + 1) % processingTexts.length;
-        setProcessingText(processingTexts[textIndex]);
-      }, 3000);
-      
-      detailIntervalRef.current = window.setInterval(() => {
-        detailIndex = (detailIndex + 1) % detailTexts.length;
-        setProcessingDetail(detailTexts[detailIndex]);
-      }, 5000);
     }
     
     return () => {
       if (progressIntervalRef.current) {
         window.clearInterval(progressIntervalRef.current);
-      }
-      if (progressTextIntervalRef.current) {
-        window.clearInterval(progressTextIntervalRef.current);
-      }
-      if (detailIntervalRef.current) {
-        window.clearInterval(detailIntervalRef.current);
       }
     };
   }, [imageUrl]);
@@ -106,12 +58,6 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
     }
-    if (progressTextIntervalRef.current) {
-      window.clearInterval(progressTextIntervalRef.current);
-    }
-    if (detailIntervalRef.current) {
-      window.clearInterval(detailIntervalRef.current);
-    }
   };
 
   const handleImageError = () => {
@@ -121,12 +67,6 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
-    }
-    if (progressTextIntervalRef.current) {
-      window.clearInterval(progressTextIntervalRef.current);
-    }
-    if (detailIntervalRef.current) {
-      window.clearInterval(detailIntervalRef.current);
     }
     
     // Auto-retry once for Unsplash images
@@ -145,77 +85,8 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
 
   if (!imageUrl) return null;
 
-  // Only show the loading state when image is loading or is a placeholder
-  if ((imageLoading || isPlaceholder) && !imageError) {
-    return (
-      <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
-        <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
-          <span>Generated Image</span>
-        </div>
-        <div className="p-4 bg-gray-900 flex flex-col items-center justify-center">
-          <div className="w-full max-w-xs flex flex-col items-center">
-            <div className="relative h-20 w-20 mb-4">
-              <svg className="animate-spin h-full w-full" viewBox="0 0 100 100">
-                <defs>
-                  <linearGradient id="imagePreviewGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#9b87f5" />
-                    <stop offset="50%" stopColor="#8c52ff" />
-                    <stop offset="100%" stopColor="#D946EF" />
-                  </linearGradient>
-                  <filter id="imagePreviewGlow">
-                    <feGaussianBlur stdDeviation="3.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-                <circle 
-                  className="opacity-10" 
-                  cx="50" 
-                  cy="50" 
-                  r="45" 
-                  stroke="#ffffff" 
-                  strokeWidth="8" 
-                  fill="none" 
-                />
-                <circle 
-                  cx="50" 
-                  cy="50" 
-                  r="45" 
-                  stroke="url(#imagePreviewGradient)" 
-                  strokeWidth="8" 
-                  fill="none" 
-                  strokeDasharray="283" 
-                  strokeDashoffset={283 * (1 - loadingProgress / 100)} 
-                  filter="url(#imagePreviewGlow)"
-                  className="drop-shadow-[0_0_8px_rgba(140,82,255,0.8)]"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl font-bold text-white">{Math.round(loadingProgress)}%</span>
-              </div>
-            </div>
-            
-            <div className="w-full max-w-[80%] space-y-2">
-              <div className="relative h-1.5 bg-gray-800/30 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF] rounded-full transition-all"
-                  style={{ width: `${loadingProgress}%` }}
-                />
-              </div>
-              <p className="text-sm text-center text-gray-300">
-                {processingText}
-              </p>
-              <p className="text-xs text-center text-gray-500 mt-2 max-w-[280px] mx-auto">
-                {processingDetail || "Enhancing details..."}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
+    <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
       <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
         <span>Generated Image</span>
         {(imageError || retryCount > 0) && (
@@ -229,19 +100,15 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           </Button>
         )}
       </div>
+      
       <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
-        {imageError ? (
-          <div className="text-center p-4">
-            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-            <p className="text-sm text-red-400">Failed to load image</p>
-            <Button 
-              onClick={handleImageRetry}
-              className="mt-2 bg-[#8c52ff] hover:bg-[#7a45e6] text-xs flex items-center gap-1"
-            >
-              <RefreshCw className="h-3 w-3" />
-              Retry Loading
-            </Button>
-          </div>
+        {(imageLoading || isPlaceholder) && !imageError ? (
+          <ImageLoadingState 
+            loadingProgress={loadingProgress}
+            setLoadingProgress={setLoadingProgress}
+          />
+        ) : imageError ? (
+          <ImageErrorState onRetry={handleImageRetry} />
         ) : (
           <img 
             ref={imageRef}
