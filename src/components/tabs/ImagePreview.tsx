@@ -18,6 +18,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -37,6 +38,15 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           if (prev < 50) return prev + 0.5;
           if (prev < 80) return prev + 0.2;
           if (prev < 90) return prev + 0.1;
+          if (prev >= 95) {
+            // If stuck at high percentage for too long, force completion or show error
+            if (timeoutRef.current === null) {
+              timeoutRef.current = window.setTimeout(() => {
+                console.log("Loading timeout reached, forcing retry");
+                handleImageRetry();
+              }, 15000); // 15 seconds timeout if stuck at high percentage
+            }
+          }
           return prev;
         });
       }, 300);
@@ -45,6 +55,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     return () => {
       if (progressIntervalRef.current) {
         window.clearInterval(progressIntervalRef.current);
+      }
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
   }, [imageUrl]);
@@ -58,6 +72,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
     }
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   };
 
   const handleImageError = () => {
@@ -68,6 +86,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
     }
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     
     // Auto-retry once for Unsplash images
     if (imageUrl?.includes('unsplash.com') && retryCount === 0) {
@@ -76,6 +98,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   };
 
   const handleImageRetry = () => {
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     setRetryCount(prev => prev + 1);
     setImageLoading(true);
     onRetry();
@@ -83,13 +109,27 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
 
   const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
 
+  // Set up a global timeout to ensure we don't get stuck perpetually
+  useEffect(() => {
+    const globalTimeout = window.setTimeout(() => {
+      if (imageLoading && loadingProgress >= 90) {
+        console.log("Global timeout reached for image loading");
+        handleImageRetry();
+      }
+    }, 30000); // 30 seconds max loading time
+    
+    return () => {
+      window.clearTimeout(globalTimeout);
+    };
+  }, [imageLoading, loadingProgress]);
+
   if (!imageUrl) return null;
 
   return (
     <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
       <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
         <span>Generated Image</span>
-        {(imageError || retryCount > 0) && (
+        {(imageError || retryCount > 0 || loadingProgress > 90) && (
           <Button 
             onClick={handleImageRetry} 
             variant="ghost" 

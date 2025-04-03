@@ -85,6 +85,7 @@ export async function handleStatusCheckResult(
   
   // Handle different status responses
   if (result.status === "processing" || result.status === "accepted") {
+    console.log(`Image still processing, scheduling next poll in ${delay}ms`);
     scheduleNextPoll({
       requestId, prompt, aspectRatio, style,
       retries: retries - 1, delay, maxRetries: params.maxRetries
@@ -94,11 +95,20 @@ export async function handleStatusCheckResult(
   
   // If we got an error from the API
   if (result.apiError) {
+    console.log(`Received API error: ${result.apiError}`);
     handleApiError(result.apiError, prompt, aspectRatio);
     return;
   }
   
+  // If we don't know the status or it's an unexpected status, use fallback
+  if (!result.status || (result.status !== "completed" && result.status !== "processing" && result.status !== "accepted")) {
+    console.log(`Unexpected status: ${result.status}, using fallback image`);
+    handleApiError("Unexpected response from server", prompt, aspectRatio);
+    return;
+  }
+  
   // If we don't know the status, continue polling with a shorter retry count
+  console.log(`Unknown status: ${result.status}, continuing polling`);
   scheduleNextPoll({
     requestId, prompt, aspectRatio, style,
     retries: retries - 1, delay, maxRetries: params.maxRetries
@@ -120,7 +130,8 @@ function handleApiError(error: any, prompt: string, aspectRatio: string): void {
  * Schedules the next polling attempt
  */
 function scheduleNextPoll(params: PollImageParams): void {
-  setTimeout(() => pollForImageResult(params), params.delay);
+  // Use setTimeout instead of direct recursion to prevent stack overflow
+  setTimeout(() => pollForImageResult(params), 50);
 }
 
 /**
@@ -130,6 +141,13 @@ export function handlePollingError(error: any, params: PollImageParams): void {
   console.error("Error in polling:", error);
   // Use a shorter retry interval when there are exceptions
   const shorterDelay = Math.max(1000, params.delay / 2);
+  
+  // If we've had multiple errors, use a fallback
+  if (params.retries <= 3) {
+    console.log("Too many polling errors, using fallback image");
+    handleMaxRetriesReached(params.prompt, params.aspectRatio);
+    return;
+  }
   
   setTimeout(() => pollForImageResult({
     ...params,
