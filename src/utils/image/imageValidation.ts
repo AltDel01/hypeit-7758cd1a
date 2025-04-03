@@ -9,7 +9,7 @@
  * @param url - The URL to check
  * @returns True if the URL is valid and not a placeholder
  */
-export function isValidImageUrl(url: string): boolean {
+export function checkValidImageUrl(url: string): boolean {
   if (!url) return false;
   
   // Check if it's not a placeholder image
@@ -28,7 +28,7 @@ export function isValidImageUrl(url: string): boolean {
  */
 export function validateImageUrl(url: string): Promise<boolean> {
   return new Promise((resolve) => {
-    if (!isValidImageUrl(url)) {
+    if (!checkValidImageUrl(url)) {
       resolve(false);
       return;
     }
