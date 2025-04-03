@@ -14,13 +14,19 @@ export async function handlePollingRequest(requestData: {
   console.log(`Polling for image status, requestId: ${requestId}, checkOnly: ${checkOnly}`);
   
   try {
-    // For direct status checks (without webhook), return a mock response
+    // For direct status checks (without webhook), return a completed response
     if (checkOnly) {
       return handleDirectStatusCheck(prompt);
     }
     
-    // Make the status check request to the Make.com webhook
-    return await checkStatusWithWebhook(requestId, prompt);
+    // Make the status check request to the webhook
+    try {
+      return await checkStatusWithWebhook(requestId, prompt);
+    } catch (webhookError) {
+      console.error("Webhook status check failed:", webhookError);
+      // Fall back to direct check if webhook fails
+      return handleDirectStatusCheck(prompt);
+    }
   } catch (error) {
     return handlePollingError(error, prompt);
   }
@@ -30,8 +36,7 @@ export async function handlePollingRequest(requestData: {
  * Handles direct status checks without calling the webhook
  */
 function handleDirectStatusCheck(prompt: string): Response {
-  console.log("Providing mock response for status check");
-  // This simulates a completed image generation
+  console.log("Providing fallback response for status check");
   const fallbackImageUrl = generateUnsplashUrl(prompt);
   
   return new Response(
@@ -48,71 +53,60 @@ function handleDirectStatusCheck(prompt: string): Response {
  * Checks the status of an image generation with the webhook
  */
 async function checkStatusWithWebhook(requestId: string, prompt: string): Promise<Response> {
-  const statusResponse = await fetch(`${POLL_ENDPOINT}?requestId=${requestId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+  // Set a timeout for the webhook request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
   
-  if (!statusResponse.ok) {
-    throw new Error(`Status check error: ${statusResponse.statusText}`);
-  }
-  
-  // Try to parse the response as JSON
   try {
-    return await handleJsonStatusResponse(statusResponse, prompt);
-  } catch (jsonError) {
-    // If not JSON, handle as text
-    return await handleTextStatusResponse(statusResponse, prompt);
-  }
-}
-
-/**
- * Handles JSON status responses
- */
-async function handleJsonStatusResponse(response: Response, prompt: string): Promise<Response> {
-  const statusData = await response.json();
-  console.log("Status response:", statusData);
-  
-  // If completed but no image URL, generate a fallback
-  if (statusData.status === "completed" && !statusData.imageUrl) {
-    const fallbackImageUrl = generateUnsplashUrl(prompt);
-    statusData.imageUrl = fallbackImageUrl;
-    statusData.message = "Generated using Unsplash (fallback)";
-  }
-  
-  return new Response(
-    JSON.stringify(statusData),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
-}
-
-/**
- * Handles text status responses
- */
-async function handleTextStatusResponse(response: Response, prompt: string): Promise<Response> {
-  const textResponse = await response.text();
-  console.log("Status response text:", textResponse);
-  
-  // If the response is "completed", generate a fallback
-  if (textResponse.toLowerCase().includes("completed")) {
-    const fallbackImageUrl = generateUnsplashUrl(prompt);
+    const statusResponse = await fetch(`${POLL_ENDPOINT}?requestId=${requestId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      signal: controller.signal
+    });
     
-    return new Response(
-      JSON.stringify({ 
-        status: "completed", 
-        imageUrl: fallbackImageUrl,
-        message: "Generated using Unsplash"
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    clearTimeout(timeoutId);
+    
+    if (!statusResponse.ok) {
+      throw new Error(`Status check error: ${statusResponse.statusText}`);
+    }
+    
+    // Try to parse the response as JSON
+    try {
+      const statusData = await statusResponse.json();
+      console.log("Status response:", statusData);
+      
+      // If completed but no image URL, generate a fallback
+      if (statusData.status === "completed" && !statusData.imageUrl) {
+        const fallbackImageUrl = generateUnsplashUrl(prompt);
+        statusData.imageUrl = fallbackImageUrl;
+        statusData.message = "Generated using Unsplash (fallback)";
+      }
+      
+      return new Response(
+        JSON.stringify(statusData),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (jsonError) {
+      // If not JSON, handle as text
+      const textResponse = await statusResponse.text();
+      console.log("Status response text:", textResponse);
+      
+      const fallbackImageUrl = generateUnsplashUrl(prompt);
+      
+      return new Response(
+        JSON.stringify({ 
+          status: "completed", 
+          imageUrl: fallbackImageUrl,
+          message: "Generated using Unsplash (text response fallback)"
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  } finally {
+    clearTimeout(timeoutId);
   }
-  
-  return new Response(
-    JSON.stringify({ status: textResponse }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 /**
@@ -121,7 +115,7 @@ async function handleTextStatusResponse(response: Response, prompt: string): Pro
 function handlePollingError(error: unknown, prompt: string): Response {
   console.error("Error polling for status:", error);
   
-  // Use fallback image generator for any polling errors
+  // Always use fallback image generator for any polling errors
   const fallbackImageUrl = generateUnsplashUrl(prompt);
   
   return new Response(

@@ -19,6 +19,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const loadingTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -31,6 +32,22 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         window.clearInterval(progressIntervalRef.current);
       }
       
+      // Clear any existing timeouts
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+      }
+      
+      // Set a hard timeout for loading
+      loadingTimeoutRef.current = window.setTimeout(() => {
+        console.log("Hard loading timeout reached, triggering retry");
+        handleImageRetry();
+      }, 60000); // 60 seconds maximum total loading time
+      
       // Realistic progress animation
       progressIntervalRef.current = window.setInterval(() => {
         setLoadingProgress(prev => {
@@ -38,16 +55,15 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           if (prev < 50) return prev + 0.5;
           if (prev < 80) return prev + 0.2;
           if (prev < 90) return prev + 0.1;
-          if (prev >= 95) {
-            // If stuck at high percentage for too long, force completion or show error
-            if (timeoutRef.current === null) {
-              timeoutRef.current = window.setTimeout(() => {
-                console.log("Loading timeout reached, forcing retry");
-                handleImageRetry();
-              }, 15000); // 15 seconds timeout if stuck at high percentage
-            }
+          // Force timeout if stuck at 90+ for too long
+          if (prev >= 90 && timeoutRef.current === null) {
+            console.log("Progress stuck at 90+%, setting timeout");
+            timeoutRef.current = window.setTimeout(() => {
+              console.log("Loading timeout reached, forcing retry");
+              handleImageRetry();
+            }, 12000); // 12 seconds timeout if stuck at high percentage
           }
-          return prev;
+          return prev < 95 ? prev + 0.05 : prev;
         });
       }, 300);
     }
@@ -59,6 +75,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
+      }
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
       }
     };
   }, [imageUrl]);
@@ -76,6 +96,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
   };
 
   const handleImageError = () => {
@@ -90,40 +114,36 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
     
-    // Auto-retry once for Unsplash images
-    if (imageUrl?.includes('unsplash.com') && retryCount === 0) {
-      setTimeout(() => handleImageRetry(), 500);
+    // Auto-retry once for images
+    if (retryCount === 0) {
+      setTimeout(() => handleImageRetry(), 1000);
     }
   };
 
   const handleImageRetry = () => {
+    console.log("Handling image retry");
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    
     setRetryCount(prev => prev + 1);
+    setLoadingProgress(0);
     setImageLoading(true);
+    setImageError(false);
     onRetry();
   };
 
   const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
-
-  // Set up a global timeout to ensure we don't get stuck perpetually
-  useEffect(() => {
-    const globalTimeout = window.setTimeout(() => {
-      if (imageLoading && loadingProgress >= 90) {
-        console.log("Global timeout reached for image loading");
-        handleImageRetry();
-      }
-    }, 30000); // 30 seconds max loading time
-    
-    return () => {
-      window.clearTimeout(globalTimeout);
-    };
-  }, [imageLoading, loadingProgress]);
-
-  if (!imageUrl) return null;
 
   return (
     <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
