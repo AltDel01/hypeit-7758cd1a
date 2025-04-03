@@ -5,7 +5,7 @@ import { checkImageStatus } from "./statusChecker";
 import { delayExecution } from "./helpers";
 import { processImageUrl } from "./imageProcessor";
 import { useFallbackImage } from "./fallbackHandler";
-import { isValidImageUrl } from '../imageValidation';
+import { checkValidImageUrl } from '../imageValidation';
 
 /**
  * Main function that polls for the result of an image generation request
@@ -78,7 +78,7 @@ export async function handleStatusCheckResult(
   }
   
   // If we have an image URL, validate and use it
-  if (result.imageUrl && isValidImageUrl(result.imageUrl)) {
+  if (result.imageUrl && checkValidImageUrl(result.imageUrl)) {
     await processImageUrl(result.imageUrl, prompt);
     return;
   }
