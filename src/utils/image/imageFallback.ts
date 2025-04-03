@@ -1,6 +1,7 @@
 
 import { dispatchImageGeneratedEvent } from './imageEvents';
 import { toast } from "sonner";
+import { checkValidImageUrl } from './imageValidation';
 
 /**
  * Interface for fallback generation options
@@ -177,8 +178,8 @@ function handleFallbackError(prompt: string): void {
  * @param url - The URL to validate
  * @returns True if the URL is valid and not a placeholder
  */
-export function isValidImageUrl(url: string): boolean {
-  if (!url) return false;
+export function isValidNonPlaceholderImage(url: string): boolean {
+  if (!checkValidImageUrl(url)) return false;
   
   // Check if it's not a placeholder image
   if (url.includes('placeholder.com') || url.includes('Generating+Image')) {

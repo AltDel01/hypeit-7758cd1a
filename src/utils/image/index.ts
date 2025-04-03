@@ -13,5 +13,5 @@ export * from './imageEvents';
 export * from './imageFallback';
 
 // Re-export image validation
-export * from './imageValidation';
-
+// Use named imports to avoid the naming conflict with isValidImageUrl
+export { checkValidImageUrl } from './imageValidation';
