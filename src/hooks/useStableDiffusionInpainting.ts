@@ -144,7 +144,9 @@ export function useStableDiffusionInpainting() {
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
     } finally {
-      setIsGenerating(false);
+        console.log("Entering finally block..."); // <-- Tambahkan
+  setIsGenerating(false);
+  console.log("setIsGenerating(false) called.");
     }
   };
   
