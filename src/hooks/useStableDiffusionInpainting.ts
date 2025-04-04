@@ -1,140 +1,147 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from "sonner";
-// Pastikan path service benar dan service ini HANYA punya sendImageToWebhook
-// dan mungkin fungsi pembantu untuk webhook, BUKAN inpaint lokal.
 import stableDiffusionService from '@/services/StableDiffusionService';
 
-// --- Nama Event yang Harus Dipicu oleh Backend/Webhook Anda ---
-// Pastikan nama dan struktur detail event ({ imageUrl: '...' }) konsisten
 const RESULT_EVENT_NAME = 'stableDiffusionResultReady';
-// ---
+const LOADING_TIMEOUT_MS = 3000; // 3 seconds
 
 export function useStableDiffusionInpainting() {
-  // == State untuk Input yang Dikirim ke Webhook ==
+  // == State == (Keep existing state)
   const [originalImage, setOriginalImage] = useState<File | null>(null);
-  const [maskImage, setMaskImage] = useState<File | null>(null); // Jaga jika webhook perlu mask
+  const [maskImage, setMaskImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState<string>("");
   const [negativePrompt, setNegativePrompt] = useState<string>("");
   const [numInferenceSteps, setNumInferenceSteps] = useState<number>(25);
   const [guidanceScale, setGuidanceScale] = useState<number>(7.5);
-
-  // == State untuk Hasil dan Status ==
-  const [resultImage, setResultImage] = useState<string | null>(null); // URL gambar hasil dari webhook
-  const [isGenerating, setIsGenerating] = useState<boolean>(false); // Status loading utama
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [generationStartTime, setGenerationStartTime] = useState<number>(0); // Untuk menghitung waktu (opsional)
+  const [generationStartTime, setGenerationStartTime] = useState<number>(0);
 
-  // == Fungsi untuk Mengirim Request ke Webhook ==
+  // == Ref for the Timeout ==
+  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null); // Use NodeJS.Timeout for type safety, or number
+
+  // == Clear Timeout Function ==
+  const clearLoadingTimeout = useCallback(() => {
+    if (loadingTimerRef.current) {
+      clearTimeout(loadingTimerRef.current);
+      loadingTimerRef.current = null;
+      console.log("<<< HOOK: Cleared loading timeout >>>");
+    }
+  }, []);
+
+  // == Function to Send Request ==
   const generateInpaintedImage = useCallback(async () => {
-    // Validasi input minimal yang dibutuhkan oleh webhook Anda
+    // ... (keep existing validation logic) ...
     const missingItems = [];
     if (!originalImage) missingItems.push("original image");
-    if (!maskImage) missingItems.push("mask image"); // Hapus jika webhook tidak pakai mask
+    if (!maskImage) missingItems.push("mask image");
     if (!prompt) missingItems.push("prompt");
 
     if (missingItems.length > 0) {
       const errorMsg = `Please provide: ${missingItems.join(", ")}`;
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
-      return; // Hentikan jika input tidak lengkap
+      return;
     }
 
-    // --- Memulai Proses ---
+    // --- Start Process ---
     setIsGenerating(true);
-    setResultImage(null); // Hapus hasil sebelumnya
+    setResultImage(null);
     setErrorMessage(null);
     setGenerationStartTime(Date.now());
+    clearLoadingTimeout(); // Clear any previous timeout
 
     toast.info("Sending image generation request...");
     console.log("Sending request to webhook with prompt:", prompt);
 
     try {
-      // Panggil fungsi service yang mengirim data ke webhook
+      // Send request (this part remains the same)
       await stableDiffusionService.sendImageToWebhook({
         image: originalImage,
-        mask: maskImage, // Kirim mask jika diperlukan webhook
+        mask: maskImage,
         prompt,
         negative_prompt: negativePrompt,
         num_inference_steps: numInferenceSteps,
         guidance_scale: guidanceScale,
-        // Tambahkan parameter lain jika webhook Anda membutuhkannya
       });
 
-      console.log("Request successfully sent to webhook. Waiting for result event...");
-      // JANGAN setIsGenerating(false) di sini. Kita menunggu event hasil.
+      console.log("Request sent. Waiting for result event OR timeout...");
+
+      // --- Start the Timeout ---
+      // Force stop loading after LOADING_TIMEOUT_MS milliseconds
+      loadingTimerRef.current = setTimeout(() => {
+        console.log(`<<< HOOK: ${LOADING_TIMEOUT_MS / 1000}s timeout elapsed. Forcing loading stop. >>>`);
+        // Check if it wasn't already stopped by the event or an error
+        // Setting state is safe, React handles batching/idempotency
+        setIsGenerating(false);
+        loadingTimerRef.current = null; // Clear ref after execution
+      }, LOADING_TIMEOUT_MS);
+      console.log(`<<< HOOK: Timeout set for ${LOADING_TIMEOUT_MS / 1000} seconds >>>`);
 
     } catch (error) {
-      // Tangani error jika PENGIRIMAN AWAL ke webhook gagal
+      // Handle initial send error
       console.error("Error sending request to webhook:", error);
       const errorMsg = `Failed to send request: ${error instanceof Error ? error.message : String(error)}`;
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
-      setIsGenerating(false); // Hentikan loading karena request awal gagal
+      setIsGenerating(false); // Stop loading on send error
+      clearLoadingTimeout(); // Clear timeout if sending failed
     }
-    // Tidak ada `finally` yang mengontrol isGenerating di sini
-    // Status loading akan dihentikan oleh event listener di bawah
+    // No finally block setting isGenerating
   }, [
     originalImage,
-    maskImage, // Tambahkan sebagai dependency jika digunakan
+    maskImage,
     prompt,
     negativePrompt,
     numInferenceSteps,
-    guidanceScale
-  ]); // Sertakan semua state input sebagai dependency
+    guidanceScale,
+    clearLoadingTimeout // Add clear function to dependencies
+  ]);
 
-  // == Listener untuk Menerima Hasil dari Webhook via Custom Event (dengan Debugging Logs) ==
+  // == Listener for Actual Result Event ==
   useEffect(() => {
     const handleResultReady = (event: Event) => {
-      // --- Log: Handler Called ---
       console.log("<<< HOOK: handleResultReady CALLED >>>", event.detail);
+      clearLoadingTimeout(); // <<< Clear the timeout if the event arrives first
 
       const customEvent = event as CustomEvent<{ imageUrl: string; [key: string]: any }>;
 
       if (customEvent.detail && typeof customEvent.detail.imageUrl === 'string') {
-        // --- Log: Valid Data Received ---
-        console.log(`<<< HOOK: Received image URL: ${customEvent.detail.imageUrl.substring(0,50)}... >>>`);
+        console.log(`<<< HOOK: Received image URL via event: ${customEvent.detail.imageUrl.substring(0,50)}... >>>`);
         setResultImage(customEvent.detail.imageUrl);
         toast.success("Image generated successfully!");
-
-        // --- Log: Before Setting State ---
-        console.log("<<< HOOK: Calling setIsGenerating(false) >>>");
-        setIsGenerating(false); // <<< KUNCI: Hentikan Loading di Sini
-        // --- Log: After Setting State ---
-        console.log("<<< HOOK: setIsGenerating(false) EXECUTED >>>");
-
+        setIsGenerating(false); // Stop loading (might be redundant if timeout already fired, but safe)
       } else {
-        // --- Log: Invalid Data Received ---
         console.warn(`<<< HOOK: Received event, but detail format incorrect >>>:`, customEvent.detail);
         setErrorMessage("Received invalid result data from webhook.");
         toast.error("Received invalid result data.");
-        setIsGenerating(false); // Hentikan loading meskipun data salah
+        setIsGenerating(false); // Stop loading even if data is bad
       }
     };
 
-    // --- Log: Adding Listener ---
     console.log(`<<< HOOK: Adding listener for ${RESULT_EVENT_NAME} >>>`);
     window.addEventListener(RESULT_EVENT_NAME, handleResultReady);
 
-    // Cleanup: Hapus listener saat komponen unmount atau hook tidak lagi digunakan
+    // Cleanup
     return () => {
-      // --- Log: Removing Listener ---
       console.log(`<<< HOOK: Removing listener for ${RESULT_EVENT_NAME} >>>`);
       window.removeEventListener(RESULT_EVENT_NAME, handleResultReady);
+      clearLoadingTimeout(); // <<< Clear timeout on unmount
     };
-  }, []); // Array dependency kosong agar listener hanya ditambahkan/dihapus sekali
+  }, [clearLoadingTimeout]); // Add clear function to dependencies
 
-  // == Kalkulasi Waktu (Opsional) ==
+  // == Kalkulasi Waktu (Optional - keep as is) ==
   const generationTime = isGenerating && generationStartTime > 0
     ? Math.max(1, Math.floor((Date.now() - generationStartTime) / 1000))
-    : null; // Tampilkan null atau 0 jika tidak sedang generate
+    : null;
 
-  // == Nilai yang Dikembalikan oleh Hook ==
+  // == Return Values == (Keep as is)
   return {
-    // State Input
     originalImage,
     setOriginalImage,
-    maskImage, // Kembalikan jika Anda masih membutuhkannya di UI
-    setMaskImage, // Kembalikan jika Anda masih membutuhkannya di UI
+    maskImage,
+    setMaskImage,
     prompt,
     setPrompt,
     negativePrompt,
@@ -143,14 +150,10 @@ export function useStableDiffusionInpainting() {
     setNumInferenceSteps,
     guidanceScale,
     setGuidanceScale,
-
-    // State Output & Status
     resultImage,
     isGenerating,
     errorMessage,
-    generationTime, // Waktu berlalu (opsional)
-
-    // Aksi Utama
+    generationTime,
     generateInpaintedImage,
   };
 }
