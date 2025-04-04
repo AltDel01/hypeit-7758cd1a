@@ -20,4 +20,5 @@ export interface ImageGenerationResponse {
   imageUrl?: string;
   error?: string;
   message?: string;
+  isWebhook?: boolean;
 }

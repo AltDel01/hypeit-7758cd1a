@@ -27,17 +27,28 @@ export async function handleGenerationRequest(requestData: any) {
     
     // Store the request in a database or cache
     // This is where you would typically call your AI model or image generation service
-    // For now, we'll just return an "accepted" status with a placeholder image
+    
+    // Determine if this is a product image or image reference request
+    const isReferenceImage = !!image_reference;
+    const isProductImage = !!product_image;
+    const useWebhook = isReferenceImage || isProductImage;
+    
+    console.log(`Request type - Reference image: ${isReferenceImage}, Product image: ${isProductImage}, Using webhook: ${useWebhook}`);
     
     // For demo purposes, we create a placeholder image URL
     let placeholderUrl;
     
-    // If there's a product image or image reference, we can use a different placeholder
-    if (product_image || image_reference) {
+    // Choose a placeholder URL based on request type
+    if (isReferenceImage) {
+      placeholderUrl = "https://via.placeholder.com/600x600?text=Processing+Reference+Image...";
+    } else if (isProductImage) {
       placeholderUrl = "https://via.placeholder.com/600x600?text=Processing+Product+Image...";
     } else {
       placeholderUrl = generateUnsplashUrl(prompt);
     }
+    
+    // Add a timestamp to prevent caching
+    placeholderUrl = `${placeholderUrl}${placeholderUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
     
     // Return an "accepted" status with the request ID
     return new Response(
@@ -45,7 +56,8 @@ export async function handleGenerationRequest(requestData: any) {
         status: "accepted",
         requestId,
         imageUrl: placeholderUrl,
-        message: "Image generation request accepted and processing in background",
+        message: `Image generation request accepted and processing ${useWebhook ? "with webhook" : "in background"}`,
+        isWebhook: useWebhook
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

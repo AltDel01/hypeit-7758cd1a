@@ -9,6 +9,7 @@ export interface PollImageParams {
   style?: string;
   imageReference?: string;
   mimeType?: string;
+  forceWebhook?: boolean;
 }
 
 /**
@@ -20,4 +21,17 @@ export interface ImageStatusResult {
   apiError?: string;
   error?: any;
   data?: any;
+  isWebhook?: boolean;
+}
+
+/**
+ * Interface for webhook payload
+ */
+export interface WebhookPayload {
+  requestId: string;
+  prompt: string;
+  imageReference?: string;
+  mimeType?: string;
+  aspectRatio?: string;
+  style?: string;
 }

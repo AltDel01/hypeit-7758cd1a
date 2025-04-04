@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
@@ -26,8 +27,15 @@ export class GeminiImageService {
         style
       };
       
+      // Check if using webhook
+      const useWebhook = !!productImage || !!imageReference;
+      if (useWebhook) {
+        requestBody.use_webhook = true;
+      }
+      
       // If imageReference is provided, add it to the request
       if (imageReference) {
+        console.log("Including image reference in request");
         requestBody.image_reference = imageReference;
         requestBody.mime_type = mimeType || "image/png";
       }
@@ -49,6 +57,7 @@ export class GeminiImageService {
       }
       
       // Call the Supabase edge function
+      console.log("Calling generate-image function with payload:", JSON.stringify(requestBody).substring(0, 500) + "...");
       const { data, error } = await supabase.functions.invoke("generate-image", {
         body: requestBody
       });
@@ -77,8 +86,16 @@ export class GeminiImageService {
         // Return the placeholder image URL for immediate display
         const placeholderUrl = response.imageUrl || "https://via.placeholder.com/600x600?text=Generating+Image...";
         
-        // Start polling in the background
-        this.startPolling(response.requestId, prompt, aspectRatio, style, imageReference, mimeType);
+        // Start polling in the background with the correct parameters
+        this.startPolling(
+          response.requestId, 
+          prompt, 
+          aspectRatio, 
+          style, 
+          imageReference, 
+          mimeType, 
+          response.isWebhook || useWebhook
+        );
         
         // Immediately dispatch an event with the placeholder image
         dispatchImageGeneratedEvent(placeholderUrl, prompt);
@@ -123,9 +140,19 @@ export class GeminiImageService {
    * @param style - The style of the generated image (optional)
    * @param imageReference - Reference image in base64 format (optional)
    * @param mimeType - Mime type of the reference image (optional)
+   * @param forceWebhook - Force using webhook even if no reference image
    */
-  private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string, imageReference?: string, mimeType?: string): void {
+  private static startPolling(
+    requestId: string, 
+    prompt: string, 
+    aspectRatio: string, 
+    style?: string, 
+    imageReference?: string, 
+    mimeType?: string,
+    forceWebhook?: boolean
+  ): void {
     console.log(`Starting polling for generated image with requestId: ${requestId}`);
+    console.log(`Webhook: ${forceWebhook}, Image reference: ${!!imageReference}`);
     
     pollForImageResult({
       requestId,
@@ -133,7 +160,8 @@ export class GeminiImageService {
       aspectRatio,
       style,
       imageReference,
-      mimeType
+      mimeType,
+      forceWebhook
     });
   }
   

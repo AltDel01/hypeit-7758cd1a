@@ -1,13 +1,17 @@
+
 import { checkImageStatus } from './statusChecker';
 import { processImageUrl } from './imageProcessor';
 import { generateFallbackImage } from '../imageFallback';
 import type { PollImageParams } from './types';
 
 // Maximum number of polling attempts before falling back
-const MAX_POLLING_ATTEMPTS = 12;
+const MAX_POLLING_ATTEMPTS = 15;
 
 // Delay between polling attempts in milliseconds
-const POLLING_DELAY = 5000;
+const POLLING_DELAY = 4000;
+
+// Maximum time for polling in milliseconds
+const MAX_POLLING_TIME = 90000; // 90 seconds
 
 /**
  * Polls for image generation result
@@ -18,11 +22,15 @@ export async function pollForImageResult({
   aspectRatio = "1:1",
   style,
   imageReference,
-  mimeType
+  mimeType,
+  forceWebhook
 }: PollImageParams): Promise<void> {
   let attempts = 0;
+  const startTime = Date.now();
+  let isWebhook = !!forceWebhook || !!imageReference;
   
   console.log(`Starting polling for request ${requestId} with prompt: "${prompt}"`);
+  console.log(`Using webhook: ${isWebhook}, Reference image: ${!!imageReference}`);
   
   // Function to check status with retry logic
   const checkStatus = async () => {
@@ -30,8 +38,16 @@ export async function pollForImageResult({
       attempts++;
       console.log(`Polling attempt ${attempts} for request ${requestId}`);
       
+      // Check if we've exceeded the maximum polling time
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime > MAX_POLLING_TIME) {
+        console.warn(`Maximum polling time of ${MAX_POLLING_TIME}ms exceeded for request ${requestId}`);
+        generateFallbackImage(prompt, aspectRatio.replace(':', 'x'));
+        return;
+      }
+      
       // Check image status
-      const result = await checkImageStatus(requestId);
+      const result = await checkImageStatus(requestId, isWebhook, imageReference, mimeType);
       
       // If we got a completed status with an image URL
       if (result.status === "completed" && result.imageUrl) {
