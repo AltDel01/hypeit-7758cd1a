@@ -94,6 +94,7 @@ const Index = () => {
       console.error("Error generating image:", error);
       Sentry.captureException(error);
       toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
+      setIsGenerating(false);    
     } finally {
       // Don't set isGenerating to false here - it will be set when the image is actually received
       // via the imageGenerated event to prevent premature completion
