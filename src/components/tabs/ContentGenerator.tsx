@@ -128,7 +128,7 @@ const ContentGenerator = ({
         setLocalGeneratedImage(newUrl);
       } else {
         // For other URLs, just add a cache buster
-        const imageWithCacheBuster = addCacheBusterToUrl(localGeneratedImage, timestamp);
+        const imageWithCacheBuster = addCacheBusterToUrl(localGeneratedImage);
         setLocalGeneratedImage(imageWithCacheBuster);
       }
       
