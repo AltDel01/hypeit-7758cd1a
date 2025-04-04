@@ -25,7 +25,7 @@ export class GeminiImageService {
       if (productImage) {
         try {
           console.log("Attempting to use Make.com webhook for image generation");
-          const webhookImageUrl = await sendToMakeWebhook(productImage);
+          const webhookImageUrl = await sendToMakeWebhook(productImage, prompt);
           
           if (webhookImageUrl) {
             console.log("Successfully generated image via Make.com webhook");

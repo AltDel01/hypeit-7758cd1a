@@ -62,6 +62,7 @@ const TabsContainer = ({
           isGenerating={isGenerating}
           onGenerate={generateImage}
           generatedImage={generatedImage}
+          setIsGenerating={setIsGenerating}
         />
       </TabsContent>
       
@@ -74,13 +75,14 @@ const TabsContainer = ({
           isGenerating={isGenerating}
           onGenerate={generateImage}
           generatedImage={generatedImage}
+          setIsGenerating={setIsGenerating}
         />
       </TabsContent>
       
       <TabsContent value="social" className="focus-visible:outline-none focus-visible:ring-0">
         <SocialTab
-          xText={setXText}
-          linkedinText={setLinkedinText}
+          setXText={setXText}
+          setLinkedinText={setLinkedinText}
           prompt={prompt}
         />
       </TabsContent>

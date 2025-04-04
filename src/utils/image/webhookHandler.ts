@@ -6,9 +6,10 @@ import { dispatchImageGeneratedEvent } from './imageEvents';
  * Sends a request to the Make.com webhook and processes the response
  * 
  * @param productImage - The product image file to be sent
+ * @param prompt - The user's prompt text
  * @returns A promise that resolves when the image is received and processed
  */
-export async function sendToMakeWebhook(productImage: File | null): Promise<string | null> {
+export async function sendToMakeWebhook(productImage: File | null, prompt: string): Promise<string | null> {
   if (!productImage) {
     console.error("No product image provided for webhook");
     return null;
@@ -23,6 +24,7 @@ export async function sendToMakeWebhook(productImage: File | null): Promise<stri
     // Prepare the payload according to the required format
     const payload = {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
+      prompt: prompt, // Add the prompt to the payload
       product_image: base64Image,
       product_image_type: productImage.type
     };

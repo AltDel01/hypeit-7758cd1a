@@ -16,6 +16,7 @@ interface ContentGeneratorProps {
   isGenerating: boolean;
   onGenerate: () => void;
   generatedImage: string | null;
+  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ContentGenerator = ({ 
@@ -25,7 +26,8 @@ const ContentGenerator = ({
   setProductImage, 
   isGenerating, 
   onGenerate,
-  generatedImage
+  generatedImage,
+  setIsGenerating
 }: ContentGeneratorProps) => {
   
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
@@ -122,8 +124,8 @@ const ContentGenerator = ({
     setIsUsingWebhook(true);
     
     try {
-      // Send the image to the webhook and get the response
-      const imageUrl = await sendToMakeWebhook(productImage);
+      // Send the image to the webhook and get the response, now including the prompt
+      const imageUrl = await sendToMakeWebhook(productImage, prompt);
       
       if (imageUrl) {
         console.log("Received image URL from webhook:", imageUrl);
@@ -160,23 +162,8 @@ const ContentGenerator = ({
     
     if (localGeneratedImage) {
       // Force image reload with a new cache buster
-      const timestamp = Date.now();
-      
-      if (localGeneratedImage.includes('unsplash.com')) {
-        // For Unsplash URLs, create a completely new request to get a different image
-        const searchTerms = prompt
-          .split(' ')
-          .filter(word => word.length > 3)
-          .slice(0, 3)
-          .join(',');
-        
-        const newUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
-        setLocalGeneratedImage(newUrl);
-      } else {
-        // For other URLs, just add a cache buster
-        const imageWithCacheBuster = addCacheBusterToUrl(localGeneratedImage);
-        setLocalGeneratedImage(imageWithCacheBuster);
-      }
+      const imageWithCacheBuster = addCacheBusterToUrl(localGeneratedImage);
+      setLocalGeneratedImage(imageWithCacheBuster);
       
       // Reset stalled state
       setIsStalled(false);
