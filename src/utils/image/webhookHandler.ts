@@ -56,7 +56,9 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     
     // Dispatch the event with the image URL
     dispatchImageGeneratedEvent(imageUrl, "Product image processed by webhook");
-    window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', { detail: { imageUrl: imageUrl } }));
+    window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', {
+    detail: { imageUrl: imageUrl }
+}));
     return imageUrl;
   } catch (error) {
     console.error("Error sending image to webhook:", error);
