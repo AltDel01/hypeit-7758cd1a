@@ -25,7 +25,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
 
   useEffect(() => {
     if (imageUrl) {
-      setImageLoading(true);
+      setImageLoading(false);
       setImageError(false);
       setIsStalled(false);
       
