@@ -82,6 +82,7 @@ const Index = () => {
       });
       
       if (imageUrl) {
+        setIsGenerating(false);
         console.log(`Image generated, URL: ${imageUrl}`);
         setGeneratedImage(imageUrl);
         toast.success("Image generated successfully!");
