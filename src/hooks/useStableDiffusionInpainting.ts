@@ -1,5 +1,3 @@
-// src/hooks/useStableDiffusionInpainting.js (atau .ts)
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 // Pastikan path service benar dan service ini HANYA punya sendImageToWebhook
