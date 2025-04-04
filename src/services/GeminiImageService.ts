@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
@@ -14,9 +13,9 @@ export class GeminiImageService {
    * @param params - The image generation parameters
    * @returns A promise that resolves to the image URL or null
    */
-  static async generateImage({ prompt, aspectRatio = "1:1", style, productImage }: GenerateImageParams): Promise<string | null> {
+  static async generateImage({ prompt, aspectRatio = "1:1", style, productImage, imageReference, mimeType }: GenerateImageParams): Promise<string | null> {
     try {
-      console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}`);
+      console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}, image reference: ${imageReference ? 'provided' : 'none'}`);
       
       toast.info("Generating image...", { duration: 5000 });
       
@@ -26,6 +25,12 @@ export class GeminiImageService {
         aspect_ratio: aspectRatio,
         style
       };
+      
+      // If imageReference is provided, add it to the request
+      if (imageReference) {
+        requestBody.image_reference = imageReference;
+        requestBody.mime_type = mimeType || "image/png";
+      }
       
       // If productImage is provided, convert it to base64 for sending to the webhook
       if (productImage) {
@@ -73,7 +78,7 @@ export class GeminiImageService {
         const placeholderUrl = response.imageUrl || "https://via.placeholder.com/600x600?text=Generating+Image...";
         
         // Start polling in the background
-        this.startPolling(response.requestId, prompt, aspectRatio, style);
+        this.startPolling(response.requestId, prompt, aspectRatio, style, imageReference, mimeType);
         
         // Immediately dispatch an event with the placeholder image
         dispatchImageGeneratedEvent(placeholderUrl, prompt);
@@ -116,15 +121,19 @@ export class GeminiImageService {
    * @param prompt - The prompt used to generate the image
    * @param aspectRatio - The aspect ratio of the generated image
    * @param style - The style of the generated image (optional)
+   * @param imageReference - Reference image in base64 format (optional)
+   * @param mimeType - Mime type of the reference image (optional)
    */
-  private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string): void {
+  private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string, imageReference?: string, mimeType?: string): void {
     console.log(`Starting polling for generated image with requestId: ${requestId}`);
     
     pollForImageResult({
       requestId,
       prompt,
       aspectRatio,
-      style
+      style,
+      imageReference,
+      mimeType
     });
   }
   

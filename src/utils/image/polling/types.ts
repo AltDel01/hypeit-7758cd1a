@@ -1,28 +1,23 @@
 
 /**
- * Types related to image polling
- */
-
-/**
- * Parameters for polling an image generation request
+ * Interface for image polling parameters
  */
 export interface PollImageParams {
   requestId: string;
   prompt: string;
-  aspectRatio: string;
+  aspectRatio?: string;
   style?: string;
-  retries?: number;
-  delay?: number;
-  maxRetries?: number;
+  imageReference?: string;
+  mimeType?: string;
 }
 
 /**
- * Interface representing the result of an image status check
+ * Interface for image status result
  */
 export interface ImageStatusResult {
-  error?: any;
   status?: string;
   imageUrl?: string;
-  apiError?: any;
+  apiError?: string;
+  error?: any;
   data?: any;
 }
