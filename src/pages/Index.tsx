@@ -34,6 +34,7 @@ const Index = () => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
       setGeneratedImage(event.detail.imageUrl);
+      setIsGenerating(false); // Make sure to set generating to false when image is received
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
@@ -94,7 +95,8 @@ const Index = () => {
       Sentry.captureException(error);
       toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      setIsGenerating(false);
+      // Don't set isGenerating to false here - it will be set when the image is actually received
+      // via the imageGenerated event to prevent premature completion
     }
   };
 
@@ -122,6 +124,7 @@ const Index = () => {
                   setXText={setXText}
                   setLinkedinText={setLinkedinText}
                   generatedImage={generatedImage}
+                  setIsGenerating={setIsGenerating}
                 />
               </div>
             </div>

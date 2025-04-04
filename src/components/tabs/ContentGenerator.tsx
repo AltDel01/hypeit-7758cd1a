@@ -6,6 +6,7 @@ import PromptForm from './PromptForm';
 import ImagePreview from './ImagePreview';
 import ImageUploadStatus from './ImageUploadStatus';
 import { addCacheBusterToUrl } from '@/utils/image/polling/helpers';
+import { sendToMakeWebhook } from '@/utils/image/webhookHandler';
 
 interface ContentGeneratorProps {
   prompt: string;
@@ -31,6 +32,7 @@ const ContentGenerator = ({
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [isStalled, setIsStalled] = useState<boolean>(false);
+  const [isUsingWebhook, setIsUsingWebhook] = useState<boolean>(false);
   const stalledTimerRef = React.useRef<number | null>(null);
   
   // Update local generated image when the prop changes
@@ -109,6 +111,50 @@ const ContentGenerator = ({
     };
   }, [isGenerating, isStalled]);
   
+  // Handle direct generation via webhook when product image is available
+  const handleGenerateWithWebhook = async () => {
+    if (!productImage) {
+      console.log("No product image available for webhook");
+      return false;
+    }
+    
+    setIsGenerating(true);
+    setIsUsingWebhook(true);
+    
+    try {
+      // Send the image to the webhook and get the response
+      const imageUrl = await sendToMakeWebhook(productImage);
+      
+      if (imageUrl) {
+        console.log("Received image URL from webhook:", imageUrl);
+        setLocalGeneratedImage(imageUrl);
+        setIsStalled(false);
+        return true;
+      }
+    } catch (error) {
+      console.error("Error using webhook:", error);
+    } finally {
+      setIsGenerating(false);
+      setIsUsingWebhook(false);
+    }
+    
+    return false;
+  };
+  
+  // Handle generation with either webhook or fallback
+  const handleGenerate = async () => {
+    // If we have a product image, try the webhook first
+    if (productImage) {
+      const webhookSuccess = await handleGenerateWithWebhook();
+      if (webhookSuccess) {
+        return; // Successfully generated with webhook
+      }
+    }
+    
+    // Fall back to the original generation method
+    onGenerate();
+  };
+  
   const handleImageRetry = () => {
     setRetryCount(prev => prev + 1);
     
@@ -136,10 +182,10 @@ const ContentGenerator = ({
       setIsStalled(false);
     } else if (retryCount > 2) {
       // If we've tried a few times and still no image, trigger a new generation
-      onGenerate();
+      handleGenerate();
     } else {
       // If no image, trigger generation
-      onGenerate();
+      handleGenerate();
     }
   };
 
@@ -148,7 +194,7 @@ const ContentGenerator = ({
       <PromptForm 
         prompt={prompt}
         setPrompt={setPrompt}
-        onSubmit={onGenerate}
+        onSubmit={handleGenerate}
       />
       
       <ImagePreview 
@@ -167,7 +213,7 @@ const ContentGenerator = ({
       <GenerateButton 
         isGenerating={isGenerating || isStalled} 
         disabled={!prompt.trim()} 
-        onClick={isStalled ? handleImageRetry : onGenerate}
+        onClick={isStalled ? handleImageRetry : handleGenerate}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import {
   dispatchImageGeneratedEvent 
 } from "@/utils/image";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
+import { sendToMakeWebhook } from "@/utils/image/webhookHandler";
 
 export class GeminiImageService {
   /**
@@ -19,6 +20,22 @@ export class GeminiImageService {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}, image reference: ${imageReference ? 'provided' : 'none'}`);
       
       toast.info("Generating image...", { duration: 5000 });
+      
+      // Try using the Make.com webhook first if we have a product image
+      if (productImage) {
+        try {
+          console.log("Attempting to use Make.com webhook for image generation");
+          const webhookImageUrl = await sendToMakeWebhook(productImage);
+          
+          if (webhookImageUrl) {
+            console.log("Successfully generated image via Make.com webhook");
+            return webhookImageUrl;
+          }
+        } catch (webhookError) {
+          console.error("Error using Make.com webhook, falling back to standard generation:", webhookError);
+          // Continue with the standard generation process
+        }
+      }
       
       // Create request body
       const requestBody: any = {
