@@ -1,3 +1,5 @@
+// src/hooks/useStableDiffusionInpainting.js (atau .ts)
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 // Pastikan path service benar dan service ini HANYA punya sendImageToWebhook
@@ -82,35 +84,43 @@ export function useStableDiffusionInpainting() {
     guidanceScale
   ]); // Sertakan semua state input sebagai dependency
 
-  // == Listener untuk Menerima Hasil dari Webhook via Custom Event ==
+  // == Listener untuk Menerima Hasil dari Webhook via Custom Event (dengan Debugging Logs) ==
   useEffect(() => {
     const handleResultReady = (event: Event) => {
-      // Pastikan event memiliki struktur yang diharapkan
+      // --- Log: Handler Called ---
+      console.log("<<< HOOK: handleResultReady CALLED >>>", event.detail);
+
       const customEvent = event as CustomEvent<{ imageUrl: string; [key: string]: any }>;
 
       if (customEvent.detail && typeof customEvent.detail.imageUrl === 'string') {
-        console.log(`Received '${RESULT_EVENT_NAME}' event with image URL:`, customEvent.detail.imageUrl);
-
-        // --- Hasil Diterima ---
+        // --- Log: Valid Data Received ---
+        console.log(`<<< HOOK: Received image URL: ${customEvent.detail.imageUrl.substring(0,50)}... >>>`);
         setResultImage(customEvent.detail.imageUrl);
         toast.success("Image generated successfully!");
+
+        // --- Log: Before Setting State ---
+        console.log("<<< HOOK: Calling setIsGenerating(false) >>>");
         setIsGenerating(false); // <<< KUNCI: Hentikan Loading di Sini
+        // --- Log: After Setting State ---
+        console.log("<<< HOOK: setIsGenerating(false) EXECUTED >>>");
 
       } else {
-        console.warn(`Received '${RESULT_EVENT_NAME}' event, but the detail format is incorrect or missing imageUrl:`, customEvent.detail);
-        // Opsional: Tangani jika data event tidak valid
+        // --- Log: Invalid Data Received ---
+        console.warn(`<<< HOOK: Received event, but detail format incorrect >>>:`, customEvent.detail);
         setErrorMessage("Received invalid result data from webhook.");
         toast.error("Received invalid result data.");
         setIsGenerating(false); // Hentikan loading meskipun data salah
       }
     };
 
-    console.log(`Adding event listener for '${RESULT_EVENT_NAME}'`);
+    // --- Log: Adding Listener ---
+    console.log(`<<< HOOK: Adding listener for ${RESULT_EVENT_NAME} >>>`);
     window.addEventListener(RESULT_EVENT_NAME, handleResultReady);
 
     // Cleanup: Hapus listener saat komponen unmount atau hook tidak lagi digunakan
     return () => {
-      console.log(`Removing event listener for '${RESULT_EVENT_NAME}'`);
+      // --- Log: Removing Listener ---
+      console.log(`<<< HOOK: Removing listener for ${RESULT_EVENT_NAME} >>>`);
       window.removeEventListener(RESULT_EVENT_NAME, handleResultReady);
     };
   }, []); // Array dependency kosong agar listener hanya ditambahkan/dihapus sekali
