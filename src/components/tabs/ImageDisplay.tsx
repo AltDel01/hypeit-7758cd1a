@@ -18,7 +18,6 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   useEffect(() => {
     console.log("ImageDisplay - generatedImage prop updated:", generatedImage);
     window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', { detail: { imageUrl: generatedImage } }));
-    //setLocalGeneratedImage(generatedImage);
   }, [generatedImage]);
   
   // Listen for generated image events
