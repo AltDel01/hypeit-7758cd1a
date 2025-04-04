@@ -22,6 +22,7 @@ export interface ImageStatusResult {
   error?: any;
   data?: any;
   isWebhook?: boolean;
+  progress?: number;
 }
 
 /**

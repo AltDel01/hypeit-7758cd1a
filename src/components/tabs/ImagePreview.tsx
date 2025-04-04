@@ -16,15 +16,18 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [imageLoading, setImageLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [isStalled, setIsStalled] = useState<boolean>(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const loadingTimeoutRef = useRef<number | null>(null);
+  const stalledTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (imageUrl) {
       setImageLoading(true);
       setImageError(false);
+      setIsStalled(false);
       
       // Start animated progress
       setLoadingProgress(0);
@@ -42,6 +45,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         window.clearTimeout(loadingTimeoutRef.current);
       }
       
+      if (stalledTimerRef.current) {
+        window.clearTimeout(stalledTimerRef.current);
+      }
+      
       // Set a hard timeout for loading
       loadingTimeoutRef.current = window.setTimeout(() => {
         console.log("Hard loading timeout reached, triggering retry");
@@ -51,18 +58,30 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       // Realistic progress animation
       progressIntervalRef.current = window.setInterval(() => {
         setLoadingProgress(prev => {
+          // Simulate natural progress curve
           if (prev < 20) return prev + 1;
           if (prev < 50) return prev + 0.5;
           if (prev < 80) return prev + 0.2;
           if (prev < 90) return prev + 0.1;
+          
+          // When progress reaches 90%, start stall detection timer
+          if (prev >= 90 && !isStalled && stalledTimerRef.current === null) {
+            console.log("Progress at 90+%, starting stall detection timer");
+            stalledTimerRef.current = window.setTimeout(() => {
+              console.log("Image generation appears stalled at 90+%");
+              setIsStalled(true);
+            }, 12000); // 12 seconds at 90% is considered stalled
+          }
+          
           // Force timeout if stuck at 90+ for too long
           if (prev >= 90 && timeoutRef.current === null) {
             console.log("Progress stuck at 90+%, setting timeout");
             timeoutRef.current = window.setTimeout(() => {
               console.log("Loading timeout reached, forcing retry");
               handleImageRetry();
-            }, 12000); // 12 seconds timeout if stuck at high percentage
+            }, 15000); // 15 seconds timeout if stuck at high percentage
           }
+          
           return prev < 95 ? prev + 0.05 : prev;
         });
       }, 300);
@@ -80,6 +99,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         window.clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
+      if (stalledTimerRef.current) {
+        window.clearTimeout(stalledTimerRef.current);
+        stalledTimerRef.current = null;
+      }
     };
   }, [imageUrl]);
 
@@ -87,6 +110,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     console.log("Image loaded successfully");
     setImageError(false);
     setImageLoading(false);
+    setIsStalled(false);
     setLoadingProgress(100);
     
     if (progressIntervalRef.current) {
@@ -99,6 +123,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     if (loadingTimeoutRef.current) {
       window.clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = null;
+    }
+    if (stalledTimerRef.current) {
+      window.clearTimeout(stalledTimerRef.current);
+      stalledTimerRef.current = null;
     }
   };
 
@@ -118,6 +146,10 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       window.clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = null;
     }
+    if (stalledTimerRef.current) {
+      window.clearTimeout(stalledTimerRef.current);
+      stalledTimerRef.current = null;
+    }
     
     // Auto-retry once for images
     if (retryCount === 0) {
@@ -135,21 +167,28 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       window.clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = null;
     }
+    if (stalledTimerRef.current) {
+      window.clearTimeout(stalledTimerRef.current);
+      stalledTimerRef.current = null;
+    }
     
     setRetryCount(prev => prev + 1);
     setLoadingProgress(0);
     setImageLoading(true);
     setImageError(false);
+    setIsStalled(false);
     onRetry();
   };
 
-  const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
+  const isPlaceholder = 
+    imageUrl?.includes('placeholder.com') || 
+    imageUrl?.includes('Generating+Image');
 
   return (
     <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
       <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
         <span>Generated Image</span>
-        {(imageError || retryCount > 0 || loadingProgress > 90) && (
+        {(imageError || isStalled || retryCount > 0 || loadingProgress > 90) && (
           <Button 
             onClick={handleImageRetry} 
             variant="ghost" 
@@ -166,6 +205,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           <ImageLoadingState 
             loadingProgress={loadingProgress}
             setLoadingProgress={setLoadingProgress}
+            isStalled={isStalled}
           />
         ) : imageError ? (
           <ImageErrorState onRetry={handleImageRetry} />

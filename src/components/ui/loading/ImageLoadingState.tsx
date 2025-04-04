@@ -2,15 +2,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import CircularProgressIndicator from './CircularProgressIndicator';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ImageLoadingStateProps {
   loadingProgress: number;
   setLoadingProgress?: React.Dispatch<React.SetStateAction<number>>;
+  isStalled?: boolean;
+  onRetry?: () => void;
 }
 
 const ImageLoadingState = ({ 
   loadingProgress, 
-  setLoadingProgress 
+  setLoadingProgress,
+  isStalled = false,
+  onRetry
 }: ImageLoadingStateProps) => {
   const [processingText, setProcessingText] = useState<string>("Loading image...");
   const [processingDetail, setProcessingDetail] = useState<string>("");
@@ -83,12 +89,34 @@ const ImageLoadingState = ({
               className="h-full" 
             />
           </div>
-          <p className="text-sm text-center text-gray-300">
-            {processingText}
-          </p>
-          <p className="text-xs text-center text-gray-500 mt-2 max-w-[280px] mx-auto">
-            {processingDetail || "Enhancing details..."}
-          </p>
+          
+          {isStalled ? (
+            <>
+              <p className="text-sm text-center text-yellow-300">
+                Generation seems to be taking longer than expected...
+              </p>
+              {onRetry && (
+                <Button 
+                  onClick={onRetry} 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 mx-auto flex items-center text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Regenerate Image
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-center text-gray-300">
+                {processingText}
+              </p>
+              <p className="text-xs text-center text-gray-500 mt-2 max-w-[280px] mx-auto">
+                {processingDetail || "Enhancing details..."}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

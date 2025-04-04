@@ -46,7 +46,8 @@ export async function checkImageStatus(
       imageUrl: data?.imageUrl,
       apiError: data?.error,
       isWebhook: isWebhook,
-      data
+      data,
+      progress: data?.progress || 0
     };
   } catch (e) {
     console.error("Exception in checkImageStatus:", e);

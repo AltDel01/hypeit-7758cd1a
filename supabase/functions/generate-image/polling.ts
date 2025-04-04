@@ -62,11 +62,42 @@ export async function handlePollingRequest(requestData: any) {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
-      // Return "processing" status
+      // Calculate progress based on request data and time
+      // For demo, simulate progress based on requestId
+      let progress = 0;
+      
+      try {
+        // Extract first 6 chars of requestId and convert to a number
+        const requestIdNum = parseInt(requestId.substring(0, 6), 16);
+        // Use the last digit to determine progress rate (0-9)
+        const progressRate = (requestIdNum % 10) + 1;
+        
+        // Calculate progress based on polling attempt (simulated)
+        const progressIncrement = 15 + progressRate; // 15-25% increment per attempt
+        
+        if (requestData._pollingAttempt) {
+          progress = Math.min(99, progressIncrement * requestData._pollingAttempt);
+        } else {
+          progress = Math.min(99, 15 + progressRate); // Initial progress 15-25%
+        }
+        
+        // Once progress gets to 90+, have a higher chance of completion next time
+        if (progress >= 90) {
+          progress = 95; // Cap at 95% until complete
+        }
+        
+        console.log(`Calculated progress: ${progress}% for request ${requestId}`);
+      } catch (e) {
+        // Default progress if calculation fails
+        progress = 50;
+      }
+      
+      // Return "processing" status with progress
       return new Response(
         JSON.stringify({
           status: "processing",
           message: "Image generation is still in progress",
+          progress: progress,
           isWebhook: useWebhook
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
