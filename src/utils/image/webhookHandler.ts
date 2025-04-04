@@ -55,7 +55,7 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     const imageUrl = `data:image/png;base64,${data.image_base64}`;
     
     // Dispatch the event with the image URL
-    dispatchImageGeneratedEvent(imageUrl, "Product image processed by webhook");
+   // dispatchImageGeneratedEvent(imageUrl, "Product image processed by webhook");
     window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', {
     detail: { imageUrl: imageUrl }
 }));
