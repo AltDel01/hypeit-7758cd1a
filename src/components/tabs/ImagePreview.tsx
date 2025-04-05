@@ -28,6 +28,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const handleImageError = () => {
     setImageError(true);
     setImageLoading(false);
+    console.error("Failed to load image from URL:", imageUrl);
   };
 
   const handleImageRetry = () => {

@@ -47,13 +47,7 @@ const Index = () => {
         console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
       }
       
-      Sentry.setContext("image_generation", {
-        prompt: prompt,
-        hasProductImage: productImage !== null,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Generate image with webhook
+      // Generate image with webhook - directly calling the webhook handler
       const imageUrl = await generateImageWithWebhook(prompt, productImage);
       
       if (imageUrl) {
