@@ -15,7 +15,7 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
   resultImage, 
   isLoading = false,
   loadingProgress = 0,
-  generationTime = 60 
+  generationTime = 0 
 }) => {
   const handleDownload = () => {
     if (!resultImage) return;
@@ -136,7 +136,7 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold">Result</h3>
-      {false ? (
+      {isLoading ? (
         <div className="aspect-square w-full max-h-[500px] overflow-hidden rounded-md border bg-gray-900 flex items-center justify-center">
           <LoadingAnimation />
         </div>
