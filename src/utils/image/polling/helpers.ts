@@ -1,18 +1,21 @@
 
 /**
- * Adds a cache buster to a URL
+ * Helper functions for image polling
  */
-export function addCacheBusterToUrl(url: string): string {
-  const timestamp = Date.now();
-  return url.includes('?') 
-    ? `${url}&t=${timestamp}` 
-    : `${url}?t=${timestamp}`;
+
+/**
+ * Delays execution for the specified time
+ */
+export async function delayExecution(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * Formats a date string to a human-readable format
+ * Adds a cache-busting parameter to a URL
  */
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+export function addCacheBusterToUrl(url: string): string {
+  const cacheBuster = Date.now();
+  return url.includes('?') 
+    ? `${url}&t=${cacheBuster}` 
+    : `${url}?t=${cacheBuster}`;
 }

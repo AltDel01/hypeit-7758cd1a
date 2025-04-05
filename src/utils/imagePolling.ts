@@ -5,8 +5,7 @@ import {
   pollForImageResult, 
   dispatchImageGeneratedEvent 
 } from './image';
-import { generateFallbackImage, isValidNonPlaceholderImage } from './image/imageFallback';
-import { checkValidImageUrl } from './image/imageValidation';
+import { generateFallbackImage } from './image/imageFallback';
 import type { PollImageParams } from './image/polling/types';
 
 // Re-export everything
@@ -14,7 +13,5 @@ export {
   pollForImageResult, 
   dispatchImageGeneratedEvent,
   generateFallbackImage,
-  checkValidImageUrl,
-  isValidNonPlaceholderImage,
   type PollImageParams
 };

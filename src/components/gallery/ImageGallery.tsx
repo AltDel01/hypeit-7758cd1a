@@ -1,37 +1,36 @@
-import React from 'react'; // Hanya perlu React
-import { Button } from '@/components/ui/button';
-import { Copy, Download } from 'lucide-react';
-import { toast } from "sonner";
 
-interface ImageDisplayProps {
-  images: { src: string; alt: string }[];
-  aspectRatio: "square" | "story"; // Hanya perlu props ini
+import React from 'react';
+import ImageDisplay from '../tabs/ImageDisplay';
+
+interface ImageGalleryProps {
+  feedImages: { src: string; alt: string }[];
+  storyImages: { src: string; alt: string }[];
+  generatedImage: string | null;
+  activeTab: string;
 }
 
-const ImageDisplay = ({ images, aspectRatio }: ImageDisplayProps) => { // Hanya images & aspectRatio
-
-  // Fungsi utilitas handleDownload dan handleCopy tetap berguna untuk list
-  const handleDownload = (imageUrl: string) => { /* ... implementasi ... */ };
-  const handleCopy = (imageUrl: string) => { /* ... implementasi ... */ };
-
-  // Kelas animasi dan penggandaan gambar tetap sama
-  const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
-  const displayImages = [...images, /* ... penggandaan ... */];
-
+const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: ImageGalleryProps) => {
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
-      {/* Hanya render list gambar */}
-      {displayImages.map((image, index) => (
-        <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
-          <img /* ... */ />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button onClick={() => handleCopy(image.src)} /* ... */ > <Copy size={14} /> </Button>
-            <Button onClick={() => handleDownload(image.src)} /* ... */ > <Download size={14} /> </Button>
-          </div>
-        </div>
-      ))}
+    <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+        <ImageDisplay 
+          images={feedImages}
+          generatedImage={generatedImage}
+          showGenerated={activeTab === "feed"}
+          aspectRatio="square"
+        />
+      </div>
+      
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+        <ImageDisplay 
+          images={storyImages}
+          generatedImage={generatedImage}
+          showGenerated={activeTab === "story"}
+          aspectRatio="story"
+        />
+      </div>
     </div>
   );
 };
 
-export default ImageDisplay;
+export default ImageGallery;

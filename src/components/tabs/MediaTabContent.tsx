@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import ContentGenerator from './ContentGenerator';
 
 interface MediaTabContentProps {
@@ -9,9 +8,8 @@ interface MediaTabContentProps {
   productImage: File | null;
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
   isGenerating: boolean;
-  onGenerate: () => void;
+  generateImage: () => void;
   generatedImage: string | null;
-  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MediaTabContent = ({ 
@@ -20,25 +18,21 @@ const MediaTabContent = ({
   productImage, 
   setProductImage, 
   isGenerating, 
-  onGenerate,
-  generatedImage,
-  setIsGenerating
+  generateImage,
+  generatedImage
 }: MediaTabContentProps) => {
   return (
-    <Card className="border-gray-700 bg-transparent">
-      <CardContent className="pt-4">
-        <ContentGenerator 
-          prompt={prompt}
-          setPrompt={setPrompt}
-          productImage={productImage}
-          setProductImage={setProductImage}
-          isGenerating={isGenerating}
-          onGenerate={onGenerate}
-          generatedImage={generatedImage}
-          setIsGenerating={setIsGenerating}
-        />
-      </CardContent>
-    </Card>
+    <div className="mt-6">
+      <ContentGenerator 
+        prompt={prompt}
+        setPrompt={setPrompt}
+        productImage={productImage}
+        setProductImage={setProductImage}
+        isGenerating={isGenerating}
+        onGenerate={generateImage}
+        generatedImage={generatedImage}
+      />
+    </div>
   );
 };
 

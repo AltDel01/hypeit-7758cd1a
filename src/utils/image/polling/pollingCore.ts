@@ -1,127 +1,139 @@
-import { checkImageStatus } from './statusChecker';
-import { processImageUrl } from './imageProcessor';
-import { generateFallbackImage } from '../imageFallback';
-import { useFallbackImage } from './fallbackHandler';
-import { dispatchImageGeneratedEvent } from '../imageEvents';
-import type { PollImageParams, ImageStatusResult } from './types';
 
-// Maximum number of polling attempts before falling back
-const MAX_POLLING_ATTEMPTS = 15;
-
-// Delay between polling attempts in milliseconds
-const POLLING_DELAY = 4000;
-
-// Maximum time for polling in milliseconds
-const MAX_POLLING_TIME = 90000; // 90 seconds
-
-// Maximum time to wait once progress reaches 90%
-const MAX_STALLED_TIME = 20000; // 20 seconds at 90+%
+import { toast } from "sonner";
+import { PollImageParams, ImageStatusResult } from "./types";
+import { checkImageStatus } from "./statusChecker";
+import { delayExecution } from "./helpers";
+import { processImageUrl } from "./imageProcessor";
+import { useFallbackImage } from "./fallbackHandler";
+import { isValidImageUrl } from '../imageValidation';
 
 /**
- * Polls for image generation result
+ * Main function that polls for the result of an image generation request
  */
-export async function pollForImageResult({
-  requestId,
-  prompt,
-  aspectRatio = "1:1",
-  style,
-  imageReference,
-  mimeType,
-  forceWebhook
-}: PollImageParams): Promise<void> {
-  let attempts = 0;
-  const startTime = Date.now();
-  let isWebhook = !!forceWebhook || !!imageReference;
-  let highProgressStartTime: number | null = null;
+export async function pollForImageResult(params: PollImageParams): Promise<void> {
+  const { 
+    requestId, 
+    prompt, 
+    aspectRatio, 
+    style,
+    retries = 10, 
+    delay = 3000, 
+    maxRetries = 10 
+  } = params;
   
-  console.log(`Starting polling for request ${requestId} with prompt: "${prompt}"`);
-  console.log(`Using webhook: ${isWebhook}, Reference image: ${!!imageReference}`);
+  // Set maximum retries to prevent infinite polling
+  const currentRetries = Math.min(retries, maxRetries);
   
-  // Function to check status with retry logic
-  const checkStatus = async () => {
-    try {
-      attempts++;
-      console.log(`Polling attempt ${attempts} for request ${requestId}`);
-      
-      // Check if we've exceeded the maximum polling time
-      const elapsedTime = Date.now() - startTime;
-      if (elapsedTime > MAX_POLLING_TIME) {
-        console.warn(`Maximum polling time of ${MAX_POLLING_TIME}ms exceeded for request ${requestId}`);
-        await useFallbackImage(prompt, aspectRatio.replace(':', 'x'));
-        return;
-      }
-      
-      // Check if we've been stuck at high progress for too long
-      if (highProgressStartTime && (Date.now() - highProgressStartTime > MAX_STALLED_TIME)) {
-        console.warn(`Request ${requestId} stalled at high progress for too long`);
-        // Force completion with a placeholder to break the stall
-        dispatchImageGeneratedEvent(
-          `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(prompt)}&t=${Date.now()}`, 
-          prompt
-        );
-        return;
-      }
-      
-      // Check image status
-      const result = await checkImageStatus(requestId, isWebhook, imageReference, mimeType);
-      await handleStatusResult(result);
-      
-    } catch (error) {
-      console.error(`Error polling for image result:`, error);
-      
-      // If an exception occurs during polling, generate fallback after max attempts
-      if (attempts >= MAX_POLLING_ATTEMPTS) {
-        console.log(`Max polling attempts reached for request ${requestId}, generating fallback`);
-        await useFallbackImage(prompt, aspectRatio.replace(':', 'x'));
-      } else {
-        setTimeout(checkStatus, POLLING_DELAY);
-      }
-    }
-  };
+  if (currentRetries <= 0) {
+    handleMaxRetriesReached(prompt, aspectRatio);
+    return;
+  }
   
-  // Helper function to process status results
-  const handleStatusResult = async (result: ImageStatusResult) => {
-    // If progress is reporting high, start tracking that time
-    if (result.progress && result.progress >= 90 && !highProgressStartTime) {
-      highProgressStartTime = Date.now();
-      console.log(`Progress reached 90% for request ${requestId}, starting stall timer`);
-    }
+  try {
+    console.log(`Polling for image result, requestId: ${requestId}, retries left: ${currentRetries}`);
     
-    // If we got a completed status with an image URL
-    if (result.status === "completed" && result.imageUrl) {
-      console.log(`Image generation completed for request ${requestId}`, result);
-      await processImageUrl(result.imageUrl, prompt);
-      return;
-    }
+    // Wait for the specified delay
+    await delayExecution(delay);
     
-    // If we got an error, log it and try again
-    if (result.apiError || result.error) {
-      console.error(`Error in poll attempt ${attempts}:`, result.apiError || result.error);
-      
-      // If we've tried too many times, generate a fallback image
-      if (attempts >= MAX_POLLING_ATTEMPTS) {
-        console.log(`Max polling attempts reached for request ${requestId}, generating fallback`);
-        await useFallbackImage(prompt, aspectRatio.replace(':', 'x'));
-        return;
-      }
-    }
+    // Check the status of the image generation request
+    const result = await checkImageStatus(requestId);
     
-    // If status is 'failed', generate a fallback
-    if (result.status === "failed") {
-      console.log(`Image generation failed for request ${requestId}, generating fallback`);
-      await useFallbackImage(prompt, aspectRatio.replace(':', 'x'));
-      return;
-    }
+    // Handle the status check result
+    await handleStatusCheckResult(result, {
+      requestId, prompt, aspectRatio, style, 
+      retries: currentRetries, delay, maxRetries
+    });
     
-    // Otherwise, try again after a delay
-    if (attempts < MAX_POLLING_ATTEMPTS) {
-      setTimeout(checkStatus, POLLING_DELAY);
-    } else {
-      console.log(`Max polling attempts reached for request ${requestId}, generating fallback`);
-      await useFallbackImage(prompt, aspectRatio.replace(':', 'x'));
-    }
-  };
+  } catch (error) {
+    handlePollingError(error, {
+      requestId, prompt, aspectRatio, style,
+      retries: currentRetries, delay, maxRetries
+    });
+  }
+}
+
+/**
+ * Handles the case when maximum retries are reached
+ */
+function handleMaxRetriesReached(prompt: string, aspectRatio: string): void {
+  console.log("Maximum polling retries reached");
+  toast.error("Image generation is taking longer than expected");
   
-  // Start checking status
-  checkStatus();
+  // Always provide a fallback image when maximum retries reached
+  useFallbackImage(prompt, aspectRatio);
+}
+
+/**
+ * Processes the result of a status check
+ */
+export async function handleStatusCheckResult(
+  result: ImageStatusResult, 
+  params: PollImageParams
+): Promise<void> {
+  const { requestId, prompt, aspectRatio, style, retries, delay } = params;
+  
+  if (result.error) {
+    handlePollingError(result.error, params);
+    return;
+  }
+  
+  // If we have an image URL, validate and use it
+  if (result.imageUrl && isValidImageUrl(result.imageUrl)) {
+    await processImageUrl(result.imageUrl, prompt);
+    return;
+  }
+  
+  // Handle different status responses
+  if (result.status === "processing" || result.status === "accepted") {
+    scheduleNextPoll({
+      requestId, prompt, aspectRatio, style,
+      retries: retries - 1, delay, maxRetries: params.maxRetries
+    });
+    return;
+  }
+  
+  // If we got an error from the API
+  if (result.apiError) {
+    handleApiError(result.apiError, prompt, aspectRatio);
+    return;
+  }
+  
+  // If we don't know the status, continue polling with a shorter retry count
+  scheduleNextPoll({
+    requestId, prompt, aspectRatio, style,
+    retries: retries - 1, delay, maxRetries: params.maxRetries
+  });
+}
+
+/**
+ * Handles API errors during polling
+ */
+function handleApiError(error: any, prompt: string, aspectRatio: string): void {
+  console.error("Error from poll:", error);
+  toast.error(`Image generation failed: ${error}`);
+  
+  // Use fallback image source
+  useFallbackImage(prompt, aspectRatio);
+}
+
+/**
+ * Schedules the next polling attempt
+ */
+function scheduleNextPoll(params: PollImageParams): void {
+  setTimeout(() => pollForImageResult(params), params.delay);
+}
+
+/**
+ * Handles errors that occur during polling
+ */
+export function handlePollingError(error: any, params: PollImageParams): void {
+  console.error("Error in polling:", error);
+  // Use a shorter retry interval when there are exceptions
+  const shorterDelay = Math.max(1000, params.delay / 2);
+  
+  setTimeout(() => pollForImageResult({
+    ...params,
+    retries: params.retries - 1,
+    delay: shorterDelay
+  }), shorterDelay);
 }

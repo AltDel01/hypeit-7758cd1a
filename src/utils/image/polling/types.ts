@@ -1,38 +1,28 @@
 
 /**
- * Interface for image polling parameters
+ * Types related to image polling
+ */
+
+/**
+ * Parameters for polling an image generation request
  */
 export interface PollImageParams {
   requestId: string;
   prompt: string;
-  aspectRatio?: string;
+  aspectRatio: string;
   style?: string;
-  imageReference?: string;
-  mimeType?: string;
-  forceWebhook?: boolean;
+  retries?: number;
+  delay?: number;
+  maxRetries?: number;
 }
 
 /**
- * Interface for image status result
+ * Interface representing the result of an image status check
  */
 export interface ImageStatusResult {
+  error?: any;
   status?: string;
   imageUrl?: string;
-  apiError?: string;
-  error?: any;
+  apiError?: any;
   data?: any;
-  isWebhook?: boolean;
-  progress?: number;
-}
-
-/**
- * Interface for webhook payload
- */
-export interface WebhookPayload {
-  requestId: string;
-  prompt: string;
-  imageReference?: string;
-  mimeType?: string;
-  aspectRatio?: string;
-  style?: string;
 }

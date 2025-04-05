@@ -5,7 +5,6 @@ import GenerateButton from './GenerateButton';
 import PromptForm from './PromptForm';
 import ImagePreview from './ImagePreview';
 import ImageUploadStatus from './ImageUploadStatus';
-import { sendToMakeWebhook } from '@/utils/image/webhookHandler';
 
 interface ContentGeneratorProps {
   prompt: string;
@@ -15,7 +14,6 @@ interface ContentGeneratorProps {
   isGenerating: boolean;
   onGenerate: () => void;
   generatedImage: string | null;
-  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ContentGenerator = ({ 
@@ -25,17 +23,17 @@ const ContentGenerator = ({
   setProductImage, 
   isGenerating, 
   onGenerate,
-  generatedImage,
-  setIsGenerating
+  generatedImage
 }: ContentGeneratorProps) => {
   
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
-  const [isUsingWebhook, setIsUsingWebhook] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
   
   // Update local generated image when the prop changes
   useEffect(() => {
-    if (generatedImage) {
+    console.log("generatedImage prop changed:", generatedImage);
+    if (generatedImage && generatedImage !== localGeneratedImage) {
       setLocalGeneratedImage(generatedImage);
     }
   }, [generatedImage]);
@@ -47,10 +45,17 @@ const ContentGenerator = ({
   
   // Listen for the imageGenerated event
   useEffect(() => {
-    const handleImageGenerated = (event: CustomEvent<{ imageUrl: string }>) => {
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Image generated event received:", event.detail);
       if (event.detail.imageUrl) {
-        setLocalGeneratedImage(event.detail.imageUrl);
-        setIsGenerating(false);
+        // Add a cache-buster to the URL
+        const timestamp = Date.now();
+        const url = event.detail.imageUrl.includes('?') 
+          ? `${event.detail.imageUrl}&cb=${timestamp}` 
+          : `${event.detail.imageUrl}?cb=${timestamp}`;
+          
+        setLocalGeneratedImage(url);
+        setRetryCount(0);
       }
     };
     
@@ -59,54 +64,40 @@ const ContentGenerator = ({
     return () => {
       window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
     };
-  }, [setIsGenerating]);
-  
-  // Handle direct generation via webhook when product image is available
-  const handleGenerateWithWebhook = async () => {
-    if (!productImage) {
-      console.log("No product image available for webhook");
-      return false;
-    }
-    
-    setIsGenerating(true);
-    setIsUsingWebhook(true);
-    
-    try {
-      // Send the image to the webhook and get the response, include the prompt
-      const imageUrl = await sendToMakeWebhook(productImage, prompt);
-      
-      if (imageUrl) {
-        console.log("Received image URL from webhook:", imageUrl);
-        setLocalGeneratedImage(imageUrl);
-        setIsGenerating(false);
-        return true;
-      }
-    } catch (error) {
-      console.error("Error using webhook:", error);
-    } finally {
-      setIsUsingWebhook(false);
-      setIsGenerating(false);
-    }
-    
-    return false;
-  };
-  
-  // Handle generation with either webhook or fallback
-  const handleGenerate = async () => {
-    // If we have a product image, try the webhook first
-    if (productImage) {
-      const webhookSuccess = await handleGenerateWithWebhook();
-      if (webhookSuccess) {
-        return; // Successfully generated with webhook
-      }
-    }
-    
-    // Fall back to the original generation method
-    onGenerate();
-  };
+  }, []);
   
   const handleImageRetry = () => {
-    handleGenerate();
+    setRetryCount(prev => prev + 1);
+    
+    if (localGeneratedImage) {
+      // Force image reload with a new cache buster
+      const timestamp = Date.now();
+      
+      if (localGeneratedImage.includes('unsplash.com')) {
+        // For Unsplash URLs, create a completely new request to get a different image
+        const searchTerms = prompt
+          .split(' ')
+          .filter(word => word.length > 3)
+          .slice(0, 3)
+          .join(',');
+        
+        const newUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
+        setLocalGeneratedImage(newUrl);
+      } else {
+        // For other URLs, just add a cache buster
+        const imageWithCacheBuster = localGeneratedImage.includes('?') 
+          ? `${localGeneratedImage}&t=${timestamp}` 
+          : `${localGeneratedImage}?t=${timestamp}`;
+        
+        setLocalGeneratedImage(imageWithCacheBuster);
+      }
+    } else if (retryCount > 2) {
+      // If we've tried a few times and still no image, trigger a new generation
+      onGenerate();
+    } else {
+      // If no image, trigger generation
+      onGenerate();
+    }
   };
 
   return (
@@ -114,7 +105,7 @@ const ContentGenerator = ({
       <PromptForm 
         prompt={prompt}
         setPrompt={setPrompt}
-        onSubmit={handleGenerate}
+        onSubmit={onGenerate}
       />
       
       <ImagePreview 
@@ -133,7 +124,7 @@ const ContentGenerator = ({
       <GenerateButton 
         isGenerating={isGenerating} 
         disabled={!prompt.trim()} 
-        onClick={handleGenerate}
+        onClick={onGenerate} 
       />
     </div>
   );

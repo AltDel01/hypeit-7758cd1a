@@ -11,23 +11,11 @@ export async function useFallbackImage(prompt: string, aspectRatio: string): Pro
   toast.info("Using alternative image source", { id: "fallback-image" });
   
   try {
-    console.log(`Using fallback image for prompt: "${prompt}", aspect ratio: ${aspectRatio}`);
-    
     // Generate a more tailored fallback based on aspect ratio
     const imageSize = aspectRatio === "9:16" ? "800x1400" : "800x800";
     
-    // First attempt: Try to generate a targeted image with encoded prompt
-    const searchTerms = prompt.split(' ')
-      .filter(word => word.length > 3)
-      .slice(0, 3)
-      .join(',');
-    
-    // Add a timestamp to prevent caching
-    const timestamp = Date.now();
-    const fallbackUrl = `https://source.unsplash.com/featured/${imageSize}/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
-    
-    // Dispatch the event with the fallback URL
-    dispatchImageGeneratedEvent(fallbackUrl, prompt);
+    // Generate and dispatch the fallback image
+    generateFallbackImage(prompt, imageSize);
   } catch (error) {
     handleFallbackError(error, prompt);
   }

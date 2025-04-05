@@ -1,17 +1,4 @@
 
+# A string used to distinguish different Supabase projects on the same host. Defaults to the working
+# directory name when running `supabase init`.
 project_id = "mkwinxbualpcivkujlfd"
-
-[functions.generate-image]
-verify_jwt = false
-
-[functions.generate-post]
-verify_jwt = false
-
-[functions.manage-secrets]
-verify_jwt = false
-
-[functions.test-gemini-key]
-verify_jwt = false
-
-[functions.test-qwen-key]
-verify_jwt = false

@@ -8,15 +8,17 @@ import { addCacheBusterToUrl } from "./helpers";
  */
 export async function processImageUrl(imageUrl: string, prompt: string): Promise<void> {
   try {
-    // Always add a cache buster to prevent caching issues
-    const finalUrl = addCacheBusterToUrl(imageUrl);
-    console.log(`Processing image URL: ${finalUrl}`);
+    // Check if this is an Unsplash URL
+    if (imageUrl.includes('unsplash.com')) {
+      const finalUrl = addCacheBusterToUrl(imageUrl);
+      toast.success("Image generated successfully!");
+      dispatchImageGeneratedEvent(finalUrl, prompt);
+      return;
+    }
     
-    // Show success toast
-    toast.success("Image generated successfully!");
-    
-    // Dispatch event with the final URL
-    dispatchImageGeneratedEvent(finalUrl, prompt);
+    // For other URLs, dispatch directly without validation
+    toast.success("Image generation completed!");
+    dispatchImageGeneratedEvent(imageUrl, prompt);
     
   } catch (error) {
     console.error("Error processing image URL:", error);

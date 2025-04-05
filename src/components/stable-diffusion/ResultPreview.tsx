@@ -15,7 +15,7 @@ const ResultPreview: React.FC<ResultPreviewProps> = ({
   resultImage, 
   isLoading = false,
   loadingProgress = 0,
-  generationTime = 0 
+  generationTime = 60 
 }) => {
   const handleDownload = () => {
     if (!resultImage) return;
