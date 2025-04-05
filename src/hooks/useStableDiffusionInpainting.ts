@@ -3,10 +3,10 @@ import { toast } from "sonner";
 import stableDiffusionService from '@/services/StableDiffusionService';
 
 const RESULT_EVENT_NAME = 'stableDiffusionResultReady';
-const LOADING_TIMEOUT_MS = 3000; // 3 seconds
+// No longer need LOADING_TIMEOUT_MS
 
 export function useStableDiffusionInpainting() {
-  // == State == (Keep existing state)
+  // == State == (Keep existing state, but isGenerating won't be used effectively)
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [maskImage, setMaskImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState<string>("");
@@ -14,21 +14,13 @@ export function useStableDiffusionInpainting() {
   const [numInferenceSteps, setNumInferenceSteps] = useState<number>(25);
   const [guidanceScale, setGuidanceScale] = useState<number>(7.5);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  // We keep isGenerating state but never set it to true
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [generationStartTime, setGenerationStartTime] = useState<number>(0);
+  // generationStartTime won't be useful now either
+  // const [generationStartTime, setGenerationStartTime] = useState<number>(0);
 
-  // == Ref for the Timeout ==
-  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null); // Use NodeJS.Timeout for type safety, or number
-
-  // == Clear Timeout Function ==
-  const clearLoadingTimeout = useCallback(() => {
-    if (loadingTimerRef.current) {
-      clearTimeout(loadingTimerRef.current);
-      loadingTimerRef.current = null;
-      console.log("<<< HOOK: Cleared loading timeout >>>");
-    }
-  }, []);
+  // No longer need the timeout ref or clear function
 
   // == Function to Send Request ==
   const generateInpaintedImage = useCallback(async () => {
@@ -46,13 +38,12 @@ export function useStableDiffusionInpainting() {
     }
 
     // --- Start Process ---
-    setIsGenerating(true);
-    setResultImage(null);
+    // setIsGenerating(true); // <<< REMOVED/COMMENTED OUT
+    setResultImage(null); // Still clear previous result
     setErrorMessage(null);
-    setGenerationStartTime(Date.now());
-    clearLoadingTimeout(); // Clear any previous timeout
+    // setGenerationStartTime(Date.now()); // Not useful anymore
 
-    toast.info("Sending image generation request...");
+    toast.info("Sending image generation request..."); // Keep toast for some feedback
     console.log("Sending request to webhook with prompt:", prompt);
 
     try {
@@ -66,18 +57,8 @@ export function useStableDiffusionInpainting() {
         guidance_scale: guidanceScale,
       });
 
-      console.log("Request sent. Waiting for result event OR timeout...");
-
-      // --- Start the Timeout ---
-      // Force stop loading after LOADING_TIMEOUT_MS milliseconds
-      loadingTimerRef.current = setTimeout(() => {
-        console.log(`<<< HOOK: ${LOADING_TIMEOUT_MS / 1000}s timeout elapsed. Forcing loading stop. >>>`);
-        // Check if it wasn't already stopped by the event or an error
-        // Setting state is safe, React handles batching/idempotency
-        setIsGenerating(false);
-        loadingTimerRef.current = null; // Clear ref after execution
-      }, LOADING_TIMEOUT_MS);
-      console.log(`<<< HOOK: Timeout set for ${LOADING_TIMEOUT_MS / 1000} seconds >>>`);
+      console.log("Request sent. Waiting for result event...");
+      // No timeout needed
 
     } catch (error) {
       // Handle initial send error
@@ -85,38 +66,36 @@ export function useStableDiffusionInpainting() {
       const errorMsg = `Failed to send request: ${error instanceof Error ? error.message : String(error)}`;
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
-      setIsGenerating(false); // Stop loading on send error
-      clearLoadingTimeout(); // Clear timeout if sending failed
+      // setIsGenerating(false); // Not needed, was never true
     }
-    // No finally block setting isGenerating
   }, [
     originalImage,
     maskImage,
     prompt,
     negativePrompt,
     numInferenceSteps,
-    guidanceScale,
-    clearLoadingTimeout // Add clear function to dependencies
+    guidanceScale
+    // No dependencies for timeout needed
   ]);
 
   // == Listener for Actual Result Event ==
   useEffect(() => {
     const handleResultReady = (event: Event) => {
       console.log("<<< HOOK: handleResultReady CALLED >>>", event.detail);
-      clearLoadingTimeout(); // <<< Clear the timeout if the event arrives first
+      // No timeout to clear
 
       const customEvent = event as CustomEvent<{ imageUrl: string; [key: string]: any }>;
 
       if (customEvent.detail && typeof customEvent.detail.imageUrl === 'string') {
         console.log(`<<< HOOK: Received image URL via event: ${customEvent.detail.imageUrl.substring(0,50)}... >>>`);
-        setResultImage(customEvent.detail.imageUrl);
+        setResultImage(customEvent.detail.imageUrl); // Set the result
         toast.success("Image generated successfully!");
-        setIsGenerating(false); // Stop loading (might be redundant if timeout already fired, but safe)
+        // setIsGenerating(false); // Not needed, was never true
       } else {
         console.warn(`<<< HOOK: Received event, but detail format incorrect >>>:`, customEvent.detail);
         setErrorMessage("Received invalid result data from webhook.");
         toast.error("Received invalid result data.");
-        setIsGenerating(false); // Stop loading even if data is bad
+        // setIsGenerating(false); // Not needed, was never true
       }
     };
 
@@ -127,14 +106,12 @@ export function useStableDiffusionInpainting() {
     return () => {
       console.log(`<<< HOOK: Removing listener for ${RESULT_EVENT_NAME} >>>`);
       window.removeEventListener(RESULT_EVENT_NAME, handleResultReady);
-      clearLoadingTimeout(); // <<< Clear timeout on unmount
+      // No timeout to clear
     };
-  }, [clearLoadingTimeout]); // Add clear function to dependencies
+  }, []); // Empty dependency array is fine
 
-  // == Kalkulasi Waktu (Optional - keep as is) ==
-  const generationTime = isGenerating && generationStartTime > 0
-    ? Math.max(1, Math.floor((Date.now() - generationStartTime) / 1000))
-    : null;
+  // == Kalkulasi Waktu (Will always be null) ==
+  const generationTime = null; // isGenerating is always false
 
   // == Return Values == (Keep as is)
   return {
@@ -151,9 +128,9 @@ export function useStableDiffusionInpainting() {
     guidanceScale,
     setGuidanceScale,
     resultImage,
-    isGenerating,
+    isGenerating, // Will always be false
     errorMessage,
-    generationTime,
+    generationTime, // Will always be null
     generateInpaintedImage,
   };
 }
