@@ -17,7 +17,6 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Update when prop changes
   useEffect(() => {
     console.log("ImageDisplay - generatedImage prop updated:", generatedImage);
-    window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', { detail: { imageUrl: generatedImage } }));
   }, [generatedImage]);
   
   // Listen for generated image events
