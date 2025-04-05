@@ -5,9 +5,9 @@ import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { toast } from "sonner";
 import TabsContainer from '@/components/tabs/TabsContainer';
-import ImageGallery from '@/components/gallery/ImageGallery';
-import GeminiImageService from '@/services/GeminiImageService';
+import ImageDisplay from '@/components/tabs/ImageDisplay';
 import { feedImages, storyImages } from '@/data/galleryImages';
+import { generateImageWithWebhook } from '@/utils/image/webhookHandler';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -29,20 +29,6 @@ const Index = () => {
     Sentry.setTag("feature", "image-generation");
   }, []);
   
-  // Listen for imageGenerated events
-  useEffect(() => {
-    const handleImageGenerated = (event: CustomEvent) => {
-      console.log("Index.tsx caught image generated event:", event.detail);
-      setGeneratedImage(event.detail.imageUrl);
-    };
-    
-    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
-    
-    return () => {
-      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
-    };
-  }, []);
-  
   const generateImage = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter a prompt to generate an image");
@@ -51,8 +37,7 @@ const Index = () => {
     
     setIsGenerating(true);
     try {
-      const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
-      console.log(`Generating image with aspect ratio: ${aspectRatio}`);
+      console.log(`Generating image with prompt: ${prompt}`);
       console.log(`Product image available: ${productImage !== null}`);
       
       // Log product image details if available
@@ -62,23 +47,12 @@ const Index = () => {
       
       Sentry.setContext("image_generation", {
         prompt: prompt,
-        aspectRatio: aspectRatio,
         hasProductImage: productImage !== null,
         timestamp: new Date().toISOString()
       });
       
-      // Update prompt to include reference to the product image if one is uploaded
-      let enhancedPrompt = prompt;
-      if (productImage) {
-        enhancedPrompt += ` - Create an image that features this product prominently.`;
-      }
-      
-      const imageUrl = await GeminiImageService.generateImage({
-        prompt: enhancedPrompt,
-        aspectRatio,
-        style: productImage ? "product-focused" : undefined,
-        productImage // Pass the product image to the service
-      });
+      // Generate image with webhook
+      const imageUrl = await generateImageWithWebhook(prompt, productImage);
       
       if (imageUrl) {
         console.log(`Image generated, URL: ${imageUrl}`);
@@ -118,21 +92,36 @@ const Index = () => {
                   productImage={productImage}
                   setProductImage={setProductImage}
                   isGenerating={isGenerating}
+                  setIsGenerating={setIsGenerating}
                   generateImage={generateImage}
                   setXText={setXText}
                   setLinkedinText={setLinkedinText}
                   generatedImage={generatedImage}
+                  setGeneratedImage={setGeneratedImage}
                 />
               </div>
             </div>
           </div>
           
-          <ImageGallery 
-            feedImages={feedImages}
-            storyImages={storyImages}
-            generatedImage={generatedImage}
-            activeTab={activeTab}
-          />
+          <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
+            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+              <ImageDisplay 
+                images={feedImages}
+                generatedImage={generatedImage}
+                showGenerated={activeTab === "feed"}
+                aspectRatio="square"
+              />
+            </div>
+            
+            <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+              <ImageDisplay 
+                images={storyImages}
+                generatedImage={generatedImage}
+                showGenerated={activeTab === "story"}
+                aspectRatio="story"
+              />
+            </div>
+          </div>
         </main>
       </div>
     </AuroraBackground>
