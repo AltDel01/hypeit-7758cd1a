@@ -1,6 +1,4 @@
-// src/App.tsx
 
-// 1. Tambahkan import yang diperlukan
 import React, { useState, useEffect } from 'react'; // <-- Tambahkan useState, useEffect
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
