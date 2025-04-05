@@ -34,6 +34,7 @@ const MediaTabContent = ({
         setProductImage={setProductImage}
         isGenerating={isGenerating}
         setIsGenerating={setIsGenerating}
+        generateImage={generateImage}
         generatedImage={generatedImage}
         setGeneratedImage={setGeneratedImage}
       />

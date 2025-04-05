@@ -36,6 +36,8 @@ const Index = () => {
     }
     
     setIsGenerating(true);
+    setGeneratedImage(null); // Clear previous image
+    
     try {
       console.log(`Generating image with prompt: ${prompt}`);
       console.log(`Product image available: ${productImage !== null}`);
@@ -55,7 +57,7 @@ const Index = () => {
       const imageUrl = await generateImageWithWebhook(prompt, productImage);
       
       if (imageUrl) {
-        console.log(`Image generated, URL: ${imageUrl}`);
+        console.log("Image generated successfully");
         setGeneratedImage(imageUrl);
         toast.success("Image generated successfully!");
       } else {
@@ -94,7 +96,9 @@ const Index = () => {
                   isGenerating={isGenerating}
                   setIsGenerating={setIsGenerating}
                   generateImage={generateImage}
+                  xText={xText}
                   setXText={setXText}
+                  linkedinText={linkedinText}
                   setLinkedinText={setLinkedinText}
                   generatedImage={generatedImage}
                   setGeneratedImage={setGeneratedImage}

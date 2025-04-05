@@ -32,28 +32,34 @@ export async function generateImageWithWebhook(
   
   console.log("Sending payload to webhook:", { id, prompt, hasProductImage: !!productImage });
   
-  // Send the request to the webhook
-  const response = await fetch("https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Webhook responded with status: ${response.status}`);
+  try {
+    // Send the request to the webhook
+    const response = await fetch("https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Webhook responded with status: ${response.status}`);
+    }
+    
+    // Parse the response
+    const result = await response.json();
+    
+    if (!result.image_base64) {
+      throw new Error("Webhook response did not contain an image");
+    }
+    
+    // Return the base64 image data
+    console.log("Successfully received image from webhook");
+    return `data:image/png;base64,${result.image_base64}`;
+  } catch (error) {
+    console.error("Error in webhook request:", error);
+    throw error;
   }
-  
-  // Parse the response
-  const result = await response.json();
-  
-  if (!result.image_base64) {
-    throw new Error("Webhook response did not contain an image");
-  }
-  
-  // Return the base64 image data
-  return `data:image/png;base64,${result.image_base64}`;
 }
 
 /**
