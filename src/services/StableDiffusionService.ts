@@ -21,7 +21,7 @@ const stableDiffusionService = {
       hasMask: !!params.mask
     });
     
-    // Forward to the webhook handler
+    // Forward to the webhook handler with the prompt
     return sendToMakeWebhook(params.image, params.prompt);
   }
 };

@@ -84,7 +84,6 @@ const TabsContainer = ({
       
       <TabsContent value="social" className="space-y-4">
         <SocialTab 
-          prompt={prompt}
           xText={""} 
           linkedinText={""}
           setXText={setXText}

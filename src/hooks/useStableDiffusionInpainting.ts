@@ -3,11 +3,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
-// Pastikan path service benar
 import stableDiffusionService from '@/services/StableDiffusionService';
 
-// Nama event yang diharapkan dari webhook
-const RESULT_EVENT_NAME = 'stableDiffusionResultReady';
+// Name of the expected event from webhook
+const RESULT_EVENT_NAME = 'imageGenerated';
 
 export function useStableDiffusionInpainting() {
   const [originalImage, setOriginalImage] = useState<File | null>(null);
@@ -23,7 +22,7 @@ export function useStableDiffusionInpainting() {
 
   // Simplified generation function
   const generateInpaintedImage = useCallback(async () => {
-    // Validasi input
+    // Input validation
     if (!originalImage) {
       toast.error("Please upload an original image");
       return;
@@ -67,13 +66,12 @@ export function useStableDiffusionInpainting() {
 
   // Event listener for webhook response
   useEffect(() => {
-    const handleResultReady = (event: Event) => {
+    const handleResultReady = (event: CustomEvent<{ imageUrl: string; [key: string]: any }>) => {
       console.log('[HOOK] Result event received:', event.type);
-      const customEvent = event as CustomEvent<{ imageUrl: string; [key: string]: any }>;
-
-      if (customEvent.detail && customEvent.detail.imageUrl) {
-        console.log('[HOOK] Image URL received:', customEvent.detail.imageUrl.substring(0, 30) + '...');
-        setResultImage(customEvent.detail.imageUrl);
+      
+      if (event.detail && event.detail.imageUrl) {
+        console.log('[HOOK] Image URL received:', event.detail.imageUrl.substring(0, 30) + '...');
+        setResultImage(event.detail.imageUrl);
         toast.success("Image generated successfully!");
       } else {
         console.warn('[HOOK] Invalid response format');
@@ -87,12 +85,12 @@ export function useStableDiffusionInpainting() {
 
     // Add event listener
     console.log(`[HOOK] Adding listener for event: ${RESULT_EVENT_NAME}`);
-    window.addEventListener(RESULT_EVENT_NAME, handleResultReady);
+    window.addEventListener(RESULT_EVENT_NAME, handleResultReady as EventListener);
 
     // Cleanup listener
     return () => {
       console.log(`[HOOK] Removing listener for event: ${RESULT_EVENT_NAME}`);
-      window.removeEventListener(RESULT_EVENT_NAME, handleResultReady);
+      window.removeEventListener(RESULT_EVENT_NAME, handleResultReady as EventListener);
     };
   }, []);
 

@@ -6,11 +6,12 @@ import { toast } from "sonner";
  * 
  * @param productImage - The product image file to be sent
  * @param prompt - The user's prompt text
- * @returns A promise that resolves when the image is received and processed
+ * @returns A promise that resolves to the image URL when received and processed
  */
 export async function sendToMakeWebhook(productImage: File | null, prompt: string): Promise<string | null> {
   if (!productImage) {
     console.error("No product image provided for webhook");
+    toast.error("Please upload an image first");
     return null;
   }
   
@@ -20,15 +21,19 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     // Convert the image to base64
     const base64Image = await fileToBase64(productImage);
     
+    // Create a unique ID for this request
+    const requestId = `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+    
     // Prepare the payload according to the required format
     const payload = {
-      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
+      id: requestId,
       prompt: prompt, // Include the prompt in the payload
       product_image: base64Image,
       product_image_type: productImage.type
     };
     
     console.log("Sending request to Make.com webhook");
+    toast.info("Processing your image...");
     
     // Send the request to the webhook
     const response = await fetch("https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6", {
@@ -53,14 +58,17 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     // Convert the base64 image to a displayable URL
     const imageUrl = `data:image/png;base64,${data.image_base64}`;
     
-    // Dispatch the event with the image URL
-    window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', {
+    // Dispatch an event with the image URL
+    const imageEvent = new CustomEvent('imageGenerated', {
       detail: { imageUrl: imageUrl }
-    }));
+    });
+    window.dispatchEvent(imageEvent);
+    
+    toast.success("Image generated successfully!");
     return imageUrl;
   } catch (error) {
     console.error("Error sending image to webhook:", error);
-    toast.error(`Failed to process image through webhook: ${error instanceof Error ? error.message : String(error)}`);
+    toast.error(`Failed to process image: ${error instanceof Error ? error.message : String(error)}`);
     return null;
   }
 }
