@@ -1,225 +1,136 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ImageLoadingState from '@/components/ui/loading/ImageLoadingState';
-import ImageErrorState from './ImageErrorState';
+import ImageErrorState from './ImageErrorState'; // Assuming this component exists
+
+// Optional: Define a simpler Loading state component or just use text
+const SimpleLoadingIndicator = () => (
+  <div className="p-4 text-center text-gray-400">
+    Loading Image...
+    {/* You could add a simple spinner here if desired */}
+  </div>
+);
 
 interface ImagePreviewProps {
+  // The URL of the image to display
   imageUrl: string | null;
-  prompt: string;
-  onRetry: () => void;
+
+  // Function to call when the user manually clicks retry.
+  // This should typically trigger the image generation process again in the parent.
+  onRetryRequest: () => void;
+
+  // Optional flag from the parent component indicating if the overall
+  // generation process is happening (before an imageUrl is even available).
+  isGenerating?: boolean;
 }
 
-const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
-  const [imageError, setImageError] = useState<boolean>(false);
-  const [imageLoading, setImageLoading] = useState<boolean>(true);
-  const [retryCount, setRetryCount] = useState<number>(0);
-  const [loadingProgress, setLoadingProgress] = useState<number>(0);
-  const [isStalled, setIsStalled] = useState<boolean>(false);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const progressIntervalRef = useRef<number | null>(null);
-  const timeoutRef = useRef<number | null>(null);
-  const loadingTimeoutRef = useRef<number | null>(null);
-  const stalledTimerRef = useRef<number | null>(null);
+const ImagePreview = ({
+  imageUrl,
+  onRetryRequest,
+  isGenerating = false // Default to false
+}: ImagePreviewProps) => {
+  // State specifically for tracking the loading/error status of the HTML <img> tag
+  const [isImgTagLoading, setIsImgTagLoading] = useState<boolean>(false);
+  const [isImgTagError, setIsImgTagError] = useState<boolean>(false);
 
+  // State to force re-render/reload of the image tag on manual retry
+  const [retryKey, setRetryKey] = useState<number>(Date.now()); // Initialize with timestamp
+
+  // Effect runs when the imageUrl changes or when a retry is triggered
   useEffect(() => {
     if (imageUrl) {
-      setImageLoading(false);
-      setImageError(false);
-      setIsStalled(false);
-      
-      // Start animated progress
-      setLoadingProgress(0);
-      if (progressIntervalRef.current) {
-        window.clearInterval(progressIntervalRef.current);
-      }
-      
-      // Clear any existing timeouts
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      
-      if (loadingTimeoutRef.current) {
-        window.clearTimeout(loadingTimeoutRef.current);
-      }
-      
-      if (stalledTimerRef.current) {
-        window.clearTimeout(stalledTimerRef.current);
-      }
-      
-      // Set a hard timeout for loading
-      loadingTimeoutRef.current = window.setTimeout(() => {
-        console.log("Hard loading timeout reached, triggering retry");
-        handleImageRetry();
-      }, 60000); // 60 seconds maximum total loading time
-      
-      // Realistic progress animation
-      progressIntervalRef.current = window.setInterval(() => {
-        setLoadingProgress(prev => {
-          // Simulate natural progress curve
-          if (prev < 20) return prev + 1;
-          if (prev < 50) return prev + 0.5;
-          if (prev < 80) return prev + 0.2;
-          if (prev < 90) return prev + 0.1;
-          
-          // When progress reaches 90%, start stall detection timer
-          if (prev >= 90 && !isStalled && stalledTimerRef.current === null) {
-            console.log("Progress at 90+%, starting stall detection timer");
-            stalledTimerRef.current = window.setTimeout(() => {
-              console.log("Image generation appears stalled at 90+%");
-              setIsStalled(true);
-            }, 12000); // 12 seconds at 90% is considered stalled
-          }
-          
-          // Force timeout if stuck at 90+ for too long
-          if (prev >= 90 && timeoutRef.current === null) {
-            console.log("Progress stuck at 90+%, setting timeout");
-            timeoutRef.current = window.setTimeout(() => {
-              console.log("Loading timeout reached, forcing retry");
-              handleImageRetry();
-            }, 15000); // 15 seconds timeout if stuck at high percentage
-          }
-          
-          return prev < 95 ? prev + 0.05 : prev;
-        });
-      }, 300);
+      // If we get a new URL, reset error state and set image tag loading to true
+      setIsImgTagError(false);
+      setIsImgTagLoading(true);
+      // Note: The actual loading happens via the <img> tag's src attribute
+    } else {
+      // If imageUrl is null (e.g., initial state), ensure loading/error are false
+      setIsImgTagLoading(false);
+      setIsImgTagError(false);
     }
-    
-    return () => {
-      if (progressIntervalRef.current) {
-        window.clearInterval(progressIntervalRef.current);
-      }
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      if (loadingTimeoutRef.current) {
-        window.clearTimeout(loadingTimeoutRef.current);
-        loadingTimeoutRef.current = null;
-      }
-      if (stalledTimerRef.current) {
-        window.clearTimeout(stalledTimerRef.current);
-        stalledTimerRef.current = null;
-      }
-    };
-  }, [imageUrl]);
+  }, [imageUrl, retryKey]); // Depend on imageUrl and the retryKey
 
-  const handleImageLoad = () => {
-    console.log("Image loaded successfully");
-    setImageError(false);
-    setImageLoading(false);
-    setIsStalled(false);
-    setLoadingProgress(100);
-    
-    if (progressIntervalRef.current) {
-      window.clearInterval(progressIntervalRef.current);
-    }
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (loadingTimeoutRef.current) {
-      window.clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
-    if (stalledTimerRef.current) {
-      window.clearTimeout(stalledTimerRef.current);
-      stalledTimerRef.current = null;
+  // Handler for the <img> tag's onLoad event
+  const handleImageLoadSuccess = () => {
+    console.log("ImagePreview: <img> tag onLoad event fired.");
+    setIsImgTagLoading(false);
+    setIsImgTagError(false);
+  };
+
+  // Handler for the <img> tag's onError event
+  const handleImageLoadError = () => {
+    console.error("ImagePreview: <img> tag onError event fired.");
+    setIsImgTagLoading(false);
+    setIsImgTagError(true);
+  };
+
+  // Handler for the manual "Retry Load" button click
+  const handleManualRetryClick = () => {
+    if (imageUrl) {
+      console.log("ImagePreview: Manual retry load clicked.");
+      // Change the key, which forces the useEffect to run again and
+      // implicitly causes React to treat the <img> tag as new, triggering a reload.
+      setRetryKey(Date.now());
+    } else {
+      // If there's no URL, the retry should likely re-trigger generation
+      console.log("ImagePreview: Manual retry clicked (no URL), calling onRetryRequest.");
+      onRetryRequest();
     }
   };
 
-  const handleImageError = () => {
-    console.log("Image failed to load, marking as error");
-    setImageError(true);
-    setImageLoading(false);
-    
-    if (progressIntervalRef.current) {
-      window.clearInterval(progressIntervalRef.current);
-    }
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (loadingTimeoutRef.current) {
-      window.clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
-    if (stalledTimerRef.current) {
-      window.clearTimeout(stalledTimerRef.current);
-      stalledTimerRef.current = null;
-    }
-    
-    // Auto-retry once for images
-    if (retryCount === 0) {
-      setTimeout(() => handleImageRetry(), 1000);
-    }
-  };
-
-  const handleImageRetry = () => {
-    console.log("Handling image retry");
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (loadingTimeoutRef.current) {
-      window.clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
-    if (stalledTimerRef.current) {
-      window.clearTimeout(stalledTimerRef.current);
-      stalledTimerRef.current = null;
-    }
-    
-    setRetryCount(prev => prev + 1);
-    setLoadingProgress(0);
-    setImageLoading(true);
-    setImageError(false);
-    setIsStalled(false);
-    onRetry();
-  };
-
-  const isPlaceholder = 
-    imageUrl?.includes('placeholder.com') || 
-    imageUrl?.includes('Generating+Image');
+  // Determine the final loading state to show to the user
+  // Show loading if:
+  // 1. The parent explicitly says it's generating (isGenerating is true)
+  // OR
+  // 2. We have an imageUrl, AND the image tag is currently trying to load, AND there's no error yet.
+  const showOverallLoading = isGenerating || (imageUrl && isImgTagLoading && !isImgTagError);
 
   return (
     <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
       <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
         <span>Generated Image</span>
-        {(imageError || isStalled || retryCount > 0 || loadingProgress > 90) && (
-          <Button 
-            onClick={handleImageRetry} 
-            variant="ghost" 
+        {/* Show the retry button ONLY if the <img> tag specifically encountered an error */}
+        {isImgTagError && (
+          <Button
+            onClick={handleManualRetryClick}
+            variant="ghost"
             className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
+            aria-label="Retry loading image"
           >
             <RefreshCw className="h-3 w-3 mr-1" />
-            Retry
+            Retry Load
           </Button>
         )}
       </div>
-      
-      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
-        {(imageLoading || isPlaceholder) && !imageError ? (
-          <ImageLoadingState 
-            loadingProgress={loadingProgress}
-            setLoadingProgress={setLoadingProgress}
-            isStalled={isStalled}
-          />
-        ) : imageError ? (
-          <ImageErrorState onRetry={handleImageRetry} />
-        ) : (
-          <img 
-            ref={imageRef}
-            key={`${imageUrl}-${retryCount}`} // Force re-render when URL changes or retry count increases
-            src={imageUrl} 
-            alt="Generated content" 
-            className="w-full h-48 object-contain rounded"
-            onError={handleImageError}
-            onLoad={handleImageLoad}
+
+      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center relative">
+        {/* 1. Show Loading State */}
+        {showOverallLoading && <SimpleLoadingIndicator />}
+
+        {/* 2. Show Error State (only if not loading and img tag specifically errored) */}
+        {!showOverallLoading && isImgTagError && (
+          <ImageErrorState onRetry={handleManualRetryClick} />
+        )}
+
+        {/* 3. Show Image (only if not loading, no error, and imageUrl exists) */}
+        {!showOverallLoading && !isImgTagError && imageUrl && (
+          <img
+            key={retryKey} // Use key to force reload on retry
+            src={imageUrl}
+            alt="Generated content" // Consider adding more descriptive alt text if prompt is available
+            className="max-w-full max-h-full object-contain rounded"
+            onLoad={handleImageLoadSuccess}
+            onError={handleImageLoadError}
+            // Hide the image element itself while its specific loading is happening
+            // to prevent browser's broken image icon from briefly showing.
+            style={{ display: isImgTagLoading ? 'none' : 'block' }}
           />
         )}
+
+         {/* 4. Show Placeholder (only if not loading, no error, and no imageUrl) */}
+         {!showOverallLoading && !isImgTagError && !imageUrl && (
+             <div className="text-center text-gray-500">Image will appear here</div>
+         )}
       </div>
     </div>
   );
