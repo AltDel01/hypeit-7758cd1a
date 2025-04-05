@@ -1,6 +1,5 @@
 
 import { toast } from "sonner";
-import { dispatchImageGeneratedEvent } from './imageEvents';
 
 /**
  * Sends a request to the Make.com webhook and processes the response
@@ -24,7 +23,7 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     // Prepare the payload according to the required format
     const payload = {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
-      prompt: prompt, // Add the prompt to the payload
+      prompt: prompt, // Include the prompt in the payload
       product_image: base64Image,
       product_image_type: productImage.type
     };
@@ -55,10 +54,9 @@ export async function sendToMakeWebhook(productImage: File | null, prompt: strin
     const imageUrl = `data:image/png;base64,${data.image_base64}`;
     
     // Dispatch the event with the image URL
-    //dispatchImageGeneratedEvent(imageUrl, "Product image processed by webhook");
     window.dispatchEvent(new CustomEvent('stableDiffusionResultReady', {
-    detail: { imageUrl: imageUrl }
-}));
+      detail: { imageUrl: imageUrl }
+    }));
     return imageUrl;
   } catch (error) {
     console.error("Error sending image to webhook:", error);

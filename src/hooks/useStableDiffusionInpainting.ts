@@ -1,15 +1,15 @@
-// src/hooks/useStableDiffusionInpainting.ts (DENGAN LOGGING)
+
+// src/hooks/useStableDiffusionInpainting.ts
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 // Pastikan path service benar
 import stableDiffusionService from '@/services/StableDiffusionService';
 
-// Nama event yang diharapkan dari webhook (PASTIKAN SAMA PERSIS DENGAN YANG DIKIRIM)
+// Nama event yang diharapkan dari webhook
 const RESULT_EVENT_NAME = 'stableDiffusionResultReady';
 
 export function useStableDiffusionInpainting() {
-  // == State (Tetap sama seperti di kode hook awal Anda) ==
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [maskImage, setMaskImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState<string>("");
@@ -17,96 +17,85 @@ export function useStableDiffusionInpainting() {
   const [numInferenceSteps, setNumInferenceSteps] = useState<number>(25);
   const [guidanceScale, setGuidanceScale] = useState<number>(7.5);
   const [resultImage, setResultImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false); // State loading utama
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Tambahkan state lain dari hook awal Anda jika memang ada dan digunakan
-  const [isModelLoading, setIsModelLoading] = useState<boolean>(false); // Contoh
-  const [loadingStatus, setLoadingStatus] = useState<string>('');      // Contoh
-  const [loadingProgress, setLoadingProgress] = useState<number>(0);    // Contoh
-  const [generationTime, setGenerationTime] = useState<number | null>(null); // Contoh
-  const [useWebhook, setUseWebhook] = useState<boolean>(true); // Contoh
+  const [useWebhook, setUseWebhook] = useState<boolean>(true);
 
-
-  // == Fungsi Generate (Dengan Logging) ==
+  // Simplified generation function
   const generateInpaintedImage = useCallback(async () => {
-    // Validasi (tetap sama)
-    const missingItems = [];
-    if (!originalImage) missingItems.push("original image");
-    if (!maskImage) missingItems.push("mask image");
-    if (!prompt) missingItems.push("prompt");
-    if (missingItems.length > 0) { /* ... handle error ... */ return; }
+    // Validasi input
+    if (!originalImage) {
+      toast.error("Please upload an original image");
+      return;
+    }
+    if (!maskImage) {
+      toast.error("Please provide a mask image");
+      return;
+    }
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
 
-    // --- LOGGING START ---
-    console.log('[HOOK LOG] ----- Generate Process START -----');
-    console.log('[HOOK LOG] Setting isGenerating: true');
-    setIsGenerating(true); // <<< PENTING: Mulai loading
+    console.log('[HOOK] Starting generation process');
+    setIsGenerating(true);
     setResultImage(null);
     setErrorMessage(null);
-    // Reset state lain jika perlu
-    // setGenerationTime(null);
 
     toast.info("Sending generation request...");
 
     try {
-      // Panggil service (tetap sama)
+      // Send request to webhook
       await stableDiffusionService.sendImageToWebhook({
-          image: originalImage, mask: maskImage, prompt, negative_prompt: negativePrompt, /*... lainnya*/
-       });
-      console.log('[HOOK LOG] Request sent to webhook. Waiting for event:', RESULT_EVENT_NAME);
-      // JANGAN set isGenerating false di sini
-
+        image: originalImage, 
+        mask: maskImage, 
+        prompt, 
+        negative_prompt: negativePrompt,
+        num_inference_steps: numInferenceSteps,
+        guidance_scale: guidanceScale
+      });
+      console.log('[HOOK] Request sent to webhook, waiting for response');
+      // Don't set isGenerating to false here - it will be set when event is received
     } catch (error) {
-      console.error('[HOOK LOG] Error sending request:', error);
+      console.error('[HOOK] Error sending request:', error);
       const errorMsg = `Failed to send request: ${error instanceof Error ? error.message : String(error)}`;
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
-      console.log('[HOOK LOG] Send Error! Setting isGenerating: false'); // <<< PENTING
-      setIsGenerating(false); // <<< Hentikan loading jika pengiriman awal gagal
+      setIsGenerating(false);
     }
-     console.log('[HOOK LOG] ----- Generate Function END (waiting for event) -----');
-  }, [
-    originalImage, maskImage, prompt, negativePrompt, numInferenceSteps, guidanceScale // Tambah dependency jika ada state lain yg dipakai
-  ]);
+  }, [originalImage, maskImage, prompt, negativePrompt, numInferenceSteps, guidanceScale]);
 
-  // == Listener Event (Dengan Logging) ==
+  // Event listener for webhook response
   useEffect(() => {
     const handleResultReady = (event: Event) => {
-      // --- LOGGING EVENT ---
-      console.log('[HOOK LOG] ***** Event Received! ***** Name:', event.type);
-      console.log('[HOOK LOG] Event Detail:', event.detail);
-
+      console.log('[HOOK] Result event received:', event.type);
       const customEvent = event as CustomEvent<{ imageUrl: string; [key: string]: any }>;
 
-      // Proses event (tetap sama)
-      if (customEvent.detail && typeof customEvent.detail.imageUrl === 'string' && customEvent.detail.imageUrl) {
-        console.log('[HOOK LOG] Valid imageUrl found:', customEvent.detail.imageUrl.substring(0, 60) + '...');
+      if (customEvent.detail && customEvent.detail.imageUrl) {
+        console.log('[HOOK] Image URL received:', customEvent.detail.imageUrl.substring(0, 30) + '...');
         setResultImage(customEvent.detail.imageUrl);
-        setErrorMessage(null);
-        toast.success("Image generated!");
+        toast.success("Image generated successfully!");
       } else {
-        console.warn('[HOOK LOG] Invalid or missing imageUrl in event detail.');
-        setErrorMessage("Received invalid result data.");
-        toast.error("Received invalid result data.");
-        setResultImage(null);
+        console.warn('[HOOK] Invalid response format');
+        setErrorMessage("Received invalid result data");
+        toast.error("Received invalid result data");
       }
-
-      // --- LOGGING STOP ---
-      console.log('[HOOK LOG] Event Processed. Setting isGenerating: false'); // <<< PENTING
-      setIsGenerating(false); // <<< Hentikan loading SETELAH event diproses
+      
+      // Always set loading to false when we receive any response
+      setIsGenerating(false);
     };
 
-    // Pasang listener
-    console.log(`[HOOK LOG] Adding listener for event: ${RESULT_EVENT_NAME}`);
+    // Add event listener
+    console.log(`[HOOK] Adding listener for event: ${RESULT_EVENT_NAME}`);
     window.addEventListener(RESULT_EVENT_NAME, handleResultReady);
 
     // Cleanup listener
     return () => {
-      console.log(`[HOOK LOG] Removing listener for event: ${RESULT_EVENT_NAME}`);
+      console.log(`[HOOK] Removing listener for event: ${RESULT_EVENT_NAME}`);
       window.removeEventListener(RESULT_EVENT_NAME, handleResultReady);
     };
-  }, []); // Dependency kosong agar hanya jalan sekali
+  }, []);
 
-  // == Return Values (Sertakan semua yang dibutuhkan komponen anak) ==
   return {
     originalImage, setOriginalImage,
     maskImage, setMaskImage,
@@ -115,10 +104,9 @@ export function useStableDiffusionInpainting() {
     numInferenceSteps, setNumInferenceSteps,
     guidanceScale, setGuidanceScale,
     resultImage,
-    isGenerating, // State loading yang dikelola hook
+    isGenerating,
     errorMessage,
     generateInpaintedImage,
-    // Sertakan state lain dari hook awal Anda jika dibutuhkan oleh InpaintingForm atau ResultPreview
-    isModelLoading, loadingStatus, loadingProgress, generationTime, useWebhook, setUseWebhook,
+    useWebhook, setUseWebhook,
   };
 }
