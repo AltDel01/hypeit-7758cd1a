@@ -17,7 +17,9 @@ interface TabsContainerProps {
   isGenerating: boolean;
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
   generateImage: () => void;
+  xText: string;
   setXText: React.Dispatch<React.SetStateAction<string>>;
+  linkedinText: string;
   setLinkedinText: React.Dispatch<React.SetStateAction<string>>;
   generatedImage: string | null;
   setGeneratedImage: React.Dispatch<React.SetStateAction<string | null>>;
@@ -33,7 +35,9 @@ const TabsContainer = ({
   isGenerating,
   setIsGenerating,
   generateImage,
+  xText,
   setXText,
+  linkedinText,
   setLinkedinText,
   generatedImage,
   setGeneratedImage
