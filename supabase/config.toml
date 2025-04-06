@@ -3,3 +3,4 @@ project_id = "your-project-id"
 
 [functions.gemini-image-generate]
 verify_jwt = false
+

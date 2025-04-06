@@ -12,5 +12,5 @@ export * from './imageEvents';
 // Re-export image fallback functionality
 export * from './imageFallback';
 
-// Re-export image validation (avoiding duplicate exports)
+// Export image validation (explicitly avoid duplicate exports)
 export { checkValidImageUrl } from './imageValidation';

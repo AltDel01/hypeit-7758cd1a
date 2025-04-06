@@ -32,8 +32,6 @@ export class GeminiImageService {
         try {
           const imageBase64 = await this.fileToBase64(productImage);
           requestBody.product_image = imageBase64;
-          requestBody.product_image_name = productImage.name;
-          requestBody.product_image_type = productImage.type;
           
           console.log("Product image processed successfully");
         } catch (imageError) {
@@ -43,13 +41,14 @@ export class GeminiImageService {
       }
       
       // Call the Supabase edge function
+      console.log("Calling gemini-image-generate function with request body");
       const { data, error } = await supabase.functions.invoke("gemini-image-generate", {
         body: requestBody
       });
       
       if (error) {
         console.error("Error calling gemini-image-generate function:", error);
-        toast.error(`Failed to generate image: ${error.message}`);
+        toast.error(`Failed to generate image: ${error.message || "Unknown error"}`);
         return null;
       }
       
@@ -66,7 +65,7 @@ export class GeminiImageService {
       
       // If we got an image URL
       if (response.imageUrl) {
-        console.log("Image generated successfully:", response.imageUrl);
+        console.log("Image generated successfully:", response.imageUrl.substring(0, 50) + "...");
         toast.success("Image generated successfully!");
         
         // Dispatch event with the image
@@ -104,9 +103,7 @@ export class GeminiImageService {
       reader.readAsDataURL(file);
       reader.onload = () => {
         if (typeof reader.result === 'string') {
-          // Extract the base64 part from the Data URL
-          const base64String = reader.result.split(',')[1];
-          resolve(base64String);
+          resolve(reader.result);
         } else {
           reject(new Error('Failed to convert file to base64'));
         }

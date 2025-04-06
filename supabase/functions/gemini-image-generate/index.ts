@@ -20,7 +20,7 @@ serve(async (req) => {
     }
 
     const requestData = await req.json();
-    const { prompt, productImage } = requestData;
+    const { prompt, product_image } = requestData;
 
     if (!prompt) {
       throw new Error("Prompt is required");
@@ -44,16 +44,18 @@ serve(async (req) => {
     };
 
     // Add product image if provided
-    if (productImage) {
+    if (product_image) {
       try {
-        // Decode base64 image
-        const imageData = base64Decode(productImage);
+        console.log("Product image provided, adding to request");
         
-        // Add to request
         requestBody.contents[0].parts.push({
           inline_data: {
-            mime_type: "image/jpeg", // Assuming JPEG format, adjust if needed
-            data: productImage
+            mime_type: product_image.startsWith("data:image/") ? 
+              product_image.split(';')[0].split(':')[1] : 
+              "image/jpeg",
+            data: product_image.includes("base64,") ? 
+              product_image.split("base64,")[1] : 
+              product_image
           }
         });
         
@@ -75,9 +77,14 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Gemini API error:", errorData);
-      throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
+      const errorText = await response.text();
+      console.error("Gemini API error:", response.status, errorText);
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
+      } catch (e) {
+        throw new Error(`Gemini API error: Status ${response.status} - ${errorText || response.statusText}`);
+      }
     }
 
     const responseData = await response.json();
@@ -100,6 +107,7 @@ serve(async (req) => {
     }
 
     if (!imageData) {
+      console.error("No image data in response:", JSON.stringify(responseData));
       throw new Error("No image data in response");
     }
 
@@ -124,13 +132,3 @@ serve(async (req) => {
     );
   }
 });
-
-// Helper function to decode base64
-function base64Decode(base64String: string): Uint8Array {
-  const binary = atob(base64String);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
