@@ -17,7 +17,7 @@ export class GeminiImageService {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}`);
       
-      toast.info("Generating image...", { duration: 5000 });
+      toast.info("Generating image with Gemini 2.0 Flash...", { duration: 5000 });
       
       // Create request body
       const requestBody: any = {
@@ -43,23 +43,23 @@ export class GeminiImageService {
       }
       
       // Call the Supabase edge function
-      const { data, error } = await supabase.functions.invoke("generate-image", {
+      const { data, error } = await supabase.functions.invoke("gemini-image-generate", {
         body: requestBody
       });
       
       if (error) {
-        console.error("Error calling generate-image function:", error);
+        console.error("Error calling gemini-image-generate function:", error);
         toast.error(`Failed to generate image: ${error.message}`);
         return null;
       }
       
       if (!data) {
-        console.error("No data returned from generate-image function");
+        console.error("No data returned from gemini-image-generate function");
         toast.error("Failed to generate image: No data returned");
         return null;
       }
       
-      console.log("Response from generate-image function:", data);
+      console.log("Response from gemini-image-generate function:", data);
       
       // Parse the response
       const response = data as ImageGenerationResponse;
@@ -77,7 +77,7 @@ export class GeminiImageService {
       
       // Handle error case
       if (response.error) {
-        console.error("Error from generate-image function:", response.error);
+        console.error("Error from gemini-image-generate function:", response.error);
         toast.error(`Failed to generate image: ${response.error}`);
         return null;
       }

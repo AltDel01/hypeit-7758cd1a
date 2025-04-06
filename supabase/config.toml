@@ -1,17 +1,5 @@
 
-project_id = "mkwinxbualpcivkujlfd"
+project_id = "your-project-id"
 
-[functions.generate-image]
-verify_jwt = false
-
-[functions.generate-post]
-verify_jwt = false
-
-[functions.manage-secrets]
-verify_jwt = false
-
-[functions.test-gemini-key]
-verify_jwt = false
-
-[functions.test-qwen-key]
+[functions.gemini-image-generate]
 verify_jwt = false
