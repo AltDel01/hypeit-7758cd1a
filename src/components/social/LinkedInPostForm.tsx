@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy } from 'lucide-react';
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import ApiKeyPlaceholder from './ApiKeyPlaceholder';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import QwenKeyInput from "@/components/api/QwenKeyInput";
 import { AlertCircle, Info } from 'lucide-react';
 import { 
   Dialog,
@@ -42,20 +41,20 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
   }, []);
 
   const checkApiKeyStatus = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-qwen-key', {
-        body: { action: 'check' }
-      });
+    // try {
+    //   const { data, error } = await supabase.functions.invoke('test-qwen-key', {
+    //     body: { action: 'check' }
+    //   });
       
-      if (error || !data.success) {
-        setIsApiKeyConfigured(false);
-      } else {
-        setIsApiKeyConfigured(true);
-      }
-    } catch (err) {
-      console.error("Error checking API key status:", err);
-      setIsApiKeyConfigured(false);
-    }
+    //   if (error || !data.success) {
+    //     setIsApiKeyConfigured(false);
+    //   } else {
+    //     setIsApiKeyConfigured(true);
+    //   }
+    // } catch (err) {
+    //   console.error("Error checking API key status:", err);
+    //   setIsApiKeyConfigured(false);
+    // }
   };
 
   const handleGeneratePost = async () => {
@@ -73,57 +72,57 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
       ? `Create a LinkedIn post about ${idea} for the ${industry} industry.` 
       : `Create a LinkedIn post about ${idea}.`;
     
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-post', {
-        body: {
-          prompt,
-          tone,
-          length,
-          platform: 'linkedin'
-        }
-      });
+    // try {
+    //   const { data, error } = await supabase.functions.invoke('generate-post', {
+    //     body: {
+    //       prompt,
+    //       tone,
+    //       length,
+    //       platform: 'linkedin'
+    //     }
+    //   });
 
-      if (error) {
-        console.error("Error invoking function:", error);
-        throw new Error(error.message);
-      }
+    //   if (error) {
+    //     console.error("Error invoking function:", error);
+    //     throw new Error(error.message);
+    //   }
 
-      if (data.error) {
-        console.error("API returned error:", data.error);
-        if (data.error.includes('quota') || data.error.includes('exceeded')) {
-          setShowQuotaError(true);
-          toast.error("OpenAI quota exceeded");
-        } else {
-          setErrorMessage(data.error);
-          toast.error(`Failed to generate post: ${data.error}`);
-        }
-        return;
-      }
+    //   if (data.error) {
+    //     console.error("API returned error:", data.error);
+    //     if (data.error.includes('quota') || data.error.includes('exceeded')) {
+    //       setShowQuotaError(true);
+    //       toast.error("OpenAI quota exceeded");
+    //     } else {
+    //       setErrorMessage(data.error);
+    //       toast.error(`Failed to generate post: ${data.error}`);
+    //     }
+    //     return;
+    //   }
 
-      if (data.isFallback) {
-        setIsFallbackContent(true);
-        if (data.warning) {
-          setFallbackWarning(data.warning);
-          toast.warning("Using fallback content generator due to API limitations");
-        }
-      }
+    //   if (data.isFallback) {
+    //     setIsFallbackContent(true);
+    //     if (data.warning) {
+    //       setFallbackWarning(data.warning);
+    //       toast.warning("Using fallback content generator due to API limitations");
+    //     }
+    //   }
 
-      const generatedText = data.text;
-      setGeneratedPost(generatedText);
-      onGeneratePost(generatedText);
+    //   const generatedText = data.text;
+    //   setGeneratedPost(generatedText);
+    //   onGeneratePost(generatedText);
       
-      if (!data.isFallback) {
-        toast.success("LinkedIn post generated successfully!");
-      } else {
-        toast.info("Post generated using fallback system");
-      }
-    } catch (error) {
-      console.error('Error generating post:', error);
-      setErrorMessage("Server error. Please try again later.");
-      toast.error("Failed to generate post. Please try again later.");
-    } finally {
-      setIsGenerating(false);
-    }
+    //   if (!data.isFallback) {
+    //     toast.success("LinkedIn post generated successfully!");
+    //   } else {
+    //     toast.info("Post generated using fallback system");
+    //   }
+    // } catch (error) {
+    //   console.error('Error generating post:', error);
+    //   setErrorMessage("Server error. Please try again later.");
+    //   toast.error("Failed to generate post. Please try again later.");
+    // } finally {
+    //   setIsGenerating(false);
+    // }
   };
 
   const copyToClipboard = () => {
@@ -131,8 +130,9 @@ const LinkedInPostForm: React.FC<LinkedInPostFormProps> = ({ onGeneratePost }) =
     toast.success("Post copied to clipboard!");
   };
 
+  // Since we've removed the API functionality, we'll set this to false by default
   if (!isApiKeyConfigured) {
-    return <QwenKeyInput />;
+    return <ApiKeyPlaceholder service="OpenAI" />;
   }
 
   return (
