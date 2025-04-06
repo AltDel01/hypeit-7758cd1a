@@ -9,3 +9,5 @@ export type { FallbackOptions } from './imageFallback';
 export * from './imagePolling';
 // Export from imageValidation (which contains the preferred isValidImageUrl implementation)
 export * from './imageValidation';
+// Export the webhook handler
+export * from './webhookHandler';
