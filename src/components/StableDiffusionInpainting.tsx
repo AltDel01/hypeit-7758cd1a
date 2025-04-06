@@ -30,8 +30,6 @@ const StableDiffusionInpainting = () => {
         onGenerate={inpainting.generateInpaintedImage}
         isGenerating={inpainting.isGenerating}
         errorMessage={inpainting.errorMessage}
-        useWebhook={inpainting.useWebhook}
-        setUseWebhook={inpainting.setUseWebhook}
       />
       
       <ResultPreview 

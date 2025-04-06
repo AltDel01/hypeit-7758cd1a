@@ -161,43 +161,6 @@ export class StableDiffusionService {
     
     return canvas;
   }
-  
-  /**
-   * Send an image to a webhook
-   */
-  async sendImageToWebhook(imageFile: File | Blob, prompt: string = ""): Promise<void> {
-    try {
-      const webhookUrl = 'https://ekalovable.app.n8n.cloud/webhook-test/c7d65113-1128-44ee-bcdb-6d334459913c';
-      console.log(`Sending image to webhook: ${webhookUrl}`);
-      
-      const formData = new FormData();
-      formData.append('image', imageFile);
-      
-      if (prompt) {
-        formData.append('prompt', prompt);
-      }
-      
-      if (imageFile instanceof File) {
-        formData.append('filename', imageFile.name);
-        formData.append('type', imageFile.type);
-        formData.append('size', imageFile.size.toString());
-      }
-      
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
-      }
-      
-      console.log('Webhook response:', await response.json());
-    } catch (error) {
-      console.error('Error sending image to webhook:', error);
-      throw error;
-    }
-  }
 }
 
 export default StableDiffusionService.getInstance();
