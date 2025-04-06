@@ -9,7 +9,6 @@ export const corsHeaders = {
 
 // Configuration
 export const POLL_ENDPOINT = "https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6/status";
-export const GENERATION_ENDPOINT = "https://hook.us2.make.com/u7vimlqhga3dxu3qwesaopz4evrepcn6";
 
 // Timeouts
 export const REQUEST_TIMEOUT = 20000; // 20 seconds

@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
-  pollForImageResult, 
   dispatchImageGeneratedEvent 
 } from "@/utils/image";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
@@ -27,9 +26,9 @@ export class GeminiImageService {
         style
       };
       
-      // If productImage is provided, convert it to base64 for sending to the webhook
+      // If productImage is provided, convert it to base64 for sending to the service
       if (productImage) {
-        console.log("Processing product image for webhook...");
+        console.log("Processing product image...");
         try {
           const imageBase64 = await this.fileToBase64(productImage);
           requestBody.product_image = imageBase64;
@@ -60,33 +59,17 @@ export class GeminiImageService {
         return null;
       }
       
-      console.log("Initial response from generate-image function:", data);
+      console.log("Response from generate-image function:", data);
       
       // Parse the response
       const response = data as ImageGenerationResponse;
       
-      // If we got an accepted status with a requestId, start polling
-      if (response.status === "accepted" && response.requestId) {
-        toast.success("Image generation request accepted!");
-        
-        // Return the placeholder image URL for immediate display
-        const placeholderUrl = response.imageUrl || "https://via.placeholder.com/600x600?text=Generating+Image...";
-        
-        // Start polling in the background
-        this.startPolling(response.requestId, prompt, aspectRatio, style);
-        
-        // Immediately dispatch an event with the placeholder image
-        dispatchImageGeneratedEvent(placeholderUrl, prompt);
-        
-        return placeholderUrl;
-      }
-      
-      // If we got a direct image URL
+      // If we got an image URL
       if (response.imageUrl) {
         console.log("Image generated successfully:", response.imageUrl);
         toast.success("Image generated successfully!");
         
-        // Dispatch event with the final image
+        // Dispatch event with the image
         dispatchImageGeneratedEvent(response.imageUrl, prompt);
         
         return response.imageUrl;
@@ -107,25 +90,6 @@ export class GeminiImageService {
       toast.error(`Error generating image: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
-  }
-  
-  /**
-   * Starts the polling process for an image generation request
-   * 
-   * @param requestId - The ID of the image generation request
-   * @param prompt - The prompt used to generate the image
-   * @param aspectRatio - The aspect ratio of the generated image
-   * @param style - The style of the generated image (optional)
-   */
-  private static startPolling(requestId: string, prompt: string, aspectRatio: string, style?: string): void {
-    console.log(`Starting polling for generated image with requestId: ${requestId}`);
-    
-    pollForImageResult({
-      requestId,
-      prompt,
-      aspectRatio,
-      style
-    });
   }
   
   /**

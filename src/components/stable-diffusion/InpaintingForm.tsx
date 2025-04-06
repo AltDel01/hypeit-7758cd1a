@@ -6,7 +6,6 @@ import ModelLoader from './ModelLoader';
 import FormHeader from './sections/FormHeader';
 import MaskSection from './sections/MaskSection';
 import PromptSection from './sections/PromptSection';
-import WebhookToggle from './controls/WebhookToggle';
 import GenerateButton from './controls/GenerateButton';
 
 interface InpaintingFormProps {
@@ -28,8 +27,6 @@ interface InpaintingFormProps {
   onGenerate: () => void;
   isGenerating: boolean;
   errorMessage?: string | null;
-  useWebhook?: boolean;
-  setUseWebhook?: (useWebhook: boolean) => void;
 }
 
 const InpaintingForm: React.FC<InpaintingFormProps> = ({
@@ -50,9 +47,7 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
   setGuidanceScale,
   onGenerate,
   isGenerating,
-  errorMessage,
-  useWebhook = false,
-  setUseWebhook
+  errorMessage
 }) => {
   const [maskDrawingMode, setMaskDrawingMode] = useState<boolean>(true);
   
@@ -130,13 +125,6 @@ const InpaintingForm: React.FC<InpaintingFormProps> = ({
             guidanceScale={guidanceScale}
             setGuidanceScale={setGuidanceScale}
           />
-          
-          {setUseWebhook && (
-            <WebhookToggle 
-              useWebhook={useWebhook} 
-              setUseWebhook={setUseWebhook} 
-            />
-          )}
           
           <GenerateButton
             isGenerating={isGenerating}

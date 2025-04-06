@@ -16,7 +16,6 @@ export function useStableDiffusionInpainting() {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [loadingStatus, setLoadingStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [useWebhook, setUseWebhook] = useState<boolean>(false);
   const [generationStartTime, setGenerationStartTime] = useState<number>(0);
   
   const originalImageRef = useRef<HTMLImageElement | null>(null);
@@ -84,18 +83,6 @@ export function useStableDiffusionInpainting() {
       
       toast.info("Starting inpainting...");
       console.log("Starting inpainting process with prompt:", prompt);
-      
-      // If using webhook, send the image to the webhook
-      if (useWebhook) {
-        try {
-          await stableDiffusionService.sendImageToWebhook(originalImage, prompt);
-          console.log("Image sent to webhook successfully");
-        } catch (webhookError) {
-          console.error("Webhook error:", webhookError);
-          // Continue with local processing despite webhook error
-          toast.error("Failed to send to webhook, continuing with local processing");
-        }
-      }
       
       // Convert files to HTML images
       console.log("Converting original image to HTML Image");
@@ -177,8 +164,6 @@ export function useStableDiffusionInpainting() {
     loadingProgress,
     loadingStatus,
     errorMessage,
-    useWebhook,
-    setUseWebhook,
     generationTime,
     
     // Actions
