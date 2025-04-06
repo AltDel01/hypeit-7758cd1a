@@ -1,7 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
 import * as Sentry from "@sentry/react";
-import React from 'react'; // Explicitly import React
 import App from './App.tsx'
 import './index.css'
 
@@ -22,9 +21,7 @@ Sentry.init({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
-      <App />
-    </Sentry.ErrorBoundary>
-  </React.StrictMode>
+  <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
+    <App />
+  </Sentry.ErrorBoundary>
 );

@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import ImageUploader from '@/components/ui/ImageUploader';
+import ImageUploader from '@/components/stable-diffusion/ImageUploader';
 import { Upload, Plus, Image } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 

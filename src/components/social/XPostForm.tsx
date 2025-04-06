@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +8,7 @@ import { Copy } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import ApiKeyPlaceholder from './ApiKeyPlaceholder';
+import QwenKeyInput from "@/components/api/QwenKeyInput";
 import { AlertCircle } from 'lucide-react';
 import { 
   Dialog,
@@ -112,9 +113,8 @@ const XPostForm: React.FC<XPostFormProps> = ({ onGeneratePost }) => {
     toast.success("Post copied to clipboard!");
   };
 
-  // Since we've removed the API functionality, we'll set this to false by default
   if (!isApiKeyConfigured) {
-    return <ApiKeyPlaceholder service="OpenAI" />;
+    return <QwenKeyInput />;
   }
 
   return (
