@@ -8,10 +8,8 @@ interface MediaTabContentProps {
   productImage: File | null;
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
   isGenerating: boolean;
-  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
   generateImage: () => void;
   generatedImage: string | null;
-  setGeneratedImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const MediaTabContent = ({ 
@@ -20,10 +18,8 @@ const MediaTabContent = ({
   productImage, 
   setProductImage, 
   isGenerating, 
-  setIsGenerating,
   generateImage,
-  generatedImage,
-  setGeneratedImage
+  generatedImage
 }: MediaTabContentProps) => {
   return (
     <div className="mt-6">
@@ -33,10 +29,8 @@ const MediaTabContent = ({
         productImage={productImage}
         setProductImage={setProductImage}
         isGenerating={isGenerating}
-        setIsGenerating={setIsGenerating}
-        generateImage={generateImage}
+        onGenerate={generateImage}
         generatedImage={generatedImage}
-        setGeneratedImage={setGeneratedImage}
       />
     </div>
   );

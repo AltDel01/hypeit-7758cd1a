@@ -15,14 +15,10 @@ interface TabsContainerProps {
   productImage: File | null;
   setProductImage: React.Dispatch<React.SetStateAction<File | null>>;
   isGenerating: boolean;
-  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
   generateImage: () => void;
-  xText: string;
   setXText: React.Dispatch<React.SetStateAction<string>>;
-  linkedinText: string;
   setLinkedinText: React.Dispatch<React.SetStateAction<string>>;
   generatedImage: string | null;
-  setGeneratedImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const TabsContainer = ({
@@ -33,14 +29,10 @@ const TabsContainer = ({
   productImage,
   setProductImage,
   isGenerating,
-  setIsGenerating,
   generateImage,
-  xText,
   setXText,
-  linkedinText,
   setLinkedinText,
-  generatedImage,
-  setGeneratedImage
+  generatedImage
 }: TabsContainerProps) => {
   return (
     <Tabs defaultValue="feed" onValueChange={setActiveTab} className="w-full">
@@ -89,10 +81,8 @@ const TabsContainer = ({
           productImage={productImage}
           setProductImage={setProductImage}
           isGenerating={isGenerating}
-          setIsGenerating={setIsGenerating}
           generateImage={generateImage}
           generatedImage={generatedImage}
-          setGeneratedImage={setGeneratedImage}
         />
       </TabsContent>
       
@@ -103,10 +93,8 @@ const TabsContainer = ({
           productImage={productImage}
           setProductImage={setProductImage}
           isGenerating={isGenerating}
-          setIsGenerating={setIsGenerating}
           generateImage={generateImage}
           generatedImage={generatedImage}
-          setGeneratedImage={setGeneratedImage}
         />
       </TabsContent>
       

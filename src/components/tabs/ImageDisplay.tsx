@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
 import { toast } from "sonner";
@@ -16,8 +16,27 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   
   // Update when prop changes
   useEffect(() => {
+    console.log("ImageDisplay - generatedImage prop updated:", generatedImage);
     setLocalGeneratedImage(generatedImage);
   }, [generatedImage]);
+  
+  // Listen for generated image events
+  useEffect(() => {
+    // Listen for the imageGenerated event
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Image display caught generated event:", event.detail);
+      
+      if (showGenerated) {
+        setLocalGeneratedImage(event.detail.imageUrl);
+      }
+    };
+    
+    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+    };
+  }, [showGenerated]);
   
   const handleDownload = (imageUrl: string) => {
     const a = document.createElement('a');
@@ -39,7 +58,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images];
+  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>

@@ -1,11 +1,17 @@
 
-// Export all image utilities from this index file
-export * from './imageEvents';
-// Import and re-export from imageFallback, excluding isValidImageUrl to avoid conflict
-import { generateFallbackImage } from './imageFallback';
-export { generateFallbackImage };
-export type { FallbackOptions } from './imageFallback';
-// Export from imagePolling
+/**
+ * Main image utilities export file
+ */
+
+// Re-export image polling functionality
 export * from './imagePolling';
-// Export from imageValidation (which contains the preferred isValidImageUrl implementation)
+
+// Re-export image event functionality
+export * from './imageEvents';
+
+// Re-export image fallback functionality
+export * from './imageFallback';
+
+// Re-export image validation
 export * from './imageValidation';
+

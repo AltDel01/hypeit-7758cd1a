@@ -1,61 +1,35 @@
 
 /**
- * Utility functions for image URL validation
+ * Validates if a given URL is a valid image URL
+ * @param url The URL to validate
+ * @returns True if the URL is valid, false otherwise
  */
-
-/**
- * Checks if an image URL is valid and not a placeholder
- * 
- * @param url - The URL to check
- * @returns True if the URL is valid and not a placeholder
- */
-export function isValidImageUrl(url: string): boolean {
+export function checkValidImageUrl(url: string): boolean {
   if (!url) return false;
   
-  // Check if it's not a placeholder image
-  if (url.includes('placeholder.com') || url.includes('Generating+Image')) {
+  // If it's a data URL for an image, it's valid
+  if (url.startsWith('data:image/')) return true;
+  
+  // Allow Unsplash URLs
+  if (url.includes('unsplash.com')) return true;
+  
+  // Basic URL validation
+  try {
+    new URL(url);
+    
+    // Check if the URL has a valid image extension
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff'];
+    const hasValidExtension = validExtensions.some(ext => 
+      url.toLowerCase().endsWith(ext) || url.toLowerCase().includes(`${ext}?`)
+    );
+    
+    return hasValidExtension;
+  } catch (e) {
     return false;
   }
-  
-  return true;
 }
 
 /**
- * Validates an image URL by checking if it can be loaded
- * 
- * @param url - The URL to validate
- * @returns A promise that resolves to true if the image is valid
+ * @deprecated Use checkValidImageUrl instead
  */
-export function validateImageUrl(url: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (!isValidImageUrl(url)) {
-      resolve(false);
-      return;
-    }
-    
-    const img = new Image();
-    
-    img.onload = () => {
-      resolve(true);
-    };
-    
-    img.onerror = () => {
-      resolve(false);
-    };
-    
-    img.src = url;
-  });
-}
-
-/**
- * Adds a cache buster to an image URL to prevent caching
- * 
- * @param url - The URL to add a cache buster to
- * @returns The URL with a cache buster parameter
- */
-export function addCacheBuster(url: string): string {
-  const cacheBuster = Date.now();
-  return url.includes('?') 
-    ? `${url}&t=${cacheBuster}` 
-    : `${url}?t=${cacheBuster}`;
-}
+export const isValidImageUrl = checkValidImageUrl;

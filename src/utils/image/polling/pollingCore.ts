@@ -5,7 +5,7 @@ import { checkImageStatus } from "./statusChecker";
 import { delayExecution } from "./helpers";
 import { processImageUrl } from "./imageProcessor";
 import { useFallbackImage } from "./fallbackHandler";
-import { isValidImageUrl } from '../imageValidation';
+import { checkValidImageUrl } from '../imageValidation';
 
 /**
  * Main function that polls for the result of an image generation request
@@ -72,36 +72,67 @@ export async function handleStatusCheckResult(
 ): Promise<void> {
   const { requestId, prompt, aspectRatio, style, retries, delay } = params;
   
+  // If we have an error in the result, handle it
   if (result.error) {
+    console.error("Error in polling result:", result.error);
     handlePollingError(result.error, params);
     return;
   }
   
   // If we have an image URL, validate and use it
-  if (result.imageUrl && isValidImageUrl(result.imageUrl)) {
+  if (result.imageUrl && checkValidImageUrl(result.imageUrl)) {
+    console.log("Valid image URL received:", result.imageUrl);
     await processImageUrl(result.imageUrl, prompt);
+    return;
+  }
+  
+  // If the API returned an error, handle it
+  if (result.apiError) {
+    console.error(`Received API error: ${result.apiError}`);
+    handleApiError(result.apiError, prompt, aspectRatio);
     return;
   }
   
   // Handle different status responses
   if (result.status === "processing" || result.status === "accepted") {
+    console.log(`Image still processing, scheduling next poll in ${delay}ms`);
     scheduleNextPoll({
       requestId, prompt, aspectRatio, style,
-      retries: retries - 1, delay, maxRetries: params.maxRetries
+      retries: retries - 1, 
+      delay: Math.min(delay + 1000, 8000), // Gradually increase delay, max 8 seconds
+      maxRetries: params.maxRetries
     });
     return;
   }
   
-  // If we got an error from the API
-  if (result.apiError) {
-    handleApiError(result.apiError, prompt, aspectRatio);
+  // If we got a completed status but no valid image URL, use fallback
+  if (result.status === "completed" && (!result.imageUrl || !checkValidImageUrl(result.imageUrl))) {
+    console.log("Completed status received but no valid image URL, using fallback");
+    useFallbackImage(prompt, aspectRatio);
     return;
   }
   
-  // If we don't know the status, continue polling with a shorter retry count
+  // If we have an unexpected status, continue polling with fewer retries
+  if (!result.status || (result.status !== "completed" && result.status !== "processing" && result.status !== "accepted")) {
+    console.log(`Unexpected status: ${result.status || "undefined"}, continuing polling`);
+    
+    // Use a shorter retry count for unexpected statuses
+    scheduleNextPoll({
+      requestId, prompt, aspectRatio, style,
+      retries: Math.min(retries - 1, 3), // Reduce retries more aggressively for unexpected statuses
+      delay, 
+      maxRetries: params.maxRetries
+    });
+    return;
+  }
+  
+  // Default case: continue polling normally
+  console.log(`Status: ${result.status}, continuing polling`);
   scheduleNextPoll({
     requestId, prompt, aspectRatio, style,
-    retries: retries - 1, delay, maxRetries: params.maxRetries
+    retries: retries - 1, 
+    delay, 
+    maxRetries: params.maxRetries
   });
 }
 
@@ -109,7 +140,7 @@ export async function handleStatusCheckResult(
  * Handles API errors during polling
  */
 function handleApiError(error: any, prompt: string, aspectRatio: string): void {
-  console.error("Error from poll:", error);
+  console.error("Error from API:", error);
   toast.error(`Image generation failed: ${error}`);
   
   // Use fallback image source
@@ -120,7 +151,8 @@ function handleApiError(error: any, prompt: string, aspectRatio: string): void {
  * Schedules the next polling attempt
  */
 function scheduleNextPoll(params: PollImageParams): void {
-  setTimeout(() => pollForImageResult(params), params.delay);
+  // Use setTimeout instead of direct recursion to prevent stack overflow
+  setTimeout(() => pollForImageResult(params), 50);
 }
 
 /**
@@ -128,9 +160,18 @@ function scheduleNextPoll(params: PollImageParams): void {
  */
 export function handlePollingError(error: any, params: PollImageParams): void {
   console.error("Error in polling:", error);
+  
   // Use a shorter retry interval when there are exceptions
   const shorterDelay = Math.max(1000, params.delay / 2);
   
+  // If we've had multiple errors, use a fallback
+  if (params.retries <= 3) {
+    console.log("Too many polling errors, using fallback image");
+    handleMaxRetriesReached(params.prompt, params.aspectRatio);
+    return;
+  }
+  
+  // Schedule another poll with reduced retries
   setTimeout(() => pollForImageResult({
     ...params,
     retries: params.retries - 1,
