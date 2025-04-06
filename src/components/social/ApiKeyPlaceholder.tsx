@@ -11,7 +11,7 @@ interface ApiKeyPlaceholderProps {
 const ApiKeyPlaceholder: React.FC<ApiKeyPlaceholderProps> = ({ service = "API" }) => {
   return (
     <div className="p-6 bg-gray-900 border border-gray-800 rounded-lg">
-      <Alert variant="warning" className="mb-4">
+      <Alert variant="destructive" className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           This feature requires an {service} key that was previously configured.
