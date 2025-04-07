@@ -5,6 +5,7 @@ import {
   dispatchImageGeneratedEvent,
   dispatchImageGenerationErrorEvent
 } from "@/utils/image";
+import { pollForImageResult } from "@/utils/image/imagePolling";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
 
 export class GeminiImageService {
@@ -18,7 +19,7 @@ export class GeminiImageService {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}`);
       
-      toast.info("Generating image with Gemini 2.0 Flash...", { duration: 5000 });
+      toast.info("Generating image with Gemini 2.0 Flash...", { duration: 5000, id: "generating-image" });
       
       // Create request body
       const requestBody: any = {
@@ -37,6 +38,7 @@ export class GeminiImageService {
           console.log("Product image processed successfully");
         } catch (imageError) {
           console.error("Error processing product image:", imageError);
+          toast.warning("Could not process product image, continuing without it");
           // Continue with generation even if image processing fails
         }
       }
@@ -67,8 +69,8 @@ export class GeminiImageService {
       // Parse the response
       const response = data as ImageGenerationResponse;
       
-      // If we got an image URL
-      if (response.imageUrl) {
+      // If we got a direct image URL (immediate success)
+      if (response.imageUrl && response.status === "completed") {
         console.log("Image generated successfully:", response.imageUrl.substring(0, 50) + "...");
         toast.success("Image generated successfully!");
         
@@ -76,6 +78,25 @@ export class GeminiImageService {
         dispatchImageGeneratedEvent(response.imageUrl, prompt);
         
         return response.imageUrl;
+      }
+      
+      // If we need to poll for the result
+      if (response.requestId) {
+        console.log(`Need to poll for image result, requestId: ${response.requestId}`);
+        
+        // Start polling for the result
+        pollForImageResult({
+          requestId: response.requestId,
+          prompt,
+          aspectRatio,
+          style,
+          retries: 20,
+          delay: 2000,
+          maxRetries: 20
+        });
+        
+        // Return null since we'll get the result asynchronously via the event system
+        return null;
       }
       
       // Handle error case

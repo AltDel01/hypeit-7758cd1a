@@ -14,6 +14,7 @@ interface ImageGeneratedEvent extends CustomEvent {
     prompt?: string;
     success: boolean;
     error?: string;
+    timestamp?: number;
   };
 }
 
@@ -32,7 +33,8 @@ export const dispatchImageGeneratedEvent = (
   console.log("Dispatching image generated event:", { 
     imageUrl: imageUrl?.substring(0, 50) + "...", 
     prompt, 
-    error 
+    error,
+    timestamp: Date.now()
   });
 
   try {
@@ -49,8 +51,14 @@ export const dispatchImageGeneratedEvent = (
 
     window.dispatchEvent(event);
     console.log("Image generated event dispatched successfully");
+    
+    // Show success toast if no error
+    if (!error) {
+      toast.success("Image generated successfully!");
+    }
   } catch (dispatchError) {
     console.error("Error dispatching image generated event:", dispatchError);
+    toast.error("Error handling generated image");
   }
 };
 
@@ -65,7 +73,7 @@ export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string
   // Show toast notification for the error
   toast.error(`Image generation failed: ${error}`, { duration: 5000 });
   
-  // Use a fallback image URL
+  // Use a fallback image URL with the prompt as context
   const fallbackUrl = prompt 
     ? `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(prompt.split(' ').slice(0, 3).join(','))}`
     : `https://source.unsplash.com/featured/800x800/?product`;
@@ -88,9 +96,32 @@ export const addImageGeneratedListener = (
 
   window.addEventListener('imageGenerated', eventListener);
   
+  console.log("Added listener for imageGenerated events");
+  
   // Return a function to remove the event listener
   return () => {
     window.removeEventListener('imageGenerated', eventListener);
   };
 };
 
+/**
+ * Force triggers a retry for image generation
+ * @param prompt The prompt to use for generation
+ * @param aspectRatio The aspect ratio to use
+ */
+export const forceImageGenerationRetry = (prompt: string, aspectRatio: string = "1:1"): void => {
+  console.log("Forcing image generation retry with prompt:", prompt);
+  
+  // Dispatch a placeholder image event first to show loading state
+  const placeholderUrl = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzIwMjAyMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3MDcwNzAiPlJldHJ5aW5nIEltYWdlIEdlbmVyYXRpb248L3RleHQ+PC9zdmc+";
+  dispatchImageGeneratedEvent(placeholderUrl, prompt, "Retrying generation");
+  
+  // Delay the actual retry trigger to allow UI to update
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('retryImageGeneration', {
+      detail: { prompt, aspectRatio, timestamp: Date.now() }
+    }));
+    
+    toast.info("Retrying image generation...");
+  }, 100);
+};
