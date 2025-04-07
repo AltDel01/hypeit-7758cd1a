@@ -2,7 +2,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
-  dispatchImageGeneratedEvent 
+  dispatchImageGeneratedEvent,
+  dispatchImageGenerationErrorEvent
 } from "@/utils/image";
 import { GenerateImageParams, ImageGenerationResponse } from "@/types/imageService";
 
@@ -46,15 +47,18 @@ export class GeminiImageService {
         body: requestBody
       });
       
+      // Handle Supabase function error
       if (error) {
         console.error("Error calling gemini-image-generate function:", error);
-        toast.error(`Failed to generate image: ${error.message || "Unknown error"}`);
+        const errorMessage = `Failed to generate image: ${error.message || "Unknown error"}`;
+        dispatchImageGenerationErrorEvent(errorMessage, prompt);
         return null;
       }
       
+      // Handle missing data response
       if (!data) {
         console.error("No data returned from gemini-image-generate function");
-        toast.error("Failed to generate image: No data returned");
+        dispatchImageGenerationErrorEvent("No data returned from service", prompt);
         return null;
       }
       
@@ -77,16 +81,17 @@ export class GeminiImageService {
       // Handle error case
       if (response.error) {
         console.error("Error from gemini-image-generate function:", response.error);
-        toast.error(`Failed to generate image: ${response.error}`);
+        dispatchImageGenerationErrorEvent(response.error, prompt);
         return null;
       }
       
       console.error("Unexpected response format:", response);
-      toast.error("Received unexpected response from the image generation service");
+      dispatchImageGenerationErrorEvent("Received unexpected response from the image generation service", prompt);
       return null;
     } catch (error) {
       console.error("Error generating image:", error);
-      toast.error(`Error generating image: ${error instanceof Error ? error.message : String(error)}`);
+      const errorMessage = `Error generating image: ${error instanceof Error ? error.message : String(error)}`;
+      dispatchImageGenerationErrorEvent(errorMessage, prompt);
       return null;
     }
   }

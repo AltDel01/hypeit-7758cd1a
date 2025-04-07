@@ -16,6 +16,7 @@ serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     
     if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY environment variable not set");
       throw new Error("GEMINI_API_KEY environment variable not set");
     }
 
@@ -23,6 +24,7 @@ serve(async (req) => {
     const { prompt, product_image } = requestData;
 
     if (!prompt) {
+      console.error("Prompt is required");
       throw new Error("Prompt is required");
     }
 
@@ -79,10 +81,13 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API error:", response.status, errorText);
+      
+      // Try to parse the error response as JSON
       try {
         const errorData = JSON.parse(errorText);
         throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
       } catch (e) {
+        // If parsing fails, use the raw error text
         throw new Error(`Gemini API error: Status ${response.status} - ${errorText || response.statusText}`);
       }
     }
@@ -108,7 +113,24 @@ serve(async (req) => {
 
     if (!imageData) {
       console.error("No image data in response:", JSON.stringify(responseData));
-      throw new Error("No image data in response");
+      
+      // Use fallback image with Unsplash
+      const searchTerms = prompt
+        .split(' ')
+        .filter(word => word.length > 3)
+        .slice(0, 3)
+        .join(',');
+      
+      const unsplashUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}`;
+      
+      return new Response(JSON.stringify({ 
+        status: "completed",
+        imageUrl: unsplashUrl,
+        message: "Using fallback image source due to API error",
+        error: "No image data in Gemini API response"
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Return the image data
@@ -123,12 +145,17 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in gemini-image-generate function:", error);
     
+    // Generate a fallback image URL from Unsplash based on the error
+    const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?product&error=${Date.now()}`;
+    
     return new Response(
       JSON.stringify({ 
         status: "error", 
+        imageUrl: fallbackImageUrl,  // Always provide an image URL, even in case of errors
+        message: "Using fallback image due to error",
         error: error instanceof Error ? error.message : String(error)
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

@@ -1,6 +1,5 @@
 
-project_id = "your-project-id"
+project_id = "mkwinxbualpcivkujlfd"
 
 [functions.gemini-image-generate]
 verify_jwt = false
-

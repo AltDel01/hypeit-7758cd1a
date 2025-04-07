@@ -5,6 +5,7 @@ import GenerateButton from './GenerateButton';
 import PromptForm from './PromptForm';
 import ImagePreview from './ImagePreview';
 import ImageUploadStatus from './ImageUploadStatus';
+import { toast } from "sonner";
 
 interface ContentGeneratorProps {
   prompt: string;
@@ -29,12 +30,15 @@ const ContentGenerator = ({
   const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
   const [hasProductImage, setHasProductImage] = useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [errorCount, setErrorCount] = useState<number>(0);
   
   // Update local generated image when the prop changes
   useEffect(() => {
     console.log("generatedImage prop changed:", generatedImage);
     if (generatedImage && generatedImage !== localGeneratedImage) {
       setLocalGeneratedImage(generatedImage);
+      // Reset error count when we get a new image
+      setErrorCount(0);
     }
   }, [generatedImage]);
   
@@ -47,6 +51,13 @@ const ContentGenerator = ({
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Image generated event received:", event.detail);
+      
+      if (event.detail.error) {
+        // Track errors from generation process
+        setErrorCount(prev => prev + 1);
+        toast.error(event.detail.error);
+      }
+      
       if (event.detail.imageUrl) {
         // Add a cache-buster to the URL
         const timestamp = Date.now();
@@ -83,6 +94,7 @@ const ContentGenerator = ({
         
         const newUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
         setLocalGeneratedImage(newUrl);
+        toast.info("Fetching a different image...");
       } else {
         // For other URLs, just add a cache buster
         const imageWithCacheBuster = localGeneratedImage.includes('?') 
@@ -91,8 +103,9 @@ const ContentGenerator = ({
         
         setLocalGeneratedImage(imageWithCacheBuster);
       }
-    } else if (retryCount > 2) {
-      // If we've tried a few times and still no image, trigger a new generation
+    } else if (retryCount > 2 || errorCount > 0) {
+      // If we've had errors or tried a few times and still no image, trigger a new generation
+      toast.info("Attempting to generate a new image...");
       onGenerate();
     } else {
       // If no image, trigger generation
