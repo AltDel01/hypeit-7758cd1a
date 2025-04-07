@@ -11,8 +11,8 @@ import {
 const QuickActions = () => {
   const actionCards: Omit<ActionCardProps, 'onClick'>[] = [
     {
-      title: "Generate Images", 
-      description: "Create social media visuals",
+      title: "Generate Social Media Visuals", 
+      description: "Create images with custom aspect ratios",
       icon: <Image className="h-5 w-5 text-blue-500" />,
     },
     {
