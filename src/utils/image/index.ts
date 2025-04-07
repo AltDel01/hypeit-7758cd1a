@@ -14,3 +14,6 @@ export * from './imageFallback';
 
 // Export image validation (explicitly avoid duplicate exports)
 export { checkValidImageUrl } from './imageValidation';
+
+// Export image loading utilities
+export * from './imageLoading';
