@@ -22,7 +22,7 @@ const MediaTabContent = ({
   generatedImage
 }: MediaTabContentProps) => {
   return (
-    <div>
+    <div className="rounded-md border border-gray-700 p-4 bg-gray-900 mt-4">
       <ContentGenerator 
         prompt={prompt}
         setPrompt={setPrompt}
