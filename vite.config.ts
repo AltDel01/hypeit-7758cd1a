@@ -2,7 +2,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
 // Dynamically import the Sentry plugin to avoid errors when it's not available
 let sentryVitePlugin: any;
@@ -17,7 +16,8 @@ try {
 export default defineConfig(({ mode }) => {
   const plugins = [
     react(),
-    mode === 'development' && componentTagger(),
+    // Temporarily disable the componentTagger to fix the build issue
+    // mode === 'development' && componentTagger(),
   ].filter(Boolean);
 
   // Only add the Sentry plugin if it was successfully imported and we have an auth token
