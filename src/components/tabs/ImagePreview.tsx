@@ -28,7 +28,7 @@ const ImagePreview = ({ generatedImage, isLoading, aspectRatio }: ImagePreviewPr
         <div className={`w-full ${aspectRatio === "9:16" ? "max-w-[200px]" : "max-w-[300px]"} mx-auto`}>
           <AspectRatio ratio={ratio} className="overflow-hidden rounded-md">
             {isLoading ? (
-              <ImageLoadingState />
+              <ImageLoadingState loadingProgress={30} />
             ) : hasImage ? (
               <img
                 src={generatedImage || ''}
@@ -36,7 +36,7 @@ const ImagePreview = ({ generatedImage, isLoading, aspectRatio }: ImagePreviewPr
                 className="w-full h-full object-cover"
               />
             ) : (
-              <ImageErrorState message="No image generated yet" />
+              <ImageErrorState message="No image generated yet" onRetry={() => {}} />
             )}
           </AspectRatio>
         </div>

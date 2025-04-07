@@ -5,11 +5,11 @@ import { ArrowUp, Loader2 } from 'lucide-react';
 
 interface GenerateButtonProps {
   isGenerating: boolean;
-  disabled: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
-const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps) => {
+const GenerateButton = ({ isGenerating, disabled = false, onClick }: GenerateButtonProps) => {
   return (
     <div className="flex justify-center mt-5">
       <Button 
