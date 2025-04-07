@@ -35,7 +35,6 @@ const ContentGenerator = ({
               prompt={prompt}
               setPrompt={setPrompt}
               isGenerating={isGenerating}
-              onSubmit={onGenerate}
             />
             <div className="mt-4">
               <ImageUploader 

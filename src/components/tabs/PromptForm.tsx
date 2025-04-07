@@ -8,11 +8,10 @@ import { toast } from "sonner";
 interface PromptFormProps {
   prompt: string;
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  isGenerating?: boolean;
   onSubmit: () => void;
 }
 
-const PromptForm = ({ prompt, setPrompt, isGenerating, onSubmit }: PromptFormProps) => {
+const PromptForm = ({ prompt, setPrompt, onSubmit }: PromptFormProps) => {
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prompt submitted:", prompt);
@@ -33,14 +32,9 @@ const PromptForm = ({ prompt, setPrompt, isGenerating, onSubmit }: PromptFormPro
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
-          disabled={isGenerating}
         />
         <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            className="bg-[#8c52ff] hover:bg-[#7a45e6] h-6 px-2 py-0.5 text-xs"
-            disabled={isGenerating}
-          >
+          <Button type="submit" className="bg-[#8c52ff] hover:bg-[#7a45e6] h-6 px-2 py-0.5 text-xs">
             <Send className="mr-1 h-3 w-3" />
             Send
           </Button>

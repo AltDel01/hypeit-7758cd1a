@@ -4,12 +4,12 @@ import { Progress } from '@/components/ui/progress';
 import CircularProgressIndicator from './CircularProgressIndicator';
 
 interface ImageLoadingStateProps {
-  loadingProgress?: number;
+  loadingProgress: number;
   setLoadingProgress?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const ImageLoadingState = ({ 
-  loadingProgress = 0, 
+  loadingProgress, 
   setLoadingProgress 
 }: ImageLoadingStateProps) => {
   const [processingText, setProcessingText] = useState<string>("Loading image...");
