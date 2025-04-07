@@ -22,7 +22,7 @@ const MediaTabContent = ({
   generatedImage
 }: MediaTabContentProps) => {
   return (
-    <div className="mt-6">
+    <div>
       <ContentGenerator 
         prompt={prompt}
         setPrompt={setPrompt}
