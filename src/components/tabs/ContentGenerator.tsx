@@ -1,9 +1,11 @@
 
-import React from 'react';
-import PromptForm from './PromptForm';
+import React, { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
-import ImagePreview from './ImagePreview';
 import GenerateButton from './GenerateButton';
+import PromptForm from './PromptForm';
+import ImagePreview from './ImagePreview';
+import ImageUploadStatus from './ImageUploadStatus';
+import { toast } from "sonner";
 
 interface ContentGeneratorProps {
   prompt: string;
@@ -13,51 +15,130 @@ interface ContentGeneratorProps {
   isGenerating: boolean;
   onGenerate: () => void;
   generatedImage: string | null;
-  aspectRatio: string;
 }
 
-const ContentGenerator = ({
-  prompt,
-  setPrompt,
-  productImage,
-  setProductImage,
-  isGenerating,
+const ContentGenerator = ({ 
+  prompt, 
+  setPrompt, 
+  productImage, 
+  setProductImage, 
+  isGenerating, 
   onGenerate,
-  generatedImage,
-  aspectRatio
+  generatedImage
 }: ContentGeneratorProps) => {
+  
+  const [localGeneratedImage, setLocalGeneratedImage] = useState<string | null>(generatedImage);
+  const [hasProductImage, setHasProductImage] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const [errorCount, setErrorCount] = useState<number>(0);
+  
+  // Update local generated image when the prop changes
+  useEffect(() => {
+    console.log("generatedImage prop changed:", generatedImage);
+    if (generatedImage && generatedImage !== localGeneratedImage) {
+      setLocalGeneratedImage(generatedImage);
+      // Reset error count when we get a new image
+      setErrorCount(0);
+    }
+  }, [generatedImage]);
+  
+  // Update product image status
+  useEffect(() => {
+    setHasProductImage(productImage !== null);
+  }, [productImage]);
+  
+  // Listen for the imageGenerated event
+  useEffect(() => {
+    const handleImageGenerated = (event: CustomEvent) => {
+      console.log("Image generated event received:", event.detail);
+      
+      if (event.detail.error) {
+        // Track errors from generation process
+        setErrorCount(prev => prev + 1);
+        toast.error(event.detail.error);
+      }
+      
+      if (event.detail.imageUrl) {
+        // Add a cache-buster to the URL
+        const timestamp = Date.now();
+        const url = event.detail.imageUrl.includes('?') 
+          ? `${event.detail.imageUrl}&cb=${timestamp}` 
+          : `${event.detail.imageUrl}?cb=${timestamp}`;
+          
+        setLocalGeneratedImage(url);
+        setRetryCount(0);
+      }
+    };
+    
+    window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+    };
+  }, []);
+  
+  const handleImageRetry = () => {
+    setRetryCount(prev => prev + 1);
+    
+    if (localGeneratedImage) {
+      // Force image reload with a new cache buster
+      const timestamp = Date.now();
+      
+      if (localGeneratedImage.includes('unsplash.com')) {
+        // For Unsplash URLs, create a completely new request to get a different image
+        const searchTerms = prompt
+          .split(' ')
+          .filter(word => word.length > 3)
+          .slice(0, 3)
+          .join(',');
+        
+        const newUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${timestamp}`;
+        setLocalGeneratedImage(newUrl);
+        toast.info("Fetching a different image...");
+      } else {
+        // For other URLs, just add a cache buster
+        const imageWithCacheBuster = localGeneratedImage.includes('?') 
+          ? `${localGeneratedImage}&t=${timestamp}` 
+          : `${localGeneratedImage}?t=${timestamp}`;
+        
+        setLocalGeneratedImage(imageWithCacheBuster);
+      }
+    } else if (retryCount > 2 || errorCount > 0) {
+      // If we've had errors or tried a few times and still no image, trigger a new generation
+      toast.info("Attempting to generate a new image...");
+      onGenerate();
+    } else {
+      // If no image, trigger generation
+      onGenerate();
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <PromptForm 
-              prompt={prompt}
-              setPrompt={setPrompt}
-              isGenerating={isGenerating}
-            />
-            <div className="mt-4">
-              <ImageUploader 
-                productImage={productImage}
-                setProductImage={setProductImage}
-              />
-            </div>
-            <div className="mt-4">
-              <GenerateButton 
-                onClick={onGenerate}
-                isGenerating={isGenerating}
-              />
-            </div>
-          </div>
-          <div>
-            <ImagePreview 
-              generatedImage={generatedImage}
-              isLoading={isGenerating}
-              aspectRatio={aspectRatio}
-            />
-          </div>
-        </div>
-      </div>
+    <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
+      <PromptForm 
+        prompt={prompt}
+        setPrompt={setPrompt}
+        onSubmit={onGenerate}
+      />
+      
+      <ImagePreview 
+        imageUrl={localGeneratedImage}
+        prompt={prompt}
+        onRetry={handleImageRetry}
+      />
+      
+      <ImageUploader 
+        productImage={productImage} 
+        setProductImage={setProductImage} 
+      />
+      
+      <ImageUploadStatus hasProductImage={hasProductImage} />
+      
+      <GenerateButton 
+        isGenerating={isGenerating} 
+        disabled={!prompt.trim()} 
+        onClick={onGenerate} 
+      />
     </div>
   );
 };

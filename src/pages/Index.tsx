@@ -10,7 +10,7 @@ import GeminiImageService from '@/services/GeminiImageService';
 import { feedImages, storyImages } from '@/data/galleryImages';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("social");
+  const [activeTab, setActiveTab] = useState("feed");
   const [prompt, setPrompt] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -51,7 +51,7 @@ const Index = () => {
     
     setIsGenerating(true);
     try {
-      const aspectRatio = document.querySelector('[data-value]')?.getAttribute('data-value') || "1:1";
+      const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       console.log(`Product image available: ${productImage !== null}`);
       

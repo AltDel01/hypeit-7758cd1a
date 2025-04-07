@@ -10,7 +10,6 @@ interface MediaTabContentProps {
   isGenerating: boolean;
   generateImage: () => void;
   generatedImage: string | null;
-  aspectRatio: string;
 }
 
 const MediaTabContent = ({ 
@@ -20,8 +19,7 @@ const MediaTabContent = ({
   setProductImage, 
   isGenerating, 
   generateImage,
-  generatedImage,
-  aspectRatio
+  generatedImage
 }: MediaTabContentProps) => {
   return (
     <div className="mt-6">
@@ -33,7 +31,6 @@ const MediaTabContent = ({
         isGenerating={isGenerating}
         onGenerate={generateImage}
         generatedImage={generatedImage}
-        aspectRatio={aspectRatio}
       />
     </div>
   );
