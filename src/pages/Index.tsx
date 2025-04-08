@@ -103,7 +103,7 @@ const Index = () => {
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
-          <div className="col-span-5 p-6 border-r border-gray-800">
+          <div className="col-span-5 p-6">
             <div className="max-w-xl mx-auto">
               <h1 className="text-4xl font-black mb-6 text-center leading-tight animate-gradient-text animate-fade-in-up">
                 Create One Month Social Media<br />Content Within Minutes
