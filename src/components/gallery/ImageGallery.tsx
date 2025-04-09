@@ -13,7 +13,7 @@ const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: Im
   return (
     <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
       <div className="col-span-6 p-4 overflow-hidden max-h-screen">
-        <div className="h-full border border-[#8c52ff] rounded-md overflow-hidden bg-gray-900">
+        <div className="h-full overflow-hidden bg-gray-900">
           <ImageDisplay 
             images={feedImages}
             generatedImage={generatedImage}
@@ -24,7 +24,7 @@ const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: Im
       </div>
       
       <div className="col-span-6 p-4 overflow-hidden max-h-screen">
-        <div className="h-full border border-[#8c52ff] rounded-md overflow-hidden bg-gray-900">
+        <div className="h-full overflow-hidden bg-gray-900">
           <ImageDisplay 
             images={storyImages}
             generatedImage={generatedImage}

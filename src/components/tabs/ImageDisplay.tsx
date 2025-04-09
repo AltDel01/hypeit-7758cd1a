@@ -58,13 +58,13 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
     <div className="h-full bg-gray-900 overflow-hidden">
-      <div className={`grid grid-cols-1 gap-5 ${animationClass} h-full pb-32`}>
+      <div className={`grid grid-cols-1 gap-4 ${animationClass} h-full`}>
         {localGeneratedImage && showGenerated ? (
-          <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
+          <div className="relative group mb-4">
             <img 
               src={localGeneratedImage} 
               alt="Generated AI image" 
@@ -96,7 +96,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         
         {/* Display multiple copies of images for a smooth looping effect */}
         {displayImages.map((image, index) => (
-          <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
+          <div key={`${index}-${image.src}`} className="relative group">
             <img 
               src={image.src} 
               alt={image.alt} 
@@ -123,8 +123,8 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
           </div>
         ))}
         
-        {/* Add additional padding at bottom to ensure no empty space */}
-        <div className="h-screen bg-gray-900"></div>
+        {/* Add empty div at the end to ensure continuous scrolling */}
+        <div className="h-screen"></div>
       </div>
     </div>
   );
