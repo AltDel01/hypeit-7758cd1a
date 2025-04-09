@@ -89,11 +89,6 @@ const ImageLoadingState = ({
     };
   }, [loadingProgress]);
   
-  // Don't show loading UI if there's no progress
-  if (loadingProgress <= 0) {
-    return null;
-  }
-  
   return (
     <div className="p-4 bg-gray-900 flex flex-col items-center justify-center">
       <div className="w-full max-w-xs flex flex-col items-center">
