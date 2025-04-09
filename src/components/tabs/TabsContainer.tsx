@@ -52,8 +52,8 @@ const TabsContainer = ({
   
   const renderVisualContent = () => {
     return (
-      <div className="p-4 bg-gray-800">
-        <div className="mb-6">
+      <div className="w-full p-4 bg-gray-800 rounded-b-md">
+        <div>
           <div className="text-sm font-medium text-white mb-3">Aspect Ratio</div>
           <div className="flex gap-4 mb-6">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -152,7 +152,7 @@ const TabsContainer = ({
             <span>Social Media Visual</span>
             <ChevronDown className="ml-2 h-5 w-5" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 bg-gray-800 border border-gray-700 z-50">
+          <DropdownMenuContent className="w-full border border-gray-700 z-50">
             {renderVisualContent()}
           </DropdownMenuContent>
         </DropdownMenu>

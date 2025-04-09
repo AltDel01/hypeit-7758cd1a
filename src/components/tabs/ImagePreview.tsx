@@ -14,7 +14,7 @@ interface ImagePreviewProps {
 
 const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const [imageError, setImageError] = useState<boolean>(false);
-  const [imageLoading, setImageLoading] = useState<boolean>(true);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -82,6 +82,25 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
           return prev < 98 ? prev + 0.1 : prev;
         });
       }, 200);
+    } else {
+      // Reset loading state when imageUrl is null
+      setImageLoading(false);
+      setLoadingProgress(0);
+      
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
     }
     
     return () => {
@@ -168,37 +187,36 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   };
 
   const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
-  const isDataUrl = imageUrl?.startsWith('data:image/');
 
   return (
     <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
       <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
         <span>Generated Image</span>
-        {(imageError || retryCount > 0 || loadingProgress > 90 || imageLoading) && (
+        {(imageError || retryCount > 0 || (loadingProgress > 90 && imageLoading) || imageUrl) && (
           <Button 
             onClick={handleImageRetry} 
             variant="ghost" 
             className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loadingProgress > 0 && loadingProgress < 100 ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 mr-1 ${imageLoading ? 'animate-spin' : ''}`} />
             Retry
           </Button>
         )}
       </div>
       
       <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
-        {(imageLoading || isPlaceholder) && !imageError ? (
+        {(imageLoading && imageUrl) || isPlaceholder ? (
           <ImageLoadingState 
             loadingProgress={loadingProgress}
             setLoadingProgress={setLoadingProgress}
           />
         ) : imageError ? (
           <ImageErrorState onRetry={handleImageRetry} />
-        ) : (
+        ) : imageUrl ? (
           <img 
             ref={imageRef}
             key={`${imageUrl}-${retryCount}`} // Force re-render when URL changes or retry count increases
-            src={imageUrl || ''} 
+            src={imageUrl} 
             alt="Generated content" 
             className="w-full h-48 object-contain rounded"
             onError={handleImageError}
@@ -207,6 +225,11 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
             decoding="sync"
             crossOrigin="anonymous" // Help with CORS issues for some image sources
           />
+        ) : (
+          <div className="text-gray-400 text-center p-8">
+            <p>No generated image yet</p>
+            <p className="text-xs mt-2">Fill out the form and click Generate to create an image</p>
+          </div>
         )}
       </div>
     </div>
