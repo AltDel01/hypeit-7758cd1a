@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, Loader2 } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GenerateButtonProps {
   isGenerating: boolean;
@@ -12,6 +13,7 @@ interface GenerateButtonProps {
 
 const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps) => {
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
+  const isMobile = useIsMobile();
 
   const handleClick = () => {
     if (!isAuthorized) {
@@ -27,24 +29,30 @@ const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps
   return (
     <div className="flex justify-center mt-5">
       <Button 
-        className="bg-[#8c52ff] hover:bg-[#7a45e6] px-6 h-8 text-sm"
+        className={cn("bg-[#8c52ff] hover:bg-[#7a45e6] text-sm", 
+          isMobile ? "px-4 py-2 w-full" : "px-6 h-8")}
         disabled={disabled || isGenerating}
         onClick={handleClick}
       >
         {isGenerating ? (
           <>
             <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            Generating...
+            {isMobile ? "Generating..." : "Generating..."}
           </>
         ) : (
           <>
             <ArrowUp className="mr-1 h-3.5 w-3.5" />
-            Generate
+            {isMobile ? "Generate" : "Generate"}
           </>
         )}
       </Button>
     </div>
   );
+
+  // Fix missing import for cn
+  function cn(...classes: string[]) {
+    return classes.filter(Boolean).join(' ');
+  }
 };
 
 export default GenerateButton;
