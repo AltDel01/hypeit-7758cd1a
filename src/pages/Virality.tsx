@@ -5,9 +5,20 @@ import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
 import { ArrowUp, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 const Virality = () => {
   const [showForm, setShowForm] = useState(false);
+  const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
+
+  const handleCreateStrategy = () => {
+    if (!isAuthorized) {
+      redirectToSignup();
+      return;
+    }
+    
+    setShowForm(true);
+  };
 
   return (
     <AuroraBackground>
@@ -72,7 +83,7 @@ const Virality = () => {
                     <div className="mt-8 flex justify-center">
                       <Button 
                         className="bg-[#8c52ff] hover:bg-[#7a45e6] px-8"
-                        onClick={() => setShowForm(true)}
+                        onClick={handleCreateStrategy}
                       >
                         <ArrowUp className="mr-2 h-4 w-4" />
                         Create Virality Strategy

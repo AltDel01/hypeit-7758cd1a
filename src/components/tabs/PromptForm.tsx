@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 interface PromptFormProps {
   prompt: string;
@@ -12,12 +13,20 @@ interface PromptFormProps {
 }
 
 const PromptForm = ({ prompt, setPrompt, onSubmit }: PromptFormProps) => {
+  const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
+
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prompt submitted:", prompt);
     
     if (!prompt.trim()) {
       toast.error("Please enter a prompt to generate an image");
+      return;
+    }
+    
+    // Check if user is authenticated before submission
+    if (!isAuthorized) {
+      redirectToSignup();
       return;
     }
     
