@@ -24,6 +24,9 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
 
   const handleNext = () => {
+    // Save form state in localStorage if needed
+    localStorage.setItem('lastBrandIdentityStep', step.toString());
+    
     if (!isAuthorized) {
       redirectToSignup();
       return;

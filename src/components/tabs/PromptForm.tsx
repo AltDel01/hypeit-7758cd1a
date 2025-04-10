@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,21 @@ interface PromptFormProps {
 const PromptForm = ({ prompt, setPrompt, onSubmit }: PromptFormProps) => {
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
 
+  // Save prompt to localStorage when it changes
+  useEffect(() => {
+    if (prompt.trim()) {
+      localStorage.setItem('savedPrompt', prompt);
+    }
+  }, [prompt]);
+
+  // Restore prompt from localStorage on component mount
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem('savedPrompt');
+    if (savedPrompt && !prompt) {
+      setPrompt(savedPrompt);
+    }
+  }, []);
+
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prompt submitted:", prompt);
@@ -23,6 +38,9 @@ const PromptForm = ({ prompt, setPrompt, onSubmit }: PromptFormProps) => {
       toast.error("Please enter a prompt to generate an image");
       return;
     }
+    
+    // Store prompt before redirecting
+    localStorage.setItem('savedPrompt', prompt);
     
     // Check if user is authenticated before submission
     if (!isAuthorized) {

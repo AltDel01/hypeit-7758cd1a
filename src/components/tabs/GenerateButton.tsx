@@ -15,6 +15,8 @@ const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps
 
   const handleClick = () => {
     if (!isAuthorized) {
+      // Save current path to know where to return after auth
+      localStorage.setItem('authRedirectPath', window.location.pathname);
       redirectToSignup();
       return;
     }

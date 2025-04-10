@@ -13,6 +13,8 @@ export function useAuthRedirect(shouldRedirect: boolean = true): {
   // Function to redirect unauthenticated users to signup
   const redirectToSignup = () => {
     if (!user && !loading) {
+      // Save current path to know where to return after auth
+      localStorage.setItem('authRedirectPath', window.location.pathname);
       navigate('/signup');
     }
   };

@@ -8,6 +8,7 @@ import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import GeminiImageService from '@/services/GeminiImageService';
 import { feedImages, storyImages } from '@/data/galleryImages';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -17,6 +18,20 @@ const Index = () => {
   const [xText, setXText] = useState("");
   const [linkedinText, setLinkedinText] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  // Restore prompt from localStorage when component mounts or user logs in
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem('savedPrompt');
+    if (savedPrompt && !prompt) {
+      setPrompt(savedPrompt);
+    }
+    
+    // Check if we redirected from auth and should clear saved path
+    if (user && localStorage.getItem('authRedirectPath') === '/') {
+      localStorage.removeItem('authRedirectPath');
+    }
+  }, [user]);
   
   useEffect(() => {
     Sentry.setUser({

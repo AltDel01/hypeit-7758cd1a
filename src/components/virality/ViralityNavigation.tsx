@@ -26,6 +26,9 @@ const ViralityNavigation: React.FC<ViralityNavigationProps> = ({
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
 
   const handleNext = () => {
+    // Save current step in localStorage
+    localStorage.setItem('lastViralityStep', currentStep.toString());
+    
     if (!isAuthorized) {
       redirectToSignup();
       return;
