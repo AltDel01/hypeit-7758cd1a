@@ -61,7 +61,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
+    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide border-b-2 border-[#F2FCE2]`}>
       {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
