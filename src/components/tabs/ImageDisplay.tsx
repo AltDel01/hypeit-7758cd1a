@@ -54,14 +54,14 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Apply different animation classes based on aspect ratio
+  // Apply different animation classes based on aspect ratio but slow them down
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
-  // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+  // Create multiple copies of images for smoother looping
+  const displayImages = [...images, ...images, ...images];
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
+    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide h-[calc(100vh-200px)] overflow-y-auto pb-4`}>
       {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
@@ -93,7 +93,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         </div>
       ) : null}
       
-      {/* Display multiple copies of images for a smooth looping effect */}
+      {/* Display images for a smooth looping effect */}
       {displayImages.map((image, index) => (
         <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
           <img 
