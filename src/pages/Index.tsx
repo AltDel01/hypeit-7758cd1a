@@ -142,14 +142,12 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="col-span-7 flex flex-col h-full">
-            <ImageGallery 
-              feedImages={feedImages}
-              storyImages={storyImages}
-              generatedImage={generatedImage}
-              activeTab={activeTab}
-            />
-          </div>
+          <ImageGallery 
+            feedImages={feedImages}
+            storyImages={storyImages}
+            generatedImage={generatedImage}
+            activeTab={activeTab}
+          />
         </main>
       </div>
     </AuroraBackground>
