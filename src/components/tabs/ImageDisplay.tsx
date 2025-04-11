@@ -57,11 +57,11 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Apply different animation classes based on aspect ratio
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
-  // Create multiple copies of images for smoother looping - but not too many to prevent performance issues
-  const displayImages = [...images, ...images, ...images];
+  // Create multiple copies of images for smoother looping - increase for better looping
+  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
-    <div className="grid grid-cols-1 gap-5 scrollbar-hide border-b-2 border-[#F2FCE2]">
+    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
       {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
@@ -93,7 +93,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         </div>
       ) : null}
       
-      {/* Display images with a reasonable number of duplicates for smooth scrolling */}
+      {/* Display multiple copies of images for a smooth looping effect */}
       {displayImages.map((image, index) => (
         <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
           <img 
