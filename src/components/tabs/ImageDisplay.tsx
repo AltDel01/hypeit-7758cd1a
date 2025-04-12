@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
 import { toast } from "sonner";
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 
 interface ImageDisplayProps {
   images: { src: string; alt: string }[];
@@ -60,6 +61,17 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Create multiple copies of images for smoother looping - increase for better looping
   const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
+  // Empty state with loading indicator
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center h-full p-8 space-y-4">
+      <CircularProgressIndicator progress={0} size="medium" showPercentage={true} />
+      <div className="text-center">
+        <p className="text-gray-400">No generated image yet</p>
+        <p className="text-sm text-gray-500">Fill out the form and click Generate to create an image</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
       {localGeneratedImage && showGenerated ? (
@@ -90,6 +102,10 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
           <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
             Generated Image
           </div>
+        </div>
+      ) : showGenerated ? (
+        <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden relative mb-5 flex items-center justify-center">
+          <EmptyState />
         </div>
       ) : null}
       
