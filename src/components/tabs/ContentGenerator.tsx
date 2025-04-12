@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
 import GenerateButton from './GenerateButton';
@@ -118,27 +117,13 @@ const ContentGenerator = ({
       <PromptForm 
         prompt={prompt}
         setPrompt={setPrompt}
-        onSubmit={onGenerate}
-      />
-      
-      <ImagePreview 
-        imageUrl={localGeneratedImage}
-        prompt={prompt}
-        onRetry={handleImageRetry}
-      />
-      
-      <ImageUploader 
-        productImage={productImage} 
-        setProductImage={setProductImage} 
+        productImage={productImage}
+        setProductImage={setProductImage}
+        isGenerating={isGenerating}
+        generateImage={onGenerate}
       />
       
       <ImageUploadStatus hasProductImage={hasProductImage} />
-      
-      <GenerateButton 
-        isGenerating={isGenerating} 
-        disabled={!prompt.trim()} 
-        onClick={onGenerate} 
-      />
     </div>
   );
 };
