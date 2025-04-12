@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
 import { toast } from "sonner";
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
+import { Progress } from '@/components/ui/progress';
 
 interface ImageDisplayProps {
   images: { src: string; alt: string }[];
@@ -58,7 +60,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+  const displayImages = [...images, ...images, ...images, ...images, ...images];
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
@@ -86,6 +88,30 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
             >
               <Download size={14} />
             </Button>
+          </div>
+          <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
+            Generated Image
+          </div>
+        </div>
+      ) : showGenerated ? (
+        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5] bg-gray-900 flex items-center justify-center aspect-square">
+          <div className="flex flex-col items-center justify-center p-4">
+            <CircularProgressIndicator 
+              progress={0} 
+              size="medium"
+              showPercentage={true}
+              gradientId={`idle-progress-${aspectRatio}`}
+            />
+            <div className="w-full max-w-xs mt-4">
+              <Progress 
+                value={0} 
+                indicatorClassName="bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF]" 
+                className="h-1.5 bg-gray-800/30" 
+              />
+              <p className="text-xs text-center mt-2 text-gray-400">
+                Ready to generate image
+              </p>
+            </div>
           </div>
           <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
             Generated Image
