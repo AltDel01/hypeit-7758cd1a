@@ -47,12 +47,12 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    toast.success("Image downloaded");
+    toast.success("Image downloaded successfully");
   };
 
   const handleCopy = (imageUrl: string) => {
     navigator.clipboard.writeText(imageUrl)
-      .then(() => toast.success("Image URL copied to clipboard"))
+      .then(() => toast.success("Image URL copied to clipboard successfully"))
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
@@ -109,7 +109,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
                 className="h-1.5 bg-gray-800/30" 
               />
               <p className="text-xs text-center mt-2 text-gray-400">
-                Ready to generate image - 0% complete
+                Waiting for image generation to start - 0% complete
               </p>
             </div>
           </div>
