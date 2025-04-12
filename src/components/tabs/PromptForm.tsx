@@ -1,73 +1,76 @@
 
-import React, { useEffect } from 'react';
-import { Textarea } from "@/components/ui/textarea";
-import { Send } from 'lucide-react';
+import React from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { toast } from "sonner";
-import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import GenerateButton from './GenerateButton';
+import ImageUploader from './ImageUploader';
+import ImagePreview from './ImagePreview';
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 
 interface PromptFormProps {
   prompt: string;
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  onSubmit: () => void;
+  setPrompt: (prompt: string) => void;
+  productImage: File | null;
+  setProductImage: (file: File | null) => void;
+  isGenerating: boolean;
+  generateImage: () => void;
 }
 
-const PromptForm = ({ prompt, setPrompt, onSubmit }: PromptFormProps) => {
-  const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
-
-  // Save prompt to localStorage when it changes
-  useEffect(() => {
-    if (prompt.trim()) {
-      localStorage.setItem('savedPrompt', prompt);
-    }
-  }, [prompt]);
-
-  // Restore prompt from localStorage on component mount
-  useEffect(() => {
-    const savedPrompt = localStorage.getItem('savedPrompt');
-    if (savedPrompt && !prompt) {
-      setPrompt(savedPrompt);
-    }
-  }, []);
-
-  const handlePromptSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Prompt submitted:", prompt);
-    
-    if (!prompt.trim()) {
-      toast.error("Please enter a prompt to generate an image");
-      return;
-    }
-    
-    // Store prompt before redirecting
-    localStorage.setItem('savedPrompt', prompt);
-    
-    // Check if user is authenticated before submission
-    if (!isAuthorized) {
-      redirectToSignup();
-      return;
-    }
-    
-    onSubmit();
-  };
-
+const PromptForm = ({ 
+  prompt, 
+  setPrompt, 
+  productImage, 
+  setProductImage, 
+  isGenerating, 
+  generateImage 
+}: PromptFormProps) => {
   return (
-    <form onSubmit={handlePromptSubmit} className="mb-4">
-      <div className="flex flex-col space-y-3">
-        <Textarea 
-          placeholder="Describe what kind of image, color codes, and style you want..."
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Describe what you want in your image..."
+          className="min-h-[100px] resize-none"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="min-h-[200px] bg-gray-800 border-gray-700 text-white"
         />
-        <div className="flex justify-end">
-          <Button type="submit" className="bg-[#8c52ff] hover:bg-[#7a45e6] h-6 px-2 py-0.5 text-xs">
-            <Send className="mr-1 h-3 w-3" />
-            Send
-          </Button>
+        
+        <div className="pt-2">
+          <ImageUploader 
+            productImage={productImage} 
+            setProductImage={setProductImage} 
+          />
+        </div>
+        
+        {productImage && (
+          <ImagePreview 
+            image={productImage} 
+            onRemove={() => setProductImage(null)} 
+          />
+        )}
+      </div>
+      
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          {isGenerating && (
+            <CircularProgressIndicator progress={0} size="small" showPercentage={true} />
+          )}
+        </div>
+        <GenerateButton 
+          onClick={generateImage} 
+          isGenerating={isGenerating} 
+        />
+      </div>
+      
+      <div className="bg-gray-900 rounded-lg p-4 text-center">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <CircularProgressIndicator progress={0} size="medium" showPercentage={true} />
+          <div className="text-center">
+            <p className="text-gray-400">No generated image yet</p>
+            <p className="text-sm text-gray-500">Fill out the form above and click Generate</p>
+          </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
