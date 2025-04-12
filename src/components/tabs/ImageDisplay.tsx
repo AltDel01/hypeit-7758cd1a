@@ -58,10 +58,10 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images];
+  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide h-full`}>
+    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
       {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
