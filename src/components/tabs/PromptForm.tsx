@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import GenerateButton from './GenerateButton';
 import ImageUploader from './ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
-import ImageLoadingState from '@/components/ui/loading/ImageLoadingState';
 
 interface PromptFormProps {
   prompt: string;
@@ -49,9 +48,18 @@ const PromptForm = ({
             <p className="text-gray-400 mt-2">Generating your image...</p>
           </div>
         ) : (
-          <div className="text-center p-4 bg-gray-900 rounded-lg w-full">
-            <p className="text-gray-400">No generated image yet</p>
-            <p className="text-sm text-gray-500 mt-2">Fill out the form and click Generate to create an image</p>
+          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-[#8c52ff]"></div>
+            <div className="p-4 text-center">
+              <CircularProgressIndicator 
+                progress={0} 
+                size="small" 
+                showPercentage={true} 
+                gradientId="noImageGeneratedProgress"
+              />
+              <p className="text-white mt-2 text-sm">Ready to generate your image</p>
+              <p className="text-gray-400 text-xs mt-1">Processing visual elements...</p>
+            </div>
           </div>
         )}
         
