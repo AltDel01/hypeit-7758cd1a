@@ -64,12 +64,18 @@ const PromptForm = ({
         )}
       </div>
       
-      <div className="flex justify-center items-center">
-        <div className="flex items-center space-x-2">
-          {isGenerating && (
-            <CircularProgressIndicator progress={0} size="small" showPercentage={true} />
-          )}
-        </div>
+      <div className="flex flex-col items-center justify-center space-y-2">
+        {isGenerating && (
+          <CircularProgressIndicator progress={0} size="small" showPercentage={true} />
+        )}
+        
+        {!isGenerating && (
+          <div className="text-center p-4 bg-gray-900 rounded-lg w-full">
+            <p className="text-gray-400">No generated image yet</p>
+            <p className="text-sm text-gray-500 mt-2">Fill out the form and click Generate to create an image</p>
+          </div>
+        )}
+        
         <GenerateButton 
           onClick={generateImage} 
           isGenerating={isGenerating}
@@ -81,3 +87,4 @@ const PromptForm = ({
 };
 
 export default PromptForm;
+

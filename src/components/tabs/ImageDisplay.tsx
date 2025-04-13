@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
@@ -54,14 +53,11 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Apply different animation classes based on aspect ratio
-  const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
-
   // Create multiple copies of images for smoother looping - increase for better looping
   const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${animationClass} scrollbar-hide`}>
+    <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>
       {localGeneratedImage && showGenerated ? (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
@@ -91,16 +87,8 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
             Generated Image
           </div>
         </div>
-      ) : showGenerated ? (
-        <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden relative mb-5 flex items-center justify-center">
-          <div className="text-center p-4">
-            <p className="text-gray-400">No generated image yet</p>
-            <p className="text-sm text-gray-500">Fill out the form and click Generate to create an image</p>
-          </div>
-        </div>
       ) : null}
       
-      {/* Display multiple copies of images for a smooth looping effect */}
       {displayImages.map((image, index) => (
         <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
           <img 
