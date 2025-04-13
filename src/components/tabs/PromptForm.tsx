@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import GenerateButton from './GenerateButton';
 import ImageUploader from './ImageUploader';
-import { CircularProgressIndicator } from '@/components/ui/loading/CircularProgressIndicator';
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 
 interface PromptFormProps {
   prompt: string;
