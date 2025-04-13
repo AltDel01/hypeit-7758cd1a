@@ -42,32 +42,31 @@ const PromptForm = ({
       </div>
       
       <div className="flex flex-col items-center justify-center space-y-2">
+        <GenerateButton 
+          onClick={generateImage} 
+          isGenerating={isGenerating}
+          disabled={!prompt.trim()} 
+        />
+        
         {isGenerating ? (
           <div className="text-center p-4 bg-gray-900 rounded-lg w-full">
             <CircularProgressIndicator progress={0} size="small" showPercentage={true} />
             <p className="text-gray-400 mt-2">Generating your image...</p>
           </div>
         ) : (
-          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden">
+          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden flex flex-col items-center">
             <div className="absolute top-0 left-0 w-full h-1 bg-[#8c52ff]"></div>
             <div className="p-4 text-center">
               <CircularProgressIndicator 
                 progress={0} 
-                size="small" 
+                size="medium" 
                 showPercentage={true} 
                 gradientId="noImageGeneratedProgress"
               />
               <p className="text-white mt-2 text-sm">Ready to generate your image</p>
-              <p className="text-gray-400 text-xs mt-1">Processing visual elements...</p>
             </div>
           </div>
         )}
-        
-        <GenerateButton 
-          onClick={generateImage} 
-          isGenerating={isGenerating}
-          disabled={!prompt.trim()} 
-        />
       </div>
     </div>
   );
