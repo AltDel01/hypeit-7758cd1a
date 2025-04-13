@@ -1,8 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import ImageUploader from './ImageUploader';
-import GenerateButton from './GenerateButton';
 import PromptForm from './PromptForm';
-import ImagePreview from './ImagePreview';
 import ImageUploadStatus from './ImageUploadStatus';
 import { toast } from "sonner";
 
@@ -123,7 +121,7 @@ const ContentGenerator = ({
         generateImage={onGenerate}
       />
       
-      <ImageUploadStatus hasProductImage={hasProductImage} />
+      {hasProductImage && <ImageUploadStatus hasProductImage={hasProductImage} />}
     </div>
   );
 };
