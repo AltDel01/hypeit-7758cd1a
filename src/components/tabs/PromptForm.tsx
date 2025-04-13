@@ -4,8 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import GenerateButton from './GenerateButton';
 import ImageUploader from './ImageUploader';
-import ImagePreview from './ImagePreview';
-import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
+import { CircularProgressIndicator } from '@/components/ui/loading/CircularProgressIndicator';
 
 interface PromptFormProps {
   prompt: string;
@@ -65,7 +64,7 @@ const PromptForm = ({
         )}
       </div>
       
-      <div className="flex justify-between items-center">
+      <div className="flex justify-center items-center">
         <div className="flex items-center space-x-2">
           {isGenerating && (
             <CircularProgressIndicator progress={0} size="small" showPercentage={true} />
@@ -76,19 +75,6 @@ const PromptForm = ({
           isGenerating={isGenerating}
           disabled={!prompt.trim()} 
         />
-      </div>
-      
-      <div className="bg-gray-900 rounded-lg p-4 text-center border border-[#8c52ff]">
-        <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs -mt-4 -mx-4 mb-4">
-          Generated Image
-        </div>
-        <div className="flex flex-col items-center justify-center space-y-4 min-h-[200px]">
-          <CircularProgressIndicator progress={0} size="medium" showPercentage={true} />
-          <div className="text-center">
-            <p className="text-gray-400">No generated image yet</p>
-            <p className="text-sm text-gray-500">Fill out the form above and click Generate</p>
-          </div>
-        </div>
       </div>
     </div>
   );
