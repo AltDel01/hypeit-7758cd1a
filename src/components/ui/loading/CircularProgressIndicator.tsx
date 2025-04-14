@@ -40,7 +40,10 @@ const CircularProgressIndicator = ({
           </linearGradient>
           <filter id={`${gradientId}Glow`}>
             <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feFlood floodColor="#8c52ff" floodOpacity="0.7" result="glow" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            <feComposite in="glow" in2="blur" operator="in" result="glowBlur" />
+            <feBlend in="SourceGraphic" in2="glowBlur" mode="screen" />
           </filter>
         </defs>
         <circle 

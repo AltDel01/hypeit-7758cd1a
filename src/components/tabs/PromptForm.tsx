@@ -54,16 +54,18 @@ const PromptForm = ({
             <p className="text-gray-400 mt-2">Generating your image...</p>
           </div>
         ) : (
-          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden flex flex-col items-center">
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#8c52ff]"></div>
-            <div className="p-4 text-center">
-              <CircularProgressIndicator 
-                progress={0} 
-                size="medium" 
-                showPercentage={true} 
-                gradientId="noImageGeneratedProgress"
-              />
-              <p className="text-white mt-2 text-sm">Ready to generate your image</p>
+          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden flex items-center justify-center border border-[#8c52ff]/40">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF]"></div>
+            <div className="w-full py-6 flex flex-col items-center justify-center">
+              <div className="flex items-center justify-center animate-glow-pulse">
+                <CircularProgressIndicator 
+                  progress={0} 
+                  size="medium" 
+                  showPercentage={true} 
+                  gradientId="noImageGeneratedProgress"
+                />
+              </div>
+              <p className="text-white mt-3 text-sm">Ready to generate your image</p>
             </div>
           </div>
         )}
