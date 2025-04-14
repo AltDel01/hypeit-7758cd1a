@@ -35,31 +35,59 @@ export const feedImages = [
 
 export const storyImages = [
   {
-    src: "/lovable-uploads/6d9a7f64-d25f-4f24-b07d-adf0cf86818a.png",
-    alt: "Golden Crunch Oatmeal Raisin Bliss - Story format"
+    src: "/lovable-uploads/b9dfb341-ed8c-42da-8ce9-2456396d5462.png",
+    alt: "Chocolate Ice Cream Cone - Story format"
   },
   {
-    src: "/lovable-uploads/8ca8a095-4e69-4870-a8d2-e450a94a3fea.png",
+    src: "/lovable-uploads/708d81e1-4f72-45c3-ba94-36c0d06f129c.png",
+    alt: "Coming Soon Fashion - Story format"
+  },
+  {
+    src: "/lovable-uploads/3797734b-8d39-4c1b-9c58-00d96aa78e3f.png",
+    alt: "Golden Crunch Cookie - Story format"
+  },
+  {
+    src: "/lovable-uploads/ea7f7d7c-4450-47ab-b242-40e939b614d4.png",
     alt: "Sports Research Collagen - Story format"
   },
   {
-    src: "/lovable-uploads/8562ecf3-f67a-48ab-800e-24df5be0e423.png",
+    src: "/lovable-uploads/979aa72b-e0ab-4382-b20c-3e7031538d8b.png",
     alt: "Premium Cashews - Story format"
   },
   {
-    src: "/lovable-uploads/1dd49ece-8573-4cb7-ad00-f7658f6271a5.png",
+    src: "/lovable-uploads/05e77e52-5a97-4dc2-ad10-29622cdc35aa.png",
     alt: "Turmeric Powder - Story format"
   },
   {
-    src: "/lovable-uploads/8ff2d6ff-5065-42c4-bc6a-f71ac52a6e6b.png",
+    src: "/lovable-uploads/01bc8c43-4fb9-49e0-8aef-5710ab221991.png",
     alt: "Auto Detailing Services - Story format"
   },
   {
-    src: "/lovable-uploads/d08236f9-17a4-4380-a046-25e13f3101f4.png",
+    src: "/lovable-uploads/a175171f-10bc-463b-bcb4-f4af6f42ce61.png",
     alt: "Pills Medication - Story format"
   },
   {
-    src: "/lovable-uploads/dab1180c-8652-4692-9adb-7343d27434c6.png",
+    src: "/lovable-uploads/04f4cf18-f36c-44a3-b64c-731079842ba6.png",
     alt: "Cheese Lover's Day Promo - Story format"
+  },
+  {
+    src: "/lovable-uploads/1a7d83f5-3512-4fc1-87b6-bc7c8ba6b723.png",
+    alt: "Cocktail Party - Story format"
+  },
+  {
+    src: "/lovable-uploads/822a6ec4-5b80-47d4-ba7d-983d4dc5d97f.png",
+    alt: "New Arrival Fashion - Story format"
+  },
+  {
+    src: "/lovable-uploads/0c88395b-2e2c-44f8-8c88-a44f23a541fa.png",
+    alt: "We Are Brewing - Story format"
+  },
+  {
+    src: "/lovable-uploads/f8bd3842-6632-4c21-9cd1-dfdf03ed79c3.png",
+    alt: "Delicious Ice Cream - Story format"
+  },
+  {
+    src: "/lovable-uploads/79eb87ba-2ba6-48ca-8131-e7da4127f60b.png",
+    alt: "Pastries and Croissants - Story format"
   }
 ];
