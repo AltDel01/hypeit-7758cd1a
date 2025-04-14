@@ -28,7 +28,7 @@ const PromptForm = ({
       <div className="space-y-2">
         <Textarea
           placeholder="Describe what you want in your image..."
-          className="min-h-[100px] resize-none"
+          className="min-h-[150px] resize-none focus:ring-2 focus:ring-[#8c52ff] focus:ring-offset-2"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
