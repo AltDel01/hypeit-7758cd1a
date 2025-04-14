@@ -1,4 +1,3 @@
-
 export const feedImages = [
   {
     src: "/lovable-uploads/f87f82c8-bda2-4268-9607-11b99cf94970.png",
@@ -36,31 +35,31 @@ export const feedImages = [
 
 export const storyImages = [
   {
-    src: "/lovable-uploads/3eaf26ea-5c41-4dd6-a936-da3761e1df91.png",
-    alt: "Chocolate Day - Story format"
+    src: "/lovable-uploads/6d9a7f64-d25f-4f24-b07d-adf0cf86818a.png",
+    alt: "Golden Crunch Oatmeal Raisin Bliss - Story format"
   },
   {
-    src: "/lovable-uploads/3fa891d0-1948-405a-b714-7daf1546dc4c.png",
-    alt: "Cocktail Party - Story format"
+    src: "/lovable-uploads/8ca8a095-4e69-4870-a8d2-e450a94a3fea.png",
+    alt: "Sports Research Collagen - Story format"
   },
   {
-    src: "/lovable-uploads/289029a1-ce4b-41b2-850c-010597e88425.png",
-    alt: "2024 New Arrival - Story format"
+    src: "/lovable-uploads/8562ecf3-f67a-48ab-800e-24df5be0e423.png",
+    alt: "Premium Cashews - Story format"
   },
   {
-    src: "/lovable-uploads/78ed681f-31a7-4aa3-8327-9b2fcff0d589.png",
-    alt: "Coming Soon - Story format"
+    src: "/lovable-uploads/1dd49ece-8573-4cb7-ad00-f7658f6271a5.png",
+    alt: "Turmeric Powder - Story format"
   },
   {
-    src: "/lovable-uploads/4566da4e-dcd6-43f1-8b1a-8f086bbbf049.png",
-    alt: "We Are Brewing - Story format"
+    src: "/lovable-uploads/8ff2d6ff-5065-42c4-bc6a-f71ac52a6e6b.png",
+    alt: "Auto Detailing Services - Story format"
   },
   {
-    src: "/lovable-uploads/d5259be9-2c46-4118-8dae-0b7a5ee45cbe.png",
-    alt: "Delicious Ice Cream - Story format"
+    src: "/lovable-uploads/d08236f9-17a4-4380-a046-25e13f3101f4.png",
+    alt: "Pills Medication - Story format"
   },
   {
-    src: "/lovable-uploads/12bfd206-826f-465e-bcc7-458b0aa560d9.png",
-    alt: "Pastries - Story format"
+    src: "/lovable-uploads/dab1180c-8652-4692-9adb-7343d27434c6.png",
+    alt: "Cheese Lover's Day Promo - Story format"
   }
 ];
