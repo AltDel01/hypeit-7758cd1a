@@ -1,4 +1,3 @@
-
 @layer utilities {
   @keyframes pop {
     0% {
@@ -110,11 +109,11 @@
   }
   
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 240s linear infinite;
+    animation: smooth-scroll-down 480s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 300s linear infinite;
+    animation: smooth-scroll-up 600s linear infinite;
   }
   
   .shadow-glow {
