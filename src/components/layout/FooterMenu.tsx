@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Settings, TrendingUp, User } from 'lucide-react';
+import { Camera, Registered, TrendingUp, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +33,7 @@ const FooterMenu = () => {
             isActive('/brand-identity') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-400'
           )}
         >
-          <Settings size={20} />
+          <Registered size={20} />
           <span className="flex items-center gap-0.5">Brand Identity<sup>®</sup></span>
         </Link>
         
