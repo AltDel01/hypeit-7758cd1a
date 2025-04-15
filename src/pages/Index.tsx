@@ -115,7 +115,7 @@ const Index = () => {
 
   return (
     <AuroraBackground>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen pb-16 md:pb-0"> {/* Added pb-16 for mobile footer spacing */}
         <Navbar />
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
           <div className="col-span-5 p-6">

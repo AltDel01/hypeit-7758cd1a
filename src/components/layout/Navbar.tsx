@@ -1,21 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Menu, X } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import FooterMenu from './FooterMenu';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(false);
 
   const NavLinks = () => (
     <>
@@ -63,56 +58,55 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="bg-black text-white py-3 px-6 w-full border-b border-gray-800">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <div className="flex items-center">
-            <img 
-              src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
-              alt="HYPEIT Logo" 
-              className="h-10 w-auto" 
-            />
+    <>
+      <nav className="bg-black text-white py-3 px-6 w-full border-b border-gray-800">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Logo - centered on mobile */}
+          <div className={cn("flex items-center", isMobile ? "flex-1" : "")}>
+            {!isMobile && (
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
+                  alt="HYPEIT Logo" 
+                  className="h-10 w-auto" 
+                />
+              </Link>
+            )}
           </div>
-        </Link>
 
-        {/* Desktop Navigation */}
-        {!isMobile && (
-          <>
-            {/* Navigation Links */}
-            <div className="flex items-center justify-center flex-1 space-x-8">
-              <NavLinks />
+          {/* Centered Logo on Mobile */}
+          {isMobile && (
+            <div className="flex-1 flex justify-center">
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
+                  alt="HYPEIT Logo" 
+                  className="h-10 w-auto" 
+                />
+              </Link>
             </div>
+          )}
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-3">
-              <AuthButtons />
-            </div>
-          </>
-        )}
-
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[85%] bg-gray-900 pt-12 border-gray-800">
-              <div className="flex flex-col h-full">
-                <div className="flex flex-col space-y-4 mb-8">
-                  <NavLinks />
-                </div>
-                <div className="flex flex-col space-y-4 mt-auto mb-10">
-                  <AuthButtons />
-                </div>
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <>
+              <div className="flex items-center justify-center flex-1 space-x-8">
+                <NavLinks />
               </div>
-            </SheetContent>
-          </Sheet>
-        )}
-      </div>
-    </nav>
+              <div className="flex items-center space-x-3">
+                <AuthButtons />
+              </div>
+            </>
+          )}
+
+          {/* Empty div for mobile to maintain centering */}
+          {isMobile && <div className="flex-1" />}
+        </div>
+      </nav>
+      
+      {/* Footer Menu for Mobile */}
+      <FooterMenu />
+    </>
   );
 };
 
