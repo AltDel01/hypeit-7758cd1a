@@ -1,5 +1,77 @@
 export const feedImages = [
   {
+    src: "/lovable-uploads/b7dc0dfa-acd0-408a-86ff-9f09a3c95edb.png",
+    alt: "Herbal Tea - Daily Boost - Square format"
+  },
+  {
+    src: "/lovable-uploads/953b9186-6bdc-4189-a943-86d325872701.png", 
+    alt: "Espresso with Rich Bold Flavor - Square format"
+  },
+  {
+    src: "/lovable-uploads/e30ed907-3eff-4220-b114-15c940fa1f8d.png",
+    alt: "Elegant House by Normandyhome - Square format"
+  },
+  {
+    src: "/lovable-uploads/56c6da96-0632-4050-81cc-8d8848bfea44.png",
+    alt: "Aleca Beauty Summer Sale Collection - Square format"
+  },
+  {
+    src: "/lovable-uploads/035202b4-6d7a-4c7e-b540-05629d3c48be.png",
+    alt: "Special Banana Chips - Square format"
+  },
+  {
+    src: "/lovable-uploads/87dad215-b6d9-4bf4-a22e-fa531ccdeda4.png",
+    alt: "Hot & Spicy Pizza - Square format"
+  },
+  {
+    src: "/lovable-uploads/e0dd5886-c8fe-409a-a8ef-c4f84be0e3ee.png",
+    alt: "New Collection Limited Edition Sneakers - Square format"
+  },
+  {
+    src: "/lovable-uploads/59dd8589-a21c-48ef-823c-abd54981df7f.png",
+    alt: "Marine by Keithston & Co - Square format"
+  },
+  {
+    src: "/lovable-uploads/464125a8-9832-4330-b998-bc654674d7b4.png",
+    alt: "CareYou Lip Balm - Square format"
+  },
+  {
+    src: "/lovable-uploads/36a342e9-7a2e-4c60-8586-22ca83b772bd.png",
+    alt: "Together We Can Save Ocean - Square format"
+  },
+  {
+    src: "/lovable-uploads/7c397839-e49c-4530-a07e-74016949bbae.png",
+    alt: "Nostalgia Mini Album - Square format"
+  },
+  {
+    src: "/lovable-uploads/f60613d3-991c-430a-8642-fa3067fb1916.png",
+    alt: "Sol Janeiro Brazilian Summer Products - Square format"
+  },
+  {
+    src: "/lovable-uploads/136f7497-e274-438a-82c6-818c0290fe3e.png",
+    alt: "National Day Celebration of Cereal - Square format"
+  },
+  {
+    src: "/lovable-uploads/51082e5a-86cd-480d-aaca-25b783c5eaff.png",
+    alt: "Healthy Breakfast With Raspberries - Square format"
+  },
+  {
+    src: "/lovable-uploads/cbfe9069-c541-49ed-a60c-22473509a9c1.png",
+    alt: "Stay Hydrated With Gulp Stor - Square format"
+  },
+  {
+    src: "/lovable-uploads/d977cb4b-c12a-4289-abe5-273b92eaa1e5.png",
+    alt: "Lumivera Radiant Serum - Square format"
+  },
+  {
+    src: "/lovable-uploads/d6b2e62f-45fd-48db-8a22-ef85ef9f4ce7.png",
+    alt: "Explore Thailand - Square format"
+  },
+  {
+    src: "/lovable-uploads/90bd655d-abda-4385-adff-1f987d40bc87.png",
+    alt: "Borcelle Gourmet Restaurant - Square format"
+  },
+  {
     src: "/lovable-uploads/f87f82c8-bda2-4268-9607-11b99cf94970.png",
     alt: "Hot Spicy Pizza - Square format"
   },
