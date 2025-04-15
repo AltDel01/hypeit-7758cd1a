@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -20,14 +19,12 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const { user } = useAuth();
   
-  // Restore prompt from localStorage when component mounts or user logs in
   useEffect(() => {
     const savedPrompt = localStorage.getItem('savedPrompt');
     if (savedPrompt && !prompt) {
       setPrompt(savedPrompt);
     }
     
-    // Check if we redirected from auth and should clear saved path
     if (user && localStorage.getItem('authRedirectPath') === '/') {
       localStorage.removeItem('authRedirectPath');
     }
@@ -44,7 +41,6 @@ const Index = () => {
     Sentry.setTag("feature", "image-generation");
   }, []);
   
-  // Listen for imageGenerated events
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
@@ -70,7 +66,6 @@ const Index = () => {
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       console.log(`Product image available: ${productImage !== null}`);
       
-      // Log product image details if available
       if (productImage) {
         console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
       }
@@ -82,7 +77,6 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
-      // Update prompt to include reference to the product image if one is uploaded
       let enhancedPrompt = prompt;
       if (productImage) {
         enhancedPrompt += ` - Create an image that features this product prominently.`;
@@ -92,7 +86,7 @@ const Index = () => {
         prompt: enhancedPrompt,
         aspectRatio,
         style: productImage ? "product-focused" : undefined,
-        productImage // Pass the product image to the service
+        productImage
       });
       
       if (imageUrl) {
@@ -115,12 +109,12 @@ const Index = () => {
 
   return (
     <AuroraBackground>
-      <div className="flex flex-col min-h-screen pb-16 md:pb-0"> {/* Added pb-16 for mobile footer spacing */}
+      <div className="flex flex-col min-h-screen pb-16 md:pb-0">
         <Navbar />
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
           <div className="col-span-5 p-6">
             <div className="max-w-xl mx-auto">
-              <h1 className="text-4xl font-black mb-6 text-center leading-tight animate-gradient-text animate-fade-in-up">
+              <h1 className="text-4xl font-black mb-6 text-center leading-tight animate-gradient-text animate-fade-in-up [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
                 Create One Month Social Media<br />Content Within Minutes
               </h1>
               
