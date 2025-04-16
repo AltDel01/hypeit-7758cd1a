@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -115,7 +114,7 @@ const Index = () => {
         <main className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 relative z-10">
           <div className="col-span-5 p-6">
             <div className="max-w-xl mx-auto">
-              <h1 className="text-4xl mb-6 text-center leading-tight text-[#8c52ff] font-extrabold md:font-extrabold [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] md:[text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
+              <h1 className="text-4xl mb-6 text-center leading-tight text-[#8c52ff] font-bold md:font-bold [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] md:[text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
                 Create One Month Social Media<br />Content Within Minutes
               </h1>
               

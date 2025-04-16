@@ -96,7 +96,7 @@ export default function Login() {
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#8c52ff] hover:bg-[#7a45e6]"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Logging in...' : 'Log in'}
@@ -107,7 +107,7 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-gray-400">
                 Don't have an account?{' '}
-                <Link to="/signup" className="text-[#8c52ff] hover:underline">
+                <Link to="/signup" className="text-blue-400 hover:underline">
                   Sign up
                 </Link>
               </p>

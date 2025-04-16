@@ -140,7 +140,7 @@ export default function Signup() {
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#8c52ff] hover:bg-[#7a45e6]"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating account...' : 'Sign up'}
@@ -151,7 +151,7 @@ export default function Signup() {
             <div className="mt-6 text-center">
               <p className="text-gray-400">
                 Already have an account?{' '}
-                <Link to="/login" className="text-[#8c52ff] hover:underline">
+                <Link to="/login" className="text-blue-400 hover:underline">
                   Log in
                 </Link>
               </p>
