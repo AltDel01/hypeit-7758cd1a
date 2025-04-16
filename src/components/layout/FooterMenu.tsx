@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, TrendingUp, User } from 'lucide-react';
+import { Camera, Star, TrendingUp, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,8 +33,7 @@ const FooterMenu = () => {
             isActive('/brand-identity') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-400'
           )}
         >
-          {/* Using a standard span with ® symbol instead of a non-existent icon */}
-          <span className="flex items-center justify-center w-5 h-5 text-lg font-bold">®</span>
+          <Star size={20} />
           <span className="flex items-center gap-0.5">Brand Identity<sup>®</sup></span>
         </Link>
         
