@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MediaTabContent from './MediaTabContent';
 import XPostForm from '@/components/social/XPostForm';
@@ -95,7 +94,7 @@ const TabsContainer = ({
               >
                 <span>{count}</span>
                 {index > 1 && (
-                  <span className="ml-1 text-yellow-400">💎</span>
+                  <span className="ml-1 text-purple-400">💎</span>
                 )}
               </button>
             ))}

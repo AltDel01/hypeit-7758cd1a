@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -136,13 +135,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-          
-          <ImageGallery 
-            feedImages={feedImages}
-            storyImages={storyImages}
-            generatedImage={generatedImage}
-            activeTab={activeTab}
-          />
         </main>
       </div>
     </AuroraBackground>
