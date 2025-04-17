@@ -70,7 +70,6 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     
     // Draw frequency bars evenly around the entire circle
     const bufferLength = dataArray.length;
-    const barWidth = (Math.PI * 2) / bufferLength;
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
     
@@ -79,8 +78,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       const value = dataArray[i] / 255;
       const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
       
-      // This is the key fix: Calculate angle to distribute bars evenly around the full circle
-      const angle = i * (Math.PI * 2) / bufferLength;
+      // Calculate angle for even 360-degree distribution
+      const angle = (i / bufferLength) * Math.PI * 2;
       
       const x1 = centerX + Math.cos(angle) * centerRadius;
       const y1 = centerY + Math.sin(angle) * centerRadius;
@@ -96,14 +95,16 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
       
       if (position < 0.33) {
-        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
+        // Replace any white with soft red gradient
+        lineGradient.addColorStop(0, 'rgba(254, 207, 205, 0.9)'); // Soft red start
         lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
       } else if (position < 0.66) {
         lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
         lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
       } else {
         lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.9)');
+        // Replace white with soft red gradient
+        lineGradient.addColorStop(1, 'rgba(254, 207, 205, 0.9)'); // Soft red end
       }
       
       ctx.strokeStyle = lineGradient;
@@ -111,7 +112,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.stroke();
       
       if (value > 0.4) {
-        ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
+        ctx.shadowColor = position < 0.33 ? '#FFDEE2' : // Soft red shadow instead of white
                          position < 0.66 ? '#8c52ff' : '#1EAEDB';
         ctx.shadowBlur = 20;
         ctx.stroke();
@@ -129,7 +130,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX - pulseRadius, centerY, 
       centerX + pulseRadius, centerY
     );
-    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.7)');
+    // Replace white with soft red
+    pulseGradient.addColorStop(0, 'rgba(254, 207, 205, 0.7)'); // Soft red
     pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)');
     pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)');
     
