@@ -36,15 +36,15 @@ export const calculateWavePoints = (
   for (let i = 0; i <= totalPoints; i++) {
     const angle = (i / totalPoints) * Math.PI * 2;
     
-    // Create organic wave movement
-    const waveTimeOffset = Math.sin(angle * 4 + time * 2) * 0.15;
-    const secondaryWave = Math.cos(angle * 6 + time * 1.5) * 0.1;
+    // Slower wave movement by reducing time multipliers
+    const waveTimeOffset = Math.sin(angle * 2 + time * 0.5) * 0.1;
+    const secondaryWave = Math.cos(angle * 3 + time * 0.3) * 0.05;
     
     // Get smoothed value with wraparound
     const dataIndex = i % totalPoints;
     const value = smoothedData[dataIndex];
     
-    // Combine base value with wave offsets for organic movement
+    // Combine base value with wave offsets for more relaxed movement
     const normalizedValue = Math.max(
       0.2,
       value * 0.7 + waveTimeOffset + secondaryWave
@@ -53,8 +53,8 @@ export const calculateWavePoints = (
     // Calculate wave height with smooth transitions
     const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * normalizedValue;
     
-    // Apply slight randomness for natural movement
-    const jitter = Math.sin(time * 10 + angle * 8) * 2;
+    // Reduce jitter for a calmer wave
+    const jitter = Math.sin(time * 3 + angle * 4) * 1;
     
     const x = centerX + Math.cos(angle) * (baseRadius + waveHeight + jitter);
     const y = centerY + Math.sin(angle) * (baseRadius + waveHeight + jitter);
