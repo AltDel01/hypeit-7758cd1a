@@ -1,19 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 
 const AvaButton: React.FC = () => {
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   const toggleVisualizer = () => {
     setIsVisualizerActive(prev => !prev);
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Outer animated rings - only visible when not active */}
+    <div ref={buttonRef} className="fixed bottom-6 right-6 z-50">
       {!isVisualizerActive && (
         <>
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FEF7CD]/40 via-[#8c52ff]/30 to-[#1EAEDB]/20 animate-outer-pulse"></div>
@@ -36,7 +36,8 @@ const AvaButton: React.FC = () => {
 
       <MicrophoneVisualizer 
         isActive={isVisualizerActive} 
-        onClose={() => setIsVisualizerActive(false)} 
+        onClose={() => setIsVisualizerActive(false)}
+        buttonRef={buttonRef}
       />
     </div>
   );
