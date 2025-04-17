@@ -17,11 +17,14 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { isListening, analyser, dataArray } = useAudioVisualization(isActive, onClose);
 
+  // Increase the size multiplier for the visualizer
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const size = Math.max(containerRef.current.offsetWidth * 3, 200);
+        // Increase the multiplier from 3 to 4 for a bigger visualizer
+        const size = Math.max(containerRef.current.offsetWidth * 4, 320);
         setDimensions({ width: size, height: size });
+        console.log("Updated visualizer dimensions to:", size);
       }
     };
     
@@ -33,11 +36,12 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     };
   }, [containerRef]);
 
-  // Debug logging to check if isActive and isListening are working correctly
+  // Debug logging
   useEffect(() => {
-    console.log("MicrophoneVisualizer - isActive:", isActive, "isListening:", isListening);
+    console.log("MicrophoneVisualizer rendered - isActive:", isActive, "isListening:", isListening);
     console.log("Analyser available:", !!analyser, "DataArray available:", !!dataArray);
-  }, [isActive, isListening, analyser, dataArray]);
+    console.log("Dimensions:", dimensions);
+  }, [isActive, isListening, analyser, dataArray, dimensions]);
 
   if (!isActive) {
     return null;
@@ -45,9 +49,14 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
 
   return (
     <div 
-      className="absolute z-50 inset-0 flex items-center justify-center"
+      className="absolute z-50 transform -translate-x-1/2 -translate-y-1/2"
       onClick={onClose}
-      style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+      style={{ 
+        width: `${dimensions.width}px`, 
+        height: `${dimensions.height}px`,
+        left: '50%',
+        bottom: '-50%'
+      }}
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full" />
       
@@ -60,9 +69,9 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         />
       )}
       
-      <div className="relative z-10 text-center">
-        <h3 className="text-2xl font-bold text-white animate-gradient-text shadow-glow">Listening...</h3>
-        <p className="text-purple-200 mt-2 text-sm">
+      <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-10 text-center w-full">
+        <h3 className="text-3xl font-bold text-white animate-gradient-text shadow-glow">Listening...</h3>
+        <p className="text-purple-200 mt-2 text-lg">
           Ask Ava about Social Media Marketing. Tap anywhere to cancel.
         </p>
       </div>

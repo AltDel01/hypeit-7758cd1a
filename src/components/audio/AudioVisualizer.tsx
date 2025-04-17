@@ -34,17 +34,17 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     
     analyser.getByteFrequencyData(dataArray);
     
-    // Draw outer rings
+    // Draw outer rings with increased sizes
     for (let i = 0; i < 3; i++) {
-      const radius = Math.min(width, height) * (0.3 + i * 0.15);
+      const radius = Math.min(width, height) * (0.35 + i * 0.15);
       
       const gradient = ctx.createRadialGradient(
         centerX, centerY, radius * 0.7,
         centerX, centerY, radius
       );
       
-      gradient.addColorStop(0, `rgba(254, 247, 205, ${0.1 + i * 0.05})`);
-      gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.08 + i * 0.03})`);
+      gradient.addColorStop(0, `rgba(254, 247, 205, ${0.15 + i * 0.05})`);
+      gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.12 + i * 0.04})`);
       gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
       
       ctx.beginPath();
@@ -53,8 +53,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.fill();
     }
     
-    // Draw inner circle
-    const centerRadius = Math.min(width, height) * 0.2;
+    // Draw inner circle with increased size
+    const centerRadius = Math.min(width, height) * 0.25;
     ctx.beginPath();
     ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
     const innerGradient = ctx.createRadialGradient(
@@ -62,16 +62,16 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX, centerY, centerRadius
     );
     innerGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
-    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.6)');
-    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.4)');
+    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.7)');
+    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)');
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
-    // Draw frequency bars
+    // Draw frequency bars with thicker lines
     const bufferLength = dataArray.length;
     const barWidth = (Math.PI * 2) / bufferLength;
-    const maxBarHeight = Math.min(width, height) * 0.3;
-    const minBarHeight = Math.min(width, height) * 0.12;
+    const maxBarHeight = Math.min(width, height) * 0.35;
+    const minBarHeight = Math.min(width, height) * 0.15;
     
     for (let i = 0; i < bufferLength; i++) {
       const value = dataArray[i] / 255;
@@ -86,38 +86,38 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
-      ctx.lineWidth = 2 + value * 2;
+      ctx.lineWidth = 3 + value * 3; // Thicker lines
       
       const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
       const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
       
       if (position < 0.33) {
-        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.8)');
+        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
         lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
       } else if (position < 0.66) {
         lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.8)');
+        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
       } else {
-        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.8)');
-        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.8)');
+        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
+        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.9)');
       }
       
       ctx.strokeStyle = lineGradient;
       ctx.lineCap = 'round';
       ctx.stroke();
       
-      if (value > 0.5) {
+      if (value > 0.4) { // Lower threshold to show more glow
         ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
                          position < 0.66 ? '#8c52ff' : '#1EAEDB';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20; // Increased shadow blur
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
     }
     
-    // Animate pulse effect
+    // Animate pulse effect with bigger radius
     const time = Date.now() / 1000;
-    const pulseRadius = Math.min(width, height) * (0.2 + 0.05 * Math.sin(time * 2));
+    const pulseRadius = Math.min(width, height) * (0.25 + 0.07 * Math.sin(time * 2));
     ctx.beginPath();
     ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
     
@@ -125,12 +125,12 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX - pulseRadius, centerY, 
       centerX + pulseRadius, centerY
     );
-    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.6)');
-    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.6)');
-    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.6)');
+    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.7)');
+    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)');
+    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)');
     
     ctx.strokeStyle = pulseGradient;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
     
     requestAnimationRef.current = requestAnimationFrame(drawVisualizer);
@@ -139,7 +139,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   useEffect(() => {
     console.log("AudioVisualizer - Setting up animation frame");
     if (analyser && dataArray) {
-      console.log("Starting visualizer animation");
+      console.log("Starting visualizer animation with dimensions:", width, height);
       drawVisualizer();
     }
     

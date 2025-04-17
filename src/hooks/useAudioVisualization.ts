@@ -1,6 +1,5 @@
 
 import { useRef, useState, useEffect } from 'react';
-import { toast } from "sonner";
 
 export const useAudioVisualization = (isActive: boolean, onClose: () => void) => {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -19,7 +18,8 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
 
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
+      // Increase FFT size for more detailed visualization
+      analyser.fftSize = 1024;
 
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
