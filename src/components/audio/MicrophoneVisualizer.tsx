@@ -46,8 +46,9 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       style={{ 
         width: `${dimensions.width}px`, 
         height: `${dimensions.height}px`,
-        right: '1rem',
-        bottom: '6rem', // Position it higher to match the arrow in the image
+        right: '50%',
+        bottom: '10rem',
+        transform: 'translateX(50%)', // Center it horizontally like the button
         pointerEvents: 'all'
       }}
     >      
