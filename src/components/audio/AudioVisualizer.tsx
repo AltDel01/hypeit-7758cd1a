@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -44,8 +43,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         centerX, centerY, radius
       );
       
-      gradient.addColorStop(0, `rgba(140, 82, 255, ${0.15 + i * 0.05})`); // Purple
-      gradient.addColorStop(0.5, `rgba(30, 174, 219, ${0.12 + i * 0.04})`); // Blue
+      gradient.addColorStop(0, `rgba(30, 174, 219, ${0.15 + i * 0.05})`); // Blue
+      gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.12 + i * 0.04})`); // Purple
       gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
       
       ctx.beginPath();
@@ -54,7 +53,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.fill();
     }
     
-    // Draw inner circle with gradient from purple to blue
+    // Draw inner circle with gradient
     const centerRadius = Math.min(width, height) * 0.25;
     ctx.beginPath();
     ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
@@ -62,22 +61,22 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX, centerY, 0,
       centerX, centerY, centerRadius
     );
-    innerGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)'); // Purple core
-    innerGradient.addColorStop(0.4, 'rgba(30, 174, 219, 0.7)'); // Blue middle
+    innerGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)'); // Blue core
+    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.7)'); // Purple middle
     innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)'); // Blue outer
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
-    // Draw frequency bars with thicker lines
+    // Draw frequency bars in a full 360-degree pattern
     const bufferLength = dataArray.length;
-    const barWidth = (Math.PI * 2) / bufferLength;
+    const angleStep = (Math.PI * 2) / bufferLength;
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
     
     for (let i = 0; i < bufferLength; i++) {
       const value = dataArray[i] / 255;
       const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
-      const angle = i * barWidth;
+      const angle = i * angleStep;
       
       const x1 = centerX + Math.cos(angle) * centerRadius;
       const y1 = centerY + Math.sin(angle) * centerRadius;
@@ -87,38 +86,30 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
-      ctx.lineWidth = 3 + value * 3; // Thicker lines
+      ctx.lineWidth = 2 + value * 2; // Slightly thinner lines for better distribution
       
       const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
       const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
       
-      if (position < 0.33) {
-        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
-      } else if (position < 0.66) {
-        lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
-      } else {
-        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.9)');
-      }
+      lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)'); // Blue start
+      lineGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.9)'); // Purple middle
+      lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)'); // Blue end
       
       ctx.strokeStyle = lineGradient;
       ctx.lineCap = 'round';
       ctx.stroke();
       
-      if (value > 0.4) { // Lower threshold to show more glow
-        ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
-                         position < 0.66 ? '#8c52ff' : '#1EAEDB';
-        ctx.shadowBlur = 20; // Increased shadow blur
+      if (value > 0.4) {
+        ctx.shadowColor = position < 0.5 ? '#1EAEDB' : '#8c52ff';
+        ctx.shadowBlur = 15;
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
     }
     
-    // Animate pulse effect with bigger radius
+    // Animate pulse effect
     const time = Date.now() / 1000;
-    const pulseRadius = Math.min(width, height) * (0.25 + 0.07 * Math.sin(time * 2));
+    const pulseRadius = Math.min(width, height) * (0.25 + 0.05 * Math.sin(time * 2));
     ctx.beginPath();
     ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
     
@@ -126,9 +117,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX - pulseRadius, centerY, 
       centerX + pulseRadius, centerY
     );
-    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.7)');
-    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)');
-    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)');
+    pulseGradient.addColorStop(0, 'rgba(30, 174, 219, 0.7)'); // Blue
+    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)'); // Purple
+    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)'); // Blue
     
     ctx.strokeStyle = pulseGradient;
     ctx.lineWidth = 3;
