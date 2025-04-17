@@ -134,10 +134,6 @@ const Index = () => {
                   generatedImage={generatedImage}
                 />
               </div>
-              
-              <div className="flex justify-center mt-4">
-                <AvaButton />
-              </div>
             </div>
           </div>
           
@@ -148,6 +144,8 @@ const Index = () => {
             activeTab={activeTab}
           />
         </main>
+        
+        <AvaButton />
       </div>
     </AuroraBackground>
   );

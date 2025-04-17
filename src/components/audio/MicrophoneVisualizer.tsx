@@ -100,15 +100,16 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     for (let i = 0; i < 3; i++) {
       const radius = Math.min(width, height) * (0.3 + i * 0.15);
       
-      // Create radial gradient for circle
+      // Create radial gradient for circle with multi-color
       const gradient = ctx.createRadialGradient(
         centerX, centerY, radius * 0.7,
         centerX, centerY, radius
       );
       
-      gradient.addColorStop(0, `rgba(155, 135, 245, ${0.1 + i * 0.05})`);
+      // Use yellow, purple, blue gradient
+      gradient.addColorStop(0, `rgba(254, 247, 205, ${0.1 + i * 0.05})`);
       gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.08 + i * 0.03})`);
-      gradient.addColorStop(1, 'rgba(75, 0, 130, 0)');
+      gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
       
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
@@ -127,9 +128,9 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       centerX, centerY, 0,
       centerX, centerY, Math.min(width, height) * 0.2
     );
-    innerGradient.addColorStop(0, 'rgba(229, 222, 255, 0.9)');
-    innerGradient.addColorStop(0.6, 'rgba(140, 82, 255, 0.6)');
-    innerGradient.addColorStop(1, 'rgba(110, 89, 165, 0.4)');
+    innerGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
+    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.6)');
+    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.4)');
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
@@ -159,11 +160,21 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       ctx.lineTo(x2, y2);
       ctx.lineWidth = 2 + value * 2;
       
-      // Create gradient for the lines
+      // Create gradient for the lines with yellow-purple-blue
       const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
-      lineGradient.addColorStop(0, 'rgba(155, 135, 245, 0.8)');
-      lineGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.9)');
-      lineGradient.addColorStop(1, 'rgba(214, 188, 250, 0.7)');
+      
+      // Determine color based on angle position
+      const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
+      if (position < 0.33) {
+        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.8)');
+        lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
+      } else if (position < 0.66) {
+        lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
+        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.8)');
+      } else {
+        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.8)');
+        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.8)');
+      }
       
       ctx.strokeStyle = lineGradient;
       ctx.lineCap = 'round';
@@ -171,7 +182,8 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       
       // Add glow to active bars
       if (value > 0.5) {
-        ctx.shadowColor = '#8c52ff';
+        ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
+                          position < 0.66 ? '#8c52ff' : '#1EAEDB';
         ctx.shadowBlur = 15;
         ctx.stroke();
         ctx.shadowBlur = 0;
@@ -183,7 +195,17 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     const pulseRadius = Math.min(width, height) * (0.2 + 0.05 * Math.sin(time * 2));
     ctx.beginPath();
     ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(214, 188, 250, 0.6)';
+    
+    // Use gradient for pulse effect
+    const pulseGradient = ctx.createLinearGradient(
+      centerX - pulseRadius, centerY, 
+      centerX + pulseRadius, centerY
+    );
+    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.6)');
+    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.6)');
+    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.6)');
+    
+    ctx.strokeStyle = pulseGradient;
     ctx.lineWidth = 2;
     ctx.stroke();
     
@@ -241,9 +263,9 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       
       <div className="relative z-10 text-center">
         <div className="animate-pulse mb-4">
-          <div className="w-16 h-16 rounded-full bg-[#8c52ff]/30 flex items-center justify-center mx-auto">
-            <div className="w-12 h-12 rounded-full bg-[#8c52ff]/50 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-[#8c52ff] flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/30 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -254,7 +276,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         </div>
         <h3 className="text-2xl font-bold text-white animate-gradient-text shadow-glow">Listening...</h3>
         <p className="text-purple-200 mt-2 max-w-xs mx-auto">
-          Ava is active and listening. Speak now or tap anywhere to cancel.
+          Ask Ava about Social Media Marketing. Tap anywhere to cancel.
         </p>
       </div>
     </div>
