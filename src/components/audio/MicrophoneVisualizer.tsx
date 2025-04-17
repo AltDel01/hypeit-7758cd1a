@@ -47,7 +47,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         width: `${dimensions.width}px`, 
         height: `${dimensions.height}px`,
         right: '50%',
-        bottom: '4rem', // Moved lower down
+        bottom: '8rem',
         transform: 'translateX(50%)', // Center horizontally
         pointerEvents: 'all'
       }}
@@ -63,10 +63,10 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60]">
         <Mic 
-          className="w-12 h-12 text-white animate-pulse" 
+          className="w-10 h-10 text-white animate-pulse" 
           strokeWidth={3}
           style={{ 
-            filter: "drop-shadow(0px 0px 12px rgba(255, 255, 255, 1))",
+            filter: "drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.9))",
             stroke: "white",
             strokeWidth: 3
           }} 
