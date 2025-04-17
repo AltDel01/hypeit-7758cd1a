@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -68,7 +67,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
-    // Draw frequency bars with thicker lines
+    // Draw frequency bars evenly around the entire circle
     const bufferLength = dataArray.length;
     const barWidth = (Math.PI * 2) / bufferLength;
     const maxBarHeight = Math.min(width, height) * 0.35;
@@ -87,7 +86,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
-      ctx.lineWidth = 3 + value * 3; // Thicker lines
+      ctx.lineWidth = 3 + value * 3;
       
       const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
       const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
@@ -107,10 +106,10 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.lineCap = 'round';
       ctx.stroke();
       
-      if (value > 0.4) { // Lower threshold to show more glow
+      if (value > 0.4) {
         ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
                          position < 0.66 ? '#8c52ff' : '#1EAEDB';
-        ctx.shadowBlur = 20; // Increased shadow blur
+        ctx.shadowBlur = 20;
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
@@ -162,7 +161,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         width: `${width}px`,
         height: `${height}px`,
         zIndex: 20,
-        borderRadius: '50%' // Ensure canvas is clipped to a circle
+        borderRadius: '50%'
       }}
     />
   );
