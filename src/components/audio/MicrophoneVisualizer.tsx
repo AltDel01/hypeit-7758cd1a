@@ -61,7 +61,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       )}
       
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-        <Mic className="w-8 h-8 text-white animate-pulse" />
+        <Mic className="w-8 h-8 text-white animate-pulse" strokeWidth={3} />
       </div>
     </div>
   );
