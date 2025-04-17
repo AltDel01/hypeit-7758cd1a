@@ -47,6 +47,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         height: `${dimensions.height}px`,
         right: '2rem',
         bottom: '2rem',
+        pointerEvents: 'all'
       }}
     >      
       {analyser && dataArray && (

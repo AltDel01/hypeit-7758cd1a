@@ -30,6 +30,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     const centerX = width / 2;
     const centerY = height / 2;
     
+    // Clear the entire canvas first
     ctx.clearRect(0, 0, width, height);
     
     analyser.getByteFrequencyData(dataArray);
@@ -160,7 +161,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       style={{ 
         width: `${width}px`,
         height: `${height}px`,
-        zIndex: 20 
+        zIndex: 20,
+        borderRadius: '50%' // Ensure canvas is clipped to a circle
       }}
     />
   );
