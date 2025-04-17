@@ -20,6 +20,44 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   const requestAnimationRef = useRef<number>(0);
   const [isListening, setIsListening] = useState(false);
 
+  // Grid texture for overlay
+  const gridTextureRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    // Create grid texture once
+    const createGridTexture = () => {
+      const gridCanvas = document.createElement('canvas');
+      gridCanvas.width = 100;
+      gridCanvas.height = 100;
+      const gridCtx = gridCanvas.getContext('2d');
+      
+      if (gridCtx) {
+        gridCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        gridCtx.lineWidth = 0.5;
+        
+        // Draw horizontal lines
+        for (let i = 0; i <= 100; i += 10) {
+          gridCtx.beginPath();
+          gridCtx.moveTo(0, i);
+          gridCtx.lineTo(100, i);
+          gridCtx.stroke();
+        }
+        
+        // Draw vertical lines
+        for (let i = 0; i <= 100; i += 10) {
+          gridCtx.beginPath();
+          gridCtx.moveTo(i, 0);
+          gridCtx.lineTo(i, 100);
+          gridCtx.stroke();
+        }
+      }
+      
+      gridTextureRef.current = gridCanvas;
+    };
+    
+    createGridTexture();
+  }, []);
+
   const startMicrophone = async () => {
     try {
       // Request microphone access
@@ -29,7 +67,8 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       // Create audio context and analyzer
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
+      analyser.fftSize = 256; // Smaller for better performance but still detailed
+      analyser.smoothingTimeConstant = 0.8; // Smoother transitions
 
       // Create source from microphone input
       const source = audioContext.createMediaStreamSource(stream);
@@ -89,128 +128,300 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     const height = canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 10;
     
-    // Clear the canvas
-    ctx.clearRect(0, 0, width, height);
+    // Clear the canvas with slight fade effect for trails
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(0, 0, width, height);
     
     // Update audio data
     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+    const dataArray = dataArrayRef.current;
     
-    // Draw outer glowing circles
-    for (let i = 0; i < 3; i++) {
-      const radius = Math.min(width, height) * (0.3 + i * 0.15);
+    // Extract frequency bands for different visualizations
+    const bassAvg = getAverageFrequency(dataArray, 0, 5); // Low frequencies
+    const midAvg = getAverageFrequency(dataArray, 6, 20); // Mid frequencies
+    const trebleAvg = getAverageFrequency(dataArray, 21, 50); // High frequencies
+    
+    // Apply grid texture
+    if (gridTextureRef.current) {
+      const time = Date.now() / 10000;
+      ctx.save();
+      ctx.globalAlpha = 0.05 + bassAvg * 0.002;
+      ctx.translate(centerX, centerY);
+      ctx.rotate(time);
+      ctx.scale(1 + bassAvg * 0.01, 1 + bassAvg * 0.01);
       
-      // Create radial gradient for circle with multi-color
-      const gradient = ctx.createRadialGradient(
-        centerX, centerY, radius * 0.7,
-        centerX, centerY, radius
-      );
-      
-      // Use yellow, purple, blue gradient
-      gradient.addColorStop(0, `rgba(254, 247, 205, ${0.1 + i * 0.05})`);
-      gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.08 + i * 0.03})`);
-      gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
-      
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = gradient;
-      ctx.fill();
+      // Create a pattern using the grid texture
+      const pattern = ctx.createPattern(gridTextureRef.current, 'repeat');
+      if (pattern) {
+        ctx.fillStyle = pattern;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+      }
+      ctx.restore();
     }
     
-    // Draw the main visualizer
-    const bufferLength = dataArrayRef.current.length;
-    const barWidth = (Math.PI * 2) / bufferLength;
-    
-    // Main visualizer circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, Math.min(width, height) * 0.2, 0, Math.PI * 2);
-    const innerGradient = ctx.createRadialGradient(
+    // Draw center sphere that morphs with bass
+    const centerSize = 30 + bassAvg * 0.4;
+    const sphereGradient = ctx.createRadialGradient(
       centerX, centerY, 0,
-      centerX, centerY, Math.min(width, height) * 0.2
+      centerX, centerY, centerSize
     );
-    innerGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
-    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.6)');
-    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.4)');
-    ctx.fillStyle = innerGradient;
+    
+    // Purple-blue center based on bass intensity
+    sphereGradient.addColorStop(0, `rgba(180, 120, 255, ${0.6 + bassAvg * 0.002})`);
+    sphereGradient.addColorStop(0.6, `rgba(120, 80, 255, ${0.5 + bassAvg * 0.001})`);
+    sphereGradient.addColorStop(1, 'rgba(70, 40, 220, 0)');
+    
+    ctx.beginPath();
+    
+    // Apply slight distortion based on bass
+    if (bassAvg > 100) {
+      // Morph into polygon when bass is strong
+      const points = 6 + Math.floor(bassAvg / 30);
+      const angleStep = (Math.PI * 2) / points;
+      const distortion = 0.8 + (bassAvg / 200);
+      
+      for (let i = 0; i < points; i++) {
+        const angle = i * angleStep;
+        const x = centerX + Math.cos(angle) * centerSize * (1 + Math.sin(angle * 3) * 0.1 * distortion);
+        const y = centerY + Math.sin(angle) * centerSize * (1 + Math.cos(angle * 3) * 0.1 * distortion);
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+    } else {
+      // Regular circle for lower bass
+      ctx.arc(centerX, centerY, centerSize, 0, Math.PI * 2);
+    }
+    
+    ctx.fillStyle = sphereGradient;
     ctx.fill();
     
-    // Draw the sound bars
-    const maxBarHeight = Math.min(width, height) * 0.3;
-    const minBarHeight = Math.min(width, height) * 0.12;
+    // Add glow effect based on audio intensity
+    const glowSize = 5 + bassAvg * 0.2;
+    ctx.shadowColor = `rgba(140, 80, 255, ${bassAvg / 255})`;
+    ctx.shadowBlur = glowSize;
+    ctx.fill();
+    ctx.shadowBlur = 0;
     
-    for (let i = 0; i < bufferLength; i++) {
-      // Get audio data and normalize it
-      const value = dataArrayRef.current[i] / 255;
+    // Add subtle lens flare on center sphere
+    addLensFlare(ctx, centerX, centerY, bassAvg);
+    
+    // Draw orbital rings responding to mid frequencies
+    const rings = 4;
+    const maxRingRadius = radius * 0.9;
+    
+    for (let r = 0; r < rings; r++) {
+      const ringRadius = (r + 1) * (maxRingRadius / rings);
+      const ringWidth = 2 + midAvg * 0.05;
       
-      // Calculate bar height based on audio data
-      const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
+      // Calculate ring distortion based on audio
+      const distortionAmount = 0.2 + (midAvg / 255) * 0.3;
+      const ringGradient = ctx.createLinearGradient(
+        centerX - ringRadius, centerY - ringRadius,
+        centerX + ringRadius, centerY + ringRadius
+      );
       
-      // Calculate angle for this bar
-      const angle = i * barWidth;
-      
-      // Calculate positions
-      const x1 = centerX + Math.cos(angle) * Math.min(width, height) * 0.2;
-      const y1 = centerY + Math.sin(angle) * Math.min(width, height) * 0.2;
-      const x2 = centerX + Math.cos(angle) * (Math.min(width, height) * 0.2 + barHeight * value);
-      const y2 = centerY + Math.sin(angle) * (Math.min(width, height) * 0.2 + barHeight * value);
-      
-      // Draw line
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.lineWidth = 2 + value * 2;
-      
-      // Create gradient for the lines with yellow-purple-blue
-      const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
-      
-      // Determine color based on angle position
-      const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
-      if (position < 0.33) {
-        lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.8)');
-        lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
-      } else if (position < 0.66) {
-        lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.8)');
+      // Color gradient based on ring position and frequency
+      if (r % 3 === 0) {
+        // Purple to orange gradient
+        ringGradient.addColorStop(0, `rgba(140, 80, 255, ${0.6 + midAvg * 0.002})`);
+        ringGradient.addColorStop(0.5, `rgba(220, 120, 180, ${0.5 + midAvg * 0.002})`);
+        ringGradient.addColorStop(1, `rgba(250, 170, 50, ${0.4 + midAvg * 0.002})`);
+      } else if (r % 3 === 1) {
+        // Blue to yellow
+        ringGradient.addColorStop(0, `rgba(30, 174, 219, ${0.6 + midAvg * 0.002})`);
+        ringGradient.addColorStop(0.5, `rgba(120, 200, 220, ${0.5 + midAvg * 0.002})`);
+        ringGradient.addColorStop(1, `rgba(254, 247, 205, ${0.4 + midAvg * 0.002})`);
       } else {
-        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.8)');
-        lineGradient.addColorStop(1, 'rgba(254, 247, 205, 0.8)');
+        // Orange to purple
+        ringGradient.addColorStop(0, `rgba(250, 170, 50, ${0.6 + midAvg * 0.002})`);
+        ringGradient.addColorStop(0.5, `rgba(220, 100, 150, ${0.5 + midAvg * 0.002})`);
+        ringGradient.addColorStop(1, `rgba(140, 80, 255, ${0.4 + midAvg * 0.002})`);
       }
       
-      ctx.strokeStyle = lineGradient;
+      ctx.beginPath();
+      
+      // Draw distorted ring based on mid frequencies
+      const segments = 120;
+      const angleStep = (Math.PI * 2) / segments;
+      const phase = Date.now() / 1000 * (r + 1) * 0.2;
+      
+      for (let i = 0; i <= segments; i++) {
+        const angle = i * angleStep;
+        
+        // Create dynamic distortion
+        const distortionFactor = Math.sin(angle * (r + 2) + phase) * distortionAmount;
+        const radiusOffset = ringRadius * (1 + distortionFactor * (midAvg / 255));
+        
+        const x = centerX + Math.cos(angle) * radiusOffset;
+        const y = centerY + Math.sin(angle) * radiusOffset;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      
+      ctx.strokeStyle = ringGradient;
+      ctx.lineWidth = ringWidth;
       ctx.lineCap = 'round';
       ctx.stroke();
       
-      // Add glow to active bars
-      if (value > 0.5) {
-        ctx.shadowColor = position < 0.33 ? '#FEF7CD' : 
-                          position < 0.66 ? '#8c52ff' : '#1EAEDB';
-        ctx.shadowBlur = 15;
-        ctx.stroke();
+      // Add subtle glow to the rings
+      ctx.shadowColor = r % 2 === 0 ? 
+        `rgba(140, 80, 255, ${midAvg / 1000})` : 
+        `rgba(250, 170, 50, ${midAvg / 1000})`;
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    
+    // Draw orbital light trails based on high frequencies
+    const orbitalParticles = 60;
+    const orbitalAngleStep = (Math.PI * 2) / orbitalParticles;
+    const time = Date.now() / 1000;
+    
+    for (let i = 0; i < orbitalParticles; i++) {
+      // Spread particles into different orbital rings
+      const orbitalRingIndex = i % 3;
+      const orbitalRadius = radius * (0.4 + orbitalRingIndex * 0.2);
+      
+      // Calculate particle position
+      const speed = (0.2 + (trebleAvg / 255)) * (1 + orbitalRingIndex * 0.3);
+      const angle = orbitalAngleStep * i + time * speed;
+      
+      const x = centerX + Math.cos(angle) * orbitalRadius;
+      const y = centerY + Math.sin(angle) * orbitalRadius;
+      
+      // Particle size based on frequency
+      const freqIndex = i % dataArray.length;
+      const particleValue = dataArray[freqIndex] / 255;
+      
+      // Only draw particles when audio is above threshold
+      if (particleValue > 0.05) {
+        const particleSize = 1 + particleValue * 3;
+        
+        // Determine particle color based on orbital ring and frequency
+        let particleColor;
+        if (orbitalRingIndex === 0) {
+          particleColor = `rgba(254, 247, 205, ${0.2 + particleValue * 0.8})`;
+        } else if (orbitalRingIndex === 1) {
+          particleColor = `rgba(250, 115, 26, ${0.2 + particleValue * 0.8})`;
+        } else {
+          particleColor = `rgba(140, 82, 255, ${0.2 + particleValue * 0.8})`;
+        }
+        
+        // Draw the particle
+        ctx.beginPath();
+        ctx.arc(x, y, particleSize, 0, Math.PI * 2);
+        ctx.fillStyle = particleColor;
+        
+        // Add glow to particles
+        ctx.shadowColor = particleColor;
+        ctx.shadowBlur = 5 + particleValue * 5;
+        ctx.fill();
         ctx.shadowBlur = 0;
+        
+        // Add trail if particle is energetic enough
+        if (particleValue > 0.5) {
+          const trailLength = particleValue * 20;
+          const trailGradient = ctx.createLinearGradient(
+            x - Math.cos(angle) * trailLength, y - Math.sin(angle) * trailLength,
+            x, y
+          );
+          
+          trailGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+          trailGradient.addColorStop(1, particleColor);
+          
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(
+            x - Math.cos(angle) * trailLength, 
+            y - Math.sin(angle) * trailLength
+          );
+          ctx.strokeStyle = trailGradient;
+          ctx.lineWidth = particleSize;
+          ctx.stroke();
+        }
       }
     }
     
-    // Draw pulse effect
-    const time = Date.now() / 1000;
-    const pulseRadius = Math.min(width, height) * (0.2 + 0.05 * Math.sin(time * 2));
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
-    
-    // Use gradient for pulse effect
-    const pulseGradient = ctx.createLinearGradient(
-      centerX - pulseRadius, centerY, 
-      centerX + pulseRadius, centerY
-    );
-    pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.6)');
-    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.6)');
-    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.6)');
-    
-    ctx.strokeStyle = pulseGradient;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
     // Continue the animation loop
     requestAnimationRef.current = requestAnimationFrame(drawVisualizer);
+  };
+  
+  // Helper function to calculate average frequency in a range
+  const getAverageFrequency = (dataArray: Uint8Array, start: number, end: number): number => {
+    let sum = 0;
+    const count = Math.min(end, dataArray.length) - start;
+    
+    if (count <= 0) return 0;
+    
+    for (let i = start; i < Math.min(end, dataArray.length); i++) {
+      sum += dataArray[i];
+    }
+    
+    return sum / count;
+  };
+  
+  // Add lens flare effect
+  const addLensFlare = (ctx: CanvasRenderingContext2D, x: number, y: number, intensity: number) => {
+    const flareSize = 5 + intensity * 0.3;
+    const flareOpacity = 0.1 + (intensity / 255) * 0.3;
+    
+    // Add small bright center
+    ctx.beginPath();
+    ctx.arc(x, y, flareSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${flareOpacity * 2})`;
+    ctx.fill();
+    
+    // Add larger flare around
+    const flareGradient = ctx.createRadialGradient(
+      x, y, flareSize / 3,
+      x, y, flareSize * 2
+    );
+    
+    flareGradient.addColorStop(0, `rgba(255, 255, 255, ${flareOpacity})`);
+    flareGradient.addColorStop(0.5, `rgba(180, 160, 255, ${flareOpacity / 2})`);
+    flareGradient.addColorStop(1, 'rgba(80, 80, 220, 0)');
+    
+    ctx.beginPath();
+    ctx.arc(x, y, flareSize * 2, 0, Math.PI * 2);
+    ctx.fillStyle = flareGradient;
+    ctx.fill();
+    
+    // Add a few random beams
+    const beamCount = 4;
+    for (let i = 0; i < beamCount; i++) {
+      const angle = (Math.PI * 2 / beamCount) * i + (Date.now() / 10000);
+      const beamLength = flareSize * 3;
+      
+      const beamGradient = ctx.createLinearGradient(
+        x, y,
+        x + Math.cos(angle) * beamLength,
+        y + Math.sin(angle) * beamLength
+      );
+      
+      beamGradient.addColorStop(0, `rgba(255, 255, 255, ${flareOpacity})`);
+      beamGradient.addColorStop(1, 'rgba(180, 160, 255, 0)');
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(
+        x + Math.cos(angle) * beamLength,
+        y + Math.sin(angle) * beamLength
+      );
+      ctx.strokeStyle = beamGradient;
+      ctx.lineWidth = 1 + flareSize / 10;
+      ctx.stroke();
+    }
   };
 
   useEffect(() => {
@@ -232,8 +443,11 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     // Handle window resize
     const handleResize = () => {
       if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
+        const container = canvasRef.current.parentElement;
+        if (container) {
+          canvasRef.current.width = container.clientWidth;
+          canvasRef.current.height = container.clientHeight;
+        }
       }
     };
     
@@ -250,34 +464,21 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center">
-      <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
-        onClick={onClose}
-      />
-      
-      <canvas 
-        ref={canvasRef} 
-        className="absolute inset-0 w-full h-full"
-      />
-      
-      <div className="relative z-10 text-center">
-        <div className="animate-pulse mb-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/30 flex items-center justify-center mx-auto">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                </svg>
-              </div>
-            </div>
-          </div>
+    <div className="absolute bottom-0 right-0 z-[1000] w-48 h-48">
+      <div className="relative w-full h-full">
+        <canvas 
+          ref={canvasRef} 
+          className="absolute inset-0 rounded-full w-full h-full"
+        />
+        <div 
+          className="absolute top-2 right-2 z-10 p-1 bg-black/30 rounded-full hover:bg-black/50 cursor-pointer"
+          onClick={onClose}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 6L6 18"></path>
+            <path d="M6 6L18 18"></path>
+          </svg>
         </div>
-        <h3 className="text-2xl font-bold text-white animate-gradient-text shadow-glow">Listening...</h3>
-        <p className="text-purple-200 mt-2 max-w-xs mx-auto">
-          Ask Ava about Social Media Marketing. Tap anywhere to cancel.
-        </p>
       </div>
     </div>
   );
