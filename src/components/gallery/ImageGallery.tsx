@@ -1,6 +1,13 @@
 
 import React from 'react';
 import ImageDisplay from '../tabs/ImageDisplay';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/carousel";
 
 interface ImageGalleryProps {
   feedImages: { src: string; alt: string }[];

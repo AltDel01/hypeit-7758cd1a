@@ -136,6 +136,13 @@ const Index = () => {
               </div>
             </div>
           </div>
+          
+          <ImageGallery 
+            feedImages={feedImages}
+            storyImages={storyImages}
+            generatedImage={generatedImage}
+            activeTab={activeTab}
+          />
         </main>
       </div>
     </AuroraBackground>
