@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -33,8 +32,6 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     // Clear the entire canvas first
     ctx.clearRect(0, 0, width, height);
     
-    analyser.getByteFrequencyData(dataArray);
-    
     // Draw outer rings with new colors
     for (let i = 0; i < 3; i++) {
       const radius = Math.min(width, height) * (0.35 + i * 0.15);
@@ -68,63 +65,65 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
-    // Draw frequency bars evenly around the entire circle
-    const bufferLength = dataArray.length;
+    // Draw frequency wave around the circle
+    analyser.getByteFrequencyData(dataArray);
+    const totalPoints = 120; // More points for smoother wave
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
+    const step = Math.floor(dataArray.length / totalPoints);
     
-    // Important: distribute bars evenly in a FULL 360-degree pattern
-    // Use a specific number of bars to ensure even distribution
-    const totalBars = 60; // Using a fixed number for more consistent visuals
-    const step = Math.floor(bufferLength / totalBars);
+    ctx.beginPath();
     
-    for (let i = 0; i < totalBars; i++) {
-      // Get data from frequency data, evenly spaced
+    // Draw the continuous wave
+    for (let i = 0; i <= totalPoints; i++) {
       const dataIndex = i * step;
       const value = dataArray[dataIndex] / 255;
-      const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
       
-      // Calculate angle for even 360-degree distribution (0 to 2π)
-      const angle = (i / totalBars) * Math.PI * 2;
+      // Calculate angle for even 360-degree distribution
+      const angle = (i / totalPoints) * Math.PI * 2;
       
-      const x1 = centerX + Math.cos(angle) * centerRadius;
-      const y1 = centerY + Math.sin(angle) * centerRadius;
-      const x2 = centerX + Math.cos(angle) * (centerRadius + barHeight * value);
-      const y2 = centerY + Math.sin(angle) * (centerRadius + barHeight * value);
+      // Add smooth wave effect using sine wave
+      const time = Date.now() / 1000;
+      const waveOffset = Math.sin(angle * 4 + time * 2) * 0.15; // Smooth wave motion
       
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.lineWidth = 3 + value * 3;
+      const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * (value + waveOffset);
       
-      const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
-      const position = (i / totalBars); // Normalized position (0 to 1)
+      const x = centerX + Math.cos(angle) * (centerRadius + waveHeight * value);
+      const y = centerY + Math.sin(angle) * (centerRadius + waveHeight * value);
       
-      if (position < 0.33) {
-        // Soft red gradient
-        lineGradient.addColorStop(0, 'rgba(254, 207, 205, 0.9)'); // Soft red start
-        lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
-      } else if (position < 0.66) {
-        lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
+      if (i === 0) {
+        ctx.moveTo(x, y);
       } else {
-        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
-        // Soft red gradient
-        lineGradient.addColorStop(1, 'rgba(254, 207, 205, 0.9)'); // Soft red end
-      }
-      
-      ctx.strokeStyle = lineGradient;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-      
-      if (value > 0.4) {
-        ctx.shadowColor = position < 0.33 ? '#FFDEE2' : // Soft red shadow instead of white
-                         position < 0.66 ? '#8c52ff' : '#1EAEDB';
-        ctx.shadowBlur = 20;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        ctx.lineTo(x, y);
       }
     }
+    
+    // Close the path to complete the wave circle
+    ctx.closePath();
+    
+    // Create gradient for the wave
+    const waveGradient = ctx.createLinearGradient(
+      centerX - centerRadius, 
+      centerY - centerRadius,
+      centerX + centerRadius, 
+      centerY + centerRadius
+    );
+    
+    // Use soft red gradient with other colors
+    waveGradient.addColorStop(0, 'rgba(254, 207, 205, 0.8)'); // Soft red
+    waveGradient.addColorStop(0.33, 'rgba(140, 82, 255, 0.8)'); // Purple
+    waveGradient.addColorStop(0.66, 'rgba(30, 174, 219, 0.8)'); // Blue
+    waveGradient.addColorStop(1, 'rgba(254, 207, 205, 0.8)'); // Back to soft red
+    
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = waveGradient;
+    ctx.stroke();
+    
+    // Add glow effect to the wave
+    ctx.shadowColor = 'rgba(140, 82, 255, 0.5)';
+    ctx.shadowBlur = 15;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
     
     // Animate pulse effect with bigger radius
     const time = Date.now() / 1000;
