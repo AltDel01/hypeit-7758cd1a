@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -44,7 +43,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         centerX, centerY, radius
       );
       
-      gradient.addColorStop(0, `rgba(140, 82, 255, ${0.15 + i * 0.05})`); // Purple
+      gradient.addColorStop(0, `rgba(30, 174, 219, ${0.15 + i * 0.05})`); // Blue
       gradient.addColorStop(0.5, `rgba(30, 174, 219, ${0.12 + i * 0.04})`); // Blue
       gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
       
@@ -54,7 +53,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.fill();
     }
     
-    // Draw inner circle with gradient from purple to blue
+    // Draw inner circle with gradient from blue to blue
     const centerRadius = Math.min(width, height) * 0.25;
     ctx.beginPath();
     ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
@@ -62,7 +61,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX, centerY, 0,
       centerX, centerY, centerRadius
     );
-    innerGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)'); // Purple core
+    innerGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)'); // Blue core
     innerGradient.addColorStop(0.4, 'rgba(30, 174, 219, 0.7)'); // Blue middle
     innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)'); // Blue outer
     ctx.fillStyle = innerGradient;
@@ -94,9 +93,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       
       if (position < 0.33) {
         lineGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
-        lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
+        lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
       } else if (position < 0.66) {
-        lineGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
+        lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
         lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
       } else {
         lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
@@ -127,7 +126,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX + pulseRadius, centerY
     );
     pulseGradient.addColorStop(0, 'rgba(254, 247, 205, 0.7)');
-    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)');
+    pulseGradient.addColorStop(0.5, 'rgba(30, 174, 219, 0.7)');
     pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)');
     
     ctx.strokeStyle = pulseGradient;
