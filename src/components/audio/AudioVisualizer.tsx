@@ -73,13 +73,19 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
     
-    // Draw bars in a complete 360-degree pattern
-    for (let i = 0; i < bufferLength; i++) {
-      const value = dataArray[i] / 255;
+    // Important: distribute bars evenly in a FULL 360-degree pattern
+    // Use a specific number of bars to ensure even distribution
+    const totalBars = 60; // Using a fixed number for more consistent visuals
+    const step = Math.floor(bufferLength / totalBars);
+    
+    for (let i = 0; i < totalBars; i++) {
+      // Get data from frequency data, evenly spaced
+      const dataIndex = i * step;
+      const value = dataArray[dataIndex] / 255;
       const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
       
-      // Calculate angle for even 360-degree distribution
-      const angle = (i / bufferLength) * Math.PI * 2;
+      // Calculate angle for even 360-degree distribution (0 to 2π)
+      const angle = (i / totalBars) * Math.PI * 2;
       
       const x1 = centerX + Math.cos(angle) * centerRadius;
       const y1 = centerY + Math.sin(angle) * centerRadius;
@@ -92,10 +98,10 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.lineWidth = 3 + value * 3;
       
       const lineGradient = ctx.createLinearGradient(x1, y1, x2, y2);
-      const position = (Math.abs(angle) % (Math.PI * 2)) / (Math.PI * 2);
+      const position = (i / totalBars); // Normalized position (0 to 1)
       
       if (position < 0.33) {
-        // Replace any white with soft red gradient
+        // Soft red gradient
         lineGradient.addColorStop(0, 'rgba(254, 207, 205, 0.9)'); // Soft red start
         lineGradient.addColorStop(1, 'rgba(140, 82, 255, 0.9)');
       } else if (position < 0.66) {
@@ -103,7 +109,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         lineGradient.addColorStop(1, 'rgba(30, 174, 219, 0.9)');
       } else {
         lineGradient.addColorStop(0, 'rgba(30, 174, 219, 0.9)');
-        // Replace white with soft red gradient
+        // Soft red gradient
         lineGradient.addColorStop(1, 'rgba(254, 207, 205, 0.9)'); // Soft red end
       }
       

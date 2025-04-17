@@ -47,7 +47,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         width: `${dimensions.width}px`, 
         height: `${dimensions.height}px`,
         right: '50%',
-        bottom: '0rem',
+        bottom: '-1rem', // Adjusted position to lower it
         transform: 'translateX(50%)',
         pointerEvents: 'all'
       }}
