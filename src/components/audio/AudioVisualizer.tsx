@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -67,46 +68,57 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     
     // Draw frequency wave around the circle
     analyser.getByteFrequencyData(dataArray);
-    const totalPoints = 120; // More points for smoother wave
+    const totalPoints = 120; // Number of points around the circle
+    const step = Math.floor(dataArray.length / totalPoints);
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
-    const step = Math.floor(dataArray.length / totalPoints);
     
-    ctx.beginPath();
+    // First collect all wave points
+    const wavePoints = [];
     
-    // Draw the continuous wave
-    for (let i = 0; i <= totalPoints; i++) {
-      const dataIndex = i * step;
+    for (let i = 0; i < totalPoints; i++) {
+      const dataIndex = (i * step) % dataArray.length;
       const value = dataArray[dataIndex] / 255;
       
       // Calculate angle for even 360-degree distribution
       const angle = (i / totalPoints) * Math.PI * 2;
       
-      // Add smooth wave effect using sine wave
+      // Add wave effect using sine wave with time
       const time = Date.now() / 1000;
-      const waveOffset = Math.sin(angle * 4 + time * 2) * 0.15; // Smooth wave motion
+      const waveOffset = Math.sin(angle * 4 + time * 2) * 0.15; 
       
-      const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * (value + waveOffset);
+      // Ensure minimum wave height even with no sound
+      const amplifiedValue = Math.max(0.1, value);
+      const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * (amplifiedValue + waveOffset);
       
-      const x = centerX + Math.cos(angle) * (centerRadius + waveHeight * value);
-      const y = centerY + Math.sin(angle) * (centerRadius + waveHeight * value);
+      const x = centerX + Math.cos(angle) * (centerRadius + waveHeight * amplifiedValue);
+      const y = centerY + Math.sin(angle) * (centerRadius + waveHeight * amplifiedValue);
       
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
+      wavePoints.push({ x, y });
     }
     
-    // Close the path to complete the wave circle
-    ctx.closePath();
+    // Draw the continuous wave with complete loop
+    ctx.beginPath();
+    
+    // Start from the last point to ensure continuity
+    if (wavePoints.length > 0) {
+      ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
+      
+      // Draw lines to all points
+      for (let i = 1; i < wavePoints.length; i++) {
+        ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
+      }
+      
+      // Close the path by returning to the first point
+      ctx.lineTo(wavePoints[0].x, wavePoints[0].y);
+    }
     
     // Create gradient for the wave
     const waveGradient = ctx.createLinearGradient(
-      centerX - centerRadius, 
-      centerY - centerRadius,
-      centerX + centerRadius, 
-      centerY + centerRadius
+      centerX - centerRadius * 1.5, 
+      centerY - centerRadius * 1.5,
+      centerX + centerRadius * 1.5, 
+      centerY + centerRadius * 1.5
     );
     
     // Use soft red gradient with other colors
@@ -120,7 +132,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     ctx.stroke();
     
     // Add glow effect to the wave
-    ctx.shadowColor = 'rgba(140, 82, 255, 0.5)';
+    ctx.shadowColor = 'rgba(254, 207, 205, 0.5)'; // Soft red glow
     ctx.shadowBlur = 15;
     ctx.stroke();
     ctx.shadowBlur = 0;
