@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -9,6 +8,7 @@ import ImageGallery from '@/components/gallery/ImageGallery';
 import GeminiImageService from '@/services/GeminiImageService';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
+import AvaButton from '@/components/audio/AvaButton';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -133,6 +133,10 @@ const Index = () => {
                   setLinkedinText={setLinkedinText}
                   generatedImage={generatedImage}
                 />
+              </div>
+              
+              <div className="flex justify-center mt-4">
+                <AvaButton />
               </div>
             </div>
           </div>
