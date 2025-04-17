@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Mic } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 
@@ -14,7 +14,7 @@ const AvaButton: React.FC = () => {
   };
 
   return (
-    <div ref={buttonRef} className="fixed bottom-6 right-6 z-50">
+    <div ref={buttonRef} className="fixed bottom-10 right-1/2 translate-x-1/2 z-50">
       {/* Only show button animations when not listening */}
       {!isVisualizerActive && (
         <>
@@ -28,12 +28,13 @@ const AvaButton: React.FC = () => {
       {!isVisualizerActive && (
         <Button
           onClick={toggleVisualizer}
-          className="rounded-full w-20 h-20 p-0 flex items-center justify-center bg-gradient-to-br from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] hover:from-[#FFF9D8] hover:via-[#9b87f5] hover:to-[#33C3F0] animate-glow-pulse shadow-lg relative z-10"
+          className="rounded-full w-28 h-28 p-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] hover:from-[#FFF9D8] hover:via-[#9b87f5] hover:to-[#33C3F0] animate-glow-pulse shadow-lg relative z-10"
           size="icon"
         >
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex items-center justify-center animate-pulse">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex items-center justify-center">
-              <Mic className="h-7 w-7 text-white" />
+          <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex flex-col items-center justify-center animate-pulse">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex flex-col items-center justify-center gap-1">
+              <Power className="h-8 w-8 text-white" />
+              <span className="text-white text-sm font-medium">Activate Ava</span>
             </div>
           </div>
         </Button>
