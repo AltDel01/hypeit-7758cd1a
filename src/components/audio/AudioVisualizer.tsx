@@ -1,4 +1,7 @@
+
 import React, { useRef, useEffect } from 'react';
+import { createCircleGradients, createInnerGradient, createWaveGradient, createPulseGradient } from './utils/gradientUtils';
+import { calculateWavePoints, drawWave } from './utils/waveUtils';
 
 interface AudioVisualizerProps {
   analyser: AnalyserNode | null;
@@ -31,117 +34,51 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     
     ctx.clearRect(0, 0, width, height);
     
-    for (let i = 0; i < 3; i++) {
-      const radius = Math.min(width, height) * (0.35 + i * 0.15);
-      
-      const gradient = ctx.createRadialGradient(
-        centerX, centerY, radius * 0.7,
-        centerX, centerY, radius
-      );
-      
-      gradient.addColorStop(0, `rgba(140, 82, 255, ${0.15 + i * 0.05})`);
-      gradient.addColorStop(0.5, `rgba(30, 174, 219, ${0.12 + i * 0.04})`);
-      gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
-      
+    // Draw background circles with gradients
+    const circleGradients = createCircleGradients(ctx, centerX, centerY, width, height);
+    circleGradients.forEach(({ radius, gradient }) => {
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.fillStyle = gradient;
       ctx.fill();
-    }
+    });
     
+    // Draw center circle
     const centerRadius = Math.min(width, height) * 0.25;
     ctx.beginPath();
     ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
-    const innerGradient = ctx.createRadialGradient(
-      centerX, centerY, 0,
-      centerX, centerY, centerRadius
-    );
-    innerGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-    innerGradient.addColorStop(0.4, 'rgba(30, 174, 219, 0.7)');
-    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)');
+    const innerGradient = createInnerGradient(ctx, centerX, centerY, centerRadius);
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
+    // Get frequency data and draw wave
     analyser.getByteFrequencyData(dataArray);
     
     const totalPoints = 128;
-    const frequencyStep = Math.floor(dataArray.length / totalPoints);
-    
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
     const baseRadius = centerRadius;
     
-    const wavePoints = [];
-    const time = Date.now() / 1000;
-    
-    for (let i = 0; i <= totalPoints; i++) {
-      const dataIndex = (i % totalPoints) * frequencyStep;
-      if (dataIndex >= dataArray.length) continue;
-      
-      const value = dataArray[dataIndex] / 255;
-      
-      const angle = (i / totalPoints) * Math.PI * 2;
-      
-      const waveOffset = Math.sin(angle * 3 + time * 1.5) * 0.1;
-      
-      const normalizedValue = Math.max(0.15, value * 0.8 + waveOffset);
-      const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * normalizedValue;
-      
-      const x = centerX + Math.cos(angle) * (baseRadius + waveHeight);
-      const y = centerY + Math.sin(angle) * (baseRadius + waveHeight);
-      
-      wavePoints.push({ x, y });
-    }
-    
-    if (wavePoints.length > 0 && wavePoints[0].x !== wavePoints[wavePoints.length - 1].x) {
-      wavePoints.push(wavePoints[0]);
-    }
-    
-    const waveLineWidth = 15;
-    ctx.beginPath();
-    
-    if (wavePoints.length > 0) {
-      ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
-      
-      for (let i = 1; i < wavePoints.length; i++) {
-        ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
-      }
-    }
-    
-    const waveGradient = ctx.createLinearGradient(
-      centerX - centerRadius * 2, 
-      centerY - centerRadius * 2,
-      centerX + centerRadius * 2, 
-      centerY + centerRadius * 2
+    const wavePoints = calculateWavePoints(
+      dataArray,
+      totalPoints,
+      centerX,
+      centerY,
+      baseRadius,
+      maxBarHeight,
+      minBarHeight
     );
     
-    waveGradient.addColorStop(0, 'rgba(254, 207, 205, 0.9)');
-    waveGradient.addColorStop(0.33, 'rgba(140, 82, 255, 0.9)');
-    waveGradient.addColorStop(0.66, 'rgba(30, 174, 219, 0.9)');
-    waveGradient.addColorStop(1, 'rgba(254, 207, 205, 0.9)');
+    const waveGradient = createWaveGradient(ctx, centerX, centerRadius);
+    drawWave(ctx, wavePoints, waveGradient);
     
-    ctx.lineWidth = waveLineWidth;
-    ctx.strokeStyle = waveGradient;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    
-    ctx.shadowColor = 'rgba(254, 207, 205, 0.7)';
-    ctx.shadowBlur = 25;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    
+    // Draw pulse circle
+    const time = Date.now() / 1000;
     const pulseRadius = Math.min(width, height) * (0.25 + 0.07 * Math.sin(time * 2));
     ctx.beginPath();
     ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
     
-    const pulseGradient = ctx.createLinearGradient(
-      centerX - pulseRadius, centerY, 
-      centerX + pulseRadius, centerY
-    );
-    pulseGradient.addColorStop(0, 'rgba(254, 207, 205, 0.7)');
-    pulseGradient.addColorStop(0.5, 'rgba(140, 82, 255, 0.7)');
-    pulseGradient.addColorStop(1, 'rgba(30, 174, 219, 0.7)');
-    
+    const pulseGradient = createPulseGradient(ctx, centerX, centerY, pulseRadius);
     ctx.strokeStyle = pulseGradient;
     ctx.lineWidth = 3;
     ctx.stroke();
