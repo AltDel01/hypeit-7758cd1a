@@ -34,7 +34,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     
     analyser.getByteFrequencyData(dataArray);
     
-    // Draw outer rings with increased sizes
+    // Draw outer rings with new colors
     for (let i = 0; i < 3; i++) {
       const radius = Math.min(width, height) * (0.35 + i * 0.15);
       
@@ -43,8 +43,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         centerX, centerY, radius
       );
       
-      gradient.addColorStop(0, `rgba(254, 247, 205, ${0.15 + i * 0.05})`);
-      gradient.addColorStop(0.5, `rgba(140, 82, 255, ${0.12 + i * 0.04})`);
+      gradient.addColorStop(0, `rgba(140, 82, 255, ${0.15 + i * 0.05})`); // Purple
+      gradient.addColorStop(0.5, `rgba(30, 174, 219, ${0.12 + i * 0.04})`); // Blue
       gradient.addColorStop(1, 'rgba(30, 174, 219, 0)');
       
       ctx.beginPath();
@@ -53,7 +53,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ctx.fill();
     }
     
-    // Draw inner circle with increased size
+    // Draw inner circle with gradient from purple to blue
     const centerRadius = Math.min(width, height) * 0.25;
     ctx.beginPath();
     ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
@@ -61,9 +61,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       centerX, centerY, 0,
       centerX, centerY, centerRadius
     );
-    innerGradient.addColorStop(0, 'rgba(254, 247, 205, 0.9)');
-    innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.7)');
-    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)');
+    innerGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)'); // Purple core
+    innerGradient.addColorStop(0.4, 'rgba(30, 174, 219, 0.7)'); // Blue middle
+    innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)'); // Blue outer
     ctx.fillStyle = innerGradient;
     ctx.fill();
     
