@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -31,10 +30,10 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
       sourceRef.current = source;
       
       setIsListening(true);
-      toast.success("Microphone activated");
+      // Removed toast.success("Microphone activated");
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      toast.error("Could not access microphone. Please check permissions.");
+      // Removed toast.error
       onClose();
     }
   };
