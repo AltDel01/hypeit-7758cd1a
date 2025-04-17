@@ -78,7 +78,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     for (let i = 0; i < bufferLength; i++) {
       const value = dataArray[i] / 255;
       const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
-      const angle = i * barWidth;
+      
+      // This is the key fix: Calculate angle to distribute bars evenly around the full circle
+      const angle = i * (Math.PI * 2) / bufferLength;
       
       const x1 = centerX + Math.cos(angle) * centerRadius;
       const y1 = centerY + Math.sin(angle) * centerRadius;
