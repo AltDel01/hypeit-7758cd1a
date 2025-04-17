@@ -14,7 +14,7 @@ const AvaButton: React.FC = () => {
 
   return (
     <div ref={buttonRef} className="fixed bottom-6 right-6 z-50">
-      {/* Outer animated rings - only visible when not active */}
+      {/* Only show button animations when not listening */}
       {!isVisualizerActive && (
         <>
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FEF7CD]/40 via-[#8c52ff]/30 to-[#1EAEDB]/20 animate-outer-pulse"></div>
@@ -23,6 +23,7 @@ const AvaButton: React.FC = () => {
         </>
       )}
       
+      {/* Only show button when not listening */}
       {!isVisualizerActive && (
         <Button
           onClick={toggleVisualizer}
@@ -37,6 +38,7 @@ const AvaButton: React.FC = () => {
         </Button>
       )}
 
+      {/* Always render the visualizer component, its visibility is controlled internally */}
       <MicrophoneVisualizer 
         isActive={isVisualizerActive} 
         onClose={() => setIsVisualizerActive(false)}

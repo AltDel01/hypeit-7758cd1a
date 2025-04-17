@@ -33,23 +33,32 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
     };
   }, [containerRef]);
 
+  // Debug logging to check if isActive and isListening are working correctly
+  useEffect(() => {
+    console.log("MicrophoneVisualizer - isActive:", isActive, "isListening:", isListening);
+    console.log("Analyser available:", !!analyser, "DataArray available:", !!dataArray);
+  }, [isActive, isListening, analyser, dataArray]);
+
   if (!isActive) {
     return null;
   }
 
   return (
     <div 
-      className="absolute -inset-[100%] flex items-center justify-center"
+      className="absolute z-50 inset-0 flex items-center justify-center"
       onClick={onClose}
+      style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full" />
       
-      <AudioVisualizer
-        analyser={analyser}
-        dataArray={dataArray}
-        width={dimensions.width}
-        height={dimensions.height}
-      />
+      {analyser && dataArray && (
+        <AudioVisualizer
+          analyser={analyser}
+          dataArray={dataArray}
+          width={dimensions.width}
+          height={dimensions.height}
+        />
+      )}
       
       <div className="relative z-10 text-center">
         <h3 className="text-2xl font-bold text-white animate-gradient-text shadow-glow">Listening...</h3>

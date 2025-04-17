@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -10,9 +11,11 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
   const [isListening, setIsListening] = useState(false);
 
   const startMicrophone = async () => {
+    console.log("Starting microphone...");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+      console.log("Microphone stream acquired successfully");
 
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
@@ -30,15 +33,15 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
       sourceRef.current = source;
       
       setIsListening(true);
-      // Removed toast.success("Microphone activated");
+      console.log("Audio visualization setup complete");
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      // Removed toast.error
       onClose();
     }
   };
 
   const stopMicrophone = () => {
+    console.log("Stopping microphone...");
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -53,9 +56,11 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
     sourceRef.current = null;
     analyserRef.current = null;
     dataArrayRef.current = null;
+    console.log("Microphone stopped and resources cleaned up");
   };
 
   useEffect(() => {
+    console.log("useAudioVisualization effect - isActive changed to:", isActive);
     if (isActive && !isListening) {
       startMicrophone();
     } else if (!isActive && isListening) {
@@ -63,9 +68,11 @@ export const useAudioVisualization = (isActive: boolean, onClose: () => void) =>
     }
     
     return () => {
-      stopMicrophone();
+      if (isListening) {
+        stopMicrophone();
+      }
     };
-  }, [isActive]);
+  }, [isActive, isListening]);
 
   return {
     isListening,

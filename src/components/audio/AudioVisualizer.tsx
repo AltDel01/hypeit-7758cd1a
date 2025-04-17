@@ -19,7 +19,10 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
   const drawVisualizer = () => {
     const canvas = canvasRef.current;
-    if (!canvas || !analyser || !dataArray) return;
+    if (!canvas || !analyser || !dataArray) {
+      console.log("Missing required elements for visualization");
+      return;
+    }
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -134,11 +137,14 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   };
 
   useEffect(() => {
+    console.log("AudioVisualizer - Setting up animation frame");
     if (analyser && dataArray) {
+      console.log("Starting visualizer animation");
       drawVisualizer();
     }
     
     return () => {
+      console.log("Cleaning up animation frame");
       if (requestAnimationRef.current) {
         cancelAnimationFrame(requestAnimationRef.current);
       }
@@ -150,7 +156,12 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       ref={canvasRef}
       width={width}
       height={height}
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0"
+      style={{ 
+        width: `${width}px`,
+        height: `${height}px`,
+        zIndex: 20 
+      }}
     />
   );
 };
