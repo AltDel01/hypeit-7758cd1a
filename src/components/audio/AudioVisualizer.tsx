@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 
 interface AudioVisualizerProps {
@@ -73,6 +74,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     const maxBarHeight = Math.min(width, height) * 0.35;
     const minBarHeight = Math.min(width, height) * 0.15;
     
+    // Draw bars in a complete 360-degree pattern
     for (let i = 0; i < bufferLength; i++) {
       const value = dataArray[i] / 255;
       const barHeight = minBarHeight + (maxBarHeight - minBarHeight) * value;
