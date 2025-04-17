@@ -59,7 +59,7 @@ export default function Signup() {
         <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-8 bg-black/70 backdrop-blur-sm border border-gray-800 rounded-xl shadow-lg">
-            <h1 className="text-2xl font-bold text-white mb-6 text-center">Sign up for If Viral</h1>
+            <h1 className="text-2xl font-bold text-white mb-6 text-center">Sign up for HypeIt</h1>
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, Star, TrendingUp, User } from 'lucide-react';
@@ -13,7 +12,7 @@ const FooterMenu = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#8c52ff] border-t border-purple-700 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#7a45e6] border-t border-purple-700 md:hidden">
       <nav className="flex justify-around items-center h-16">
         <Link 
           to="/" 
