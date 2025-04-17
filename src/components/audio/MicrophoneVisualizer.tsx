@@ -21,7 +21,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const size = Math.min(containerRef.current.offsetWidth * 2, 240); // Reduced size
+        const size = Math.min(containerRef.current.offsetWidth * 1.8, 180); // Reduced size more
         setDimensions({ width: size, height: size });
         console.log("Updated visualizer dimensions to:", size);
       }
@@ -46,8 +46,8 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       style={{ 
         width: `${dimensions.width}px`, 
         height: `${dimensions.height}px`,
-        right: '2rem',
-        bottom: '2rem',
+        right: '1rem',
+        bottom: '6rem', // Position it higher to match the arrow in the image
         pointerEvents: 'all'
       }}
     >      
@@ -61,7 +61,11 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       )}
       
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-        <Mic className="w-8 h-8 text-white animate-pulse" strokeWidth={3} />
+        <Mic 
+          className="w-8 h-8 text-white animate-pulse" 
+          strokeWidth={3}
+          style={{ filter: "drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.7))" }} // Add glow effect to make it more visible
+        />
       </div>
     </div>
   );
