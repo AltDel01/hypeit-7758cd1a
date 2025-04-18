@@ -28,7 +28,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gray-900 border border-gray-800 max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white text-center">Choose a Plan to Access {feature}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white text-center">Want to Fully Experience your AI Social Media Specialist?</DialogTitle>
           <DialogDescription className="text-gray-400 mt-2 text-center">
             Select the plan that best fits your needs
           </DialogDescription>
@@ -56,7 +56,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-300">1 page generated moodboard</span>
+                <span className="text-sm text-gray-300">Free 1 page generated moodboard</span>
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
@@ -100,7 +100,11 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-300">15 pages brand identity/month</span>
+                <span className="text-sm text-gray-300">15 pages of full package brand identity per month</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Access to consult with Ava</span>
               </li>
             </ul>
             
@@ -116,7 +120,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
           <div className="relative p-6 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm">
             <h3 className="text-xl font-semibold text-white mb-2">Pro</h3>
             <div className="text-3xl font-bold text-white mb-4">$25<span className="text-lg text-gray-400">/mo</span></div>
-            <p className="text-sm text-gray-400 mb-6">For professional content creators</p>
+            <p className="text-sm text-gray-400 mb-6">For Businesses that Need High Conversion</p>
             
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
@@ -129,15 +133,27 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-300">All Starter features</span>
+                <span className="text-sm text-gray-300">Free Generated Logo</span>
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-300">Full virality strategy</span>
+                <span className="text-sm text-gray-300">Free Color Psychology</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                <span className="text-sm text-gray-300">15 pages of full package brand identity per month</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Full package of virality strategy</span>
               </li>
               <li className="flex items-start">
                 <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
                 <span className="text-sm text-gray-300">Social media analytics</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Access to consult with Ava</span>
               </li>
             </ul>
             
@@ -155,3 +171,4 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
 };
 
 export default PremiumFeatureModal;
+
