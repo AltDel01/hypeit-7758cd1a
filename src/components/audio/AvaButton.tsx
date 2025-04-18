@@ -1,25 +1,40 @@
 
-import React, { useState, useRef } from 'react';
-import { Power } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Power, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useElevenLabsAgent } from '@/hooks/useElevenLabsAgent';
 
 const AvaButton: React.FC = () => {
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { startConversation, endConversation, isSpeaking, status } = useElevenLabsAgent();
 
-  const handleButtonClick = () => {
+  useEffect(() => {
+    return () => {
+      if (isVisualizerActive) {
+        endConversation();
+      }
+    };
+  }, [isVisualizerActive]);
+
+  const handleButtonClick = async () => {
     if (!user) {
       toast.error('Please sign in to talk with Ava');
       navigate('/login');
       return;
     }
     
+    if (!isVisualizerActive) {
+      await startConversation();
+    } else {
+      await endConversation();
+    }
     toggleVisualizer();
   };
 
@@ -48,8 +63,14 @@ const AvaButton: React.FC = () => {
         >
           <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex flex-col items-center justify-center animate-pulse">
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex flex-col items-center justify-center gap-1">
-              <Power className="h-8 w-8 text-white" />
-              <span className="text-white text-sm font-medium">Activate Ava</span>
+              {status === "connected" ? (
+                <MicOff className="h-8 w-8 text-white animate-pulse" />
+              ) : (
+                <Power className="h-8 w-8 text-white" />
+              )}
+              <span className="text-white text-sm font-medium">
+                {status === "connected" ? "Stop Ava" : "Activate Ava"}
+              </span>
             </div>
           </div>
         </Button>
@@ -60,6 +81,7 @@ const AvaButton: React.FC = () => {
         isActive={isVisualizerActive} 
         onClose={() => {
           console.log("Closing visualizer");
+          endConversation();
           setIsVisualizerActive(false);
         }}
         containerRef={buttonRef}
