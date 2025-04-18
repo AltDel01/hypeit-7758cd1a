@@ -8,7 +8,7 @@ const DashboardHeader = () => {
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
       <div>
         <h1 className="text-3xl font-bold mb-1 text-white">Dashboard</h1>
-        <p className="text-gray-400">Welcome back! Here's an overview of your BrandGen activity.</p>
+        <p className="text-gray-400">Welcome back! Here's an overview of your HYPEIT activity.</p>
       </div>
       <div className="mt-4 md:mt-0 flex space-x-3">
         <Button variant="outline" className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
