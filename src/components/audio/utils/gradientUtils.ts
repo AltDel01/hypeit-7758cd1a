@@ -52,9 +52,9 @@ export const createInnerGradient = (
     centerX, centerY, centerRadius
   );
   
-  innerGradient.addColorStop(0, 'rgba(140, 82, 255, 0.9)');
-  innerGradient.addColorStop(0.4, 'rgba(30, 174, 219, 0.7)');
-  innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)');
+  innerGradient.addColorStop(0, 'rgba(234, 56, 76, 0.9)');  // Red shade
+  innerGradient.addColorStop(0.4, 'rgba(140, 82, 255, 0.7)'); // Purple
+  innerGradient.addColorStop(0.8, 'rgba(30, 174, 219, 0.5)'); // Blue shade
   
   return innerGradient;
 };
