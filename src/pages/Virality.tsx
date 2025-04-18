@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
@@ -26,7 +25,7 @@ const Virality = () => {
         <Navbar />
         <main className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-0 relative z-10">
           {/* Main content area - 3/5 width */}
-          <div className="col-span-3 p-8 border-r border-gray-800">
+          <div className="col-span-3 p-8">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Boost Your Content Virality</h1>
               <p className="text-gray-400 mb-8">
@@ -86,7 +85,7 @@ const Virality = () => {
                         onClick={handleCreateStrategy}
                       >
                         <ArrowUp className="mr-2 h-4 w-4" />
-                        Create Virality Strategy
+                        Create Virality Strategy 💎
                       </Button>
                     </div>
                   </div>
