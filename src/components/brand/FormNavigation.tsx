@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Diamond } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 interface FormNavigationProps {
@@ -61,7 +61,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
         >
           {step === 3 ? (
             <>
-              Create Full Brand Identity 
+              Create Full Brand Identity 💎
             </>
           ) : (
             'Next'
@@ -73,7 +73,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6] px-6"
           onClick={handleSubmit}
         >
-          Create Full Brand Identity 💎
+          Generate Brand Identity
         </Button>
       )}
     </div>
