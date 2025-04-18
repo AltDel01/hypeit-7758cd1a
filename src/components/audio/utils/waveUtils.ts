@@ -1,4 +1,3 @@
-
 interface WavePoint {
   x: number;
   y: number;
@@ -17,44 +16,46 @@ export const calculateWavePoints = (
   const wavePoints: WavePoint[] = [];
   const time = Date.now() / 1000;
   
-  // Create smoother transitions between frequencies
+  // Create smoother transitions between frequencies with more emphasis on audio input
   const smoothedData = new Float32Array(totalPoints);
   for (let i = 0; i < totalPoints; i++) {
     const dataIndex = i * frequencyStep;
     if (dataIndex >= dataArray.length) continue;
     
-    // Apply smoothing by averaging neighboring values
+    // Enhanced smoothing by considering more neighboring values
     const prevIndex = Math.max(0, dataIndex - frequencyStep);
     const nextIndex = Math.min(dataArray.length - 1, dataIndex + frequencyStep);
-    smoothedData[i] = (
-      dataArray[prevIndex] + 
-      dataArray[dataIndex] * 2 + 
-      dataArray[nextIndex]
-    ) / 4 / 255;
+    const prevValue = dataArray[prevIndex];
+    const currentValue = dataArray[dataIndex];
+    const nextValue = dataArray[nextIndex];
+    
+    // Increase audio reactivity by giving more weight to the current value
+    smoothedData[i] = (prevValue + currentValue * 3 + nextValue) / 5 / 255;
   }
   
   for (let i = 0; i <= totalPoints; i++) {
     const angle = (i / totalPoints) * Math.PI * 2;
     
-    // Slower wave movement by reducing time multipliers
-    const waveTimeOffset = Math.sin(angle * 2 + time * 0.5) * 0.1;
-    const secondaryWave = Math.cos(angle * 3 + time * 0.3) * 0.05;
+    // Create evenly distributed wave patterns
+    const waveTimeOffset = Math.sin(angle * 3 + time * 0.5) * 0.15;
+    const secondaryWave = Math.cos(angle * 4 + time * 0.3) * 0.1;
+    const tertiaryWave = Math.sin(angle * 2 + time * 0.4) * 0.08;
     
     // Get smoothed value with wraparound
     const dataIndex = i % totalPoints;
     const value = smoothedData[dataIndex];
     
-    // Combine base value with wave offsets for more relaxed movement
+    // Enhanced wave combination for more wobbliness
     const normalizedValue = Math.max(
       0.2,
-      value * 0.7 + waveTimeOffset + secondaryWave
+      value * 0.8 + waveTimeOffset + secondaryWave + tertiaryWave
     );
     
-    // Calculate wave height with smooth transitions
+    // Calculate wave height with increased responsiveness
     const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * normalizedValue;
     
-    // Reduce jitter for a calmer wave
-    const jitter = Math.sin(time * 3 + angle * 4) * 1;
+    // More dynamic jitter based on audio input
+    const jitter = Math.sin(time * 3 + angle * 4) * (1 + value * 2);
     
     const x = centerX + Math.cos(angle) * (baseRadius + waveHeight + jitter);
     const y = centerY + Math.sin(angle) * (baseRadius + waveHeight + jitter);
