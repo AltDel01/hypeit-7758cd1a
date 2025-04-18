@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
@@ -11,12 +10,14 @@ interface FontSelectorProps {
   onSelectFont: (font: string) => void;
 }
 
-// Organized fonts by categories
+// Extended font options with more categories and fonts
 const fontOptions = {
   'Popular Fonts': [
     { name: 'Inter', displayName: 'Inter', category: 'Sans-serif', example: 'Modern, clean and professional' },
     { name: 'Playfair Display', displayName: 'Playfair', category: 'Serif', example: 'Elegant, sophisticated and timeless' },
     { name: 'Montserrat', displayName: 'Montserrat', category: 'Sans-serif', example: 'Contemporary, geometric and versatile' },
+    { name: 'Raleway', displayName: 'Raleway', category: 'Sans-serif', example: 'Modern, minimal and stylish' },
+    { name: 'Lato', displayName: 'Lato', category: 'Sans-serif', example: 'Friendly and natural' },
   ],
   'Sans Serif': [
     { name: 'Roboto', displayName: 'Roboto', example: 'Neutral, friendly and approachable' },
@@ -30,21 +31,33 @@ const fontOptions = {
     { name: 'Lora', displayName: 'Lora', example: 'Classic, editorial and sophisticated' },
     { name: 'Source Serif Pro', displayName: 'Source Serif', example: 'Refined, classic and readable' },
     { name: 'Crimson Text', displayName: 'Crimson', example: 'Traditional, elegant and literary' },
+    { name: 'Libre Baskerville', displayName: 'Libre Baskerville', example: 'Classic, sophisticated and readable' },
+    { name: 'Cormorant Garamond', displayName: 'Cormorant', example: 'Elegant, light and delicate' },
+    { name: 'Spectral', displayName: 'Spectral', example: 'Modern interpretation of old-style fonts' },
   ],
   'Display': [
     { name: 'Abril Fatface', displayName: 'Abril Fatface', example: 'Bold, dramatic and elegant' },
     { name: 'Lobster', displayName: 'Lobster', example: 'Playful, bold and decorative' },
     { name: 'Pacifico', displayName: 'Pacifico', example: 'Friendly, casual and handwritten' },
     { name: 'Comfortaa', displayName: 'Comfortaa', example: 'Modern, geometric and friendly' },
+    { name: 'Righteous', displayName: 'Righteous', example: 'Bold, modern and geometric' },
+    { name: 'Abril Fatface', displayName: 'Abril Fatface', example: 'Elegant display with high contrast' },
+    { name: 'Permanent Marker', displayName: 'Permanent Marker', example: 'Casual, handwritten style' },
   ],
   'Monospace': [
     { name: 'Fira Code', displayName: 'Fira Code', example: 'Clean, precise and technical' },
     { name: 'Source Code Pro', displayName: 'Source Code', example: 'Clear, structured and technical' },
     { name: 'JetBrains Mono', displayName: 'JetBrains Mono', example: 'Modern, clear and technical' },
-  ]
+  ],
+  'Handwriting': [
+    { name: 'Dancing Script', displayName: 'Dancing Script', example: 'Lively, dancing letterforms' },
+    { name: 'Great Vibes', displayName: 'Great Vibes', example: 'Elegant calligraphy style' },
+    { name: 'Satisfy', displayName: 'Satisfy', example: 'Casual script with a personal touch' },
+    { name: 'Pacifico', displayName: 'Pacifico', example: 'Fun and friendly script' },
+  ],
 };
 
-// Add font links
+// Extended font links array
 const fontLinks = [
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
@@ -65,6 +78,16 @@ const fontLinks = [
   'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap',
   'https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap',
   'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Righteous&display=swap',
+  'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap',
+  'https://fonts.googleapis.com/css2?family=Satisfy&display=swap',
+  'https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap',
 ];
 
 const FontSelector: React.FC<FontSelectorProps> = ({ selectedFont, onSelectFont }) => {
