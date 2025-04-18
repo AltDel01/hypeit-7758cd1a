@@ -72,7 +72,15 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4 text-white">Brand Visuals</h2>
+      <h2 className="text-xl font-semibold mb-4 text-white flex items-center">
+        Brand Visuals 
+        <Diamond 
+          className="ml-2 h-5 w-5" 
+          fill="#1EAEDB" 
+          stroke="#1EAEDB" 
+          strokeWidth={1} 
+        />
+      </h2>
       
       <div className="max-w-xs mx-auto sm:mx-0">
         <ImageUploader
