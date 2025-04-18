@@ -72,7 +72,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           <Button 
             type="button" 
             className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6] px-6"
-            onClick={handleSubmit}
+            onClick={onSubmit}
           >
             Generate Brand Identity 💎
           </Button>
