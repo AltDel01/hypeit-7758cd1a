@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
-import { ArrowUp, ChevronRight } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 
 const Virality = () => {
   const [showForm, setShowForm] = useState(false);
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
+  const { showPremiumModal, selectedFeature, checkPremiumFeature, closePremiumModal } = usePremiumFeature();
 
   const handleCreateStrategy = () => {
     if (!isAuthorized) {
@@ -16,7 +19,9 @@ const Virality = () => {
       return;
     }
     
-    setShowForm(true);
+    if (checkPremiumFeature('Virality Strategy')) {
+      setShowForm(true);
+    }
   };
 
   return (
@@ -186,6 +191,12 @@ const Virality = () => {
             </div>
           </div>
         </main>
+
+        <PremiumFeatureModal 
+          isOpen={showPremiumModal}
+          onClose={closePremiumModal}
+          feature={selectedFeature}
+        />
       </div>
     </AuroraBackground>
   );

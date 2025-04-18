@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 
 interface FormNavigationProps {
   step: number;
@@ -21,12 +23,21 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
   isSubmitStep
 }) => {
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
+  const { checkPremiumFeature } = usePremiumFeature();
 
   const handleNext = () => {
     if (!isAuthorized) {
       redirectToSignup();
       return;
     }
+
+    if (step === 3) {
+      if (checkPremiumFeature('Brand Identity Package')) {
+        onNext();
+      }
+      return;
+    }
+
     onNext();
   };
   
@@ -35,8 +46,11 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
       redirectToSignup();
       return;
     }
-    if (onSubmit) {
-      onSubmit();
+
+    if (checkPremiumFeature('Brand Identity Generation')) {
+      if (onSubmit) {
+        onSubmit();
+      }
     }
   };
 
@@ -60,9 +74,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6]"
         >
           {step === 3 ? (
-            <>
-              Create Full Brand Identity 💎
-            </>
+            <>Create Full Brand Identity 💎</>
           ) : (
             'Next'
           )}
@@ -73,7 +85,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6] px-6"
           onClick={handleSubmit}
         >
-          Generate Brand Identity
+          Generate Brand Identity 💎
         </Button>
       )}
     </div>
