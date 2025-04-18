@@ -65,9 +65,9 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
               Create Full Brand Identity 
               <Diamond 
                 className="ml-2 h-4 w-4" 
-                fill="#1EAEDB" 
-                stroke="#1EAEDB" 
-                strokeWidth={1} 
+                fill="white" 
+                stroke="white" 
+                opacity={0.5} 
               />
             </>
           ) : (
@@ -80,7 +80,13 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6] px-6"
           onClick={handleSubmit}
         >
-          Create Full Brand Identity <Diamond className="ml-2 h-4 w-4" fill="#1EAEDB" stroke="#1EAEDB" strokeWidth={1} />
+          Create Full Brand Identity 
+          <Diamond 
+            className="ml-2 h-4 w-4" 
+            fill="white" 
+            stroke="white" 
+            opacity={0.5} 
+          />
         </Button>
       )}
     </div>
