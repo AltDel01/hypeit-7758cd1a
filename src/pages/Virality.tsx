@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
