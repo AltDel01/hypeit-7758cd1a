@@ -74,18 +74,16 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4 text-white">Brand Visuals</h2>
       
-      <div>
-        <div className="max-w-xs mx-auto sm:mx-0">
-          <ImageUploader
-            id="logo-upload"
-            label="Upload Logo"
-            icon={<Upload className="h-5 w-5" />}
-            onChange={handleLogoUpload}
-            image={brandLogo}
-            onRemoveImage={() => setBrandLogo(null)}
-            className="h-full"
-          />
-        </div>
+      <div className="max-w-xs mx-auto sm:mx-0">
+        <ImageUploader
+          id="logo-upload"
+          label="Upload Logo"
+          icon={<Upload className="h-5 w-5" />}
+          onChange={handleLogoUpload}
+          image={brandLogo}
+          onRemoveImage={() => setBrandLogo(null)}
+          className="h-full"
+        />
       </div>
       
       <div className="mt-6">
@@ -132,7 +130,7 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
 
       <div className="flex gap-4 mt-8">
         <Button 
-          variant="purple" 
+          variant="newPurple" 
           className="flex-1"
           onClick={handleGenerateMoodboard}
         >
