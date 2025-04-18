@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MediaTabContent from './MediaTabContent';
 import XPostForm from '@/components/social/XPostForm';
 import LinkedInPostForm from '@/components/social/LinkedInPostForm';
+import BlogPostForm from '@/components/social/BlogPostForm';
 import { ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -135,7 +136,7 @@ const TabsContainer = ({
       return (
         <div className="rounded-md border border-gray-700 p-4 bg-gray-900">
           <h2 className="text-lg font-bold text-white mb-4">Generate Your Blog Post</h2>
-          <p className="text-gray-400 text-center">Blog post generation coming soon</p>
+          <BlogPostForm onGeneratePost={(text) => console.log('Blog post generated:', text)} />
         </div>
       );
     }
