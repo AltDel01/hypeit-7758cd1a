@@ -20,7 +20,10 @@
   }
   
   input:focus, textarea:focus {
-    box-shadow: 0 0 5px rgba(140, 82, 255, 0.5);
+    box-shadow: none !important;
+    border-color: #8c52ff !important;
+    outline: none !important;
+    ring: 0 !important;
   }
   
   /* Animation pause on hover */

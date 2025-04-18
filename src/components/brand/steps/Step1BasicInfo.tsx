@@ -36,7 +36,7 @@ const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
               <Input 
                 placeholder="Enter your business name" 
                 {...field} 
-                className="bg-gray-800 border-gray-700 text-white focus:ring-purple-500 focus:border-purple-500 focus:ring-2"
+                className="bg-gray-800 border-gray-700 text-white outline-none focus:border-[#8c52ff] focus:outline-none"
               />
             </FormControl>
             <FormMessage />
