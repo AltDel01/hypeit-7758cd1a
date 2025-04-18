@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Diamond } from 'lucide-react';
@@ -64,9 +65,9 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
               Create Full Brand Identity 
               <Diamond 
                 className="ml-2 h-4 w-4" 
-                fill="#00A3FF" 
-                stroke="white" 
-                strokeWidth={1.5} 
+                fill="#1EAEDB" 
+                stroke="#1EAEDB" 
+                strokeWidth={1} 
               />
             </>
           ) : (
@@ -79,7 +80,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6] px-6"
           onClick={handleSubmit}
         >
-          Create Full Brand Identity <Diamond className="ml-2 h-4 w-4" />
+          Create Full Brand Identity <Diamond className="ml-2 h-4 w-4" fill="#1EAEDB" stroke="#1EAEDB" strokeWidth={1} />
         </Button>
       )}
     </div>
