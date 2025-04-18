@@ -3,10 +3,25 @@ import React, { useState, useRef } from 'react';
 import { Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const AvaButton: React.FC = () => {
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    if (!user) {
+      toast.error('Please sign in to talk with Ava');
+      navigate('/login');
+      return;
+    }
+    
+    toggleVisualizer();
+  };
 
   const toggleVisualizer = () => {
     setIsVisualizerActive(prev => !prev);
@@ -27,7 +42,7 @@ const AvaButton: React.FC = () => {
       {/* Increase the button size when not listening */}
       {!isVisualizerActive && (
         <Button
-          onClick={toggleVisualizer}
+          onClick={handleButtonClick}
           className="rounded-full w-28 h-28 p-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] hover:from-[#FFF9D8] hover:via-[#9b87f5] hover:to-[#33C3F0] animate-glow-pulse shadow-lg relative z-10"
           size="icon"
         >
