@@ -36,16 +36,16 @@ export const calculateWavePoints = (
   for (let i = 0; i <= totalPoints; i++) {
     const angle = (i / totalPoints) * Math.PI * 2;
     
-    // Create evenly distributed wave patterns
-    const waveTimeOffset = Math.sin(angle * 3 + time * 0.5) * 0.15;
-    const secondaryWave = Math.cos(angle * 4 + time * 0.3) * 0.1;
-    const tertiaryWave = Math.sin(angle * 2 + time * 0.4) * 0.08;
+    // Increase wave wobbliness by adding more wave patterns with higher amplitudes
+    const waveTimeOffset = Math.sin(angle * 3 + time * 0.5) * 0.25;
+    const secondaryWave = Math.cos(angle * 4 + time * 0.3) * 0.2;
+    const tertiaryWave = Math.sin(angle * 2 + time * 0.4) * 0.15;
     
     // Get smoothed value with wraparound
     const dataIndex = i % totalPoints;
     const value = smoothedData[dataIndex];
     
-    // Enhanced wave combination for more wobbliness
+    // Enhanced wave combination for more dramatic wobbliness
     const normalizedValue = Math.max(
       0.2,
       value * 0.8 + waveTimeOffset + secondaryWave + tertiaryWave
@@ -54,8 +54,8 @@ export const calculateWavePoints = (
     // Calculate wave height with increased responsiveness
     const waveHeight = minBarHeight + (maxBarHeight - minBarHeight) * normalizedValue;
     
-    // More dynamic jitter based on audio input
-    const jitter = Math.sin(time * 3 + angle * 4) * (1 + value * 2);
+    // More dramatic jitter effect
+    const jitter = Math.sin(time * 3 + angle * 4) * (2 + value * 4);
     
     const x = centerX + Math.cos(angle) * (baseRadius + waveHeight + jitter);
     const y = centerY + Math.sin(angle) * (baseRadius + waveHeight + jitter);
