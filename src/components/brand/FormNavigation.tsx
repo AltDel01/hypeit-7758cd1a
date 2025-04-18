@@ -63,7 +63,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
             <>
               Create Full Brand Identity 
               <Diamond 
-                className="ml-2 h-4 w-4 text-[#00A3FF]" 
+                className="ml-2 h-4 w-4" 
                 fill="#00A3FF" 
                 stroke="white" 
                 strokeWidth={1.5} 
