@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/stable-diffusion/ImageUploader';
-import { Upload, Plus, Image, Diamond } from 'lucide-react';
+import { Upload, Plus, Diamond } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface Step3VisualsProps {
@@ -31,10 +31,8 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
   
   const handleMultiplePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // Convert FileList to Array to access forEach
       const filesArray = Array.from(e.target.files);
       
-      // Check file size and type
       filesArray.forEach(file => {
         if (file.size > 10 * 1024 * 1024) { // 10MB limit
           toast({
@@ -77,7 +75,6 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
       <h2 className="text-xl font-semibold mb-4 text-white">Brand Visuals</h2>
       
       <div>
-        <FormLabel className="block mb-2 text-white">Upload Logo (Optional)</FormLabel>
         <div className="max-w-xs mx-auto sm:mx-0">
           <ImageUploader
             id="logo-upload"
@@ -135,8 +132,8 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
 
       <div className="flex gap-4 mt-8">
         <Button 
-          variant="outline" 
-          className="flex-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+          variant="purple" 
+          className="flex-1"
           onClick={handleGenerateMoodboard}
         >
           Generate Moodboard
