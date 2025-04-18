@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, FileDown } from 'lucide-react';
+import { ArrowLeft, Diamond } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 interface FormNavigationProps {
@@ -24,14 +24,10 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
   const { isAuthorized, redirectToSignup } = useAuthRedirect(false);
 
   const handleNext = () => {
-    // Save form state in localStorage if needed
-    localStorage.setItem('lastBrandIdentityStep', step.toString());
-    
     if (!isAuthorized) {
       redirectToSignup();
       return;
     }
-    
     onNext();
   };
   
@@ -40,7 +36,6 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
       redirectToSignup();
       return;
     }
-    
     if (onSubmit) {
       onSubmit();
     }
@@ -65,15 +60,15 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           onClick={handleNext}
           className="ml-auto bg-[#8c52ff] hover:bg-[#7a45e6]"
         >
-          Next <ArrowRight className="ml-2 h-4 w-4" />
+          Next
         </Button>
       ) : (
         <Button 
           type="button" 
-          className="ml-auto bg-green-600 hover:bg-green-700"
+          className="ml-auto bg-green-600 hover:bg-green-700 px-6"
           onClick={handleSubmit}
         >
-          Generate Brand Identity <FileDown className="ml-2 h-4 w-4" />
+          Create Full Brand Identity <Diamond className="ml-2 h-4 w-4" />
         </Button>
       )}
     </div>

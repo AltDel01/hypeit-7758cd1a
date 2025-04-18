@@ -1,9 +1,8 @@
-
 import React, { useRef } from 'react';
 import { FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/stable-diffusion/ImageUploader';
-import { Upload, Plus, Image } from 'lucide-react';
+import { Upload, Plus, Image, Diamond } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface Step3VisualsProps {
@@ -66,12 +65,19 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
     }
   };
 
+  const handleGenerateMoodboard = () => {
+    toast({
+      title: "Coming Soon",
+      description: "The moodboard generator will be available soon!",
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4">Brand Visuals</h2>
+      <h2 className="text-xl font-semibold mb-4 text-white">Brand Visuals</h2>
       
       <div>
-        <FormLabel className="block mb-2">Upload Logo (Optional)</FormLabel>
+        <FormLabel className="block mb-2 text-white">Upload Logo (Optional)</FormLabel>
         <div className="max-w-xs mx-auto sm:mx-0">
           <ImageUploader
             id="logo-upload"
@@ -86,7 +92,7 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
       </div>
       
       <div className="mt-6">
-        <FormLabel className="block mb-2">Upload Product Photos</FormLabel>
+        <FormLabel className="block mb-2 text-white">Upload Product Photos</FormLabel>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
           {productPhotos.map((photo, index) => (
@@ -125,6 +131,16 @@ const Step3Visuals: React.FC<Step3VisualsProps> = ({
             <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
           </div>
         </div>
+      </div>
+
+      <div className="flex gap-4 mt-8">
+        <Button 
+          variant="outline" 
+          className="flex-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+          onClick={handleGenerateMoodboard}
+        >
+          Generate Moodboard
+        </Button>
       </div>
     </div>
   );
