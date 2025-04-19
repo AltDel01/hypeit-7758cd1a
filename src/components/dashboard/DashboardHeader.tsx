@@ -7,8 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardHeader = () => {
   const { user } = useAuth();
-  // In a real app, you would check user roles
-  const isAdmin = !!user; // For demo purposes, all logged-in users are admins
+  // Only show admin button for the specific email
+  const isAdmin = user?.email === 'putra.ekadarma@gmail.com';
   
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">

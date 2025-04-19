@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -78,8 +77,12 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Simulating admin check - in a real app, you would check user roles
-  const isAdmin = true; // For demo purposes, everyone is an admin
+  // Check if user has admin access
+  const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com';
+
+  if (!user || !hasAdminAccess) {
+    return <Navigate to="/" replace />;
+  }
 
   // Filter requests based on active tab
   const filteredRequests = requests.filter(request => {
@@ -217,10 +220,6 @@ const Admin = () => {
         return null;
     }
   };
-
-  if (!user || !isAdmin) {
-    return <Navigate to="/login" replace />;
-  }
 
   return (
     <AuroraBackground>
