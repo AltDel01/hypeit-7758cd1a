@@ -11,11 +11,8 @@ export async function useFallbackImage(prompt: string, aspectRatio: string): Pro
   toast.info("Using alternative image source", { id: "fallback-image" });
   
   try {
-    // Generate a more tailored fallback based on aspect ratio
-    const imageSize = aspectRatio === "9:16" ? "800x1400" : "800x800";
-    
     // Generate and dispatch the fallback image
-    generateFallbackImage(prompt, imageSize);
+    await generateFallbackImage(prompt);
   } catch (error) {
     handleFallbackError(error, prompt);
   }
@@ -31,3 +28,4 @@ export function handleFallbackError(error: any, prompt: string): void {
   const emergencyFallback = "https://source.unsplash.com/featured/800x800/?product";
   dispatchImageGeneratedEvent(emergencyFallback, prompt);
 }
+

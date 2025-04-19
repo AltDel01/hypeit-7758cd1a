@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { dispatchImageGeneratedEvent } from './imageEvents';
 
@@ -45,16 +44,19 @@ export const getFallbackImage = async (
 };
 
 /**
- * Uses a fallback image when the AI image generation fails
+ * Generates a fallback image using the getFallbackImage method
  */
-export const useFallbackImage = (prompt: string, aspectRatio: string = "1:1"): void => {
-  getFallbackImage(prompt, aspectRatio)
-    .then(imageUrl => {
-      toast.info("Using a stock image instead");
-      dispatchImageGeneratedEvent(imageUrl, prompt, "Using fallback image");
-    })
-    .catch(error => {
-      console.error("Failed to get fallback image:", error);
-      toast.error("Failed to load any image");
-    });
+export const generateFallbackImage = async (
+  prompt: string, 
+  imageSize: string = "800x800"
+): Promise<void> => {
+  try {
+    const fallbackUrl = await getFallbackImage(prompt);
+    toast.info("Using alternative image source", { id: "fallback-image" });
+    dispatchImageGeneratedEvent(fallbackUrl, prompt);
+  } catch (error) {
+    console.error("Error generating fallback image:", error);
+    const emergencyFallback = "https://source.unsplash.com/featured/800x800/?product";
+    dispatchImageGeneratedEvent(emergencyFallback, prompt);
+  }
 };
