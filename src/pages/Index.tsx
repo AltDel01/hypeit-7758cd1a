@@ -42,7 +42,6 @@ const Index = () => {
     Sentry.setTag("feature", "image-generation");
   }, []);
   
-  // Listen for image generation events from the admin panel
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
@@ -58,10 +57,9 @@ const Index = () => {
     };
   }, []);
 
-  // Check for completed requests when the component mounts
   useEffect(() => {
     if (user) {
-      const latestRequest = imageRequestService.getLatestRequestForUser(user.uid);
+      const latestRequest = imageRequestService.getLatestRequestForUser(user.id);
       if (latestRequest && latestRequest.status === 'completed' && latestRequest.resultImage) {
         setGeneratedImage(latestRequest.resultImage);
       }
@@ -91,8 +89,6 @@ const Index = () => {
       
       if (productImage) {
         console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
-        // In a real app, you would upload the productImage to your server or cloud storage
-        // For this example, we'll create a temporary object URL
         productImageUrl = URL.createObjectURL(productImage);
       }
       
@@ -103,10 +99,9 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
-      // Create the image generation request
       const request = imageRequestService.createRequest(
-        user.uid,
-        user.displayName || user.email || 'Anonymous User',
+        user.id,
+        user.email || 'Anonymous User',
         prompt,
         aspectRatio,
         productImageUrl
@@ -114,26 +109,22 @@ const Index = () => {
       
       console.log("Image generation request created:", request);
       
-      // Start simulating progress updates
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.random() * 10;
         if (progress >= 95) {
-          progress = 95; // Cap at 95% until completed
+          progress = 95;
           clearInterval(interval);
         }
         
-        // Trigger an event to update the progress
         const progressEvent = new CustomEvent('imageGenerationProgress', {
           detail: { progress }
         });
         window.dispatchEvent(progressEvent);
       }, 800);
       
-      // Notify the user that their request has been sent
       toast.success("Your image generation request has been sent to our designers!");
       toast.info("You'll receive a notification when your image is ready.");
-      
     } catch (error) {
       console.error("Error generating image:", error);
       Sentry.captureException(error);
