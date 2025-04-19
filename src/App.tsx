@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,10 @@ const AppRoutes = () => {
         element={<ProtectedRoute><CustomErrorBoundary><Dashboard /></CustomErrorBoundary></ProtectedRoute>} 
       />
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
+      <Route 
+        path="/admin" 
+        element={<ProtectedRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></ProtectedRoute>} 
+      />
       <Route 
         path="/login" 
         element={<AuthRoute><CustomErrorBoundary><Login /></CustomErrorBoundary></AuthRoute>} 

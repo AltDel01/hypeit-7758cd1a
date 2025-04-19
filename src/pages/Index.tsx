@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -5,10 +6,10 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { toast } from "sonner";
 import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
-import GeminiImageService from '@/services/GeminiImageService';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
+import imageRequestService from '@/services/ImageRequestService';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -42,10 +43,13 @@ const Index = () => {
     Sentry.setTag("feature", "image-generation");
   }, []);
   
+  // Listen for image generation events from the admin panel
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
       setGeneratedImage(event.detail.imageUrl);
+      setIsGenerating(false);
+      toast.success("Your image has been generated!");
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
@@ -54,10 +58,27 @@ const Index = () => {
       window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
     };
   }, []);
+
+  // Check for completed requests when the component mounts
+  useEffect(() => {
+    if (user) {
+      const latestRequest = imageRequestService.getLatestRequestForUser(user.uid);
+      if (latestRequest && latestRequest.status === 'completed' && latestRequest.resultImage) {
+        setGeneratedImage(latestRequest.resultImage);
+      }
+    }
+  }, [user]);
   
   const generateImage = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter a prompt to generate an image");
+      return;
+    }
+    
+    if (!user) {
+      toast.error("Please log in to generate images");
+      localStorage.setItem('authRedirectPath', '/');
+      localStorage.setItem('savedPrompt', prompt);
       return;
     }
     
@@ -67,8 +88,13 @@ const Index = () => {
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       console.log(`Product image available: ${productImage !== null}`);
       
+      let productImageUrl = null;
+      
       if (productImage) {
         console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
+        // In a real app, you would upload the productImage to your server or cloud storage
+        // For this example, we'll create a temporary object URL
+        productImageUrl = URL.createObjectURL(productImage);
       }
       
       Sentry.setContext("image_generation", {
@@ -78,32 +104,41 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
-      let enhancedPrompt = prompt;
-      if (productImage) {
-        enhancedPrompt += ` - Create an image that features this product prominently.`;
-      }
-      
-      const imageUrl = await GeminiImageService.generateImage({
-        prompt: enhancedPrompt,
+      // Create the image generation request
+      const request = imageRequestService.createRequest(
+        user.uid,
+        user.displayName || user.email || 'Anonymous User',
+        prompt,
         aspectRatio,
-        style: productImage ? "product-focused" : undefined,
-        productImage
-      });
+        productImageUrl
+      );
       
-      if (imageUrl) {
-        console.log(`Image generated, URL: ${imageUrl}`);
-        setGeneratedImage(imageUrl);
-        toast.success("Image generated successfully!");
-      } else {
-        console.error("No image URL returned from generation service");
-        Sentry.captureMessage("Image generation failed - No URL returned", "error");
-        toast.error("Failed to generate image - no URL returned");
-      }
+      console.log("Image generation request created:", request);
+      
+      // Start simulating progress updates
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 95) {
+          progress = 95; // Cap at 95% until completed
+          clearInterval(interval);
+        }
+        
+        // Trigger an event to update the progress
+        const progressEvent = new CustomEvent('imageGenerationProgress', {
+          detail: { progress }
+        });
+        window.dispatchEvent(progressEvent);
+      }, 800);
+      
+      // Notify the user that their request has been sent
+      toast.success("Your image generation request has been sent to our designers!");
+      toast.info("You'll receive a notification when your image is ready.");
+      
     } catch (error) {
       console.error("Error generating image:", error);
       Sentry.captureException(error);
-      toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
+      toast.error(`Failed to submit request: ${error instanceof Error ? error.message : String(error)}`);
       setIsGenerating(false);
     }
   };

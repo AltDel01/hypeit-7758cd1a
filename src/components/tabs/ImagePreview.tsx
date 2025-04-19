@@ -22,6 +22,20 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
   const timeoutRef = useRef<number | null>(null);
   const loadingTimeoutRef = useRef<number | null>(null);
 
+  // Listen for image generation progress updates
+  useEffect(() => {
+    const handleProgressUpdate = (event: CustomEvent) => {
+      console.log("Progress update received:", event.detail.progress);
+      setLoadingProgress(event.detail.progress);
+    };
+    
+    window.addEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    };
+  }, []);
+
   // Listen for image generation retry events
   useEffect(() => {
     const handleRetryEvent = () => {
@@ -42,10 +56,11 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       setImageLoading(true);
       setImageError(false);
       
-      // Start animated progress
+      // Reset loading progress if this is a new image URL (not just a retry)
       setLoadingProgress(0);
       if (progressIntervalRef.current) {
         window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
       
       // Clear any existing timeouts
@@ -56,6 +71,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
       
       if (loadingTimeoutRef.current) {
         window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
       }
       
       // Set a hard timeout for loading
@@ -63,25 +79,6 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
         console.log("Hard loading timeout reached, triggering retry");
         handleImageRetry();
       }, 30000); // 30 seconds maximum total loading time
-      
-      // Realistic progress animation
-      progressIntervalRef.current = window.setInterval(() => {
-        setLoadingProgress(prev => {
-          if (prev < 20) return prev + 2;
-          if (prev < 50) return prev + 1;
-          if (prev < 80) return prev + 0.5;
-          if (prev < 90) return prev + 0.2;
-          // Force timeout if stuck at 90+ for too long
-          if (prev >= 90 && timeoutRef.current === null) {
-            console.log("Progress stuck at 90+%, setting timeout");
-            timeoutRef.current = window.setTimeout(() => {
-              console.log("Loading timeout reached, forcing retry");
-              handleImageRetry();
-            }, 10000); // 10 seconds timeout if stuck at high percentage
-          }
-          return prev < 98 ? prev + 0.1 : prev;
-        });
-      }, 200);
     } else {
       // Reset loading state when imageUrl is null
       setImageLoading(false);
@@ -106,6 +103,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     return () => {
       if (progressIntervalRef.current) {
         window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
@@ -126,6 +124,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
     }
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
@@ -144,6 +143,7 @@ const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
     
     if (progressIntervalRef.current) {
       window.clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
     }
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);

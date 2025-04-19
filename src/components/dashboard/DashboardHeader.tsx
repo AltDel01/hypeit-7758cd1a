@@ -1,9 +1,15 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Clock, Plus } from 'lucide-react';
+import { Clock, Plus, LayoutDashboard } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardHeader = () => {
+  const { user } = useAuth();
+  // In a real app, you would check user roles
+  const isAdmin = !!user; // For demo purposes, all logged-in users are admins
+  
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
       <div>
@@ -19,6 +25,14 @@ const DashboardHeader = () => {
           <Plus className="mr-2 h-4 w-4" />
           New Creation
         </Button>
+        {isAdmin && (
+          <Link to="/admin">
+            <Button variant="outline" className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Admin Area
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );
