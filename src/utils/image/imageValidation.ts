@@ -1,86 +1,26 @@
 
 /**
- * Validates if an image URL is proper and not a placeholder
- * 
- * @param url The URL to check
- * @returns True if the URL is valid
+ * Checks if a URL is a valid image URL
  */
-export function checkValidImageUrl(url: string | null | undefined): boolean {
+export const checkValidImageUrl = (url: string): boolean => {
   if (!url) return false;
   
-  // Check for data URLs
-  if (url.startsWith('data:image/')) {
-    return url.length > 100; // Simple heuristic to skip placeholder data URLs
-  }
-  
-  // Skip URLs with known placeholder indicators 
-  if (
-    url.includes('placeholder.com') || 
-    url.includes('Generating+Image') ||
-    url.includes('placeholder.svg') ||
-    url.includes('placeholder-image')
-  ) {
-    return false;
-  }
-  
-  // Try to validate URLs
+  // Basic URL validation
   try {
     new URL(url);
-    return true;
   } catch (e) {
     return false;
   }
-}
-
-/**
- * Validates if an image is actually loadable
- * 
- * @param url The image URL to check
- * @returns A promise that resolves to a boolean indicating if the image is loadable
- */
-export function isImageLoadable(url: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (!checkValidImageUrl(url)) {
-      resolve(false);
-      return;
-    }
-    
-    const img = new Image();
-    const timeoutId = setTimeout(() => {
-      resolve(false);
-    }, 10000); // 10 second timeout
-    
-    img.onload = () => {
-      clearTimeout(timeoutId);
-      resolve(true);
-    };
-    
-    img.onerror = () => {
-      clearTimeout(timeoutId);
-      resolve(false);
-    };
-    
-    img.src = url;
-  });
-}
-
-/**
- * Adds a cache buster parameter to an image URL to avoid caching issues
- * 
- * @param url The URL to add the cache buster to
- * @returns The URL with the cache buster parameter added
- */
-export function addCacheBuster(url: string): string {
-  if (!url) return url;
   
-  // Don't add cache busters to data URLs
-  if (url.startsWith('data:')) return url;
+  // Check if it's an image URL by extension or content type
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.svg'];
+  const hasImageExtension = imageExtensions.some(ext => url.toLowerCase().includes(ext));
   
-  const cacheBuster = `cb=${Date.now()}`;
+  // Handle data URLs
+  const isDataUrl = url.startsWith('data:image/');
   
-  if (url.includes('?')) {
-    return `${url}&${cacheBuster}`;
-  } else {
-    return `${url}?${cacheBuster}`;
-  }
-}
+  // Handle blob URLs
+  const isBlobUrl = url.startsWith('blob:');
+  
+  return hasImageExtension || isDataUrl || isBlobUrl || url.includes('unsplash.com');
+};

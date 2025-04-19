@@ -1,5 +1,6 @@
 
 import { nanoid } from 'nanoid';
+import { toast } from 'sonner';
 
 // Define request status types
 export type RequestStatus = 'new' | 'in-progress' | 'completed';
@@ -22,25 +23,41 @@ export interface ImageRequest {
 class ImageRequestService {
   private requests: ImageRequest[] = [];
   private initialized: boolean = false;
+  private storageKey: string = 'imageRequests';
 
   constructor() {
     this.loadFromStorage();
+    
+    // Add event listener for storage changes from other tabs/windows
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.storageKey) {
+        console.log('ImageRequestService: Storage changed from another tab/window, reloading requests');
+        this.loadFromStorage();
+        
+        // Dispatch event to notify UI components about the change
+        window.dispatchEvent(new CustomEvent('imageRequestsUpdated', {
+          detail: { requests: this.requests }
+        }));
+      }
+    });
   }
 
   // Load existing requests from localStorage
   private loadFromStorage() {
     try {
-      const savedRequests = localStorage.getItem('imageRequests');
+      const savedRequests = localStorage.getItem(this.storageKey);
       if (savedRequests) {
         this.requests = JSON.parse(savedRequests);
         console.log('Loaded requests from localStorage:', this.requests);
         this.initialized = true;
       } else {
         console.log('No saved requests found in localStorage');
+        this.requests = [];
         this.initialized = true;
       }
     } catch (error) {
       console.error('Failed to load image requests from localStorage:', error);
+      this.requests = [];
       this.initialized = true;
     }
   }
@@ -48,10 +65,11 @@ class ImageRequestService {
   // Save current state to localStorage
   private saveToStorage() {
     try {
-      localStorage.setItem('imageRequests', JSON.stringify(this.requests));
+      localStorage.setItem(this.storageKey, JSON.stringify(this.requests));
       console.log('Saved requests to localStorage:', this.requests);
     } catch (error) {
       console.error('Failed to save image requests to localStorage:', error);
+      toast.error('Failed to save your request. Please try again later.');
     }
   }
 
@@ -118,8 +136,7 @@ class ImageRequestService {
 
   // Update request status
   updateRequestStatus(id: string, status: RequestStatus): ImageRequest | null {
-    const requests = this.getAllRequests();
-    const index = requests.findIndex(req => req.id === id);
+    const index = this.requests.findIndex(req => req.id === id);
     if (index === -1) return null;
 
     this.requests[index] = {
@@ -129,13 +146,18 @@ class ImageRequestService {
     };
     
     this.saveToStorage();
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('imageRequestUpdated', {
+      detail: { request: this.requests[index] }
+    }));
+    
     return this.requests[index];
   }
 
   // Upload result for a request
   uploadResult(id: string, resultImageUrl: string): ImageRequest | null {
-    const requests = this.getAllRequests();
-    const index = requests.findIndex(req => req.id === id);
+    const index = this.requests.findIndex(req => req.id === id);
     if (index === -1) return null;
 
     this.requests[index] = {
@@ -146,12 +168,18 @@ class ImageRequestService {
     };
     
     this.saveToStorage();
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('imageRequestCompleted', {
+      detail: { request: this.requests[index] }
+    }));
+    
     return this.requests[index];
   }
 
   // Get a specific request by ID
   getRequestById(id: string): ImageRequest | null {
-    const request = this.getAllRequests().find(req => req.id === id);
+    const request = this.requests.find(req => req.id === id);
     return request || null;
   }
 
@@ -170,6 +198,15 @@ class ImageRequestService {
   clearAllRequests() {
     this.requests = [];
     this.saveToStorage();
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('imageRequestsCleared'));
+  }
+  
+  // Force reload requests from storage
+  forceReload(): ImageRequest[] {
+    this.loadFromStorage();
+    return this.getAllRequests();
   }
 }
 
