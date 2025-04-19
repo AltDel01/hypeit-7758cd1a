@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -108,6 +109,12 @@ const Index = () => {
       );
       
       console.log("Image generation request created:", request);
+      
+      // Dispatch a custom event to notify that a new request has been created
+      const requestEvent = new CustomEvent('imageRequestCreated', {
+        detail: { request }
+      });
+      window.dispatchEvent(requestEvent);
       
       let progress = 0;
       const interval = setInterval(() => {

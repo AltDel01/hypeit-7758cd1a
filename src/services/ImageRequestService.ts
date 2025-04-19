@@ -67,6 +67,10 @@ class ImageRequestService {
     this.requests.push(newRequest);
     this.saveToStorage();
     
+    // Log the new request for debugging
+    console.log('New image request created:', newRequest);
+    console.log('Current requests:', this.requests);
+    
     return newRequest;
   }
 
@@ -131,6 +135,12 @@ class ImageRequestService {
     return userRequests.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )[0];
+  }
+
+  // Clear all requests (for testing purposes)
+  clearAllRequests() {
+    this.requests = [];
+    this.saveToStorage();
   }
 }
 

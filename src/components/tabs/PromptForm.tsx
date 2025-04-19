@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import GenerateButton from './GenerateButton';
@@ -23,6 +23,23 @@ const PromptForm = ({
   isGenerating, 
   generateImage 
 }: PromptFormProps) => {
+  const [generationProgress, setGenerationProgress] = useState(0);
+  
+  // Listen for progress updates
+  useEffect(() => {
+    const handleProgressUpdate = (event: CustomEvent) => {
+      const { progress } = event.detail;
+      console.log("Progress update:", progress);
+      setGenerationProgress(progress);
+    };
+    
+    window.addEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    };
+  }, []);
+  
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -51,7 +68,7 @@ const PromptForm = ({
         {isGenerating ? (
           <div className="text-center p-4 bg-gray-900 rounded-lg w-full flex flex-col items-center justify-center">
             <CircularProgressIndicator 
-              progress={0} 
+              progress={generationProgress} 
               size="medium" 
               showPercentage={true} 
             />

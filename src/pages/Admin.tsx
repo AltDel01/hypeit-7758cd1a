@@ -10,68 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
-
-// Define request status types
-type RequestStatus = 'new' | 'in-progress' | 'completed';
-
-// Define image generation request interface
-interface ImageRequest {
-  id: string;
-  userId: string;
-  userName: string;
-  prompt: string;
-  aspectRatio: string;
-  status: RequestStatus;
-  createdAt: string;
-  productImage: string | null;
-  resultImage: string | null;
-  updatedAt: string;
-}
-
-// Mock data - in a real app, this would come from your database
-const mockRequests: ImageRequest[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    userName: 'John Doe',
-    prompt: 'A stunning landscape with mountains and a sunset',
-    aspectRatio: '1:1',
-    status: 'new',
-    createdAt: '2025-04-18T14:35:00Z',
-    productImage: null,
-    resultImage: null,
-    updatedAt: '2025-04-18T14:35:00Z'
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    userName: 'Jane Smith',
-    prompt: 'A futuristic city with flying cars and tall buildings',
-    aspectRatio: '9:16',
-    status: 'in-progress',
-    createdAt: '2025-04-18T09:15:00Z',
-    productImage: 'https://source.unsplash.com/random/800x800/?cityscape',
-    resultImage: null,
-    updatedAt: '2025-04-18T10:20:00Z'
-  },
-  {
-    id: '3',
-    userId: 'user3',
-    userName: 'Robert Johnson',
-    prompt: 'A vintage car on a coastal road',
-    aspectRatio: '1:1',
-    status: 'completed',
-    createdAt: '2025-04-17T16:45:00Z',
-    productImage: null,
-    resultImage: 'https://source.unsplash.com/random/800x800/?vintagecars',
-    updatedAt: '2025-04-17T18:30:00Z'
-  }
-];
+import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
 
 const Admin = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('new');
-  const [requests, setRequests] = useState<ImageRequest[]>(mockRequests);
+  const [requests, setRequests] = useState<ImageRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ImageRequest | null>(null);
   const [resultImage, setResultImage] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -79,6 +23,32 @@ const Admin = () => {
 
   // Check if user has admin access
   const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com';
+
+  useEffect(() => {
+    // Load requests from the service
+    const loadRequests = () => {
+      const allRequests = imageRequestService.getAllRequests();
+      console.log('Loaded requests from service:', allRequests);
+      setRequests(allRequests);
+    };
+
+    loadRequests();
+
+    // Set up an interval to check for new requests every few seconds
+    const intervalId = setInterval(loadRequests, 5000);
+    
+    // Listen for the custom event that indicates a new request has been created
+    const handleNewRequest = () => {
+      loadRequests();
+    };
+    
+    window.addEventListener('imageRequestCreated', handleNewRequest);
+    
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('imageRequestCreated', handleNewRequest);
+    };
+  }, []);
 
   if (!user || !hasAdminAccess) {
     return <Navigate to="/" replace />;
@@ -98,19 +68,19 @@ const Admin = () => {
 
   // Handle status update
   const handleUpdateStatus = (id: string, status: RequestStatus) => {
-    setRequests(prevRequests => 
-      prevRequests.map(req => 
-        req.id === id 
-        ? { ...req, status, updatedAt: new Date().toISOString() } 
-        : req
-      )
-    );
+    const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
-    toast.success(`Request ${id} marked as ${status}`);
-    
-    // If current request is being updated, update selectedRequest too
-    if (selectedRequest?.id === id) {
-      setSelectedRequest(prev => prev ? { ...prev, status, updatedAt: new Date().toISOString() } : null);
+    if (updatedRequest) {
+      // Update the requests state with the new list
+      setRequests(imageRequestService.getAllRequests());
+      toast.success(`Request ${id} marked as ${status}`);
+      
+      // If current request is being updated, update selectedRequest too
+      if (selectedRequest?.id === id) {
+        setSelectedRequest(updatedRequest);
+      }
+    } else {
+      toast.error(`Failed to update request ${id}`);
     }
   };
 
@@ -139,38 +109,34 @@ const Admin = () => {
       const imageUrl = URL.createObjectURL(resultImage);
       
       // Update the request with the result image
-      setRequests(prevRequests => 
-        prevRequests.map(req => 
-          req.id === selectedRequest.id 
-          ? { ...req, resultImage: imageUrl, status: 'completed', updatedAt: new Date().toISOString() } 
-          : req
-        )
-      );
+      const updatedRequest = imageRequestService.uploadResult(selectedRequest.id, imageUrl);
       
-      // Update selected request
-      setSelectedRequest(prev => prev ? { 
-        ...prev, 
-        resultImage: imageUrl, 
-        status: 'completed',
-        updatedAt: new Date().toISOString() 
-      } : null);
-      
-      clearInterval(interval);
-      setUploadProgress(100);
-      
-      toast.success("Image uploaded and request completed!");
-      
-      // Trigger a custom event that the main page can listen to
-      const imageGeneratedEvent = new CustomEvent('imageGenerated', {
-        detail: {
-          imageUrl,
-          prompt: selectedRequest.prompt,
-          aspectRatio: selectedRequest.aspectRatio,
-          requestId: selectedRequest.id
-        }
-      });
-      
-      window.dispatchEvent(imageGeneratedEvent);
+      if (updatedRequest) {
+        // Update requests state
+        setRequests(imageRequestService.getAllRequests());
+        
+        // Update selected request
+        setSelectedRequest(updatedRequest);
+        
+        clearInterval(interval);
+        setUploadProgress(100);
+        
+        toast.success("Image uploaded and request completed!");
+        
+        // Trigger a custom event that the main page can listen to
+        const imageGeneratedEvent = new CustomEvent('imageGenerated', {
+          detail: {
+            imageUrl,
+            prompt: selectedRequest.prompt,
+            aspectRatio: selectedRequest.aspectRatio,
+            requestId: selectedRequest.id
+          }
+        });
+        
+        window.dispatchEvent(imageGeneratedEvent);
+      } else {
+        toast.error("Failed to update request with result image");
+      }
       
       // Reset after a delay
       setTimeout(() => {
