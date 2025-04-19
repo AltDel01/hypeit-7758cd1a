@@ -1,18 +1,11 @@
 
-// This file is kept for backward compatibility
-// Import all functionality from the new modular structure
-import { 
-  pollForImageResult, 
-  dispatchImageGeneratedEvent 
-} from './image';
-import { generateFallbackImage } from './image/imageFallback';
+import { pollForImageResult, dispatchImageGeneratedEvent } from './image';
+import { FallbackService } from './image/services/FallbackService';
 import type { PollImageParams } from './image/polling/types';
 
-// Re-export everything
 export { 
   pollForImageResult, 
   dispatchImageGeneratedEvent,
-  generateFallbackImage,
+  FallbackService,
   type PollImageParams
 };
-

@@ -4,27 +4,24 @@ import { checkImageStatus } from "./statusChecker";
 import { delayExecution } from "./helpers";
 import { processImageUrl } from "./imageProcessor";
 import { useFallbackImage } from "./fallbackHandler";
-import { checkValidImageUrl } from '../imageValidation';
 import { forceImageGenerationRetry, dispatchImageGenerationErrorEvent } from '../imageEvents';
+import { POLLING_CONFIG, calculateNextDelay, isValidResponse, isProcessing } from './pollingUtils';
 
 const activePolls = new Map<string, boolean>();
 
-/**
- * Main function that polls for the result of an image generation request
- */
 export async function pollForImageResult(params: PollImageParams): Promise<void> {
   const { 
     requestId, 
     prompt, 
     aspectRatio, 
     style,
-    retries = 10, 
-    delay = 3000, 
-    maxRetries = 10 
+    retries = POLLING_CONFIG.MAX_RETRIES, 
+    delay = POLLING_CONFIG.INITIAL_DELAY, 
+    maxRetries = POLLING_CONFIG.MAX_RETRIES 
   } = params;
   
   if (activePolls.get(requestId)) {
-    console.log(`Already polling for requestId: ${requestId}, skipping duplicate poll`);
+    console.log(`Already polling for requestId: ${requestId}`);
     return;
   }
   
@@ -39,24 +36,16 @@ export async function pollForImageResult(params: PollImageParams): Promise<void>
   
   try {
     console.log(`Polling for image result, requestId: ${requestId}, retries left: ${currentRetries}`);
-    
     await delayExecution(delay);
     
     const result = await checkImageStatus(requestId);
-    
-    console.log(`Poll result for ${requestId}:`, result);
-    
     await handleStatusCheckResult(result, {
-      requestId, prompt, aspectRatio, style, 
-      retries: currentRetries, delay, maxRetries
+      ...params,
+      retries: currentRetries,
+      delay
     });
-    
   } catch (error) {
-    console.error(`Polling error for ${requestId}:`, error);
-    handlePollingError(error, {
-      requestId, prompt, aspectRatio, style,
-      retries: currentRetries, delay, maxRetries
-    });
+    handlePollingError(error, params);
   } finally {
     if (currentRetries <= 1) {
       activePolls.delete(requestId);
@@ -100,25 +89,25 @@ export async function handleStatusCheckResult(
     return;
   }
   
-  if (result.imageUrl && checkValidImageUrl(result.imageUrl)) {
+  if (result.imageUrl) {
     console.log(`Valid image URL received for ${requestId}:`, result.imageUrl.substring(0, 50) + "...");
     await processImageUrl(result.imageUrl, prompt);
     activePolls.delete(requestId);
     return;
   }
   
-  if (result.status === "processing" || result.status === "accepted") {
+  if (isProcessing(result.status)) {
     console.log(`Image still processing (${result.status}) for ${requestId}, polling again in ${delay}ms`);
     scheduleNextPoll({
       requestId, prompt, aspectRatio, style,
       retries: retries - 1, 
-      delay: Math.min(delay + 500, 8000),
+      delay: calculateNextDelay(delay),
       maxRetries: params.maxRetries
     });
     return;
   }
   
-  if (result.status === "completed" && (!result.imageUrl || !checkValidImageUrl(result.imageUrl))) {
+  if (result.status === "completed" && !result.imageUrl) {
     console.log(`Completed status received for ${requestId} but no valid image URL, using fallback`);
     useFallbackImage(prompt, aspectRatio);
     activePolls.delete(requestId);
