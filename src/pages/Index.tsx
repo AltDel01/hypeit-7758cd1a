@@ -100,6 +100,7 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
+      // Create request in the service
       const request = imageRequestService.createRequest(
         user.id,
         user.email || 'Anonymous User',
@@ -110,12 +111,7 @@ const Index = () => {
       
       console.log("Image generation request created:", request);
       
-      // Dispatch a custom event to notify that a new request has been created
-      const requestEvent = new CustomEvent('imageRequestCreated', {
-        detail: { request }
-      });
-      window.dispatchEvent(requestEvent);
-      
+      // Start progress simulation for user feedback
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.random() * 10;

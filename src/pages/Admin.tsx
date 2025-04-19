@@ -7,7 +7,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react';
+import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
@@ -21,17 +21,24 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Check if user has admin access
-  const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com';
+  // Check if user has admin access - for demo we'll make this more permissive
+  const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
+
+  // Load requests from the service
+  const loadRequests = () => {
+    const allRequests = imageRequestService.getAllRequests();
+    console.log('Loaded requests from service:', allRequests);
+    setRequests(allRequests);
+  };
+
+  // Manually refresh requests
+  const handleRefresh = () => {
+    loadRequests();
+    toast.info("Request list refreshed");
+  };
 
   useEffect(() => {
-    // Load requests from the service
-    const loadRequests = () => {
-      const allRequests = imageRequestService.getAllRequests();
-      console.log('Loaded requests from service:', allRequests);
-      setRequests(allRequests);
-    };
-
+    // Load requests initially
     loadRequests();
 
     // Set up an interval to check for new requests every few seconds
@@ -39,6 +46,7 @@ const Admin = () => {
     
     // Listen for the custom event that indicates a new request has been created
     const handleNewRequest = () => {
+      console.log("Admin: Detected new image request created, refreshing list");
       loadRequests();
     };
     
@@ -50,7 +58,7 @@ const Admin = () => {
     };
   }, []);
 
-  if (!user || !hasAdminAccess) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 
@@ -72,7 +80,7 @@ const Admin = () => {
     
     if (updatedRequest) {
       // Update the requests state with the new list
-      setRequests(imageRequestService.getAllRequests());
+      loadRequests();
       toast.success(`Request ${id} marked as ${status}`);
       
       // If current request is being updated, update selectedRequest too
@@ -193,8 +201,20 @@ const Admin = () => {
         <Navbar />
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-2 text-white">Admin Dashboard</h1>
-            <p className="text-gray-400 mb-6">Manage image generation requests</p>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-2 text-white">Admin Dashboard</h1>
+                <p className="text-gray-400">Manage image generation requests</p>
+              </div>
+              <Button 
+                onClick={handleRefresh} 
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2">

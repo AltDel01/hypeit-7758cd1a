@@ -21,16 +21,27 @@ export interface ImageRequest {
 // In a real application, this would interact with your database
 class ImageRequestService {
   private requests: ImageRequest[] = [];
+  private initialized: boolean = false;
 
   constructor() {
-    // Try to load existing requests from localStorage
+    this.loadFromStorage();
+  }
+
+  // Load existing requests from localStorage
+  private loadFromStorage() {
     try {
       const savedRequests = localStorage.getItem('imageRequests');
       if (savedRequests) {
         this.requests = JSON.parse(savedRequests);
+        console.log('Loaded requests from localStorage:', this.requests);
+        this.initialized = true;
+      } else {
+        console.log('No saved requests found in localStorage');
+        this.initialized = true;
       }
     } catch (error) {
       console.error('Failed to load image requests from localStorage:', error);
+      this.initialized = true;
     }
   }
 
@@ -38,6 +49,7 @@ class ImageRequestService {
   private saveToStorage() {
     try {
       localStorage.setItem('imageRequests', JSON.stringify(this.requests));
+      console.log('Saved requests to localStorage:', this.requests);
     } catch (error) {
       console.error('Failed to save image requests to localStorage:', error);
     }
@@ -51,6 +63,11 @@ class ImageRequestService {
     aspectRatio: string, 
     productImageUrl: string | null
   ): ImageRequest {
+    // Make sure storage is loaded before creating a request
+    if (!this.initialized) {
+      this.loadFromStorage();
+    }
+
     const newRequest: ImageRequest = {
       id: nanoid(8), // Generate a short unique ID
       userId,
@@ -71,27 +88,38 @@ class ImageRequestService {
     console.log('New image request created:', newRequest);
     console.log('Current requests:', this.requests);
     
+    // Dispatch event to notify other components
+    const requestEvent = new CustomEvent('imageRequestCreated', {
+      detail: { request: newRequest }
+    });
+    window.dispatchEvent(requestEvent);
+    
     return newRequest;
   }
 
   // Get all requests
   getAllRequests(): ImageRequest[] {
+    // Ensure requests are loaded from storage
+    if (!this.initialized) {
+      this.loadFromStorage();
+    }
     return [...this.requests];
   }
 
   // Get requests by status
   getRequestsByStatus(status: RequestStatus): ImageRequest[] {
-    return this.requests.filter(req => req.status === status);
+    return this.getAllRequests().filter(req => req.status === status);
   }
 
   // Get requests by user ID
   getRequestsByUser(userId: string): ImageRequest[] {
-    return this.requests.filter(req => req.userId === userId);
+    return this.getAllRequests().filter(req => req.userId === userId);
   }
 
   // Update request status
   updateRequestStatus(id: string, status: RequestStatus): ImageRequest | null {
-    const index = this.requests.findIndex(req => req.id === id);
+    const requests = this.getAllRequests();
+    const index = requests.findIndex(req => req.id === id);
     if (index === -1) return null;
 
     this.requests[index] = {
@@ -106,7 +134,8 @@ class ImageRequestService {
 
   // Upload result for a request
   uploadResult(id: string, resultImageUrl: string): ImageRequest | null {
-    const index = this.requests.findIndex(req => req.id === id);
+    const requests = this.getAllRequests();
+    const index = requests.findIndex(req => req.id === id);
     if (index === -1) return null;
 
     this.requests[index] = {
@@ -122,7 +151,7 @@ class ImageRequestService {
 
   // Get a specific request by ID
   getRequestById(id: string): ImageRequest | null {
-    const request = this.requests.find(req => req.id === id);
+    const request = this.getAllRequests().find(req => req.id === id);
     return request || null;
   }
 
