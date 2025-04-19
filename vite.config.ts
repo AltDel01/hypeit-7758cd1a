@@ -15,7 +15,9 @@ try {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const plugins = [
-    react(),
+    react({
+      jsxRuntime: 'automatic'
+    }),
     // Temporarily disable the componentTagger to fix the build issue
     // mode === 'development' && componentTagger(),
   ].filter(Boolean);
@@ -45,6 +47,15 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true, // Generate source maps for production builds
     },
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        '@tanstack/react-query',
+        'react-router-dom',
+        'lucide-react',
+        'sonner'
+      ],
+    },
   };
 });
-
