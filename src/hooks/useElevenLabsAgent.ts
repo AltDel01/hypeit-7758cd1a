@@ -13,6 +13,7 @@ export const useElevenLabsAgent = () => {
   const [lastMessage, setLastMessage] = useState<any>(null);
   const [conversationContext, setConversationContext] = useState<ConversationContext>(ConversationContext.GENERAL);
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
 
   const imageGenerationKeywords = [
     'generate image', 
@@ -91,16 +92,35 @@ export const useElevenLabsAgent = () => {
   };
 
   // Create properly typed wrapper functions for conversation methods
-  const startConversation = async (params?: any) => {
-    console.log("Starting conversation with params:", params);
+  const startConversation = async () => {
+    console.log("Starting conversation attempt:", connectionAttempts + 1);
+    
     try {
-      // Use the correct parameter format for startSession
-      return await conversation.startSession({
-        agentId: "default"
+      setConnectionAttempts(prev => prev + 1);
+      
+      // Make sure conversation is properly configured
+      const result = await conversation.startSession({
+        agentId: "default" // Using the default agent ID
       });
+      
+      console.log("Conversation started successfully:", result);
+      return result;
     } catch (error) {
       console.error("Failed to start conversation:", error);
-      toast.error("Failed to connect with Ava");
+      
+      // Provide more specific error messages based on the error
+      if (error instanceof Error) {
+        if (error.message.includes("WebSocket")) {
+          toast.error("Network issue connecting to Ava. Check your internet connection.");
+        } else if (error.message.includes("permission")) {
+          toast.error("Microphone permission needed to talk with Ava.");
+        } else {
+          toast.error("Failed to connect with Ava. Please try again.");
+        }
+      } else {
+        toast.error("Failed to connect with Ava. Please try again.");
+      }
+      
       throw error;
     }
   };
@@ -124,6 +144,7 @@ export const useElevenLabsAgent = () => {
     status: conversation.status,
     lastMessage,
     pendingPrompt,
-    clearPendingPrompt
+    clearPendingPrompt,
+    connectionAttempts
   };
 };

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Power, MicOff } from 'lucide-react';
+import { Power, MicOff, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { useElevenLabsAgent } from '@/hooks/useElevenLabsAgent';
 
 const AvaButton: React.FC = () => {
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +24,8 @@ const AvaButton: React.FC = () => {
     conversation, 
     lastMessage, 
     pendingPrompt,
-    clearPendingPrompt 
+    clearPendingPrompt,
+    connectionAttempts
   } = useElevenLabsAgent();
 
   useEffect(() => {
@@ -68,22 +70,32 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
+      setIsConnecting(true);
       try {
+        // Request microphone permission early
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        
         await startConversation();
-        toggleVisualizer();
+        setIsVisualizerActive(true);
+        toast.success("Connected to Ava successfully!");
       } catch (error) {
         console.error("Failed to start conversation:", error);
-        toast.error("Failed to connect to Ava. Please try again.");
+        
+        if (error instanceof DOMException && error.name === "NotAllowedError") {
+          toast.error("Microphone access is required to use Ava.");
+        }
+        
+        setIsVisualizerActive(false);
+      } finally {
+        setIsConnecting(false);
       }
     } else {
-      await endConversation();
-      toggleVisualizer();
+      try {
+        await endConversation();
+      } finally {
+        setIsVisualizerActive(false);
+      }
     }
-  };
-
-  const toggleVisualizer = () => {
-    setIsVisualizerActive(prev => !prev);
-    console.log("Toggled visualizer to:", !isVisualizerActive);
   };
 
   return (
@@ -99,18 +111,21 @@ const AvaButton: React.FC = () => {
       {!isVisualizerActive && (
         <Button
           onClick={handleButtonClick}
-          className="rounded-full w-28 h-28 p-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] hover:from-[#FFF9D8] hover:via-[#9b87f5] hover:to-[#33C3F0] animate-glow-pulse shadow-lg relative z-10"
+          disabled={isConnecting}
+          className={`rounded-full w-28 h-28 p-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] hover:from-[#FFF9D8] hover:via-[#9b87f5] hover:to-[#33C3F0] ${isConnecting ? 'opacity-80' : 'animate-glow-pulse'} shadow-lg relative z-10`}
           size="icon"
         >
           <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB]/50 flex flex-col items-center justify-center animate-pulse">
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#FEF7CD] via-[#8c52ff] to-[#1EAEDB] flex flex-col items-center justify-center gap-1">
-              {status === "connected" ? (
+              {isConnecting ? (
+                <div className="h-8 w-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : status === "connected" ? (
                 <MicOff className="h-8 w-8 text-white animate-pulse" />
               ) : (
-                <Power className="h-8 w-8 text-white" />
+                <Mic className="h-8 w-8 text-white" />
               )}
               <span className="text-white text-sm font-medium">
-                {status === "connected" ? "Stop Ava" : "Activate Ava"}
+                {isConnecting ? "Connecting..." : status === "connected" ? "Stop Ava" : "Activate Ava"}
               </span>
             </div>
           </div>
