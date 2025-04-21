@@ -1,7 +1,7 @@
 
 import { useConversation } from "@11labs/react";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Enum for conversation context states
 enum ConversationContext {
@@ -14,6 +14,8 @@ export const useElevenLabsAgent = () => {
   const [conversationContext, setConversationContext] = useState<ConversationContext>(ConversationContext.GENERAL);
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const imageGenerationKeywords = [
     'generate image', 
@@ -37,7 +39,13 @@ export const useElevenLabsAgent = () => {
   const conversation = useConversation({
     onError: (error) => {
       console.error("ElevenLabs error:", error);
+      const errorMessage = typeof error === 'string' ? error : 
+                          error instanceof Error ? error.message : 
+                          'Unknown error occurred';
+      
+      setConnectionError(errorMessage);
       toast.error("Error connecting to Ava");
+      setIsInitializing(false);
     },
     onMessage: (message) => {
       console.log("Received message:", message);
@@ -74,6 +82,11 @@ export const useElevenLabsAgent = () => {
 
         setLastMessage(message);
       }
+    },
+    onConnect: () => {
+      console.log("Connected to Ava successfully!");
+      setConnectionError(null);
+      setIsInitializing(false);
     }
   });
 
@@ -92,11 +105,15 @@ export const useElevenLabsAgent = () => {
   };
 
   // Create properly typed wrapper functions for conversation methods
-  const startConversation = async () => {
+  const startConversation = useCallback(async () => {
     console.log("Starting conversation attempt:", connectionAttempts + 1);
     
     try {
+      setIsInitializing(true);
       setConnectionAttempts(prev => prev + 1);
+      
+      // First request microphone permission explicitly
+      await navigator.mediaDevices.getUserMedia({ audio: true });
       
       // Make sure conversation is properly configured
       const result = await conversation.startSession({
@@ -104,16 +121,23 @@ export const useElevenLabsAgent = () => {
       });
       
       console.log("Conversation started successfully:", result);
+      setConnectionError(null);
       return result;
     } catch (error) {
       console.error("Failed to start conversation:", error);
       
       // Provide more specific error messages based on the error
       if (error instanceof Error) {
+        setConnectionError(error.message);
+        
         if (error.message.includes("WebSocket")) {
           toast.error("Network issue connecting to Ava. Check your internet connection.");
         } else if (error.message.includes("permission")) {
           toast.error("Microphone permission needed to talk with Ava.");
+        } else if (error.message.includes("MediaDevices")) {
+          toast.error("Browser doesn't support microphone access. Try a different browser.");
+        } else if (error.message.includes("not found") || error.message.includes("404")) {
+          toast.error("The Ava service couldn't be reached. Please try again later.");
         } else {
           toast.error("Failed to connect with Ava. Please try again.");
         }
@@ -121,19 +145,21 @@ export const useElevenLabsAgent = () => {
         toast.error("Failed to connect with Ava. Please try again.");
       }
       
+      setIsInitializing(false);
       throw error;
     }
-  };
+  }, [conversation, connectionAttempts]);
 
-  const endConversation = async () => {
+  const endConversation = useCallback(async () => {
     console.log("Ending conversation");
     try {
+      setIsInitializing(false);
       return await conversation.endSession();
     } catch (error) {
       console.error("Failed to end conversation:", error);
       return null;
     }
-  };
+  }, [conversation]);
 
   // Return the correct methods from conversation object
   return {
@@ -145,6 +171,8 @@ export const useElevenLabsAgent = () => {
     lastMessage,
     pendingPrompt,
     clearPendingPrompt,
-    connectionAttempts
+    connectionAttempts,
+    connectionError,
+    isInitializing
   };
 };
