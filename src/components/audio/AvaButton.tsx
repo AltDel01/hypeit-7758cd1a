@@ -4,6 +4,7 @@ import { Power, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePrompt } from '@/contexts/PromptContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useElevenLabsAgent } from '@/hooks/useElevenLabsAgent';
@@ -13,7 +14,8 @@ const AvaButton: React.FC = () => {
   const buttonRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { startConversation, endConversation, isSpeaking, status } = useElevenLabsAgent();
+  const { setGlobalPrompt } = usePrompt();
+  const { startConversation, endConversation, isSpeaking, status, conversation } = useElevenLabsAgent();
 
   useEffect(() => {
     return () => {
@@ -22,6 +24,26 @@ const AvaButton: React.FC = () => {
       }
     };
   }, [isVisualizerActive]);
+
+  useEffect(() => {
+    if (conversation) {
+      conversation.onMessage((message) => {
+        if (message.type === 'final_transcript') {
+          // If the user's message contains keywords about image generation
+          if (message.text.toLowerCase().includes('generate') || 
+              message.text.toLowerCase().includes('create an image') ||
+              message.text.toLowerCase().includes('make an image')) {
+            // Extract the description part after the command
+            const prompt = message.text.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
+            if (prompt) {
+              setGlobalPrompt(prompt);
+              toast.success("Prompt has been set! You can now upload an image if needed.");
+            }
+          }
+        }
+      });
+    }
+  }, [conversation, setGlobalPrompt]);
 
   const handleButtonClick = async () => {
     if (!user) {

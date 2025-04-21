@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
+import { PromptProvider } from "./contexts/PromptContext";
 
 const queryClient = new QueryClient();
 
@@ -77,9 +77,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <CustomErrorBoundary>
-            <AppRoutes />
-          </CustomErrorBoundary>
+          <PromptProvider>
+            <CustomErrorBoundary>
+              <AppRoutes />
+            </CustomErrorBoundary>
+          </PromptProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
