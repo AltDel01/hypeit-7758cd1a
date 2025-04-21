@@ -1,5 +1,6 @@
 
 // Types for image polling functionality
+
 export interface PollImageParams {
   requestId: string;
   prompt: string;
@@ -17,10 +18,3 @@ export interface ImageStatusResult {
   error?: string;
   apiError?: string;
 }
-
-export interface PollingConfig {
-  MAX_RETRIES: number;
-  INITIAL_DELAY: number;
-  MAX_DELAY: number;
-}
-

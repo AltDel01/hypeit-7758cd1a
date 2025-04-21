@@ -1,17 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RefreshCw } from 'lucide-react';
-import RequestList from '@/components/admin/RequestList';
-import RequestDetails from '@/components/admin/RequestDetails';
-import { imageRequestManager } from '@/services';
-import type { ImageRequest, RequestStatus } from '@/types/imageRequest';
+import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import ImageUploader from '@/components/tabs/ImageUploader';
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
+import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -22,21 +21,30 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Check if user has admin access - for demo we'll make this more permissive
+  const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
+
+  // Load requests from the service
   const loadRequests = () => {
-    const allRequests = imageRequestManager.getAllRequests();
+    const allRequests = imageRequestService.getAllRequests();
     console.log('Loaded requests from service:', allRequests);
     setRequests(allRequests);
   };
 
+  // Manually refresh requests
   const handleRefresh = () => {
     loadRequests();
     toast.info("Request list refreshed");
   };
 
   useEffect(() => {
+    // Load requests initially
     loadRequests();
+
+    // Set up an interval to check for new requests every few seconds
     const intervalId = setInterval(loadRequests, 5000);
     
+    // Listen for the custom event that indicates a new request has been created
     const handleNewRequest = () => {
       console.log("Admin: Detected new image request created, refreshing list");
       loadRequests();
@@ -54,23 +62,28 @@ const Admin = () => {
     return <Navigate to="/" replace />;
   }
 
+  // Filter requests based on active tab
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;
     return request.status === activeTab;
   });
 
+  // Handle request selection
   const handleSelectRequest = (request: ImageRequest) => {
     setSelectedRequest(request);
-    setResultImage(null);
+    setResultImage(null); // Reset result image when selecting a new request
   };
 
+  // Handle status update
   const handleUpdateStatus = (id: string, status: RequestStatus) => {
-    const updatedRequest = imageRequestManager.updateRequestStatus(id, status);
+    const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
     if (updatedRequest) {
+      // Update the requests state with the new list
       loadRequests();
       toast.success(`Request ${id} marked as ${status}`);
       
+      // If current request is being updated, update selectedRequest too
       if (selectedRequest?.id === id) {
         setSelectedRequest(updatedRequest);
       }
@@ -79,6 +92,7 @@ const Admin = () => {
     }
   };
 
+  // Handle uploading result image and completing request
   const handleUploadResult = async () => {
     if (!selectedRequest || !resultImage) {
       toast.error("Please select a request and upload a result image");
@@ -87,6 +101,7 @@ const Admin = () => {
     
     setIsUploading(true);
     
+    // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         const newProgress = prev + Math.random() * 15;
@@ -94,21 +109,29 @@ const Admin = () => {
       });
     }, 400);
     
+    // Simulate API call to upload image
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
+      // Create object URL for the uploaded image
       const imageUrl = URL.createObjectURL(resultImage);
       
-      const updatedRequest = imageRequestManager.uploadResult(selectedRequest.id, imageUrl);
+      // Update the request with the result image
+      const updatedRequest = imageRequestService.uploadResult(selectedRequest.id, imageUrl);
       
       if (updatedRequest) {
-        setRequests(imageRequestManager.getAllRequests());
+        // Update requests state
+        setRequests(imageRequestService.getAllRequests());
+        
+        // Update selected request
         setSelectedRequest(updatedRequest);
+        
         clearInterval(interval);
         setUploadProgress(100);
         
         toast.success("Image uploaded and request completed!");
         
+        // Trigger a custom event that the main page can listen to
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
             imageUrl,
@@ -123,6 +146,7 @@ const Admin = () => {
         toast.error("Failed to update request with result image");
       }
       
+      // Reset after a delay
       setTimeout(() => {
         setUploadProgress(0);
         setIsUploading(false);
@@ -136,9 +160,39 @@ const Admin = () => {
     }
   };
 
+  // Format date to readable string
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString();
+  };
+
+  // Status badge component
+  const StatusBadge = ({ status }: { status: RequestStatus }) => {
+    switch (status) {
+      case 'new':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+            <AlertTriangle className="w-3 h-3 mr-1" />
+            New
+          </span>
+        );
+      case 'in-progress':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+            <Clock className="w-3 h-3 mr-1" />
+            In Progress
+          </span>
+        );
+      case 'completed':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Completed
+          </span>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -173,29 +227,162 @@ const Admin = () => {
                       <TabsTrigger value="completed">Completed</TabsTrigger>
                     </TabsList>
                     
-                    <RequestList
-                      requests={filteredRequests}
-                      selectedRequest={selectedRequest}
-                      onSelectRequest={handleSelectRequest}
-                      onUpdateStatus={handleUpdateStatus}
-                      formatDate={formatDate}
-                    />
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>User</TableHead>
+                            <TableHead>Prompt</TableHead>
+                            <TableHead>Aspect Ratio</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Created</TableHead>
+                            <TableHead>Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredRequests.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                                No requests found
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            filteredRequests.map((request) => (
+                              <TableRow 
+                                key={request.id} 
+                                className={`cursor-pointer ${selectedRequest?.id === request.id ? 'bg-gray-800/50' : ''}`}
+                                onClick={() => handleSelectRequest(request)}
+                              >
+                                <TableCell>{request.id}</TableCell>
+                                <TableCell>{request.userName}</TableCell>
+                                <TableCell className="max-w-xs truncate">{request.prompt}</TableCell>
+                                <TableCell>{request.aspectRatio}</TableCell>
+                                <TableCell><StatusBadge status={request.status} /></TableCell>
+                                <TableCell>{formatDate(request.createdAt)}</TableCell>
+                                <TableCell>
+                                  <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                                    {request.status === 'new' && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline" 
+                                        onClick={() => handleUpdateStatus(request.id, 'in-progress')}
+                                      >
+                                        Start
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </Tabs>
               </div>
               
               <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4">
                 {selectedRequest ? (
-                  <RequestDetails
-                    selectedRequest={selectedRequest}
-                    resultImage={resultImage}
-                    setResultImage={setResultImage}
-                    isUploading={isUploading}
-                    uploadProgress={uploadProgress}
-                    onUpdateStatus={handleUpdateStatus}
-                    onUploadResult={handleUploadResult}
-                    formatDate={formatDate}
-                  />
+                  <div>
+                    <h2 className="text-xl font-bold mb-2 text-white">Request Details</h2>
+                    <div className="mb-4">
+                      <StatusBadge status={selectedRequest.status} />
+                      <p className="mt-2 text-sm text-gray-400">Last updated: {formatDate(selectedRequest.updatedAt)}</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">User</h3>
+                        <p className="text-white">{selectedRequest.userName}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Prompt</h3>
+                        <p className="text-white bg-gray-800/50 p-2 rounded-md">{selectedRequest.prompt}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Aspect Ratio</h3>
+                        <p className="text-white">{selectedRequest.aspectRatio}</p>
+                      </div>
+                      
+                      {selectedRequest.productImage && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Reference Image</h3>
+                          <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
+                            <img 
+                              src={selectedRequest.productImage} 
+                              alt="Reference" 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedRequest.status !== 'completed' ? (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400 mb-1">Upload Result Image</h3>
+                          <ImageUploader 
+                            productImage={resultImage} 
+                            setProductImage={setResultImage} 
+                            className="h-40"
+                          />
+                          
+                          {selectedRequest.status === 'new' ? (
+                            <div className="flex space-x-2 mt-4">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => handleUpdateStatus(selectedRequest.id, 'in-progress')}
+                                className="flex-1"
+                              >
+                                <Clock className="mr-2 h-4 w-4" />
+                                Mark In Progress
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex space-x-2 mt-4">
+                              {isUploading ? (
+                                <div className="w-full flex flex-col items-center justify-center p-4">
+                                  <CircularProgressIndicator 
+                                    progress={uploadProgress} 
+                                    size="medium"
+                                  />
+                                  <p className="mt-2 text-sm text-gray-400">Uploading...</p>
+                                </div>
+                              ) : (
+                                <Button 
+                                  variant="newPurple"
+                                  disabled={!resultImage}
+                                  onClick={handleUploadResult}
+                                  className="flex-1"
+                                >
+                                  <Upload className="mr-2 h-4 w-4" />
+                                  Upload & Complete
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Result Image</h3>
+                          <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
+                            <img 
+                              src={selectedRequest.resultImage || ''} 
+                              alt="Result" 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="text-xs text-green-500 mt-1 flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Completed
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-gray-400">Select a request to view details</p>

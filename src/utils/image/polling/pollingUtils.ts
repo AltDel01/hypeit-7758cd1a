@@ -1,7 +1,8 @@
 
-import { PollingConfig } from './types';
-
-export const POLLING_CONFIG: PollingConfig = {
+/**
+ * Utility functions for image polling
+ */
+export const POLLING_CONFIG = {
   MAX_RETRIES: 10,
   INITIAL_DELAY: 3000,
   MAX_DELAY: 8000,
@@ -18,4 +19,3 @@ export const isValidResponse = (status: string, imageUrl?: string): boolean => {
 export const isProcessing = (status?: string): boolean => {
   return status === "processing" || status === "accepted";
 };
-

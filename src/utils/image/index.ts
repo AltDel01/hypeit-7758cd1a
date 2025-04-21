@@ -9,7 +9,7 @@ export * from './imagePolling';
 // Re-export image event functionality
 export * from './imageEvents';
 
-// Export image validation
+// Export image validation (explicitly avoid duplicate exports)
 export { checkValidImageUrl } from './imageValidation';
 
 // Export image loading utilities
@@ -17,4 +17,3 @@ export * from './imageLoading';
 
 // Re-export fallback service
 export * from './services/FallbackService';
-
