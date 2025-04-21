@@ -95,9 +95,9 @@ export const useElevenLabsAgent = () => {
     console.log("Starting conversation with params:", params);
     // Call the underlying method with proper type handling
     if (params) {
-      return await conversation.startSession();
+      return await conversation.startSession({ agentId: "default" });
     } else {
-      return await conversation.startSession();
+      return await conversation.startSession({ agentId: "default" });
     }
   };
 
