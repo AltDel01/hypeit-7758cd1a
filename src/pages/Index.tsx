@@ -8,7 +8,7 @@ import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
-import { imageRequestManager } from '@/services';
+import imageRequestService from '@/services';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -59,7 +59,7 @@ const Index = () => {
 
   useEffect(() => {
     if (user) {
-      const latestRequest = imageRequestManager.getLatestRequestForUser(user.id);
+      const latestRequest = imageRequestService.getLatestRequestForUser(user.id);
       if (latestRequest && latestRequest.status === 'completed' && latestRequest.resultImage) {
         setGeneratedImage(latestRequest.resultImage);
       }
@@ -100,7 +100,7 @@ const Index = () => {
       });
       
       // Create request in the service
-      const request = imageRequestManager.createRequest(
+      const request = imageRequestService.createRequest(
         user.id,
         user.email || 'Anonymous User',
         prompt,
