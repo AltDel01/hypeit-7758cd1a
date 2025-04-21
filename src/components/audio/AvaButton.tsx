@@ -68,11 +68,17 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
-      await startConversation();
+      try {
+        await startConversation();
+        toggleVisualizer();
+      } catch (error) {
+        console.error("Failed to start conversation:", error);
+        toast.error("Failed to connect to Ava. Please try again.");
+      }
     } else {
       await endConversation();
+      toggleVisualizer();
     }
-    toggleVisualizer();
   };
 
   const toggleVisualizer = () => {

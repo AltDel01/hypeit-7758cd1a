@@ -93,17 +93,26 @@ export const useElevenLabsAgent = () => {
   // Create properly typed wrapper functions for conversation methods
   const startConversation = async (params?: any) => {
     console.log("Starting conversation with params:", params);
-    // Call the underlying method with proper type handling
-    if (params) {
-      return await conversation.startSession({ agentId: "default" });
-    } else {
-      return await conversation.startSession({ agentId: "default" });
+    try {
+      // Use the correct parameter format for startSession
+      return await conversation.startSession({
+        agentId: "default"
+      });
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
+      toast.error("Failed to connect with Ava");
+      throw error;
     }
   };
 
   const endConversation = async () => {
     console.log("Ending conversation");
-    return await conversation.endSession();
+    try {
+      return await conversation.endSession();
+    } catch (error) {
+      console.error("Failed to end conversation:", error);
+      return null;
+    }
   };
 
   // Return the correct methods from conversation object
