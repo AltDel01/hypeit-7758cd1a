@@ -40,7 +40,7 @@ export const useElevenLabsAgent = () => {
     onError: (error) => {
       console.error("ElevenLabs error:", error);
       const errorMessage = typeof error === 'string' ? error : 
-                          error instanceof Error ? error.message : 
+                          (error && typeof error === 'object' && 'message' in error) ? error.message : 
                           'Unknown error occurred';
       
       setConnectionError(errorMessage);
@@ -127,16 +127,20 @@ export const useElevenLabsAgent = () => {
       console.error("Failed to start conversation:", error);
       
       // Provide more specific error messages based on the error
-      if (error instanceof Error) {
-        setConnectionError(error.message);
+      let errorMessage = 'Failed to connect with Ava';
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = error.message as string;
         
-        if (error.message.includes("WebSocket")) {
+        if (errorMessage.includes("WebSocket")) {
           toast.error("Network issue connecting to Ava. Check your internet connection.");
-        } else if (error.message.includes("permission")) {
+        } else if (errorMessage.includes("permission")) {
           toast.error("Microphone permission needed to talk with Ava.");
-        } else if (error.message.includes("MediaDevices")) {
+        } else if (errorMessage.includes("MediaDevices")) {
           toast.error("Browser doesn't support microphone access. Try a different browser.");
-        } else if (error.message.includes("not found") || error.message.includes("404")) {
+        } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
           toast.error("The Ava service couldn't be reached. Please try again later.");
         } else {
           toast.error("Failed to connect with Ava. Please try again.");
@@ -145,6 +149,7 @@ export const useElevenLabsAgent = () => {
         toast.error("Failed to connect with Ava. Please try again.");
       }
       
+      setConnectionError(errorMessage);
       setIsInitializing(false);
       throw error;
     }
