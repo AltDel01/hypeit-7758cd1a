@@ -95,13 +95,9 @@ export const useElevenLabsAgent = () => {
     console.log("Starting conversation with params:", params);
     // Call the underlying method with proper type handling
     if (params) {
-      return await conversation.startSession(params);
+      return await conversation.startSession();
     } else {
-      // For the empty case, we need to use a valid empty object that satisfies the type constraints
-      return await conversation.startSession({
-        // Use the minimum required fields to satisfy the type
-        url: undefined
-      });
+      return await conversation.startSession();
     }
   };
 

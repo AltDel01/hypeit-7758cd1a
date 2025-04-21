@@ -68,9 +68,7 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
-      await startConversation({
-        url: undefined // Passing a valid object with minimum required fields
-      });
+      await startConversation();
     } else {
       await endConversation();
     }
