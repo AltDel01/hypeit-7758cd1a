@@ -39,9 +39,15 @@ export const useElevenLabsAgent = () => {
   const conversation = useConversation({
     onError: (error) => {
       console.error("ElevenLabs error:", error);
-      const errorMessage = typeof error === 'string' ? error : 
-                          (error && typeof error === 'object' && 'message' in error) ? error.message : 
-                          'Unknown error occurred';
+      // Fix the type checking for error to avoid "message does not exist on type 'never'"
+      let errorMessage: string;
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = error.message as string;
+      } else {
+        errorMessage = 'Unknown error occurred';
+      }
       
       setConnectionError(errorMessage);
       toast.error("Error connecting to Ava");
