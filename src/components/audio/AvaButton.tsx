@@ -68,7 +68,8 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
-      await startConversation();
+      // Pass an empty object as argument since the function expects it
+      await startConversation({});
     } else {
       await endConversation();
     }
