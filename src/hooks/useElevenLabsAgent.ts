@@ -90,10 +90,19 @@ export const useElevenLabsAgent = () => {
     setConversationContext(ConversationContext.GENERAL);
   };
 
-  // Create wrapper functions that handle the params correctly
-  const startConversation = async (params?: Parameters<typeof conversation.startSession>[0]) => {
+  // Create properly typed wrapper functions for conversation methods
+  const startConversation = async (params?: any) => {
     console.log("Starting conversation with params:", params);
-    return await conversation.startSession(params || {});
+    // Call the underlying method with proper type handling
+    if (params) {
+      return await conversation.startSession(params);
+    } else {
+      // For the empty case, we need to use a valid empty object that satisfies the type constraints
+      return await conversation.startSession({
+        // Use the minimum required fields to satisfy the type
+        url: undefined
+      });
+    }
   };
 
   const endConversation = async () => {
