@@ -1,8 +1,11 @@
 
 import { useConversation } from "@11labs/react";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export const useElevenLabsAgent = () => {
+  const [lastMessage, setLastMessage] = useState<any>(null);
+
   const conversation = useConversation({
     onError: (error) => {
       console.error("ElevenLabs error:", error);
@@ -10,6 +13,7 @@ export const useElevenLabsAgent = () => {
     },
     onMessage: (message) => {
       console.log("Received message:", message);
+      setLastMessage(message);
     }
   });
 
@@ -37,6 +41,7 @@ export const useElevenLabsAgent = () => {
     startConversation,
     endConversation,
     isSpeaking: conversation.isSpeaking,
-    status: conversation.status
+    status: conversation.status,
+    lastMessage
   };
 };

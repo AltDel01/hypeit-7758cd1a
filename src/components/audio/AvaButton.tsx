@@ -15,7 +15,7 @@ const AvaButton: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { setGlobalPrompt } = usePrompt();
-  const { startConversation, endConversation, isSpeaking, status, conversation } = useElevenLabsAgent();
+  const { startConversation, endConversation, isSpeaking, status, conversation, lastMessage } = useElevenLabsAgent();
 
   useEffect(() => {
     return () => {
@@ -23,27 +23,28 @@ const AvaButton: React.FC = () => {
         endConversation();
       }
     };
-  }, [isVisualizerActive]);
+  }, [isVisualizerActive, endConversation]);
 
+  // Process messages when they arrive
   useEffect(() => {
-    if (conversation) {
-      conversation.onMessage((message) => {
-        if (message.type === 'final_transcript') {
-          // If the user's message contains keywords about image generation
-          if (message.text.toLowerCase().includes('generate') || 
-              message.text.toLowerCase().includes('create an image') ||
-              message.text.toLowerCase().includes('make an image')) {
-            // Extract the description part after the command
-            const prompt = message.text.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
-            if (prompt) {
-              setGlobalPrompt(prompt);
-              toast.success("Prompt has been set! You can now upload an image if needed.");
-            }
-          }
+    if (lastMessage && lastMessage.type === 'final_transcript') {
+      const messageText = lastMessage.text.toLowerCase();
+      
+      // If the user's message contains keywords about image generation
+      if (messageText.includes('generate') || 
+          messageText.includes('create an image') ||
+          messageText.includes('make an image')) {
+        
+        // Extract the description part after the command
+        const prompt = lastMessage.text.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
+        
+        if (prompt) {
+          setGlobalPrompt(prompt);
+          toast.success("Prompt has been set! You can now upload an image if needed.");
         }
-      });
+      }
     }
-  }, [conversation, setGlobalPrompt]);
+  }, [lastMessage, setGlobalPrompt]);
 
   const handleButtonClick = async () => {
     if (!user) {
