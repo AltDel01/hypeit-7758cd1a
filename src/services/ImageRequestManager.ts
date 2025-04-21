@@ -1,13 +1,24 @@
 
-import { toast } from 'sonner';
 import type { ImageRequest, RequestStatus } from '@/types/imageRequest';
 import { LocalStorageService } from './storage/LocalStorageService';
+import { RequestCreationService } from './requests/RequestCreationService';
+import { StatusUpdateService } from './requests/StatusUpdateService';
+import { UserRequestService } from './requests/UserRequestService';
+import { RequestQueryService } from './requests/RequestQueryService';
 
 class ImageRequestManager {
   private storage: LocalStorageService;
+  private requestCreationService: RequestCreationService;
+  private statusUpdateService: StatusUpdateService;
+  private userRequestService: UserRequestService;
+  private requestQueryService: RequestQueryService;
 
   constructor() {
     this.storage = new LocalStorageService();
+    this.requestCreationService = new RequestCreationService(this.storage);
+    this.statusUpdateService = new StatusUpdateService(this.storage);
+    this.userRequestService = new UserRequestService(this.storage);
+    this.requestQueryService = new RequestQueryService(this.storage);
   }
 
   createRequest(
@@ -17,57 +28,41 @@ class ImageRequestManager {
     aspectRatio: string, 
     productImageUrl: string | null
   ): ImageRequest {
-    try {
-      return this.storage.create({
-        userId,
-        userName,
-        prompt,
-        aspectRatio,
-        status: 'new',
-        productImage: productImageUrl,
-        resultImage: null
-      });
-    } catch (error) {
-      console.error('Failed to create image request:', error);
-      toast.error('Failed to save your request. Please try again later.');
-      throw error;
-    }
+    return this.requestCreationService.createRequest(
+      userId,
+      userName,
+      prompt,
+      aspectRatio,
+      productImageUrl
+    );
   }
 
   getAllRequests(): ImageRequest[] {
-    return this.storage.getAll();
+    return this.requestQueryService.getAllRequests();
   }
 
   getRequestsByStatus(status: RequestStatus): ImageRequest[] {
-    return this.storage.getAll().filter(req => req.status === status);
+    return this.requestQueryService.getRequestsByStatus(status);
   }
 
   getRequestsByUser(userId: string): ImageRequest[] {
-    return this.storage.getAll().filter(req => req.userId === userId);
+    return this.userRequestService.getRequestsByUser(userId);
   }
 
   updateRequestStatus(id: string, status: RequestStatus): ImageRequest | null {
-    return this.storage.update(id, { status });
+    return this.statusUpdateService.updateRequestStatus(id, status);
   }
 
   uploadResult(id: string, resultImageUrl: string): ImageRequest | null {
-    return this.storage.update(id, {
-      resultImage: resultImageUrl,
-      status: 'completed'
-    });
+    return this.statusUpdateService.uploadResult(id, resultImageUrl);
   }
 
   getRequestById(id: string): ImageRequest | null {
-    return this.storage.getById(id);
+    return this.requestQueryService.getRequestById(id);
   }
 
   getLatestRequestForUser(userId: string): ImageRequest | null {
-    const userRequests = this.getRequestsByUser(userId);
-    if (userRequests.length === 0) return null;
-    
-    return userRequests.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )[0];
+    return this.userRequestService.getLatestRequestForUser(userId);
   }
 
   clearAllRequests(): void {

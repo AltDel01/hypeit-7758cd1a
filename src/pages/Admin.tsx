@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
-import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
+import imageRequestService, { ImageRequest, RequestStatus } from '@/services';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -21,30 +21,24 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Check if user has admin access - for demo we'll make this more permissive
   const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
 
-  // Load requests from the service
   const loadRequests = () => {
     const allRequests = imageRequestService.getAllRequests();
     console.log('Loaded requests from service:', allRequests);
     setRequests(allRequests);
   };
 
-  // Manually refresh requests
   const handleRefresh = () => {
     loadRequests();
     toast.info("Request list refreshed");
   };
 
   useEffect(() => {
-    // Load requests initially
     loadRequests();
 
-    // Set up an interval to check for new requests every few seconds
     const intervalId = setInterval(loadRequests, 5000);
     
-    // Listen for the custom event that indicates a new request has been created
     const handleNewRequest = () => {
       console.log("Admin: Detected new image request created, refreshing list");
       loadRequests();
@@ -62,28 +56,23 @@ const Admin = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Filter requests based on active tab
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;
     return request.status === activeTab;
   });
 
-  // Handle request selection
   const handleSelectRequest = (request: ImageRequest) => {
     setSelectedRequest(request);
-    setResultImage(null); // Reset result image when selecting a new request
+    setResultImage(null);
   };
 
-  // Handle status update
   const handleUpdateStatus = (id: string, status: RequestStatus) => {
     const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
     if (updatedRequest) {
-      // Update the requests state with the new list
       loadRequests();
       toast.success(`Request ${id} marked as ${status}`);
       
-      // If current request is being updated, update selectedRequest too
       if (selectedRequest?.id === id) {
         setSelectedRequest(updatedRequest);
       }
@@ -92,7 +81,6 @@ const Admin = () => {
     }
   };
 
-  // Handle uploading result image and completing request
   const handleUploadResult = async () => {
     if (!selectedRequest || !resultImage) {
       toast.error("Please select a request and upload a result image");
@@ -101,7 +89,6 @@ const Admin = () => {
     
     setIsUploading(true);
     
-    // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         const newProgress = prev + Math.random() * 15;
@@ -109,29 +96,21 @@ const Admin = () => {
       });
     }, 400);
     
-    // Simulate API call to upload image
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Create object URL for the uploaded image
       const imageUrl = URL.createObjectURL(resultImage);
       
-      // Update the request with the result image
       const updatedRequest = imageRequestService.uploadResult(selectedRequest.id, imageUrl);
       
       if (updatedRequest) {
-        // Update requests state
         setRequests(imageRequestService.getAllRequests());
-        
-        // Update selected request
         setSelectedRequest(updatedRequest);
-        
         clearInterval(interval);
         setUploadProgress(100);
         
         toast.success("Image uploaded and request completed!");
         
-        // Trigger a custom event that the main page can listen to
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
             imageUrl,
@@ -146,7 +125,6 @@ const Admin = () => {
         toast.error("Failed to update request with result image");
       }
       
-      // Reset after a delay
       setTimeout(() => {
         setUploadProgress(0);
         setIsUploading(false);
@@ -160,13 +138,11 @@ const Admin = () => {
     }
   };
 
-  // Format date to readable string
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Status badge component
   const StatusBadge = ({ status }: { status: RequestStatus }) => {
     switch (status) {
       case 'new':

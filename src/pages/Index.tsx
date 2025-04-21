@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -9,7 +8,7 @@ import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
-import imageRequestService from '@/services/ImageRequestService';
+import imageRequestService from '@/services';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
