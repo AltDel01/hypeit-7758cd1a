@@ -91,9 +91,9 @@ export const useElevenLabsAgent = () => {
   };
 
   // Create wrapper functions that handle the params correctly
-  const startConversation = async (params: Parameters<typeof conversation.startSession>[0] = {}) => {
+  const startConversation = async (params?: Parameters<typeof conversation.startSession>[0]) => {
     console.log("Starting conversation with params:", params);
-    return await conversation.startSession(params);
+    return await conversation.startSession(params || {});
   };
 
   const endConversation = async () => {

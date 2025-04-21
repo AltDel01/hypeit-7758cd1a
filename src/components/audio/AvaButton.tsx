@@ -68,7 +68,6 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
-      // Now startConversation properly handles the parameters
       await startConversation();
     } else {
       await endConversation();
