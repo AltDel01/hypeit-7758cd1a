@@ -21,25 +21,17 @@ export const handleApiError = (error: any, prompt: string, aspectRatio: string, 
   removeActivePoll(requestId);
 };
 
-export const handlePollingError = async (error: any, params: PollImageParams): Promise<void> => {
+export const handlePollingError = async (error: any, params: PollImageParams): Promise<boolean> => {
   const { prompt, aspectRatio, requestId, retries } = params;
   console.error(`Error in polling for ${requestId}:`, error);
   
   if (retries <= 2) {
     console.log(`Too many polling errors for ${requestId}, using fallback image`);
     handleMaxRetriesReached(prompt, aspectRatio, requestId);
-    return;
+    return false;
   }
 
-  const shorterDelay = Math.max(1000, params.delay / 2);
-  await new Promise(resolve => setTimeout(resolve, shorterDelay));
-  
-  // Return updated params for next polling attempt
-  return {
-    ...params,
-    retries: params.retries - 1,
-    delay: shorterDelay
-  };
+  return true;
 };
 
 export const handleApiKeyError = (error: string, requestId: string, prompt: string): void => {

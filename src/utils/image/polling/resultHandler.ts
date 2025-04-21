@@ -8,8 +8,8 @@ import { isProcessing, calculateNextDelay } from './pollingUtils';
 export const handleStatusCheckResult = async (
   result: ImageStatusResult,
   params: PollImageParams
-): Promise<PollImageParams | void> => {
-  const { requestId, prompt, aspectRatio, retries, delay } = params;
+): Promise<boolean> => {
+  const { requestId, prompt, aspectRatio } = params;
 
   if (result.error) {
     console.error(`Error in polling result for ${requestId}:`, result.error);
@@ -24,42 +24,31 @@ export const handleStatusCheckResult = async (
     console.log(`Valid image URL received for ${requestId}:`, result.imageUrl.substring(0, 50) + "...");
     await processImageUrl(result.imageUrl, prompt);
     removeActivePoll(requestId);
-    return;
+    return false;
   }
 
   if (isProcessing(result.status)) {
-    console.log(`Image still processing (${result.status}) for ${requestId}, polling again in ${delay}ms`);
-    return {
-      ...params,
-      retries: retries - 1,
-      delay: calculateNextDelay(delay)
-    };
+    console.log(`Image still processing (${result.status}) for ${requestId}, polling again`);
+    return true;
   }
 
   if (result.status === "completed" && !result.imageUrl) {
     console.log(`Completed status received for ${requestId} but no valid image URL, using fallback`);
     useFallbackImage(prompt, aspectRatio);
     removeActivePoll(requestId);
-    return;
+    return false;
   }
 
   if (result.data) {
-    return {
-      ...params,
-      retries: Math.min(retries - 1, 3),
-      delay
-    };
+    return true;
   }
 
-  if (retries > 1) {
-    return {
-      ...params,
-      retries: retries - 1,
-      delay
-    };
-  } else {
-    console.log(`No retries left for ${requestId}, using fallback`);
-    useFallbackImage(prompt, aspectRatio);
-    removeActivePoll(requestId);
+  if (params.retries > 1) {
+    return true;
   }
+
+  console.log(`No retries left for ${requestId}, using fallback`);
+  useFallbackImage(prompt, aspectRatio);
+  removeActivePoll(requestId);
+  return false;
 };

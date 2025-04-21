@@ -5,7 +5,7 @@ import { delayExecution } from "./helpers";
 import { POLLING_CONFIG } from './pollingUtils';
 import { handleMaxRetriesReached, handlePollingError, handleApiKeyError } from './errorHandler';
 import { handleStatusCheckResult } from './resultHandler';
-import { addActivePoll, isPollingActive } from './pollingState';
+import { addActivePoll, isPollingActive, removeActivePoll } from './pollingState';
 
 export async function pollForImageResult(params: PollImageParams): Promise<void> {
   const { 
@@ -26,6 +26,7 @@ export async function pollForImageResult(params: PollImageParams): Promise<void>
   
   if (currentRetries <= 0) {
     handleMaxRetriesReached(prompt, aspectRatio, requestId);
+    removeActivePoll(requestId);
     return;
   }
   
@@ -37,26 +38,36 @@ export async function pollForImageResult(params: PollImageParams): Promise<void>
     
     if (result.apiError?.includes("API key")) {
       handleApiKeyError(result.apiError, requestId, prompt);
+      removeActivePoll(requestId);
       return;
     }
     
-    const nextParams = await handleStatusCheckResult(result, {
+    const shouldContinuePolling = await handleStatusCheckResult(result, {
       ...params,
       retries: currentRetries
     });
     
-    if (nextParams) {
+    if (shouldContinuePolling) {
       // Schedule next poll with updated parameters
-      setTimeout(() => pollForImageResult(nextParams), 50);
+      setTimeout(() => pollForImageResult({
+        ...params,
+        retries: currentRetries - 1
+      }), 50);
     }
   } catch (error) {
-    const updatedParams = await handlePollingError(error, {
+    const shouldRetry = await handlePollingError(error, {
       ...params,
       retries: currentRetries
     });
     
-    if (updatedParams) {
-      setTimeout(() => pollForImageResult(updatedParams), 50);
+    if (shouldRetry) {
+      setTimeout(() => pollForImageResult({
+        ...params,
+        retries: currentRetries - 1,
+        delay: Math.max(1000, params.delay / 2)
+      }), 50);
+    } else {
+      removeActivePoll(requestId);
     }
   }
 }
