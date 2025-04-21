@@ -90,11 +90,22 @@ export const useElevenLabsAgent = () => {
     setConversationContext(ConversationContext.GENERAL);
   };
 
+  // Create wrapper functions that handle the params correctly
+  const startConversation = async (params: Parameters<typeof conversation.startSession>[0] = {}) => {
+    console.log("Starting conversation with params:", params);
+    return await conversation.startSession(params);
+  };
+
+  const endConversation = async () => {
+    console.log("Ending conversation");
+    return await conversation.endSession();
+  };
+
   // Return the correct methods from conversation object
   return {
     conversation,
-    startConversation: conversation.startSession,
-    endConversation: conversation.endSession,
+    startConversation,
+    endConversation,
     isSpeaking: conversation.isSpeaking,
     status: conversation.status,
     lastMessage,
