@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Power, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,24 @@ const AvaButton: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { setGlobalPrompt } = usePrompt();
-  const { startConversation, endConversation, isSpeaking, status, conversation, lastMessage } = useElevenLabsAgent();
+  const { 
+    startConversation, 
+    endConversation, 
+    isSpeaking, 
+    status, 
+    conversation, 
+    lastMessage, 
+    pendingPrompt,
+    clearPendingPrompt 
+  } = useElevenLabsAgent();
+
+  useEffect(() => {
+    if (pendingPrompt) {
+      setGlobalPrompt(pendingPrompt);
+      toast.success("Image generation prompt detected and set!");
+      clearPendingPrompt();
+    }
+  }, [pendingPrompt, setGlobalPrompt, clearPendingPrompt]);
 
   useEffect(() => {
     return () => {
@@ -25,17 +41,14 @@ const AvaButton: React.FC = () => {
     };
   }, [isVisualizerActive, endConversation]);
 
-  // Process messages when they arrive
   useEffect(() => {
     if (lastMessage && lastMessage.type === 'final_transcript') {
       const messageText = lastMessage.text.toLowerCase();
       
-      // If the user's message contains keywords about image generation
       if (messageText.includes('generate') || 
           messageText.includes('create an image') ||
           messageText.includes('make an image')) {
         
-        // Extract the description part after the command
         const prompt = lastMessage.text.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
         
         if (prompt) {
@@ -68,7 +81,6 @@ const AvaButton: React.FC = () => {
 
   return (
     <div ref={buttonRef} className="fixed bottom-10 right-1/2 translate-x-1/2 z-50">
-      {/* Only show button animations when not listening */}
       {!isVisualizerActive && (
         <>
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FEF7CD]/40 via-[#8c52ff]/30 to-[#1EAEDB]/20 animate-outer-pulse"></div>
@@ -77,7 +89,6 @@ const AvaButton: React.FC = () => {
         </>
       )}
       
-      {/* Increase the button size when not listening */}
       {!isVisualizerActive && (
         <Button
           onClick={handleButtonClick}
@@ -99,7 +110,6 @@ const AvaButton: React.FC = () => {
         </Button>
       )}
 
-      {/* Always render the visualizer component, its visibility is controlled internally */}
       <MicrophoneVisualizer 
         isActive={isVisualizerActive} 
         onClose={() => {
