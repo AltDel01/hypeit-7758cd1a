@@ -44,7 +44,9 @@ export const useElevenLabsAgent = () => {
       if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = error.message as string;
+        // Use type assertion to safely access message
+        const errorObj = error as { message: string };
+        errorMessage = errorObj.message;
       } else {
         errorMessage = 'Unknown error occurred';
       }
@@ -138,7 +140,9 @@ export const useElevenLabsAgent = () => {
       if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = error.message as string;
+        // Use type assertion to safely access message
+        const errorObj = error as { message: string };
+        errorMessage = errorObj.message;
         
         if (errorMessage.includes("WebSocket")) {
           toast.error("Network issue connecting to Ava. Check your internet connection.");
