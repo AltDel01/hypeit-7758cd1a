@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Power, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,14 +43,14 @@ const AvaButton: React.FC = () => {
   }, [isVisualizerActive, endConversation]);
 
   useEffect(() => {
-    if (lastMessage && lastMessage.type === 'final_transcript') {
-      const messageText = lastMessage.text.toLowerCase();
+    if (lastMessage && typeof lastMessage === 'object' && 'message' in lastMessage) {
+      const messageText = lastMessage.message.toLowerCase();
       
       if (messageText.includes('generate') || 
           messageText.includes('create an image') ||
           messageText.includes('make an image')) {
         
-        const prompt = lastMessage.text.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
+        const prompt = lastMessage.message.replace(/^(generate|create an image|make an image)(\s+of|\s+with|\s+showing)?/i, '').trim();
         
         if (prompt) {
           setGlobalPrompt(prompt);

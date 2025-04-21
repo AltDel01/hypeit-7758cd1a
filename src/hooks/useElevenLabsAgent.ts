@@ -41,8 +41,10 @@ export const useElevenLabsAgent = () => {
     onMessage: (message) => {
       console.log("Received message:", message);
       
-      if (message.type === 'final_transcript') {
-        const messageText = message.text.toLowerCase();
+      // We need to adapt to the actual message structure from ElevenLabs
+      // The message structure has changed - let's handle it properly
+      if (message && typeof message === 'object' && 'message' in message) {
+        const messageText = message.message.toLowerCase();
         
         // Check for image generation intent
         const hasGenerationIntent = imageGenerationKeywords.some(keyword => 
@@ -88,10 +90,11 @@ export const useElevenLabsAgent = () => {
     setConversationContext(ConversationContext.GENERAL);
   };
 
+  // Return the correct methods from conversation object
   return {
     conversation,
-    startConversation,
-    endConversation,
+    startConversation: conversation.startSession,
+    endConversation: conversation.endSession,
     isSpeaking: conversation.isSpeaking,
     status: conversation.status,
     lastMessage,
