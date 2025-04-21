@@ -7,13 +7,11 @@ import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePrompt } from '@/contexts/PromptContext';
 import AvaButton from '@/components/audio/AvaButton';
 import { imageRequestManager } from '@/services';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
-  const { globalPrompt } = usePrompt();
   const [prompt, setPrompt] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,14 +21,15 @@ const Index = () => {
   const { user } = useAuth();
   
   useEffect(() => {
-    if (globalPrompt && !prompt) {
-      setPrompt(globalPrompt);
+    const savedPrompt = localStorage.getItem('savedPrompt');
+    if (savedPrompt && !prompt) {
+      setPrompt(savedPrompt);
     }
     
     if (user && localStorage.getItem('authRedirectPath') === '/') {
       localStorage.removeItem('authRedirectPath');
     }
-  }, [user, globalPrompt]);
+  }, [user]);
   
   useEffect(() => {
     Sentry.setUser({
