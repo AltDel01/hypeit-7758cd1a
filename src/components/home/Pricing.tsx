@@ -35,7 +35,7 @@ const Pricing = () => {
         { name: "Competitor analysis", included: false },
         { name: "Priority support", included: true },
       ],
-      popular: true,
+      popular: true
     },
     {
       title: "Business",
@@ -51,8 +51,25 @@ const Pricing = () => {
         { name: "Competitor analysis", included: true },
         { name: "Priority support", included: true },
       ],
-      popular: false,
+      popular: false
     },
+    {
+      title: "Specialist",
+      price: "$125",
+      description: "AI-powered end-to-end social growth and analytics",
+      features: [
+        { name: "All Pro Benefits", included: true },
+        { name: "AI Automated posting to social media", included: true },
+        { name: "AI winning content analytics", included: true },
+        { name: "AI influencer recommendation and analytics", included: true },
+        { name: "AI contact, collect rate card, and generate brief with influencers automatically", included: true },
+        { name: "AI social media Audit", included: true },
+        { name: "AI competitor benchmarking", included: true },
+        { name: "AI social media reporting", included: true },
+        { name: "AI social media trend analytics", included: true },
+      ],
+      popular: false
+    }
   ];
 
   return (
@@ -63,36 +80,51 @@ const Pricing = () => {
         <div className="absolute top-0 -right-40 w-96 h-96 bg-brand-teal/5 rounded-full blur-3xl" />
       </div>
       
-      <div className="max-w-7xl mx-auto px-6 md:px-10">
-        <div className="text-center mb-16 max-w-2xl mx-auto">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-10">
+        <div className="text-center mb-12 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Simple, transparent pricing
           </h2>
-          <p className="text-brand-slate-600 text-lg">
+          <p className="text-brand-slate-600 text-md md:text-lg">
             Choose the plan that's right for your business. All plans include a 14-day free trial.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Mobile: horizontal scroll, Desktop: grid */}
+        <div className="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto snap-x md:overflow-visible pb-4 no-scrollbar">
           {pricing.map((plan, index) => (
-            <PricingCard
+            <div
               key={index}
-              title={plan.title}
-              price={plan.price}
-              description={plan.description}
-              features={plan.features}
-              popular={plan.popular}
-              buttonText={plan.title === "Free" ? "Get Started" : "Start Free Trial"}
-              className={cn(
-                plan.popular ? "md:scale-105 md:shadow-lg z-10" : "",
-                "duration-300"
-              )}
-            />
+              className="snap-start min-w-[85vw] max-w-xs sm:min-w-[60vw] md:min-w-0 md:max-w-none"
+            >
+              <PricingCard
+                title={plan.title}
+                price={plan.price}
+                description={plan.description}
+                features={plan.features}
+                popular={plan.popular}
+                buttonText={
+                  plan.title === "Free"
+                    ? "Get Started"
+                    : plan.title === "Specialist"
+                      ? "Contact Sales"
+                      : "Start Free Trial"}
+                className={
+                  (plan.popular
+                    ? "md:scale-105 md:shadow-lg z-10"
+                    : "") + " duration-300"
+                }
+              />
+            </div>
           ))}
         </div>
         
-        <div className="mt-12 text-center text-brand-slate-500 text-sm">
-          Need a custom plan? <a href="#" className="text-brand-blue hover:underline">Contact us</a> for enterprise pricing.
+        <div className="mt-10 text-center text-brand-slate-500 text-sm px-2">
+          Need a custom plan?{" "}
+          <a href="#" className="text-brand-blue hover:underline">
+            Contact us
+          </a>{" "}
+          for enterprise pricing.
         </div>
       </div>
     </section>
@@ -100,3 +132,4 @@ const Pricing = () => {
 };
 
 export default Pricing;
+
