@@ -12,8 +12,10 @@ interface DropdownMenuProps extends DropdownMenuPrimitive.DropdownMenuProps {
 const DropdownMenu = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Root>,
   DropdownMenuProps
->((props, ref) => (
-  <DropdownMenuPrimitive.Root {...props} />
+>(({ children, ...props }, ref) => (
+  <DropdownMenuPrimitive.Root {...props}>
+    {children}
+  </DropdownMenuPrimitive.Root>
 ))
 DropdownMenu.displayName = DropdownMenuPrimitive.Root.displayName
 
