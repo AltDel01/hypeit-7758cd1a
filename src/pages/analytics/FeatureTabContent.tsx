@@ -3,14 +3,11 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, BarChart, Users, Mail } from 'lucide-react';
-import { TabsContent } from '@/components/ui/tabs';
 
 interface Props {
   onTrigger: (feature: string) => void;
-  tab: string;
 }
-
-const FeatureTabContent = ({ onTrigger, tab }: Props) => (
+const FeatureTabContent = ({ onTrigger }: Props) => (
   <>
     <TabsContent value="schedule" className="space-y-4">
       <Card className="bg-gray-800 border-gray-700 p-6">
@@ -66,5 +63,5 @@ const FeatureTabContent = ({ onTrigger, tab }: Props) => (
     </TabsContent>
   </>
 );
-
+import { TabsContent } from '@/components/ui/tabs';
 export default FeatureTabContent;
