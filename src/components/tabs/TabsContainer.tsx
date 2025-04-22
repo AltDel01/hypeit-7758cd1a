@@ -49,9 +49,11 @@ const TabsContainer = ({
     <div className="w-full">
       <div className="grid grid-cols-2 gap-4 mb-4">
         <DropdownMenu open={visualMenuOpen} onOpenChange={setVisualMenuOpen}>
-          <DropdownMenuTrigger className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
-            <span>Social Media Visual</span>
-            <ChevronDown className="ml-2 h-5 w-5" />
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
+              <span>Social Media Visual</span>
+              <ChevronDown className="ml-2 h-5 w-5" />
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-full border border-gray-700 z-50">
             <VisualSettings
@@ -64,9 +66,11 @@ const TabsContainer = ({
         </DropdownMenu>
         
         <DropdownMenu open={writerMenuOpen} onOpenChange={setWriterMenuOpen}>
-          <DropdownMenuTrigger className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
-            <span>Ghost Writer</span>
-            <ChevronDown className="ml-2 h-5 w-5" />
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
+              <span>Ghost Writer</span>
+              <ChevronDown className="ml-2 h-5 w-5" />
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 bg-gray-800 border border-gray-700 z-50">
             {[
