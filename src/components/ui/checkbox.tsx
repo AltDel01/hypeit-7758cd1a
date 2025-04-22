@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils"
 
 interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
   className?: string;
+  children?: React.ReactNode;
+}
+
+interface CheckboxIndicatorProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Indicator> {
+  className?: string;
+  children?: React.ReactNode;
 }
 
 const Checkbox = React.forwardRef<

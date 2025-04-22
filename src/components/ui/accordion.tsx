@@ -11,21 +11,29 @@ interface AccordionItemProps extends React.ComponentPropsWithoutRef<typeof Accor
   className?: string;
   value: string;
   disabled?: boolean;
+  children?: React.ReactNode;
 }
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   AccordionItemProps
->(({ className, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
     className={cn("border-b", className)}
     {...props}
-  />
+  >
+    {children}
+  </AccordionPrimitive.Item>
 ))
 AccordionItem.displayName = "AccordionItem"
 
 interface AccordionTriggerProps extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+interface AccordionHeaderProps extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Header> {
   className?: string;
   children?: React.ReactNode;
 }
