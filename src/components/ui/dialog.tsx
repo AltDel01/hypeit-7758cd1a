@@ -11,21 +11,26 @@ const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogPortal = DialogPrimitive.Portal
 
+interface DialogCloseProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close> {
+  children?: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
+}
+
 const DialogClose = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Close>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close> & {
-    children?: React.ReactNode;
-  }
->(({ className, children, ...props }, ref) => (
+  DialogCloseProps
+>(({ className, children, asChild = false, ...props }, ref) => (
   <DialogPrimitive.Close
     ref={ref}
     className={cn(
       "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
       className
     )}
+    asChild={asChild}
     {...props}
   >
-    {children || (
+    {asChild ? children : (
       <>
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
@@ -79,11 +84,16 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+interface DialogHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+  children?: React.ReactNode;
+}
+
 const DialogHeader = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }) => (
+}: DialogHeaderProps) => (
   <div
     className={cn(
       "flex flex-col space-y-1.5 text-center sm:text-left",
@@ -96,11 +106,16 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+interface DialogFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+  children?: React.ReactNode;
+}
+
 const DialogFooter = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }) => (
+}: DialogFooterProps) => (
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
