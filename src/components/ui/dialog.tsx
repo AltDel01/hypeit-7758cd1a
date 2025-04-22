@@ -30,6 +30,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   children?: React.ReactNode;
+  className?: string;
 }
 
 const DialogContent = React.forwardRef<
@@ -92,6 +93,7 @@ DialogFooter.displayName = "DialogFooter"
 
 interface DialogTitleProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title> {
   children?: React.ReactNode;
+  className?: string;
 }
 
 const DialogTitle = React.forwardRef<
@@ -113,6 +115,7 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 interface DialogDescriptionProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description> {
   children?: React.ReactNode;
+  className?: string;
 }
 
 const DialogDescription = React.forwardRef<
