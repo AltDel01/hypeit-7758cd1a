@@ -9,6 +9,8 @@ const Accordion = AccordionPrimitive.Root
 
 interface AccordionItemProps extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> {
   className?: string;
+  value: string;
+  disabled?: boolean;
 }
 
 const AccordionItem = React.forwardRef<
