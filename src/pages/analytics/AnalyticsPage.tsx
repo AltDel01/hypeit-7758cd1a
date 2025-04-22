@@ -25,16 +25,6 @@ const TAB_CONTENT = {
   outreach: (onTrigger: (feature: string) => void) => (
     <FeatureTabContent onTrigger={onTrigger} tab="outreach" />
   ),
-  tiktok: (onTrigger: (feature: string) => void) => (
-    <div className="bg-gray-800 border-gray-700 p-6 rounded-lg text-white text-xl">
-      <span>TikTok Analytics Coming Soon</span>
-    </div>
-  ),
-  social: (onTrigger: (feature: string) => void) => (
-    <div className="bg-gray-800 border-gray-700 p-6 rounded-lg text-white text-xl">
-      <span>X Analytics Coming Soon</span>
-    </div>
-  ),
 };
 
 const AnalyticsPage = () => {

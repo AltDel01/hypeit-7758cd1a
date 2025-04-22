@@ -11,7 +11,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Instagram, CalendarDays, ChartBar, Users, Mail, Tiktok } from "lucide-react";
+import { Instagram, CalendarDays, ChartBar, Users, Mail } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const analyticsRoutes = [
@@ -39,19 +39,6 @@ const analyticsRoutes = [
     label: "Influencer Outreach",
     value: "outreach",
     icon: <Mail className="h-5 w-5" />,
-  },
-  {
-    label: "TikTok",
-    value: "tiktok",
-    icon: <Tiktok className="h-5 w-5" />,
-  },
-  {
-    label: "X",
-    value: "social",
-    // Use the modern X logo as an image.
-    icon: (
-      <img src="/lovable-uploads/modern-x.svg" alt="X Logo" className="h-5 w-5 invert" />
-    ),
   },
 ];
 
