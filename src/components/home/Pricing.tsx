@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PricingCard from '@/components/ui/PricingCard';
 import { cn } from '@/lib/utils';
@@ -54,7 +53,7 @@ const Pricing = () => {
       popular: false
     },
     {
-      title: "Specialist",
+      title: "Vibe Marketing",
       price: "$125",
       description: "AI-powered end-to-end social growth and analytics",
       features: [
@@ -68,7 +67,8 @@ const Pricing = () => {
         { name: "AI social media reporting", included: true },
         { name: "AI social media trend analytics", included: true },
       ],
-      popular: false
+      popular: false,
+      buttonText: "Upgrade to Specialist"
     }
   ];
 
@@ -106,8 +106,8 @@ const Pricing = () => {
                 buttonText={
                   plan.title === "Free"
                     ? "Get Started"
-                    : plan.title === "Specialist"
-                      ? "Contact Sales"
+                    : plan.title === "Vibe Marketing"
+                      ? "Upgrade to Specialist"
                       : "Start Free Trial"}
                 className={
                   (plan.popular
@@ -132,4 +132,3 @@ const Pricing = () => {
 };
 
 export default Pricing;
-
