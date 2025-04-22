@@ -4,10 +4,6 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-interface DropdownMenuProps {
-  children?: React.ReactNode;
-}
-
 const DropdownMenu = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
