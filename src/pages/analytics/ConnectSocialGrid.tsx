@@ -1,7 +1,7 @@
 
 import React from 'react';
 import SocialConnectCard from './SocialConnectCard';
-import { Instagram, Linkedin } from 'lucide-react';
+import { Instagram, Linkedin, X } from 'lucide-react';
 
 interface ConnectSocialGridProps {
   onTrigger: (feature: string) => void;
@@ -15,20 +15,6 @@ const ConnectSocialGrid = ({ onTrigger }: ConnectSocialGridProps) => (
       onConnect={() => onTrigger('instagram')}
     />
     <SocialConnectCard 
-      platform="LinkedIn"
-      icon={<Linkedin className="h-8 w-8 text-blue-700" />}
-      onConnect={() => onTrigger('linkedin')}
-    />
-    {/* X (with new logo) */}
-    <SocialConnectCard 
-      platform="X"
-      icon={
-        <img src="/lovable-uploads/modern-x.svg" alt="X Logo" className="h-8 w-8 invert" />
-      }
-      onConnect={() => onTrigger('x')}
-    />
-    {/* TikTok */}
-    <SocialConnectCard 
       platform="TikTok"
       icon={
         <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none">
@@ -36,6 +22,16 @@ const ConnectSocialGrid = ({ onTrigger }: ConnectSocialGridProps) => (
         </svg>
       }
       onConnect={() => onTrigger('tiktok')}
+    />
+    <SocialConnectCard 
+      platform="LinkedIn"
+      icon={<Linkedin className="h-8 w-8 text-blue-700" />}
+      onConnect={() => onTrigger('linkedin')}
+    />
+    <SocialConnectCard 
+      platform="X"
+      icon={<X className="h-8 w-8 text-black" />}
+      onConnect={() => onTrigger('x')}
     />
   </div>
 );
