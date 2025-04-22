@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Star, TrendingUp, User } from 'lucide-react';
+import { Camera, Star, TrendingUp, User, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,6 +27,17 @@ const FooterMenu = () => {
         </Link>
         
         <Link 
+          to="/analytics" 
+          className={cn(
+            "flex flex-col items-center justify-center text-xs gap-1 transition-all duration-300",
+            isActive('/analytics') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
+          )}
+        >
+          <BarChart2 size={20} />
+          <span>Analytics</span>
+        </Link>
+        
+        <Link 
           to="/brand-identity" 
           className={cn(
             "flex flex-col items-center justify-center text-xs gap-1 transition-all duration-300",
@@ -33,7 +45,7 @@ const FooterMenu = () => {
           )}
         >
           <Star size={20} />
-          <span>Brand Identity</span>
+          <span>Brand</span>
         </Link>
         
         <Link 
@@ -44,7 +56,7 @@ const FooterMenu = () => {
           )}
         >
           <TrendingUp size={20} />
-          <span>Virality Strategy</span>
+          <span>Virality</span>
         </Link>
         
         <Link 

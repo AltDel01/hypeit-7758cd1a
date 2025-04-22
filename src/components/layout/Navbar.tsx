@@ -15,6 +15,7 @@ const Navbar = () => {
   const NavLinks = () => (
     <>
       <NavLink to="/">Generate Content</NavLink>
+      <NavLink to="/analytics">Analytics</NavLink>
       <NavLink to="/brand-identity">Brand Identity</NavLink>
       <NavLink to="/virality">Virality Strategy</NavLink>
     </>
