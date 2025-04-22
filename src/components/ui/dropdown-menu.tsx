@@ -1,19 +1,18 @@
-
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-interface DropdownMenuProps extends DropdownMenuPrimitive.DropdownMenuProps {
+interface DropdownMenuProps {
   children?: React.ReactNode;
 }
 
 const DropdownMenu = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Root>,
-  DropdownMenuProps
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
 >(({ children, ...props }, ref) => (
-  <DropdownMenuPrimitive.Root ref={ref} {...props}>
+  <DropdownMenuPrimitive.Root {...props}>
     {children}
   </DropdownMenuPrimitive.Root>
 ))
