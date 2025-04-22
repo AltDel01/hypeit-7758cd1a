@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ConnectSocialGrid from './ConnectSocialGrid';
 import FeatureTabContent from './FeatureTabContent';
 import AnalyticsSidebar from './AnalyticsSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const TAB_CONTENT = {
   connect: (onTrigger: (feature: string) => void) => (
@@ -49,17 +50,19 @@ const AnalyticsPage = () => {
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 py-8 flex flex-row gap-4 items-stretch relative">
-          <AnalyticsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          <section
-            className="flex-1 ml-0 min-h-[400px] w-full rounded-xl p-0 relative"
-          >
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
-            <div className="w-full">
-              {TAB_CONTENT[activeTab]
-                ? TAB_CONTENT[activeTab](handlePremiumFeature)
-                : null}
+          <SidebarProvider>
+            <div className="min-h-screen flex w-full">
+              <AnalyticsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+              <section className="flex-1 ml-0 min-h-[400px] w-full rounded-xl p-0 relative">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
+                <div className="w-full">
+                  {TAB_CONTENT[activeTab]
+                    ? TAB_CONTENT[activeTab](handlePremiumFeature)
+                    : null}
+                </div>
+              </section>
             </div>
-          </section>
+          </SidebarProvider>
         </main>
       </div>
       <PremiumFeatureModal
