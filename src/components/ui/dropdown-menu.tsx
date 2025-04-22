@@ -13,7 +13,7 @@ const DropdownMenu = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Root>,
   DropdownMenuProps
 >(({ children, ...props }, ref) => (
-  <DropdownMenuPrimitive.Root {...props}>
+  <DropdownMenuPrimitive.Root ref={ref} {...props}>
     {children}
   </DropdownMenuPrimitive.Root>
 ))
