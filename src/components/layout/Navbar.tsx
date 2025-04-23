@@ -89,11 +89,11 @@ const Navbar = () => {
           ) : (
             <>
               <div className={cn("flex items-center", isMobile ? "flex-1" : "")}>
-                <Link to="/" className="flex items-center">
+                <Link to="/" className="flex items-center h-20">
                   <img 
                     src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
                     alt="HYPEIT Logo" 
-                    className="h-12 w-auto" // Reduced from h-16 to h-12
+                    className="h-12 w-auto"
                   />
                 </Link>
               </div>
@@ -125,3 +125,4 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 };
 
 export default Navbar;
+
