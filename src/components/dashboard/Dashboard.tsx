@@ -11,7 +11,7 @@ const Dashboard = () => {
   const recentActivity = getRecentActivity();
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 pb-20 md:pb-6">
       <DashboardHeader />
       <UsageMetrics metrics={usageMetrics} />
       <QuickActions />

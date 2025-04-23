@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ActionCard, { ActionCardProps } from './ActionCard';
 import { 
   Image, 
@@ -9,6 +10,8 @@ import {
 } from 'lucide-react';
 
 const QuickActions = () => {
+  const navigate = useNavigate();
+  
   const actionCards: Omit<ActionCardProps, 'onClick'>[] = [
     {
       title: "Generate Images", 
@@ -35,12 +38,25 @@ const QuickActions = () => {
   ];
 
   const handleAction = (title: string) => {
-    console.log(`Navigate to ${title}`);
+    switch (title) {
+      case "Generate Images":
+        navigate("/");
+        break;
+      case "Write Captions":
+        navigate("/");
+        break;
+      case "Build Moodboard":
+        navigate("/brand-identity");
+        break;
+      case "Create Strategy":
+        navigate("/virality");
+        break;
+    }
   };
 
   return (
-    <section className="mb-8">
-      <h2 className="text-xl font-semibold mb-4 text-white">Create Something New</h2>
+    <section className="space-y-4">
+      <h2 className="text-lg md:text-xl font-semibold text-white">Create Something New</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {actionCards.map((card, index) => (
           <ActionCard

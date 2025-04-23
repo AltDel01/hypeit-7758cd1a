@@ -7,27 +7,26 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardHeader = () => {
   const { user } = useAuth();
-  // Only show admin button for the specific email
   const isAdmin = user?.email === 'putra.ekadarma@gmail.com';
   
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
+    <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
       <div>
-        <h1 className="text-3xl font-bold mb-1 text-white">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 text-white">Dashboard</h1>
         <p className="text-gray-400">Welcome back! Here's an overview of your HYPEIT activity.</p>
       </div>
-      <div className="mt-4 md:mt-0 flex space-x-3">
-        <Button variant="outline" className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
+      <div className="flex flex-wrap gap-3">
+        <Button variant="outline" className="flex-1 md:flex-none border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
           <Clock className="mr-2 h-4 w-4" />
           View History
         </Button>
-        <Button className="bg-[#8c52ff] hover:bg-[#7a45e6] text-white hover:shadow-md">
+        <Button className="flex-1 md:flex-none bg-[#8c52ff] hover:bg-[#7a45e6] text-white hover:shadow-md">
           <Plus className="mr-2 h-4 w-4" />
           New Creation
         </Button>
         {isAdmin && (
           <Link to="/admin">
-            <Button variant="outline" className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
+            <Button variant="outline" className="flex-1 md:flex-none border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Admin Area
             </Button>
