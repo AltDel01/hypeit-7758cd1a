@@ -11,12 +11,12 @@ import FooterMenu from './FooterMenu';
 const MobileTopBar = () => {
   const { user } = useAuth();
   return (
-    <div className="flex md:hidden items-center justify-between w-full px-4 py-1 h-12">
+    <div className="flex md:hidden items-center justify-between w-full px-4 py-1 h-16">
       <Link to="/" className="flex items-center">
         <img 
           src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
           alt="HYPEIT Logo" 
-          className="h-10 w-auto" // Increased from h-7 to h-10
+          className="h-10 w-auto"
         />
       </Link>
 
