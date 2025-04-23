@@ -10,12 +10,12 @@ import FooterMenu from './FooterMenu';
 const MobileTopBar = () => {
   const { user } = useAuth();
   return (
-    <div className="flex md:hidden items-center justify-between w-full px-4 py-1 h-12">
+    <div className="flex md:hidden items-center justify-between w-full px-4 py-2 h-14">
       <Link to="/" className="flex items-center">
         <img 
           src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
           alt="HYPEIT Logo" 
-          className="h-7 w-auto" 
+          className="h-8 w-auto" 
         />
       </Link>
 
@@ -23,7 +23,7 @@ const MobileTopBar = () => {
         to={user ? '/dashboard' : '/login'}
         className="text-gray-200 hover:text-white"
       >
-        <User size={22} />
+        <User size={24} />
       </Link>
     </div>
   );
@@ -81,7 +81,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-black text-white py-1 px-6 w-full border-b border-gray-800">
+      <nav className="bg-black text-white py-3 px-6 w-full border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {isMobile ? (
             <MobileTopBar />
