@@ -15,7 +15,7 @@ try {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const plugins = [
-    react(), // Removed jsxRuntime option
+    react(),
     // Temporarily disable the componentTagger to fix the build issue
     // mode === 'development' && componentTagger(),
   ].filter(Boolean);
