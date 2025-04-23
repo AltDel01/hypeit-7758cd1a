@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ const PromptForm = ({
       <div className="space-y-2">
         <Textarea
           placeholder="Describe in detail what image you want from color include color code if possible, font, text, any other element..."
-          className="min-h-[120px] resize-none focus:ring-2 focus:ring-[#8c52ff] focus:ring-offset-2 bg-[#1A1F2C] border border-[#8c52ff]/30 text-white"
+          className="min-h-[120px] resize-none focus:ring-2 focus:ring-[#8c52ff] focus:ring-offset-2 bg-[#1A1F2C] border border-[#8c52ff]/30 text-white" // Simplified border
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
@@ -73,7 +74,7 @@ const PromptForm = ({
             <p className="text-gray-400 mt-2">Generating your image...</p>
           </div>
         ) : (
-          <div className="relative w-full bg-[#1A1F2C] rounded-lg flex items-center justify-center border-2 border-[#8c52ff]/60">
+          <div className="relative w-full bg-[#1A1F2C] rounded-lg flex items-center justify-center border border-[#8c52ff]/30"> {/* Simplified border */}
             <div className="w-full py-6 flex flex-col items-center justify-center">
               <div className="flex items-center justify-center animate-glow-pulse">
                 <CircularProgressIndicator 

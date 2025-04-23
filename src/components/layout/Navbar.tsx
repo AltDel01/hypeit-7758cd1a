@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -8,26 +7,23 @@ import { LogOut, User } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
 
-// Add the MobileTopBar component for mobile above main logo area
 const MobileTopBar = () => {
   const { user } = useAuth();
   return (
-    <div className="flex md:hidden items-center justify-between w-full px-4 pt-3 pb-2">
-      {/* Logo: Top Left */}
+    <div className="flex md:hidden items-center justify-between w-full px-4 py-2 h-14">
       <Link to="/" className="flex items-center">
         <img 
           src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
           alt="HYPEIT Logo" 
-          className="h-10 w-auto" 
+          className="h-8 w-auto" 
         />
       </Link>
 
-      {/* Profile: Top Right */}
       <Link
         to={user ? '/dashboard' : '/login'}
         className="text-gray-200 hover:text-white"
       >
-        <User size={32} />
+        <User size={24} />
       </Link>
     </div>
   );
@@ -88,11 +84,9 @@ const Navbar = () => {
       <nav className="bg-black text-white py-3 px-6 w-full border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {isMobile ? (
-            // Show mobile top bar (logo left, profile right)
             <MobileTopBar />
           ) : (
             <>
-              {/* Desktop: Logo left, nav links center, auth right */}
               <div className={cn("flex items-center", isMobile ? "flex-1" : "")}>
                 <Link to="/" className="flex items-center">
                   <img 
@@ -113,7 +107,6 @@ const Navbar = () => {
         </div>
       </nav>
       
-      {/* Footer Menu for Mobile */}
       <FooterMenu />
     </>
   );
