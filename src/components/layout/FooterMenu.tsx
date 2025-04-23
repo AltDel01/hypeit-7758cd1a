@@ -12,7 +12,7 @@ const FooterMenu = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#7a45e6] border-t border-purple-700 md:hidden">
-      <nav className="flex justify-around items-center h-20 gap-2 px-1">
+      <nav className="flex justify-around items-center h-16 gap-2 px-1">
         <Link 
           to="/" 
           className={cn(
@@ -20,8 +20,8 @@ const FooterMenu = () => {
             isActive('/') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <Camera size={28} />
-          <span className="text-sm">Content</span>
+          <Camera size={24} />
+          <span className="text-xs">Content</span>
         </Link>
         
         <Link 
@@ -31,8 +31,8 @@ const FooterMenu = () => {
             isActive('/analytics') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <BarChart2 size={28} />
-          <span className="text-sm">Analytics</span>
+          <BarChart2 size={24} />
+          <span className="text-xs">Analytics</span>
         </Link>
         
         <Link 
@@ -42,8 +42,8 @@ const FooterMenu = () => {
             isActive('/brand-identity') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <Star size={28} />
-          <span className="text-sm">Brand</span>
+          <Star size={24} />
+          <span className="text-xs">Brand Identity</span>
         </Link>
         
         <Link 
@@ -53,10 +53,9 @@ const FooterMenu = () => {
             isActive('/virality') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <TrendingUp size={28} />
-          <span className="text-sm">Virality</span>
+          <TrendingUp size={24} />
+          <span className="text-xs">Virality</span>
         </Link>
-        {/* Note: Profile removed for mobile from footer! */}
       </nav>
     </div>
   );
