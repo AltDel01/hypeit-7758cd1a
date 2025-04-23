@@ -93,7 +93,7 @@ const Navbar = () => {
                   <img 
                     src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
                     alt="HYPEIT Logo" 
-                    className="h-16 w-auto" // Increased from h-10 to h-16
+                    className="h-12 w-auto" // Reduced from h-16 to h-12
                   />
                 </Link>
               </div>
