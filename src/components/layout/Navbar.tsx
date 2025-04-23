@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,7 @@ const MobileTopBar = () => {
         <img 
           src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
           alt="HYPEIT Logo" 
-          className="h-7 w-auto" 
+          className="h-10 w-auto" // Increased from h-7 to h-10
         />
       </Link>
 
@@ -92,7 +93,7 @@ const Navbar = () => {
                   <img 
                     src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
                     alt="HYPEIT Logo" 
-                    className="h-10 w-auto" 
+                    className="h-16 w-auto" // Increased from h-10 to h-16
                   />
                 </Link>
               </div>
