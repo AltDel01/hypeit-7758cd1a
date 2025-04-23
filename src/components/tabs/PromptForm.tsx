@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,6 @@ const PromptForm = ({
 }: PromptFormProps) => {
   const [generationProgress, setGenerationProgress] = useState(0);
   
-  // Listen for progress updates
   useEffect(() => {
     const handleProgressUpdate = (event: CustomEvent) => {
       const { progress } = event.detail;
@@ -45,7 +43,7 @@ const PromptForm = ({
       <div className="space-y-2">
         <Textarea
           placeholder="Describe in detail what image you want from color include color code if possible, font, text, any other element..."
-          className="min-h-[150px] resize-none focus:ring-2 focus:ring-[#8c52ff] focus:ring-offset-2"
+          className="min-h-[120px] resize-none focus:ring-2 focus:ring-[#8c52ff] focus:ring-offset-2 bg-[#1A1F2C] border border-[#8c52ff]/30 text-white"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
@@ -75,8 +73,7 @@ const PromptForm = ({
             <p className="text-gray-400 mt-2">Generating your image...</p>
           </div>
         ) : (
-          <div className="relative w-full bg-[#1A1F2C] rounded-lg overflow-hidden flex items-center justify-center border-2 border-[#8c52ff]/60">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9b87f5] via-[#8c52ff] to-[#D946EF]"></div>
+          <div className="relative w-full bg-[#1A1F2C] rounded-lg flex items-center justify-center border-2 border-[#8c52ff]/60">
             <div className="w-full py-6 flex flex-col items-center justify-center">
               <div className="flex items-center justify-center animate-glow-pulse">
                 <CircularProgressIndicator 
