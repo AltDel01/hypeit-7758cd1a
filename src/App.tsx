@@ -9,14 +9,16 @@ import CustomErrorBoundary from "./components/error/ErrorBoundary";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
-import Analytics from "./pages/Analytics";
+import Analytics from "./pages/analytics/AnalyticsPage";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
+import React from "react";
 
+// Create a new query client outside of component rendering
 const queryClient = new QueryClient();
 
 // Protected route component
@@ -73,19 +75,19 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
           <CustomErrorBoundary>
             <AppRoutes />
+            <Toaster />
+            <Sonner />
           </CustomErrorBoundary>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
 );
 
 export default App;

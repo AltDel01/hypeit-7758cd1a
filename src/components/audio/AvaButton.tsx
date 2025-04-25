@@ -21,7 +21,7 @@ const AvaButton: React.FC = () => {
         endConversation();
       }
     };
-  }, [isVisualizerActive]);
+  }, [isVisualizerActive, endConversation]);
 
   const handleButtonClick = async () => {
     if (!user) {

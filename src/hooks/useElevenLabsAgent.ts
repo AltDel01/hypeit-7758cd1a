@@ -1,9 +1,12 @@
 
-import { useConversation } from "@11labs/react";
+import { useState, useCallback } from "react";
+import { useConversation as useElevenLabsConversation } from "@11labs/react";
 import { toast } from "sonner";
 
 export const useElevenLabsAgent = () => {
-  const conversation = useConversation({
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  const conversation = useElevenLabsConversation({
     onError: (error) => {
       console.error("ElevenLabs error:", error);
       toast.error("Error connecting to Ava");
@@ -13,30 +16,36 @@ export const useElevenLabsAgent = () => {
     }
   });
 
-  const startConversation = async () => {
+  const startConversation = useCallback(async () => {
     try {
-      await conversation.startSession({
-        agentId: "hELBJiIy7Zdh6wJPxqFW"
-      });
+      if (!isInitialized) {
+        await conversation.startSession({
+          agentId: "hELBJiIy7Zdh6wJPxqFW"
+        });
+        setIsInitialized(true);
+      }
     } catch (error) {
       console.error("Failed to start conversation:", error);
       toast.error("Failed to connect to Ava");
     }
-  };
+  }, [conversation, isInitialized]);
 
-  const endConversation = async () => {
+  const endConversation = useCallback(async () => {
     try {
-      await conversation.endSession();
+      if (isInitialized) {
+        await conversation.endSession();
+        setIsInitialized(false);
+      }
     } catch (error) {
       console.error("Failed to end conversation:", error);
     }
-  };
+  }, [conversation, isInitialized]);
 
   return {
     conversation,
     startConversation,
     endConversation,
-    isSpeaking: conversation.isSpeaking,
-    status: conversation.status
+    isSpeaking: conversation?.isSpeaking || false,
+    status: conversation?.status || "disconnected"
   };
 };

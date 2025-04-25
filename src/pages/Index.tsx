@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -135,7 +134,7 @@ const Index = () => {
       setIsGenerating(false);
     }
   };
-
+  
   return (
     <AuroraBackground>
       <div className="flex flex-col min-h-screen pb-16 md:pb-0">
