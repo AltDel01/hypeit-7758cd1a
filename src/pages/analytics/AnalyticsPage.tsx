@@ -55,37 +55,36 @@ const AnalyticsPage = () => {
 
   return (
     <AuroraBackground>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <div className="flex-1 container mx-auto px-4 py-8 flex">
-          <SidebarProvider>
-            <Sidebar className="h-[calc(100vh-8rem)]">
-              <SidebarContent>
-                <SidebarGroup>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {menuItems.map((item) => (
-                        <SidebarMenuItem key={item.id}>
-                          <SidebarMenuButton
-                            onClick={() => setActiveSection(item.id)}
-                            isActive={activeSection === item.id}
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-            <div className="flex-1 pl-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
-              {renderContent()}
-            </div>
-          </SidebarProvider>
-        </div>
+      <Navbar />
+      <div className="flex h-[calc(100vh-4rem)]">
+        <SidebarProvider>
+          <Sidebar className="h-full border-r border-slate-700">
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {menuItems.map((item) => (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton
+                          onClick={() => setActiveSection(item.id)}
+                          isActive={activeSection === item.id}
+                          className="hover:scale-105 transition-transform duration-200 hover:bg-purple-600/20"
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+          <div className="flex-1 p-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
+            {renderContent()}
+          </div>
+        </SidebarProvider>
       </div>
       <PremiumFeatureModal
         isOpen={isPremiumModalOpen}
