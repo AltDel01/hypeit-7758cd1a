@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -57,11 +58,11 @@ const AnalyticsPage = () => {
       <Navbar />
       <div className="flex h-[calc(100vh-4rem)] pt-16">
         <SidebarProvider>
-          <Sidebar className="fixed left-0 top-[4.5rem] h-screen border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <SidebarContent className="overflow-hidden">
+          <Sidebar className="fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <SidebarContent className="overflow-visible">
               <SidebarGroup>
                 <SidebarGroupContent>
-                  <SidebarMenu className="space-y-4 p-4">
+                  <SidebarMenu className="space-y-6 p-4">
                     {menuItems.map((item) => (
                       <SidebarMenuItem key={item.id}>
                         <SidebarMenuButton
@@ -79,7 +80,7 @@ const AnalyticsPage = () => {
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <div className="flex-1 p-6 pl-[280px]">
+          <div className="flex-1 p-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
             {renderContent()}
           </div>
