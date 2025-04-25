@@ -56,22 +56,22 @@ const AnalyticsPage = () => {
   return (
     <AuroraBackground>
       <Navbar />
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-4rem)] pt-16">
         <SidebarProvider>
-          <Sidebar className="h-full border-r border-slate-700">
+          <Sidebar className="h-[calc(100vh-4rem)] fixed top-16 left-0 border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="space-y-3 p-4">
                     {menuItems.map((item) => (
                       <SidebarMenuItem key={item.id}>
                         <SidebarMenuButton
                           onClick={() => setActiveSection(item.id)}
                           isActive={activeSection === item.id}
-                          className="hover:scale-105 transition-transform duration-200 hover:bg-purple-600/20"
+                          className="w-full h-12 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95"
                         >
                           <item.icon className="w-5 h-5" />
-                          <span>{item.label}</span>
+                          <span className="ml-3 font-medium">{item.label}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
@@ -80,7 +80,7 @@ const AnalyticsPage = () => {
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <div className="flex-1 p-6">
+          <div className="flex-1 ml-64 p-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
             {renderContent()}
           </div>
