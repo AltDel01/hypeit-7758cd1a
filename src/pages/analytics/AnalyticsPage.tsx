@@ -58,19 +58,19 @@ const AnalyticsPage = () => {
       <Navbar />
       <div className="flex h-[calc(100vh-4rem)] pt-16">
         <SidebarProvider>
-          <Sidebar className="h-[calc(100vh-4rem)] fixed top-16 left-0 border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <Sidebar className="h-[calc(100vh-16rem)] fixed top-44 left-0 border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupContent>
-                  <SidebarMenu className="space-y-3 p-4">
+                  <SidebarMenu className="space-y-6 p-4">
                     {menuItems.map((item) => (
                       <SidebarMenuItem key={item.id}>
                         <SidebarMenuButton
                           onClick={() => setActiveSection(item.id)}
                           isActive={activeSection === item.id}
-                          className="w-full h-12 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95"
+                          className="w-full h-14 rounded-xl transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
                         >
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className="w-6 h-6" />
                           <span className="ml-3 font-medium">{item.label}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -80,7 +80,7 @@ const AnalyticsPage = () => {
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <div className="flex-1 ml-64 p-6">
+          <div className="flex-1 p-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
             {renderContent()}
           </div>
