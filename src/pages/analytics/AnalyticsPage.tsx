@@ -17,6 +17,7 @@ import {
   SidebarProvider,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const AnalyticsPage = () => {
@@ -56,12 +57,15 @@ const AnalyticsPage = () => {
   return (
     <AuroraBackground>
       <Navbar />
-      <div className="flex">
-        <SidebarProvider>
-          <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-background/95 backdrop-blur border-r border-slate-700 supports-[backdrop-filter]:bg-background/60 z-10">
+      <div className="flex min-h-screen w-full">
+        <SidebarProvider defaultOpen={true}>
+          <Sidebar variant="sidebar" className="border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupContent>
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <SidebarTrigger />
+                  </div>
                   <SidebarMenu className="space-y-6 p-4">
                     {menuItems.map((item) => (
                       <SidebarMenuItem key={item.id}>
@@ -69,6 +73,7 @@ const AnalyticsPage = () => {
                           onClick={() => setActiveSection(item.id)}
                           isActive={activeSection === item.id}
                           className="w-full h-14 rounded-xl transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
+                          tooltip={item.label}
                         >
                           <item.icon className="w-6 h-6" />
                           <span className="ml-3 font-medium">{item.label}</span>
@@ -79,15 +84,10 @@ const AnalyticsPage = () => {
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
-          </div>
-          <div className="w-64 flex-shrink-0">
-            {/* This is a spacer div that takes up the same width as the sidebar */}
-          </div>
-          <div className="flex-1 ml-64">
-            <div className="p-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
-              {renderContent()}
-            </div>
+          </Sidebar>
+          <div className="flex-1 p-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
+            {renderContent()}
           </div>
         </SidebarProvider>
       </div>
