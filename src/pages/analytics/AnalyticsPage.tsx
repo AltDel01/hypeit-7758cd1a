@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -12,6 +13,7 @@ import {
   SidebarContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuButton,
   SidebarTrigger,
   SidebarProvider,
   SidebarGroup,
