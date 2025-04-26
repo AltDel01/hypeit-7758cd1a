@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -13,13 +12,18 @@ import {
   SidebarContent,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
+  SidebarTrigger,
   SidebarProvider,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
 const AnalyticsPage = () => {
   const { user } = useAuth();
@@ -65,7 +69,16 @@ const AnalyticsPage = () => {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <div className="flex items-center justify-between px-4 py-2">
-                    <SidebarTrigger />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarTrigger />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Toggle Sidebar
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <SidebarMenu className="space-y-6 p-4">
                     {menuItems.map((item) => (
