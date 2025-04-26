@@ -56,10 +56,10 @@ const AnalyticsPage = () => {
   return (
     <AuroraBackground>
       <Navbar />
-      <div className="flex h-[calc(100vh-4rem)] pt-16">
+      <div className="flex h-[calc(100vh-4rem)]">
         <SidebarProvider>
-          <Sidebar className="fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <SidebarContent className="overflow-visible">
+          <Sidebar className="fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
+            <SidebarContent className="overflow-hidden">
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-6 p-4">
@@ -80,7 +80,10 @@ const AnalyticsPage = () => {
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <div className="flex-1 p-6">
+          <div className="w-64 flex-shrink-0">
+            {/* This is a spacer div that takes up the same width as the sidebar */}
+          </div>
+          <div className="flex-1 p-6 pt-16">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
             {renderContent()}
           </div>
