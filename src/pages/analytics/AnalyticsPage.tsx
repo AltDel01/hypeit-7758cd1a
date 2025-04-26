@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, Calendar, BarChart, Users, Mail } from 'lucide-react';
+import { Instagram, Calendar, BarChart, Users, Mail, PanelLeft } from 'lucide-react';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ import {
   SidebarGroupContent,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Button } from '@/components/ui/button';
 
 const AnalyticsPage = () => {
   const { user } = useAuth();
