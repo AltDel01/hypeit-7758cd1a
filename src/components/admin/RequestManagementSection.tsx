@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +7,7 @@ import { RequestList } from '@/components/admin/RequestList';
 import { RequestDetails } from '@/components/admin/RequestDetails';
 import { useRequestManagement } from '@/hooks/useRequestManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { toast } from 'sonner';
 
 export const RequestManagementSection = () => {
   const {
@@ -29,33 +30,71 @@ export const RequestManagementSection = () => {
   const [activeTab, setActiveTab] = React.useState<string>('new');
   const [resultImage, setResultImage] = React.useState<File | null>(null);
   
-  // Auto-refresh requests every 30 seconds
+  // Memoized refresh function to avoid unnecessary rerenders
+  const refreshRequests = useCallback(() => {
+    handleRefresh();
+    toast.info("Refreshing request list...");
+  }, [handleRefresh]);
+  
+  // Auto-refresh requests every 15 seconds (reduced frequency to avoid excessive refreshes)
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       console.log('Auto-refreshing request list...');
       loadRequests();
-    }, 30000);
+    }, 15000);
     
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [loadRequests]);
 
-  // Refresh on initial load and tab visibility change
+  // Refresh on initial load, tab visibility change, and broadcast messages
   useEffect(() => {
-    handleRefresh();
+    // Initial load
+    refreshRequests();
     
+    // Set up visibility change handler
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('Tab became visible, refreshing requests...');
-        handleRefresh();
+        refreshRequests();
       }
     };
     
+    // Setup broadcast channel for direct tab-to-tab communication
+    let broadcastChannel: BroadcastChannel | null = null;
+    try {
+      if ('BroadcastChannel' in window) {
+        broadcastChannel = new BroadcastChannel('image_requests_channel');
+        broadcastChannel.onmessage = (event) => {
+          console.log('BroadcastChannel message received in RequestManagementSection:', event.data);
+          refreshRequests();
+        };
+      }
+    } catch (error) {
+      console.warn('BroadcastChannel not supported:', error);
+    }
+    
+    // Listen for custom events
+    const handleRequestEvent = () => {
+      console.log('Custom request event received, refreshing...');
+      refreshRequests();
+    };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('imageRequestCreated', handleRequestEvent);
+    window.addEventListener('imageRequestsUpdated', handleRequestEvent);
+    window.addEventListener('imageRequestsCleared', handleRequestEvent);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('imageRequestCreated', handleRequestEvent);
+      window.removeEventListener('imageRequestsUpdated', handleRequestEvent);
+      window.removeEventListener('imageRequestsCleared', handleRequestEvent);
+      
+      if (broadcastChannel) {
+        broadcastChannel.close();
+      }
     };
-  }, []);
+  }, [refreshRequests]);
 
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;
@@ -70,7 +109,7 @@ export const RequestManagementSection = () => {
           <p className="text-gray-400">Manage image generation requests</p>
         </div>
         <Button 
-          onClick={handleRefresh} 
+          onClick={refreshRequests} 
           variant="outline"
           className="flex items-center gap-2"
         >

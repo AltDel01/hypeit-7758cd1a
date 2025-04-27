@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { ImageRequest } from '@/services/requests';
 import { imageRequestService } from '@/services/requests';
@@ -9,11 +9,20 @@ export const useRequestManagement = () => {
   const [selectedRequest, setSelectedRequest] = useState<ImageRequest | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
 
+  // Create a memoized version of loadRequests to avoid recreating the function on each render
+  const loadRequests = useCallback(() => {
+    const allRequests = imageRequestService.getAllRequests();
+    console.log('Loaded requests from service:', allRequests);
+    setRequests(allRequests);
+    setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
+  }, []);
+
   // Add useEffect to listen for image request events
   useEffect(() => {
     const handleRequestCreated = (event: CustomEvent) => {
       console.log('Request created event received:', event.detail);
       loadRequests();
+      toast.success(`New request created: ${event.detail.request.id}`);
     };
 
     const handleRequestUpdated = (event: CustomEvent) => {
@@ -39,8 +48,29 @@ export const useRequestManagement = () => {
     
     const handleRequestsUpdated = (event: CustomEvent) => {
       console.log('Requests updated event received:', event.detail);
-      setRequests(event.detail.requests);
+      if (event.detail.requests) {
+        setRequests(event.detail.requests);
+      }
     };
+    
+    // Setup broadcast channel for direct tab-to-tab communication
+    let broadcastChannel: BroadcastChannel | null = null;
+    try {
+      if ('BroadcastChannel' in window) {
+        broadcastChannel = new BroadcastChannel('image_requests_channel');
+        broadcastChannel.onmessage = (event) => {
+          console.log('BroadcastChannel message received in useRequestManagement:', event.data);
+          loadRequests();
+          
+          // If it's an update to the currently selected request, update that as well
+          if (selectedRequest && event.data.detail?.request && event.data.detail.request.id === selectedRequest.id) {
+            setSelectedRequest(event.data.detail.request);
+          }
+        };
+      }
+    } catch (error) {
+      console.warn('BroadcastChannel not supported:', error);
+    }
 
     // Initial load
     loadRequests();
@@ -56,24 +86,21 @@ export const useRequestManagement = () => {
       window.removeEventListener('imageRequestUpdated', handleRequestUpdated as EventListener);
       window.removeEventListener('imageRequestCompleted', handleRequestCompleted as EventListener);
       window.removeEventListener('imageRequestsUpdated', handleRequestsUpdated as EventListener);
+      
+      if (broadcastChannel) {
+        broadcastChannel.close();
+      }
     };
-  }, [selectedRequest]);
+  }, [loadRequests, selectedRequest]);
 
-  const loadRequests = () => {
-    const allRequests = imageRequestService.getAllRequests();
-    console.log('Loaded requests from service:', allRequests);
-    setRequests(allRequests);
-    setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
-  };
-
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     const reloaded = imageRequestService.forceReload();
     setRequests(reloaded);
     toast.info("Request list refreshed");
     setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
-  };
+  }, []);
 
-  const handleUpdateStatus = (id: string, status: 'in-progress') => {
+  const handleUpdateStatus = useCallback((id: string, status: 'in-progress') => {
     const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
     if (updatedRequest) {
@@ -86,7 +113,7 @@ export const useRequestManagement = () => {
     } else {
       toast.error(`Failed to update request ${id}`);
     }
-  };
+  }, [loadRequests, selectedRequest]);
 
   return {
     requests,

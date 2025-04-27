@@ -29,11 +29,24 @@ export class LocalStorageHandler implements RequestStorage {
       localStorage.setItem(this.storageKey, JSON.stringify(requests));
       console.log('Saved requests to localStorage:', requests);
 
-      // Dispatch a custom event that can be listened to by other tabs/windows
+      // Dispatch a custom event that can be listened to by other components within the same window
       const storageEvent = new CustomEvent('imageRequestsUpdated', {
         detail: { requests }
       });
       window.dispatchEvent(storageEvent);
+      
+      // Attempt to broadcast across tabs using BroadcastChannel API if available
+      try {
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('image_requests_channel');
+          bc.postMessage({ type: 'imageRequestsUpdated', requests });
+          console.log('Broadcast message sent to other tabs');
+          bc.close();
+        }
+      } catch (bcError) {
+        console.warn('BroadcastChannel failed, falling back to storage events:', bcError);
+      }
+      
     } catch (error) {
       console.error('Failed to save image requests to localStorage:', error);
       toast.error('Failed to save your request. Please try again later.');

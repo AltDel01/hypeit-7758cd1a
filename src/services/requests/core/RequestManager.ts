@@ -9,12 +9,14 @@ export class RequestManager {
   private initialized: boolean = false;
   private storageHandler: LocalStorageHandler;
   private eventManager: RequestEventManager;
+  private pollingInterval: number | null = null;
 
   constructor() {
     this.storageHandler = new LocalStorageHandler();
     this.eventManager = new RequestEventManager();
     this.loadFromStorage();
     
+    // Set up listeners for storage events and custom events
     this.eventManager.setupStorageListener((requests) => {
       console.log('Received updated requests via event:', requests);
       this.requests = requests;
@@ -22,6 +24,9 @@ export class RequestManager {
 
     // Add a polling mechanism to periodically check for new requests
     this.setupPolling();
+    
+    // Add a visibility change listener to refresh data when tab becomes visible
+    this.setupVisibilityListener();
   }
   
   protected getStorageHandler(): LocalStorageHandler {
@@ -39,15 +44,27 @@ export class RequestManager {
   }
 
   private setupPolling(): void {
-    // Poll every 10 seconds to check for new requests
-    const pollInterval = setInterval(() => {
+    // Poll every 5 seconds to check for new requests (shorter interval for better responsiveness)
+    this.pollingInterval = window.setInterval(() => {
       console.log('Polling for new requests...');
       this.loadFromStorage();
-    }, 10000);
+    }, 5000);
     
     // Clean up interval on page unload
     window.addEventListener('beforeunload', () => {
-      clearInterval(pollInterval);
+      if (this.pollingInterval !== null) {
+        clearInterval(this.pollingInterval);
+      }
+    });
+  }
+  
+  private setupVisibilityListener(): void {
+    // Refresh data when the tab becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Tab became visible, refreshing requests');
+        this.loadFromStorage();
+      }
     });
   }
 
