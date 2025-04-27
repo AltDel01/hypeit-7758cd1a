@@ -10,10 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw } from 'lucide-react';
 import { imageRequestService } from '@/services/requests';
 import type { ImageRequest } from '@/services/requests';
-
 import { RequestList } from '@/components/admin/RequestList';
 import { RequestDetails } from '@/components/admin/RequestDetails';
 import { TestRequestForm } from '@/components/admin/TestRequestForm';
+import { useImageUpload } from '@/hooks/useImageUpload';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -21,12 +21,21 @@ const Admin = () => {
   const [requests, setRequests] = useState<ImageRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ImageRequest | null>(null);
   const [resultImage, setResultImage] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [testPrompt, setTestPrompt] = useState('A beautiful mountain landscape');
   const [debugInfo, setDebugInfo] = useState<string>('');
 
   const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
+
+  const { isUploading, uploadProgress, handleUploadResult } = useImageUpload({
+    selectedRequest,
+    onRequestUpdated: () => {
+      setRequests(imageRequestService.getAllRequests());
+      if (selectedRequest) {
+        const updatedRequest = imageRequestService.getRequestById(selectedRequest.id);
+        setSelectedRequest(updatedRequest);
+      }
+    }
+  });
 
   const loadRequests = () => {
     const allRequests = imageRequestService.getAllRequests();
@@ -234,7 +243,7 @@ const Admin = () => {
                     uploadProgress={uploadProgress}
                     resultImage={resultImage}
                     onUpdateStatus={handleUpdateStatus}
-                    onUploadResult={handleUploadResult}
+                    onUploadResult={() => resultImage && handleUploadResult(resultImage)}
                     setResultImage={setResultImage}
                   />
                 ) : (
