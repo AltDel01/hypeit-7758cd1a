@@ -140,5 +140,3 @@ class ImageRequestService {
 
 // Create and export a singleton instance
 export const imageRequestService = new ImageRequestService();
-
-export default imageRequestService;

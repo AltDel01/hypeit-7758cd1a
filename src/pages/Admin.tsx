@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -10,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw, Plus } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
-import imageRequestService, { ImageRequest, RequestStatus } from '@/services/requests';
+import { imageRequestService, ImageRequest, RequestStatus } from '@/services/requests';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
