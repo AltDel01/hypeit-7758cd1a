@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw, Plus } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
-import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
+import imageRequestService, { ImageRequest, RequestStatus } from '@/services/requests';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -26,10 +25,8 @@ const Admin = () => {
   const [testPrompt, setTestPrompt] = useState('A beautiful mountain landscape');
   const [debugInfo, setDebugInfo] = useState<string>('');
 
-  // Check if user has admin access - for demo we'll make this more permissive
   const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
 
-  // Load requests from the service
   const loadRequests = () => {
     const allRequests = imageRequestService.getAllRequests();
     console.log('Loaded requests from service:', allRequests);
@@ -37,7 +34,6 @@ const Admin = () => {
     setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
   };
 
-  // Manually refresh requests
   const handleRefresh = () => {
     const reloaded = imageRequestService.forceReload();
     setRequests(reloaded);
@@ -45,7 +41,6 @@ const Admin = () => {
     setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
   };
 
-  // Create a test request
   const handleCreateTestRequest = () => {
     if (!user) {
       toast.error("You must be logged in to create a test request");
@@ -71,7 +66,6 @@ const Admin = () => {
     }
   };
 
-  // Clear all test requests
   const handleClearAllRequests = () => {
     if (window.confirm("Are you sure you want to clear all requests? This cannot be undone.")) {
       imageRequestService.clearAllRequests();
@@ -83,13 +77,10 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    // Load requests initially
     loadRequests();
 
-    // Set up an interval to check for new requests every few seconds
     const intervalId = setInterval(loadRequests, 5000);
     
-    // Listen for the custom event that indicates a new request has been created
     const handleNewRequest = () => {
       console.log("Admin: Detected new image request created, refreshing list");
       loadRequests();
@@ -107,28 +98,23 @@ const Admin = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Filter requests based on active tab
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;
     return request.status === activeTab;
   });
 
-  // Handle request selection
   const handleSelectRequest = (request: ImageRequest) => {
     setSelectedRequest(request);
-    setResultImage(null); // Reset result image when selecting a new request
+    setResultImage(null);
   };
 
-  // Handle status update
   const handleUpdateStatus = (id: string, status: RequestStatus) => {
     const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
     if (updatedRequest) {
-      // Update the requests state with the new list
       loadRequests();
       toast.success(`Request ${id} marked as ${status}`);
       
-      // If current request is being updated, update selectedRequest too
       if (selectedRequest?.id === id) {
         setSelectedRequest(updatedRequest);
       }
@@ -137,7 +123,6 @@ const Admin = () => {
     }
   };
 
-  // Handle uploading result image and completing request
   const handleUploadResult = async () => {
     if (!selectedRequest || !resultImage) {
       toast.error("Please select a request and upload a result image");
@@ -146,7 +131,6 @@ const Admin = () => {
     
     setIsUploading(true);
     
-    // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         const newProgress = prev + Math.random() * 15;
@@ -154,29 +138,21 @@ const Admin = () => {
       });
     }, 400);
     
-    // Simulate API call to upload image
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Create object URL for the uploaded image
       const imageUrl = URL.createObjectURL(resultImage);
       
-      // Update the request with the result image
       const updatedRequest = imageRequestService.uploadResult(selectedRequest.id, imageUrl);
       
       if (updatedRequest) {
-        // Update requests state
         setRequests(imageRequestService.getAllRequests());
-        
-        // Update selected request
         setSelectedRequest(updatedRequest);
-        
         clearInterval(interval);
         setUploadProgress(100);
         
         toast.success("Image uploaded and request completed!");
         
-        // Trigger a custom event that the main page can listen to
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
             imageUrl,
@@ -191,7 +167,6 @@ const Admin = () => {
         toast.error("Failed to update request with result image");
       }
       
-      // Reset after a delay
       setTimeout(() => {
         setUploadProgress(0);
         setIsUploading(false);
@@ -205,13 +180,11 @@ const Admin = () => {
     }
   };
 
-  // Format date to readable string
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Status badge component
   const StatusBadge = ({ status }: { status: RequestStatus }) => {
     switch (status) {
       case 'new':
@@ -261,7 +234,6 @@ const Admin = () => {
               </Button>
             </div>
             
-            {/* Test Request Creation Section */}
             <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4 mb-6">
               <h2 className="text-xl font-bold mb-4 text-white">Create Test Request</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
