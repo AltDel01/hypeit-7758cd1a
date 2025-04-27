@@ -1,105 +1,47 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw } from 'lucide-react';
-import { imageRequestService } from '@/services/requests';
-import type { ImageRequest } from '@/services/requests';
 import { RequestList } from '@/components/admin/RequestList';
 import { RequestDetails } from '@/components/admin/RequestDetails';
 import { TestRequestForm } from '@/components/admin/TestRequestForm';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useRequestManagement } from '@/hooks/useRequestManagement';
+import { useTestRequest } from '@/hooks/useTestRequest';
 
 const Admin = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('new');
-  const [requests, setRequests] = useState<ImageRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<ImageRequest | null>(null);
   const [resultImage, setResultImage] = useState<File | null>(null);
-  const [testPrompt, setTestPrompt] = useState('A beautiful mountain landscape');
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  
+  const {
+    requests,
+    selectedRequest,
+    setSelectedRequest,
+    debugInfo,
+    loadRequests,
+    handleRefresh,
+    handleUpdateStatus
+  } = useRequestManagement();
 
-  const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
+  const {
+    testPrompt,
+    setTestPrompt,
+    handleCreateTestRequest,
+    handleClearAllRequests
+  } = useTestRequest({
+    loadRequests,
+    setDebugInfo
+  });
 
   const { isUploading, uploadProgress, handleUploadResult } = useImageUpload({
     selectedRequest,
-    onRequestUpdated: () => {
-      setRequests(imageRequestService.getAllRequests());
-      if (selectedRequest) {
-        const updatedRequest = imageRequestService.getRequestById(selectedRequest.id);
-        setSelectedRequest(updatedRequest);
-      }
-    }
+    onRequestUpdated: loadRequests
   });
-
-  const loadRequests = () => {
-    const allRequests = imageRequestService.getAllRequests();
-    console.log('Loaded requests from service:', allRequests);
-    setRequests(allRequests);
-    setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
-  };
-
-  const handleRefresh = () => {
-    const reloaded = imageRequestService.forceReload();
-    setRequests(reloaded);
-    toast.info("Request list refreshed");
-    setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
-  };
-
-  const handleCreateTestRequest = () => {
-    if (!user) {
-      toast.error("You must be logged in to create a test request");
-      return;
-    }
-
-    try {
-      const newRequest = imageRequestService.createRequest(
-        user.id || 'anonymous',
-        user.email || 'Test User',
-        testPrompt,
-        '16:9',
-        null
-      );
-      
-      toast.success("Test request created successfully!");
-      loadRequests();
-      setDebugInfo(`Test request created with ID: ${newRequest.id}`);
-    } catch (error) {
-      console.error("Error creating test request:", error);
-      toast.error("Failed to create test request");
-      setDebugInfo(`Error creating request: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  };
-
-  const handleClearAllRequests = () => {
-    if (window.confirm("Are you sure you want to clear all requests? This cannot be undone.")) {
-      imageRequestService.clearAllRequests();
-      setRequests([]);
-      setSelectedRequest(null);
-      toast.success("All requests cleared");
-      setDebugInfo("All requests cleared from local storage");
-    }
-  };
-
-  const handleUpdateStatus = (id: string, status: 'in-progress') => {
-    const updatedRequest = imageRequestService.updateRequestStatus(id, status);
-    
-    if (updatedRequest) {
-      loadRequests();
-      toast.success(`Request ${id} marked as ${status}`);
-      
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(updatedRequest);
-      }
-    } else {
-      toast.error(`Failed to update request ${id}`);
-    }
-  };
 
   useEffect(() => {
     loadRequests();
@@ -152,7 +94,7 @@ const Admin = () => {
             <TestRequestForm 
               testPrompt={testPrompt}
               onTestPromptChange={setTestPrompt}
-              onCreateTest={handleCreateTestRequest}
+              onCreateTest={() => handleCreateTestRequest(user.id, user.email)}
               onClearAll={handleClearAllRequests}
               debugInfo={debugInfo}
             />
