@@ -42,6 +42,11 @@ class ImageRequestService {
     });
   }
 
+  // Get the storage key (useful for debugging)
+  getStorageKey(): string {
+    return this.storageKey;
+  }
+
   // Load existing requests from localStorage
   private loadFromStorage() {
     try {

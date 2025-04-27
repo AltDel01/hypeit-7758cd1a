@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -7,10 +8,12 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Upload, CheckCircle, Clock, AlertTriangle, Loader2, RefreshCw, Plus } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import imageRequestService, { ImageRequest, RequestStatus } from '@/services/ImageRequestService';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -20,6 +23,8 @@ const Admin = () => {
   const [resultImage, setResultImage] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [testPrompt, setTestPrompt] = useState('A beautiful mountain landscape');
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Check if user has admin access - for demo we'll make this more permissive
   const hasAdminAccess = user?.email === 'putra.ekadarma@gmail.com' || true;
@@ -29,12 +34,52 @@ const Admin = () => {
     const allRequests = imageRequestService.getAllRequests();
     console.log('Loaded requests from service:', allRequests);
     setRequests(allRequests);
+    setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
   };
 
   // Manually refresh requests
   const handleRefresh = () => {
-    loadRequests();
+    const reloaded = imageRequestService.forceReload();
+    setRequests(reloaded);
     toast.info("Request list refreshed");
+    setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
+  };
+
+  // Create a test request
+  const handleCreateTestRequest = () => {
+    if (!user) {
+      toast.error("You must be logged in to create a test request");
+      return;
+    }
+
+    try {
+      const newRequest = imageRequestService.createRequest(
+        user.id || 'anonymous',
+        user.email || 'Test User',
+        testPrompt,
+        '16:9',
+        null
+      );
+      
+      toast.success("Test request created successfully!");
+      loadRequests();
+      setDebugInfo(`Test request created with ID: ${newRequest.id}`);
+    } catch (error) {
+      console.error("Error creating test request:", error);
+      toast.error("Failed to create test request");
+      setDebugInfo(`Error creating request: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  // Clear all test requests
+  const handleClearAllRequests = () => {
+    if (window.confirm("Are you sure you want to clear all requests? This cannot be undone.")) {
+      imageRequestService.clearAllRequests();
+      setRequests([]);
+      setSelectedRequest(null);
+      toast.success("All requests cleared");
+      setDebugInfo("All requests cleared from local storage");
+    }
   };
 
   useEffect(() => {
@@ -214,6 +259,44 @@ const Admin = () => {
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </Button>
+            </div>
+            
+            {/* Test Request Creation Section */}
+            <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4 mb-6">
+              <h2 className="text-xl font-bold mb-4 text-white">Create Test Request</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="col-span-2">
+                  <Label htmlFor="test-prompt">Test Prompt</Label>
+                  <Input 
+                    id="test-prompt"
+                    value={testPrompt}
+                    onChange={(e) => setTestPrompt(e.target.value)}
+                    placeholder="Enter a test prompt"
+                    className="bg-gray-800/50 border-gray-700"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleCreateTestRequest} 
+                    className="flex items-center gap-2"
+                    variant="newPurple"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Test Request
+                  </Button>
+                  <Button 
+                    onClick={handleClearAllRequests} 
+                    variant="destructive"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              </div>
+              {debugInfo && (
+                <div className="mt-3 p-2 bg-gray-800/50 rounded text-sm text-gray-400 font-mono">
+                  <p>Debug: {debugInfo}</p>
+                </div>
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
