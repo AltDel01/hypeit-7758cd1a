@@ -1,4 +1,3 @@
-
 import { nanoid } from 'nanoid';
 import type { ImageRequest, RequestStatus } from '../types';
 import { LocalStorageHandler } from '../storage/LocalStorageHandler';
@@ -18,6 +17,10 @@ export class RequestManager {
     this.eventManager.setupStorageListener((requests) => {
       this.requests = requests;
     });
+  }
+  
+  protected getStorageHandler(): LocalStorageHandler {
+    return this.storageHandler;
   }
 
   private loadFromStorage(): void {
