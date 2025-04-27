@@ -8,7 +8,7 @@ import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
-import imageRequestService from '@/services/ImageRequestService';
+import { imageRequestService } from '@/services/requests';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
