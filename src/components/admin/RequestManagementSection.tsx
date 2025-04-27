@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,7 +14,8 @@ export const RequestManagementSection = () => {
     selectedRequest,
     setSelectedRequest,
     handleRefresh,
-    handleUpdateStatus
+    handleUpdateStatus,
+    loadRequests
   } = useRequestManagement();
 
   const { isUploading, uploadProgress, handleUploadResult } = useImageUpload({
@@ -27,6 +28,34 @@ export const RequestManagementSection = () => {
 
   const [activeTab, setActiveTab] = React.useState<string>('new');
   const [resultImage, setResultImage] = React.useState<File | null>(null);
+  
+  // Auto-refresh requests every 30 seconds
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing request list...');
+      loadRequests();
+    }, 30000);
+    
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  // Refresh on initial load and tab visibility change
+  useEffect(() => {
+    handleRefresh();
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Tab became visible, refreshing requests...');
+        handleRefresh();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;

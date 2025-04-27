@@ -1,3 +1,4 @@
+
 import { nanoid } from 'nanoid';
 import type { ImageRequest, RequestStatus } from '../types';
 import { LocalStorageHandler } from '../storage/LocalStorageHandler';
@@ -15,8 +16,12 @@ export class RequestManager {
     this.loadFromStorage();
     
     this.eventManager.setupStorageListener((requests) => {
+      console.log('Received updated requests via event:', requests);
       this.requests = requests;
     });
+
+    // Add a polling mechanism to periodically check for new requests
+    this.setupPolling();
   }
   
   protected getStorageHandler(): LocalStorageHandler {
@@ -26,10 +31,24 @@ export class RequestManager {
   private loadFromStorage(): void {
     this.requests = this.storageHandler.loadFromStorage();
     this.initialized = true;
+    console.log('Loaded requests from storage:', this.requests);
   }
 
   private saveToStorage(): void {
     this.storageHandler.saveToStorage(this.requests);
+  }
+
+  private setupPolling(): void {
+    // Poll every 10 seconds to check for new requests
+    const pollInterval = setInterval(() => {
+      console.log('Polling for new requests...');
+      this.loadFromStorage();
+    }, 10000);
+    
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+      clearInterval(pollInterval);
+    });
   }
 
   createRequest(

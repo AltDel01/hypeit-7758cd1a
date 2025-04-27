@@ -28,6 +28,12 @@ export class LocalStorageHandler implements RequestStorage {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(requests));
       console.log('Saved requests to localStorage:', requests);
+
+      // Dispatch a custom event that can be listened to by other tabs/windows
+      const storageEvent = new CustomEvent('imageRequestsUpdated', {
+        detail: { requests }
+      });
+      window.dispatchEvent(storageEvent);
     } catch (error) {
       console.error('Failed to save image requests to localStorage:', error);
       toast.error('Failed to save your request. Please try again later.');

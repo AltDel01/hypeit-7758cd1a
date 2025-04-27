@@ -9,6 +9,7 @@ export class RequestEventManager {
   }
 
   setupStorageListener(callback: (requests: ImageRequest[]) => void): () => void {
+    // Listen for storage events from other tabs/windows
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'imageRequests') {
         console.log('ImageRequestService: Storage changed from another tab/window, reloading requests');
@@ -18,8 +19,19 @@ export class RequestEventManager {
         this.dispatchEvent('imageRequestsUpdated', { requests });
       }
     };
+    
+    // Listen for custom events within the same window
+    const handleCustomEvent = (event: CustomEvent) => {
+      console.log('ImageRequestService: Custom event received, updating requests');
+      callback(event.detail.requests);
+    };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('imageRequestsUpdated', handleCustomEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('imageRequestsUpdated', handleCustomEvent as EventListener);
+    };
   }
 }
