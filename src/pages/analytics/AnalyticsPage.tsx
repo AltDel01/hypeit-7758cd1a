@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, Calendar, BarChart, Users, Mail, Image } from 'lucide-react';
+import { Instagram, Calendar, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,8 @@ import {
   SidebarProvider,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import { 
@@ -27,6 +29,38 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+
+// Create a separate component for the floating toggle button that appears when sidebar is collapsed
+const FloatingSidebarToggle = () => {
+  const { state, toggleSidebar } = useSidebar();
+  
+  if (state === "expanded") {
+    return null; // Don't show the floating button when sidebar is expanded
+  }
+  
+  return (
+    <div className="fixed left-4 top-24 z-50">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              onClick={toggleSidebar} 
+              size="icon" 
+              variant="secondary"
+              className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
+            >
+              <PanelLeft className="h-5 w-5" />
+              <span className="sr-only">Expand Sidebar</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Expand Sidebar
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+};
 
 const AnalyticsPage = () => {
   const { user } = useAuth();
@@ -70,6 +104,9 @@ const AnalyticsPage = () => {
       <Navbar />
       <div className="flex min-h-screen w-full">
         <SidebarProvider defaultOpen={true}>
+          {/* Add the floating toggle button */}
+          <FloatingSidebarToggle />
+          
           <Sidebar variant="sidebar" className="border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <SidebarContent>
               <SidebarGroup>
@@ -104,6 +141,9 @@ const AnalyticsPage = () => {
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
+            
+            {/* Add SidebarRail for an additional way to toggle the sidebar */}
+            <SidebarRail />
           </Sidebar>
           <div className="flex-1 p-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
