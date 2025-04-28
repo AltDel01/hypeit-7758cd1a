@@ -9,6 +9,7 @@ export interface PollImageParams {
   retries: number;
   delay: number;
   maxRetries: number;
+  originalRequestId?: string; // Add this property to fix the error
 }
 
 export interface ImageStatusResult {
