@@ -45,11 +45,15 @@ const GeneratedContentPage = () => {
     const removeListener = addImageGeneratedListener((event) => {
       const { imageUrl, prompt, requestId } = event.detail;
       
-      if (!imageUrl || !requestId) return;
+      // If imageUrl is missing or no way to identify the image, we can't do anything
+      if (!imageUrl) return;
       
       setImages(prev => {
+        // Generate a unique ID if requestId is missing
+        const imageId = requestId || `gen-${Date.now()}`;
+        
         // Check if the image is already in the list
-        const exists = prev.some(img => img.id === requestId);
+        const exists = requestId ? prev.some(img => img.id === requestId) : false;
         
         if (exists) {
           // Update the existing image
@@ -61,7 +65,7 @@ const GeneratedContentPage = () => {
         } else {
           // Add the new image
           return [...prev, {
-            id: requestId,
+            id: imageId,
             imageUrl,
             prompt: prompt || 'AI generated image',
             status: 'complete' as const,

@@ -15,6 +15,7 @@ interface ImageGeneratedEvent extends CustomEvent {
     success: boolean;
     error?: string;
     timestamp?: number;
+    requestId?: string; // Added requestId property
   };
 }
 
@@ -23,17 +24,20 @@ interface ImageGeneratedEvent extends CustomEvent {
  * @param imageUrl The URL of the generated image
  * @param prompt The prompt used to generate the image
  * @param error Optional error message if generation failed
+ * @param requestId Optional request ID associated with the image
  */
 export const dispatchImageGeneratedEvent = (
   imageUrl: string, 
   prompt?: string,
-  error?: string
+  error?: string,
+  requestId?: string
 ): void => {
   // Log the event details
   console.log("Dispatching image generated event:", { 
     imageUrl: imageUrl?.substring(0, 50) + "...", 
     prompt, 
     error,
+    requestId,
     timestamp: Date.now()
   });
 
@@ -45,6 +49,7 @@ export const dispatchImageGeneratedEvent = (
         prompt,
         success: !error,
         error,
+        requestId,
         timestamp: Date.now()
       }
     });
@@ -66,8 +71,9 @@ export const dispatchImageGeneratedEvent = (
  * Dispatches an image generation error event
  * @param error The error message
  * @param prompt The prompt that was used
+ * @param requestId Optional request ID associated with the failed image
  */
-export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string): void => {
+export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string, requestId?: string): void => {
   console.error("Image generation error:", error);
   
   // Show toast notification for the error
@@ -79,7 +85,7 @@ export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string
     : `https://source.unsplash.com/featured/800x800/?product`;
   
   // Dispatch the event with error details
-  dispatchImageGeneratedEvent(fallbackUrl, prompt, error);
+  dispatchImageGeneratedEvent(fallbackUrl, prompt, error, requestId);
 };
 
 /**
@@ -108,18 +114,19 @@ export const addImageGeneratedListener = (
  * Force triggers a retry for image generation
  * @param prompt The prompt to use for generation
  * @param aspectRatio The aspect ratio to use
+ * @param requestId Optional request ID to associate with the retry
  */
-export const forceImageGenerationRetry = (prompt: string, aspectRatio: string = "1:1"): void => {
+export const forceImageGenerationRetry = (prompt: string, aspectRatio: string = "1:1", requestId?: string): void => {
   console.log("Forcing image generation retry with prompt:", prompt);
   
   // Dispatch a placeholder image event first to show loading state
   const placeholderUrl = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzIwMjAyMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3MDcwNzAiPlJldHJ5aW5nIEltYWdlIEdlbmVyYXRpb248L3RleHQ+PC9zdmc+";
-  dispatchImageGeneratedEvent(placeholderUrl, prompt, "Retrying generation");
+  dispatchImageGeneratedEvent(placeholderUrl, prompt, "Retrying generation", requestId);
   
   // Delay the actual retry trigger to allow UI to update
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent('retryImageGeneration', {
-      detail: { prompt, aspectRatio, timestamp: Date.now() }
+      detail: { prompt, aspectRatio, requestId, timestamp: Date.now() }
     }));
     
     toast.info("Retrying image generation...");

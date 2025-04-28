@@ -15,7 +15,7 @@ export class GeminiImageService {
    * @param params - The image generation parameters
    * @returns A promise that resolves to the image URL or null
    */
-  static async generateImage({ prompt, aspectRatio = "1:1", style, productImage }: GenerateImageParams): Promise<string | null> {
+  static async generateImage({ prompt, aspectRatio = "1:1", style, productImage, requestId }: GenerateImageParams): Promise<string | null> {
     try {
       console.log(`Generating image with prompt: "${prompt}", aspect ratio: ${aspectRatio}, style: ${style || 'default'}, product image: ${productImage ? 'provided' : 'none'}`);
       
@@ -53,14 +53,14 @@ export class GeminiImageService {
       if (error) {
         console.error("Error calling gemini-image-generate function:", error);
         const errorMessage = `Failed to generate image: ${error.message || "Unknown error"}`;
-        dispatchImageGenerationErrorEvent(errorMessage, prompt);
+        dispatchImageGenerationErrorEvent(errorMessage, prompt, requestId);
         return null;
       }
       
       // Handle missing data response
       if (!data) {
         console.error("No data returned from gemini-image-generate function");
-        dispatchImageGenerationErrorEvent("No data returned from service", prompt);
+        dispatchImageGenerationErrorEvent("No data returned from service", prompt, requestId);
         return null;
       }
       
@@ -75,7 +75,7 @@ export class GeminiImageService {
         toast.success("Image generated successfully!");
         
         // Dispatch event with the image
-        dispatchImageGeneratedEvent(response.imageUrl, prompt);
+        dispatchImageGeneratedEvent(response.imageUrl, prompt, undefined, requestId);
         
         return response.imageUrl;
       }
@@ -92,7 +92,8 @@ export class GeminiImageService {
           style,
           retries: 20,
           delay: 2000,
-          maxRetries: 20
+          maxRetries: 20,
+          originalRequestId: requestId // Pass the original request ID
         });
         
         // Return null since we'll get the result asynchronously via the event system
@@ -102,17 +103,17 @@ export class GeminiImageService {
       // Handle error case
       if (response.error) {
         console.error("Error from gemini-image-generate function:", response.error);
-        dispatchImageGenerationErrorEvent(response.error, prompt);
+        dispatchImageGenerationErrorEvent(response.error, prompt, requestId);
         return null;
       }
       
       console.error("Unexpected response format:", response);
-      dispatchImageGenerationErrorEvent("Received unexpected response from the image generation service", prompt);
+      dispatchImageGenerationErrorEvent("Received unexpected response from the image generation service", prompt, requestId);
       return null;
     } catch (error) {
       console.error("Error generating image:", error);
       const errorMessage = `Error generating image: ${error instanceof Error ? error.message : String(error)}`;
-      dispatchImageGenerationErrorEvent(errorMessage, prompt);
+      dispatchImageGenerationErrorEvent(errorMessage, prompt, requestId);
       return null;
     }
   }
