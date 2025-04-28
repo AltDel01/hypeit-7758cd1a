@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, Calendar, BarChart, Users, Mail, PanelLeft } from 'lucide-react';
+import { Instagram, Calendar, BarChart, Users, Mail, Image } from 'lucide-react';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConnectSocialGrid from './ConnectSocialGrid';
 import FeatureTabContent from './FeatureTabContent';
+import GeneratedContent from './GeneratedContent';
 import {
   Sidebar,
   SidebarContent,
@@ -48,6 +49,7 @@ const AnalyticsPage = () => {
     { id: 'connect', label: 'Connect Accounts', icon: Instagram },
     { id: 'schedule', label: 'Schedule Posts', icon: Calendar },
     { id: 'content', label: 'Content Analysis', icon: BarChart },
+    { id: 'generated', label: 'Generated Content', icon: Image },
     { id: 'influencers', label: 'Influencer Analytics', icon: Users },
     { id: 'outreach', label: 'Influencer Outreach', icon: Mail },
   ];
@@ -56,6 +58,8 @@ const AnalyticsPage = () => {
     switch (activeSection) {
       case 'connect':
         return <ConnectSocialGrid onTrigger={handlePremiumFeature} />;
+      case 'generated':
+        return <GeneratedContent />;
       default:
         return <FeatureTabContent onTrigger={handlePremiumFeature} />;
     }

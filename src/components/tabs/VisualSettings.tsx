@@ -1,6 +1,9 @@
+
 import React from 'react';
 import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface VisualSettingsProps {
   selectedAspectRatio: string;
@@ -16,10 +19,32 @@ const VisualSettings = ({
   onImagesPerBatchSelect
 }: VisualSettingsProps) => {
   const { checkPremiumFeature, showPremiumModal, closePremiumModal } = usePremiumFeature();
+  const navigate = useNavigate();
 
   const handleImagesPerBatchSelect = (count: number) => {
     if (count > 3) {
-      checkPremiumFeature('Image Generation');
+      const isPremium = checkPremiumFeature('Image Generation');
+      if (isPremium) {
+        // For premium users selecting large batches, notify them where the images will appear
+        onImagesPerBatchSelect(count);
+        toast.info(`Your ${count} images will appear in the Generated Content section of Analytics once ready.`);
+        
+        // Set a small timeout to allow the toast to be read before potentially navigating
+        setTimeout(() => {
+          const shouldNavigate = window.confirm("Would you like to go to the Generated Content page to view your images when they're ready?");
+          if (shouldNavigate) {
+            navigate('/analytics');
+            // Add a small delay to allow the page to load before setting the active section
+            setTimeout(() => {
+              // Create and dispatch a custom event to set the active section
+              const event = new CustomEvent('setAnalyticsSection', { 
+                detail: { section: 'generated' } 
+              });
+              window.dispatchEvent(event);
+            }, 500);
+          }
+        }, 1000);
+      }
     } else {
       onImagesPerBatchSelect(count);
     }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -9,6 +10,7 @@ import { feedImages, storyImages } from '@/data/galleryImages';
 import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
 import { imageRequestService } from '@/services/requests';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -19,6 +21,7 @@ const Index = () => {
   const [linkedinText, setLinkedinText] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const savedPrompt = localStorage.getItem('savedPrompt');
@@ -99,13 +102,18 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
+      // Get the batch size from local storage (set by VisualSettings)
+      const batchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '1', 10);
+      const isPremiumBatch = batchSize > 3;
+      
       // Create request in the service
       const request = imageRequestService.createRequest(
         user.id,
         user.email || 'Anonymous User',
         prompt,
         aspectRatio,
-        productImageUrl
+        productImageUrl,
+        batchSize
       );
       
       console.log("Image generation request created:", request);
@@ -120,13 +128,33 @@ const Index = () => {
         }
         
         const progressEvent = new CustomEvent('imageGenerationProgress', {
-          detail: { progress }
+          detail: { progress, requestId: request.id }
         });
         window.dispatchEvent(progressEvent);
       }, 800);
       
       toast.success("Your image generation request has been sent to our designers!");
-      toast.info("You'll receive a notification when your image is ready.");
+      
+      if (isPremiumBatch) {
+        toast.info(`You will find your ${batchSize} images in the Analytics > Generated Content section when they're ready.`);
+        
+        // After a short delay, ask if they want to navigate to the Generated Content page
+        setTimeout(() => {
+          const shouldNavigate = window.confirm("Would you like to go to the Generated Content page to view your images once they're ready?");
+          if (shouldNavigate) {
+            navigate('/analytics');
+            // Add a small delay to allow the page to load before setting the active section
+            setTimeout(() => {
+              const event = new CustomEvent('setAnalyticsSection', { 
+                detail: { section: 'generated' } 
+              });
+              window.dispatchEvent(event);
+            }, 500);
+          }
+        }, 1500);
+      } else {
+        toast.info("You'll receive a notification when your image is ready.");
+      }
     } catch (error) {
       console.error("Error generating image:", error);
       Sentry.captureException(error);

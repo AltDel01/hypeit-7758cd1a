@@ -1,5 +1,17 @@
 
-export type RequestStatus = 'new' | 'in-progress' | 'completed';
+export type RequestStatus = 'new' | 'processing' | 'completed' | 'failed';
+
+export type RequestEventType = 
+  | 'imageRequestCreated'
+  | 'imageRequestUpdated'
+  | 'imageRequestCompleted'
+  | 'imageRequestsUpdated'
+  | 'imageRequestsCleared';
+
+export interface RequestEventDetail {
+  request?: ImageRequest;
+  requests?: ImageRequest[];
+}
 
 export interface ImageRequest {
   id: string;
@@ -9,20 +21,17 @@ export interface ImageRequest {
   aspectRatio: string;
   status: RequestStatus;
   createdAt: string;
+  updatedAt: string;
   productImage: string | null;
   resultImage: string | null;
-  updatedAt: string;
+  batchSize?: number;
+  batchImages?: string[];
+  batchParentId?: string;
+  batchIndex?: number;
 }
 
 export interface RequestStorage {
-  getStorageKey(): string;
   loadFromStorage(): ImageRequest[];
   saveToStorage(requests: ImageRequest[]): void;
-}
-
-export type RequestEventType = 'imageRequestCreated' | 'imageRequestUpdated' | 'imageRequestCompleted' | 'imageRequestsCleared' | 'imageRequestsUpdated';
-
-export interface RequestEventDetail {
-  request?: ImageRequest;
-  requests?: ImageRequest[];
+  getStorageKey(): string;
 }

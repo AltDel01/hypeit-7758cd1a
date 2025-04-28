@@ -1,3 +1,4 @@
+
 @layer utilities {
   @keyframes pop {
     0% {
@@ -167,6 +168,21 @@
     }
   }
 
+  /* New animation for batch progress */
+  @keyframes batch-progress {
+    0% {
+      width: 0%;
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      width: 100%;
+      background-position: 0% 50%;
+    }
+  }
+
   .animate-gradient-text {
     background-size: 200% auto;
     background-clip: text;
@@ -223,6 +239,13 @@
   
   .animate-wave-circle {
     animation: wave-circle 2.5s infinite ease-out;
+  }
+  
+  /* New animation class for batch image progress */
+  .animate-batch-progress {
+    animation: batch-progress 60s ease-out forwards;
+    background: linear-gradient(90deg, #8c52ff, #D946EF, #1EAEDB);
+    background-size: 200% auto;
   }
   
   .shadow-glow {

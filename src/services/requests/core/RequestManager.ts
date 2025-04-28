@@ -73,7 +73,8 @@ export class RequestManager {
     userName: string,
     prompt: string,
     aspectRatio: string,
-    productImageUrl: string | null
+    productImageUrl: string | null,
+    batchSize: number = 1
   ): ImageRequest {
     if (!this.initialized) {
       this.loadFromStorage();
@@ -89,14 +90,121 @@ export class RequestManager {
       createdAt: new Date().toISOString(),
       productImage: productImageUrl,
       resultImage: null,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      batchSize: batchSize,
+      batchImages: []
     };
 
     this.requests.push(newRequest);
     this.saveToStorage();
+    
+    // Store the batch size in localStorage for reference
+    localStorage.setItem('selectedImagesPerBatch', batchSize.toString());
+    
     this.eventManager.dispatchEvent('imageRequestCreated', { request: newRequest });
     
+    // For premium batches (15, 25), create multiple placeholder entries in Generated Content
+    if (batchSize > 3) {
+      this.createBatchPlaceholders(newRequest);
+    }
+    
     return newRequest;
+  }
+
+  private createBatchPlaceholders(request: ImageRequest): void {
+    // For premium users, simulate creating batch entries that will appear in Generated Content
+    const { id: parentId, batchSize, prompt, userId, aspectRatio } = request;
+    
+    // Create placeholder requests for each image in the batch
+    for (let i = 0; i < batchSize; i++) {
+      const batchRequest: ImageRequest = {
+        id: `${parentId}-batch-${i}`,
+        userId,
+        userName: request.userName,
+        prompt: `${prompt} (variation ${i+1})`,
+        aspectRatio,
+        status: 'new',
+        createdAt: new Date().toISOString(),
+        productImage: null,
+        resultImage: null,
+        updatedAt: new Date().toISOString(),
+        batchParentId: parentId,
+        batchIndex: i
+      };
+      
+      this.requests.push(batchRequest);
+      
+      // Add to the parent's batch images array
+      if (!request.batchImages) {
+        request.batchImages = [];
+      }
+      request.batchImages.push(batchRequest.id);
+    }
+    
+    this.saveToStorage();
+    
+    // Simulate progress for batch items
+    this.simulateBatchProgress(request);
+  }
+  
+  private simulateBatchProgress(parentRequest: ImageRequest): void {
+    if (!parentRequest.batchImages || parentRequest.batchImages.length === 0) {
+      return;
+    }
+    
+    // Calculate total duration based on batch size (larger batches take longer)
+    const totalDuration = parentRequest.batchSize > 15 ? 180000 : 120000; // 3 minutes or 2 minutes
+    const intervalTime = 2000; // Update every 2 seconds
+    const totalSteps = totalDuration / intervalTime;
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+      currentStep++;
+      const progress = Math.min(95, (currentStep / totalSteps) * 100);
+      
+      // Update all batch images with the current progress
+      parentRequest.batchImages?.forEach((batchId, index) => {
+        // Add some variation to the progress
+        const individualProgress = progress + (Math.random() * 10 - 5);
+        
+        // Dispatch progress event for this batch item
+        const progressEvent = new CustomEvent('imageGenerationProgress', {
+          detail: { 
+            requestId: batchId, 
+            progress: Math.min(95, Math.max(0, individualProgress)) 
+          }
+        });
+        window.dispatchEvent(progressEvent);
+        
+        // Every few steps, complete a random image in the batch
+        if (currentStep > 10 && Math.random() > 0.85) {
+          const batchRequest = this.getRequestById(batchId);
+          if (batchRequest && batchRequest.status !== 'completed') {
+            // Generate a placeholder result image
+            const resultImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(parentRequest.prompt.split(' ').slice(0, 3).join(','))}&random=${Date.now()}${index}`;
+            
+            this.uploadResult(batchId, resultImageUrl);
+          }
+        }
+      });
+      
+      // End the simulation after reaching close to 100%
+      if (currentStep >= totalSteps) {
+        clearInterval(interval);
+        
+        // Complete any remaining batch items
+        parentRequest.batchImages?.forEach(batchId => {
+          const batchRequest = this.getRequestById(batchId);
+          if (batchRequest && batchRequest.status !== 'completed') {
+            const resultImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(parentRequest.prompt.split(' ').slice(0, 3).join(','))}&random=${Date.now()}`;
+            this.uploadResult(batchId, resultImageUrl);
+          }
+        });
+        
+        // Mark parent request as completed
+        this.updateRequestStatus(parentRequest.id, 'completed');
+      }
+    }, intervalTime);
   }
 
   getAllRequests(): ImageRequest[] {
