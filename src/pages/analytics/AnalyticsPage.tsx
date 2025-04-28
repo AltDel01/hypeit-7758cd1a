@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, Calendar, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
+import { Instagram, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -81,7 +81,6 @@ const AnalyticsPage = () => {
 
   const menuItems = [
     { id: 'connect', label: 'Connect Accounts', icon: Instagram },
-    { id: 'schedule', label: 'Schedule Posts', icon: Calendar },
     { id: 'content', label: 'Content Analysis', icon: BarChart },
     { id: 'generated', label: 'Generated Content', icon: Image },
     { id: 'influencers', label: 'Influencer Analytics', icon: Users },
