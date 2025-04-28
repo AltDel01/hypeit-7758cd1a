@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -81,8 +80,8 @@ const AnalyticsPage = () => {
 
   const menuItems = [
     { id: 'connect', label: 'Connect Accounts', icon: Instagram },
-    { id: 'content', label: 'Content Analysis', icon: BarChart },
     { id: 'generated', label: 'Generated Content', icon: Image },
+    { id: 'content', label: 'Content Analysis', icon: BarChart },
     { id: 'influencers', label: 'Influencer Analytics', icon: Users },
     { id: 'outreach', label: 'Influencer Outreach', icon: Mail },
   ];
@@ -103,10 +102,8 @@ const AnalyticsPage = () => {
       <Navbar />
       <div className="flex min-h-screen w-full">
         <SidebarProvider defaultOpen={true}>
-          {/* Add the floating toggle button */}
           <FloatingSidebarToggle />
           
-          {/* Sidebar Container */}
           <div className="flex">
             <Sidebar variant="sidebar" className="border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <SidebarContent>
@@ -143,12 +140,10 @@ const AnalyticsPage = () => {
                 </SidebarGroup>
               </SidebarContent>
               
-              {/* Add SidebarRail for an additional way to toggle the sidebar */}
               <SidebarRail />
             </Sidebar>
           </div>
           
-          {/* Fixed width main content */}
           <div className="w-full max-w-5xl mx-auto px-6 py-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
             <div className="w-full">
