@@ -1,5 +1,5 @@
 
-export type RequestStatus = 'new' | 'processing' | 'completed' | 'failed';
+export type RequestStatus = 'new' | 'processing' | 'completed' | 'failed' | 'in-progress';
 
 export type RequestEventType = 
   | 'imageRequestCreated'

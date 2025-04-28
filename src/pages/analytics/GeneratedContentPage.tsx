@@ -30,7 +30,7 @@ const GeneratedContentPage = () => {
     // Load existing requests
     if (user) {
       const requests = imageRequestService.getRequestsByUser(user.id);
-      const loadedImages = requests.map(req => ({
+      const loadedImages: GeneratedImage[] = requests.map(req => ({
         id: req.id,
         imageUrl: req.resultImage || '',
         prompt: req.prompt,
@@ -45,6 +45,8 @@ const GeneratedContentPage = () => {
     const removeListener = addImageGeneratedListener((event) => {
       const { imageUrl, prompt, requestId } = event.detail;
       
+      if (!imageUrl || !requestId) return;
+      
       setImages(prev => {
         // Check if the image is already in the list
         const exists = prev.some(img => img.id === requestId);
@@ -53,16 +55,16 @@ const GeneratedContentPage = () => {
           // Update the existing image
           return prev.map(img => 
             img.id === requestId 
-              ? { ...img, imageUrl, status: 'complete', progress: 100 } 
+              ? { ...img, imageUrl, status: 'complete' as const, progress: 100 } 
               : img
           );
         } else {
           // Add the new image
           return [...prev, {
-            id: requestId || `gen-${Date.now()}`,
+            id: requestId,
             imageUrl,
             prompt: prompt || 'AI generated image',
-            status: 'complete',
+            status: 'complete' as const,
             progress: 100
           }];
         }

@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { ImageRequest } from '@/services/requests';
+import type { ImageRequest, RequestStatus } from '@/services/requests';
 import { imageRequestService } from '@/services/requests';
 
 export const useRequestManagement = () => {
@@ -100,7 +99,7 @@ export const useRequestManagement = () => {
     setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
   }, []);
 
-  const handleUpdateStatus = useCallback((id: string, status: 'in-progress') => {
+  const handleUpdateStatus = useCallback((id: string, status: RequestStatus) => {
     const updatedRequest = imageRequestService.updateRequestStatus(id, status);
     
     if (updatedRequest) {
