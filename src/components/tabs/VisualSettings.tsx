@@ -3,7 +3,6 @@ import React from 'react';
 import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 
 interface VisualSettingsProps {
   selectedAspectRatio: string;
@@ -25,9 +24,8 @@ const VisualSettings = ({
     if (count > 3) {
       const isPremium = checkPremiumFeature('Image Generation');
       if (isPremium) {
-        // For premium users selecting large batches, just update the selection
+        // For premium users selecting large batches, just update the selection without notification
         onImagesPerBatchSelect(count);
-        toast.info(`Your ${count} images will appear in the Generated Content section of Analytics once ready.`);
       }
     } else {
       onImagesPerBatchSelect(count);

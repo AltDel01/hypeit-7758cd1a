@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -8,8 +8,42 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
+import { imageRequestService } from '@/services/requests';
+import { useAuth } from '@/contexts/AuthContext';
 
 const GeneratedContent = () => {
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    const handleProgressUpdate = (event: CustomEvent) => {
+      const { progress } = event.detail;
+      console.log("Progress update in Analytics:", progress);
+      setGenerationProgress(progress);
+      setIsGenerating(true);
+    };
+    
+    window.addEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Check for any active requests when component mounts
+    if (user) {
+      const activeRequests = imageRequestService.getActiveRequestsForUser(user.id);
+      if (activeRequests.length > 0) {
+        setIsGenerating(true);
+        // Use progress from most recent request
+        setGenerationProgress(activeRequests[0].progress || 0);
+      }
+    }
+  }, [user]);
+
   const handleSchedulePost = () => {
     // Future implementation: Add schedule post functionality
     console.log('Schedule Post button clicked');
@@ -37,6 +71,26 @@ const GeneratedContent = () => {
           </Tooltip>
         </TooltipProvider>
       </div>
+      
+      {isGenerating && (
+        <div className="bg-background/30 border border-purple-800/30 backdrop-blur-md rounded-xl p-6 flex flex-col items-center">
+          <h3 className="text-xl font-medium mb-4 text-white text-center">Generating Your Images</h3>
+          
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <CircularProgressIndicator 
+              progress={generationProgress} 
+              size="large" 
+              showPercentage={true} 
+            />
+            <p className="text-gray-300">
+              Your images are being generated. This may take a few minutes.
+            </p>
+            <div className="text-sm text-gray-400 mt-2">
+              Your {localStorage.getItem('selectedImagesPerBatch') || '15'} images will appear here once ready
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-background/30 border border-purple-800/30 backdrop-blur-md rounded-xl p-6">

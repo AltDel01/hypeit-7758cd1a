@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
@@ -135,10 +134,7 @@ const Index = () => {
       
       // For premium batches (15 or 25 images), immediately navigate to Analytics > Generated Content
       if (isPremiumBatch) {
-        toast.success("Your image generation request has been sent to our designers!");
-        toast.info(`Your ${batchSize} images will appear in the Generated Content section of Analytics once ready.`);
-        
-        // Directly navigate to Analytics page with Generated Content section
+        // No toast notification - just immediately redirect
         navigate('/analytics');
         
         // Add a small delay to allow the page to load before setting the active section
