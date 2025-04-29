@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
+import { Instagram, BarChart, Mail, Image, PanelLeft } from 'lucide-react';
 import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -98,7 +98,6 @@ const AnalyticsPage = () => {
     { id: 'connect', label: 'Connect Accounts', icon: Instagram },
     { id: 'generated', label: 'Generated Content', icon: Image },
     { id: 'content', label: 'Content Analysis', icon: BarChart },
-    { id: 'influencers', label: 'Influencer Analytics', icon: Users },
     { id: 'outreach', label: 'Influencer Outreach', icon: Mail },
   ];
 
