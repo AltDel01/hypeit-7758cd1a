@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { Instagram, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
@@ -67,6 +68,21 @@ const AnalyticsPage = () => {
   const [activePremiumFeature, setActivePremiumFeature] = useState('');
   const [activeSection, setActiveSection] = useState('connect');
   const navigate = useNavigate();
+
+  // Listen for the custom event to set the active section
+  useEffect(() => {
+    const handleSetSection = (event: CustomEvent) => {
+      if (event.detail && event.detail.section) {
+        setActiveSection(event.detail.section);
+      }
+    };
+    
+    window.addEventListener('setAnalyticsSection', handleSetSection as EventListener);
+    
+    return () => {
+      window.removeEventListener('setAnalyticsSection', handleSetSection as EventListener);
+    };
+  }, []);
 
   const handlePremiumFeature = (feature: string) => {
     if (!user) {

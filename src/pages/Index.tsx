@@ -133,26 +133,23 @@ const Index = () => {
         window.dispatchEvent(progressEvent);
       }, 800);
       
-      toast.success("Your image generation request has been sent to our designers!");
-      
+      // For premium batches (15 or 25 images), immediately navigate to Analytics > Generated Content
       if (isPremiumBatch) {
-        toast.info(`You will find your ${batchSize} images in the Analytics > Generated Content section when they're ready.`);
+        toast.success("Your image generation request has been sent to our designers!");
+        toast.info(`Your ${batchSize} images will appear in the Generated Content section of Analytics once ready.`);
         
-        // After a short delay, ask if they want to navigate to the Generated Content page
+        // Directly navigate to Analytics page with Generated Content section
+        navigate('/analytics');
+        
+        // Add a small delay to allow the page to load before setting the active section
         setTimeout(() => {
-          const shouldNavigate = window.confirm("Would you like to go to the Generated Content page to view your images once they're ready?");
-          if (shouldNavigate) {
-            navigate('/analytics');
-            // Add a small delay to allow the page to load before setting the active section
-            setTimeout(() => {
-              const event = new CustomEvent('setAnalyticsSection', { 
-                detail: { section: 'generated' } 
-              });
-              window.dispatchEvent(event);
-            }, 500);
-          }
-        }, 1500);
+          const event = new CustomEvent('setAnalyticsSection', { 
+            detail: { section: 'generated' } 
+          });
+          window.dispatchEvent(event);
+        }, 500);
       } else {
+        toast.success("Your image generation request has been sent to our designers!");
         toast.info("You'll receive a notification when your image is ready.");
       }
     } catch (error) {
