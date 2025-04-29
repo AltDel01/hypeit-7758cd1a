@@ -1,11 +1,11 @@
 
-@import './styles/animations.css';
-@import './styles/utilities.css';
-@import './styles/base.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import './styles/animations.css';
+@import './styles/utilities.css';
+@import './styles/base.css';
 
 :root {
   --background: 240 10% 3.9%;
