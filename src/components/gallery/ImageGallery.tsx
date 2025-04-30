@@ -1,6 +1,13 @@
 
 import React from 'react';
 import ImageDisplay from '../tabs/ImageDisplay';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/carousel";
 
 interface ImageGalleryProps {
   feedImages: { src: string; alt: string }[];
@@ -9,29 +16,25 @@ interface ImageGalleryProps {
   activeTab: string;
 }
 
-const ImageGallery = ({ feedImages, storyImages }: ImageGalleryProps) => {
+const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: ImageGalleryProps) => {
   return (
     <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
-      <div className="col-span-6 p-4 h-screen">
-        <div className="h-full overflow-hidden">
-          <ImageDisplay 
-            images={feedImages}
-            generatedImage={null}
-            showGenerated={false}
-            aspectRatio="square"
-          />
-        </div>
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+        <ImageDisplay 
+          images={feedImages}
+          generatedImage={generatedImage}
+          showGenerated={activeTab === "feed"}
+          aspectRatio="square"
+        />
       </div>
       
-      <div className="col-span-6 p-4 h-screen">
-        <div className="h-full overflow-hidden">
-          <ImageDisplay 
-            images={storyImages}
-            generatedImage={null}
-            showGenerated={false}
-            aspectRatio="story"
-          />
-        </div>
+      <div className="col-span-6 p-4 overflow-hidden max-h-screen">
+        <ImageDisplay 
+          images={storyImages}
+          generatedImage={generatedImage}
+          showGenerated={activeTab === "story"}
+          aspectRatio="story"
+        />
       </div>
     </div>
   );

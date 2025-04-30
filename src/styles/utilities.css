@@ -26,6 +26,12 @@
     ring: 0 !important;
   }
   
+  /* Animation pause on hover */
+  .animate-feed-scroll-down:hover,
+  .animate-story-scroll-up:hover {
+    animation-play-state: paused;
+  }
+  
   /* Scrollbar utilities */
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */

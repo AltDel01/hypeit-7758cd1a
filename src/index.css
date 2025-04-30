@@ -3,9 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './styles/base.css';
+@import './styles/animations.css';
 @import './styles/utilities.css';
-@import './styles/animations/index.css';
+@import './styles/base.css';
 
 :root {
   --background: 240 10% 3.9%;
@@ -28,29 +28,17 @@
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
   --radius: 0.5rem;
+  color-scheme: dark;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+html, body {
+  color: white;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Additional custom styles */
-.text-gradient {
-  background: linear-gradient(to right, #8c52ff, #1EAEDB, #FEF7CD);
-  -webkit-background-clip: text;
+.gradient-text {
   background-clip: text;
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.button-glow {
-  box-shadow: 0 0 15px rgba(140, 82, 255, 0.5);
-}
-
-.button-glow:hover {
-  box-shadow: 0 0 30px rgba(140, 82, 255, 0.8);
+  background-image: linear-gradient(90deg, #8c52ff, #5ce1e6);
+  display: inline;
 }

@@ -24,13 +24,10 @@ const VisualSettings = ({
     if (count > 3) {
       const isPremium = checkPremiumFeature('Image Generation');
       if (isPremium) {
-        // Save the selection to localStorage for later reference
-        localStorage.setItem('selectedImagesPerBatch', count.toString());
+        // For premium users selecting large batches, just update the selection without notification
         onImagesPerBatchSelect(count);
       }
     } else {
-      // For non-premium batch sizes, also save to localStorage
-      localStorage.setItem('selectedImagesPerBatch', count.toString());
       onImagesPerBatchSelect(count);
     }
   };

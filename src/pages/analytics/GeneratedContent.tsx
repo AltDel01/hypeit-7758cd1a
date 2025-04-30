@@ -15,7 +15,6 @@ import { useAuth } from '@/contexts/AuthContext';
 const GeneratedContent = () => {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [batchSize, setBatchSize] = useState(15); // Default to 15
   const { user } = useAuth();
   
   useEffect(() => {
@@ -43,10 +42,6 @@ const GeneratedContent = () => {
         setGenerationProgress(activeRequests[0].progress || 0);
       }
     }
-    
-    // Get the batch size from local storage
-    const storedBatchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '15', 10);
-    setBatchSize(storedBatchSize > 3 ? storedBatchSize : 15); // Fallback to 15 if invalid
   }, [user]);
 
   const handleSchedulePost = () => {
@@ -91,7 +86,7 @@ const GeneratedContent = () => {
               Your images are being generated. This may take a few minutes.
             </p>
             <div className="text-sm text-gray-400 mt-2">
-              Your {batchSize} images will appear here once ready
+              Your {localStorage.getItem('selectedImagesPerBatch') || '15'} images will appear here once ready
             </div>
           </div>
         </div>

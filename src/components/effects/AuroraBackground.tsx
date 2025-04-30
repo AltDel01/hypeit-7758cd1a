@@ -41,27 +41,13 @@ const AuroraBackground: React.FC<AuroraBackgroundProps> = ({ children }) => {
     
     container.addEventListener('mousemove', handleMouseMove);
     
-    // Set initial background to ensure it's visible even without mouse movement
-    if (aurora) {
-      aurora.style.background = `
-        radial-gradient(
-          circle at 50% 50%,
-          rgba(155, 135, 245, 0.8) 0%,
-          rgba(126, 105, 171, 0.6) 25%,
-          rgba(110, 89, 165, 0.4) 50%,
-          rgba(14, 165, 233, 0.3) 75%,
-          rgba(0, 0, 0, 0) 100%
-        )
-      `;
-    }
-    
     return () => {
       container.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
   
   return (
-    <div ref={containerRef} className="relative min-h-screen w-full overflow-hidden bg-background">
+    <div ref={containerRef} className="relative min-h-screen w-full overflow-hidden">
       <div 
         ref={auroraRef} 
         className="absolute inset-0 pointer-events-none transition-transform duration-300 ease-out"
