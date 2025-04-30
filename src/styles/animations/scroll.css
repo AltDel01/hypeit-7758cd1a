@@ -15,7 +15,7 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(-50%);
+      transform: translateY(50%);
     }
   }
   
@@ -37,6 +37,7 @@
   /* Container classes for proper overflow handling */
   .scroll-container {
     overflow: hidden;
+    height: 100%;
     mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
   }
@@ -45,5 +46,7 @@
     padding-bottom: 0;
     padding-top: 0;
     will-change: transform;
+    display: flex;
+    flex-direction: column;
   }
 }

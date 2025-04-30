@@ -59,10 +59,10 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   const displayImages = [...images, ...images, ...images, ...images];
 
   return (
-    <div className="scroll-container h-full relative">
-      <div className={`scroll-content ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} pb-4`}>
+    <div className="scroll-container relative h-full">
+      <div className={`scroll-content ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"}`}>
         {localGeneratedImage && showGenerated ? (
-          <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
+          <div className="rounded-lg overflow-hidden relative group mb-4 border-2 border-[#9b87f5]">
             <img 
               src={localGeneratedImage} 
               alt="Generated AI image" 
@@ -94,7 +94,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         ) : null}
         
         {displayImages.map((image, index) => (
-          <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-5">
+          <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-4">
             <img 
               src={image.src} 
               alt={image.alt} 
