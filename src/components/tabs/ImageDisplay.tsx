@@ -54,8 +54,9 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+  // Fix: Ensure we have enough images for proper scrolling
+  // Create an array with twice the number of images for smoother infinite scrolling
+  const displayImages = [...images, ...images, ...images, ...images, ...images];
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>

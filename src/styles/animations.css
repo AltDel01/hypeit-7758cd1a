@@ -69,6 +69,7 @@
     100% { caret-color: #9b87f5; }
   }
   
+  /* Fixed smooth scroll animations - ensure they move at a consistent pace */
   @keyframes smooth-scroll-down {
     0% {
       transform: translateY(0);
@@ -80,10 +81,10 @@
   
   @keyframes smooth-scroll-up {
     0% {
-      transform: translateY(-50%);
+      transform: translateY(0);
     }
     100% {
-      transform: translateY(0);
+      transform: translateY(-50%);
     }
   }
   
@@ -208,12 +209,13 @@
     animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
   }
   
+  /* Fixed animation durations for smooth scrolling */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 480s linear infinite;
+    animation: smooth-scroll-down 60s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 600s linear infinite;
+    animation: smooth-scroll-up 60s linear infinite;
   }
   
   .animate-ripple {
