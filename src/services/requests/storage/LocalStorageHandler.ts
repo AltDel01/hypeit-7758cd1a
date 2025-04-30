@@ -52,4 +52,46 @@ export class LocalStorageHandler implements RequestStorage {
       toast.error('Failed to save your request. Please try again later.');
     }
   }
+
+  getAllRequests(): ImageRequest[] {
+    return this.loadFromStorage();
+  }
+
+  getRequestById(id: string): ImageRequest | null {
+    const requests = this.getAllRequests();
+    return requests.find(req => req.id === id) || null;
+  }
+
+  saveRequest(request: ImageRequest): void {
+    const requests = this.getAllRequests();
+    const existingIndex = requests.findIndex(r => r.id === request.id);
+    
+    if (existingIndex >= 0) {
+      requests[existingIndex] = request;
+    } else {
+      requests.push(request);
+    }
+    
+    this.saveToStorage(requests);
+    
+    // Dispatch event for the specific request update
+    const requestEvent = new CustomEvent('imageRequestUpdated', {
+      detail: { request }
+    });
+    window.dispatchEvent(requestEvent);
+  }
+
+  deleteRequest(id: string): boolean {
+    const requests = this.getAllRequests();
+    const initialLength = requests.length;
+    
+    const filteredRequests = requests.filter(req => req.id !== id);
+    
+    if (filteredRequests.length !== initialLength) {
+      this.saveToStorage(filteredRequests);
+      return true;
+    }
+    
+    return false;
+  }
 }

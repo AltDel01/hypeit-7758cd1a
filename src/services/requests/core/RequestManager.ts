@@ -1,7 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { LocalStorageHandler } from '../storage/LocalStorageHandler';
-import { Request, RequestStatus } from '../types';
+import { ImageRequest, RequestStatus } from '../types';
 
 export class RequestManager {
   private storageHandler: LocalStorageHandler;
@@ -24,18 +24,21 @@ export class RequestManager {
     aspectRatio: string,
     imageUrl: string | null,
     batchSize: number = 1
-  ): Request {
-    const request: Request = {
+  ): ImageRequest {
+    const request: ImageRequest = {
       id: uuidv4(),
       userId,
       userName,
       prompt,
       aspectRatio,
+      productImage: imageUrl,
       referenceImage: imageUrl,
       batchSize,
-      status: 'pending',
+      status: 'processing',
       createdAt: new Date().toISOString(),
-      progress: 0,
+      updatedAt: new Date().toISOString(),
+      resultImage: null,
+      progress: 0
     };
 
     // Save the batch size to localStorage for reference across pages
@@ -43,34 +46,40 @@ export class RequestManager {
     
     this.storageHandler.saveRequest(request);
     
+    // Dispatch a custom event for the request creation
+    const requestEvent = new CustomEvent('imageRequestCreated', {
+      detail: { request }
+    });
+    window.dispatchEvent(requestEvent);
+    
     return request;
   }
 
-  getRequestById(id: string): Request | null {
+  getRequestById(id: string): ImageRequest | null {
     return this.storageHandler.getRequestById(id);
   }
 
-  getAllRequests(): Request[] {
+  getAllRequests(): ImageRequest[] {
     return this.storageHandler.getAllRequests();
   }
 
-  getRequestsForUser(userId: string): Request[] {
+  getRequestsForUser(userId: string): ImageRequest[] {
     return this.getAllRequests().filter(request => request.userId === userId);
   }
   
-  getActiveRequestsForUser(userId: string): Request[] {
+  getActiveRequestsForUser(userId: string): ImageRequest[] {
     return this.getRequestsForUser(userId)
-      .filter(request => ['pending', 'processing'].includes(request.status))
+      .filter(request => ['new', 'processing', 'in-progress'].includes(request.status))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
   
-  getCompletedRequestsForUser(userId: string): Request[] {
+  getCompletedRequestsForUser(userId: string): ImageRequest[] {
     return this.getRequestsForUser(userId)
       .filter(request => request.status === 'completed')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
   
-  getLatestRequestForUser(userId: string): Request | null {
+  getLatestRequestForUser(userId: string): ImageRequest | null {
     const userRequests = this.getRequestsForUser(userId);
     if (userRequests.length === 0) return null;
     
@@ -79,23 +88,36 @@ export class RequestManager {
     )[0];
   }
 
-  updateRequest(id: string, updates: Partial<Request>): Request | null {
+  updateRequest(id: string, updates: Partial<ImageRequest>): ImageRequest | null {
     const request = this.getRequestById(id);
     if (!request) return null;
 
-    const updatedRequest = { ...request, ...updates };
+    const updatedRequest = { 
+      ...request, 
+      ...updates, 
+      updatedAt: new Date().toISOString() 
+    };
+    
     this.storageHandler.saveRequest(updatedRequest);
     
     return updatedRequest;
+  }
+  
+  updateRequestStatus(id: string, status: RequestStatus): ImageRequest | null {
+    return this.updateRequest(id, { status });
   }
 
   deleteRequest(id: string): boolean {
     return this.storageHandler.deleteRequest(id);
   }
   
+  forceReload(): ImageRequest[] {
+    return this.storageHandler.loadFromStorage();
+  }
+  
   simulateGenerationProgress() {
     const pendingRequests = this.getAllRequests().filter(
-      request => ['pending', 'processing'].includes(request.status)
+      request => ['new', 'processing', 'in-progress'].includes(request.status)
     );
     
     pendingRequests.forEach(request => {
