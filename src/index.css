@@ -5,7 +5,7 @@
 
 @import './styles/base.css';
 @import './styles/utilities.css';
-@import './styles/animations.css';
+@import './styles/animations/index.css';
 
 :root {
   --background: 240 10% 3.9%;

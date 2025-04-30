@@ -1,0 +1,24 @@
+
+@layer utilities {
+  /* Animation for batch progress */
+  @keyframes batch-progress {
+    0% {
+      width: 0%;
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      width: 100%;
+      background-position: 0% 50%;
+    }
+  }
+  
+  /* Animation class for batch progress */
+  .animate-batch-progress {
+    animation: batch-progress 60s ease-out forwards;
+    background: linear-gradient(90deg, #8c52ff, #D946EF, #1EAEDB);
+    background-size: 200% auto;
+  }
+}

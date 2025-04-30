@@ -1,0 +1,23 @@
+
+@layer utilities {
+  .animate-gradient-text {
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-text 1s ease infinite;
+    background-image: linear-gradient(45deg, #FEF7CD, #8c52ff, #1EAEDB, #FEF7CD);
+    background-size: 300% 300%;
+    font-weight: 800;
+  }
+  
+  .animate-gradient-rotate {
+    background: linear-gradient(90deg, #FEF7CD, #8c52ff, #1EAEDB, #8c52ff, #FEF7CD);
+    background-size: 200% 200%;
+    animation: gradient-rotate 3s ease infinite;
+  }
+  
+  .animate-fade-in-up {
+    animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+}

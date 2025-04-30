@@ -1,0 +1,11 @@
+
+@layer utilities {
+  @keyframes rainbow-cursor {
+    0% { caret-color: #9b87f5; }
+    20% { caret-color: #D946EF; }
+    40% { caret-color: #F97316; }
+    60% { caret-color: #33C3F0; }
+    80% { caret-color: #1EAEDB; }
+    100% { caret-color: #9b87f5; }
+  }
+}

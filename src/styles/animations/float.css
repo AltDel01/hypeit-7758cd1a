@@ -1,0 +1,25 @@
+
+@layer utilities {
+  @keyframes float-gently {
+    0% {
+      transform: translateY(0px) translateX(0px);
+    }
+    25% {
+      transform: translateY(-5px) translateX(3px);
+    }
+    50% {
+      transform: translateY(0px) translateX(0px);
+    }
+    75% {
+      transform: translateY(5px) translateX(-3px);
+    }
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+  }
+  
+  /* Animation class for floating movement */
+  .animate-float {
+    animation: float-gently 5s ease-in-out infinite;
+  }
+}

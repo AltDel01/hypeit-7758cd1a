@@ -1,0 +1,30 @@
+
+@layer utilities {
+  /* Smooth scroll animations */
+  @keyframes smooth-scroll-down {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+  
+  @keyframes smooth-scroll-up {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+  
+  /* Animation classes for smooth scrolling */
+  .animate-feed-scroll-down {
+    animation: smooth-scroll-down 60s linear infinite;
+  }
+  
+  .animate-story-scroll-up {
+    animation: smooth-scroll-up 60s linear infinite;
+  }
+}
