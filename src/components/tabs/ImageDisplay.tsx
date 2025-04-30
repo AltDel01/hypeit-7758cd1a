@@ -55,14 +55,14 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   };
 
   // Create multiple copies of images for smooth infinite scrolling
-  const displayImages = [...images, ...images, ...images];
+  const displayImages = [...images, ...images, ...images, ...images, ...images];
 
   // Set appropriate animation class based on aspect ratio
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   return (
     <div className="scroll-container hardware-accelerated">
-      <div className={`scroll-content ${animationClass} hardware-accelerated`} style={{ minHeight: '200%' }}>
+      <div className={`scroll-content ${animationClass} hardware-accelerated`} style={{ height: '200%' }}>
         {localGeneratedImage && showGenerated ? (
           <div className="rounded-lg overflow-hidden relative group mb-4 border-2 border-[#9b87f5]">
             <img 

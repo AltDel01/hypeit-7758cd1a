@@ -6,7 +6,7 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(-50%);
+      transform: translateY(-100%);
     }
   }
   
@@ -15,17 +15,17 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(50%);
+      transform: translateY(-100%);
     }
   }
   
   /* Animation classes with proper duration and timing */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 45s linear infinite;
+    animation: smooth-scroll-down 30s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 45s linear infinite;
+    animation: smooth-scroll-up 30s linear infinite;
   }
   
   /* Animation pause on hover */
