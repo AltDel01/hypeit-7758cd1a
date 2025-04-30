@@ -58,9 +58,13 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Using more duplicates to ensure continuous animation
   const displayImages = [...images, ...images, ...images, ...images];
 
+  // Calculate the total height to ensure it's enough for scrolling animation
+  const containerClassName = "scroll-container relative h-full";
+  const contentClassName = `scroll-content ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"}`;
+
   return (
-    <div className="scroll-container relative h-full">
-      <div className={`scroll-content ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"}`}>
+    <div className={containerClassName}>
+      <div className={contentClassName}>
         {localGeneratedImage && showGenerated ? (
           <div className="rounded-lg overflow-hidden relative group mb-4 border-2 border-[#9b87f5]">
             <img 

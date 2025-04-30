@@ -6,7 +6,7 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(-50%);
+      transform: translateY(-100%);
     }
   }
   
@@ -15,17 +15,17 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(50%);
+      transform: translateY(-100%);
     }
   }
   
   /* Animation classes for smooth scrolling */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 60s linear infinite;
+    animation: smooth-scroll-down 30s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 60s linear infinite;
+    animation: smooth-scroll-up 30s linear infinite;
   }
   
   /* Animation pause on hover */
@@ -38,6 +38,7 @@
   .scroll-container {
     overflow: hidden;
     height: 100%;
+    position: relative;
     mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
   }
@@ -48,5 +49,6 @@
     will-change: transform;
     display: flex;
     flex-direction: column;
+    height: auto;
   }
 }
