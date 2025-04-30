@@ -1,4 +1,5 @@
 
+
 @layer utilities {
   /* Smooth scroll animations with proper transform values */
   @keyframes smooth-scroll-down {
@@ -6,26 +7,26 @@
       transform: translateY(0);
     }
     100% {
-      transform: translateY(-100%);
+      transform: translateY(-50%);
     }
   }
   
   @keyframes smooth-scroll-up {
     0% {
-      transform: translateY(0);
+      transform: translateY(-50%);
     }
     100% {
-      transform: translateY(-100%);
+      transform: translateY(0);
     }
   }
   
   /* Animation classes with proper duration and timing */
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 30s linear infinite;
+    animation: smooth-scroll-down 20s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 30s linear infinite;
+    animation: smooth-scroll-up 20s linear infinite;
   }
   
   /* Animation pause on hover */
@@ -59,3 +60,4 @@
     perspective: 1000px;
   }
 }
+

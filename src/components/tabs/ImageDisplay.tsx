@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
@@ -54,15 +55,20 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Create multiple copies of images for smooth infinite scrolling
-  const displayImages = [...images, ...images, ...images, ...images, ...images];
+  // Create enough copies of images for smooth infinite scrolling
+  const displayImages = [...images, ...images];
+  
+  // Create duplicated content for seamless scrolling
+  const contentTop = [...displayImages];
+  const contentBottom = [...displayImages];
 
   // Set appropriate animation class based on aspect ratio
   const animationClass = aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up";
 
   return (
-    <div className="scroll-container hardware-accelerated">
-      <div className={`scroll-content ${animationClass} hardware-accelerated`} style={{ height: '200%' }}>
+    <div className="scroll-container">
+      {/* First set of images */}
+      <div className={`scroll-content ${animationClass}`}>
         {localGeneratedImage && showGenerated ? (
           <div className="rounded-lg overflow-hidden relative group mb-4 border-2 border-[#9b87f5]">
             <img 
@@ -95,13 +101,42 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
           </div>
         ) : null}
         
-        {displayImages.map((image, index) => (
-          <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-4">
+        {contentTop.map((image, index) => (
+          <div key={`top-${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-4">
             <img 
               src={image.src} 
               alt={image.alt} 
               className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`}
               loading={index < 4 ? "eager" : "lazy"}
+            />
+            <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
+                onClick={() => handleCopy(image.src)}
+              >
+                <Copy size={14} />
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
+                onClick={() => handleDownload(image.src)}
+              >
+                <Download size={14} />
+              </Button>
+            </div>
+          </div>
+        ))}
+        
+        {contentBottom.map((image, index) => (
+          <div key={`bottom-${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-4">
+            <img 
+              src={image.src} 
+              alt={image.alt} 
+              className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`}
+              loading="lazy"
             />
             <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button 
@@ -129,3 +164,4 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
 };
 
 export default ImageDisplay;
+
