@@ -54,69 +54,74 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Create an array with multiple copies of images for smooth infinite scrolling
-  const displayImages = [...images, ...images, ...images, ...images, ...images];
+  // Create multiple copies of images for smooth infinite scrolling
+  // Using more duplicates to ensure continuous animation
+  const displayImages = [...images, ...images, ...images, ...images];
 
   return (
-    <div className={`grid grid-cols-1 gap-5 h-[300vh] ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"}`}>
-      {localGeneratedImage && showGenerated ? (
-        <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
-          <img 
-            src={localGeneratedImage} 
-            alt="Generated AI image" 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
-          />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(localGeneratedImage)}
-            >
-              <Copy size={14} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(localGeneratedImage)}
-            >
-              <Download size={14} />
-            </Button>
+    <div className="scroll-container h-full relative">
+      <div className={`scroll-content ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} pb-4`}>
+        {localGeneratedImage && showGenerated ? (
+          <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
+            <img 
+              src={localGeneratedImage} 
+              alt="Generated AI image" 
+              className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`}
+              loading="eager"
+            />
+            <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
+                onClick={() => handleCopy(localGeneratedImage)}
+              >
+                <Copy size={14} />
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
+                onClick={() => handleDownload(localGeneratedImage)}
+              >
+                <Download size={14} />
+              </Button>
+            </div>
+            <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
+              Generated Image
+            </div>
           </div>
-          <div className="absolute top-0 left-0 bg-[#9b87f5] text-white px-2 py-1 text-xs">
-            Generated Image
+        ) : null}
+        
+        {displayImages.map((image, index) => (
+          <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group mb-5">
+            <img 
+              src={image.src} 
+              alt={image.alt} 
+              className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`}
+              loading={index < 4 ? "eager" : "lazy"}
+            />
+            <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
+                onClick={() => handleCopy(image.src)}
+              >
+                <Copy size={14} />
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
+                onClick={() => handleDownload(image.src)}
+              >
+                <Download size={14} />
+              </Button>
+            </div>
           </div>
-        </div>
-      ) : null}
-      
-      {displayImages.map((image, index) => (
-        <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
-          <img 
-            src={image.src} 
-            alt={image.alt} 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
-          />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(image.src)}
-            >
-              <Copy size={14} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(image.src)}
-            >
-              <Download size={14} />
-            </Button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

@@ -33,4 +33,17 @@
   .animate-story-scroll-up:hover {
     animation-play-state: paused;
   }
+
+  /* Container classes for proper overflow handling */
+  .scroll-container {
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+  }
+
+  .scroll-content {
+    padding-bottom: 0;
+    padding-top: 0;
+    will-change: transform;
+  }
 }
