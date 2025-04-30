@@ -27,4 +27,10 @@
   .animate-story-scroll-up {
     animation: smooth-scroll-up 60s linear infinite;
   }
+  
+  /* Animation pause on hover */
+  .animate-feed-scroll-down:hover,
+  .animate-story-scroll-up:hover {
+    animation-play-state: paused;
+  }
 }
