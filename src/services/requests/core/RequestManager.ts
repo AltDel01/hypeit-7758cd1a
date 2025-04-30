@@ -83,40 +83,14 @@ export class RequestManager {
     const request = this.getRequestById(id);
     if (!request) return null;
 
-    const updatedRequest = { 
-      ...request, 
-      ...updates,
-      updatedAt: new Date().toISOString() 
-    };
-    
+    const updatedRequest = { ...request, ...updates };
     this.storageHandler.saveRequest(updatedRequest);
     
     return updatedRequest;
   }
 
-  updateRequestStatus(id: string, status: RequestStatus): Request | null {
-    return this.updateRequest(id, { status });
-  }
-
-  uploadResult(id: string, resultImage: string): Request | null {
-    return this.updateRequest(id, { 
-      resultImage, 
-      status: 'completed', 
-      completedAt: new Date().toISOString(),
-      progress: 100 
-    });
-  }
-
   deleteRequest(id: string): boolean {
     return this.storageHandler.deleteRequest(id);
-  }
-  
-  forceReload(): Request[] {
-    return this.getAllRequests();
-  }
-  
-  clearAllRequests(): void {
-    this.storageHandler.saveToStorage([]);
   }
   
   simulateGenerationProgress() {

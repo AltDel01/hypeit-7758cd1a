@@ -1,5 +1,5 @@
 
-export type RequestStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'in-progress' | 'new';
+export type RequestStatus = 'new' | 'processing' | 'completed' | 'failed' | 'in-progress';
 
 export type RequestEventType = 
   | 'imageRequestCreated'
@@ -9,38 +9,29 @@ export type RequestEventType =
   | 'imageRequestsCleared';
 
 export interface RequestEventDetail {
-  request?: Request;
-  requests?: Request[];
+  request?: ImageRequest;
+  requests?: ImageRequest[];
 }
 
-export interface Request {
+export interface ImageRequest {
   id: string;
   userId: string;
   userName: string;
   prompt: string;
   aspectRatio: string;
-  referenceImage: string | null;
-  batchSize: number;
   status: RequestStatus;
   createdAt: string;
-  updatedAt?: string;
-  completedAt?: string;
-  progress?: number;
-  resultImage?: string | null;
+  updatedAt: string;
+  productImage: string | null;
+  resultImage: string | null;
+  batchSize?: number;
   batchImages?: string[];
   batchParentId?: string;
   batchIndex?: number;
 }
 
 export interface RequestStorage {
-  loadFromStorage(): Request[];
-  saveToStorage(requests: Request[]): void;
+  loadFromStorage(): ImageRequest[];
+  saveToStorage(requests: ImageRequest[]): void;
   getStorageKey(): string;
-  getAllRequests(): Request[];
-  getRequestById(id: string): Request | null;
-  saveRequest(request: Request): void;
-  deleteRequest(id: string): boolean;
 }
-
-// Backward compatibility type aliases
-export type ImageRequest = Request;

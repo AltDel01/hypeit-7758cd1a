@@ -55,12 +55,12 @@ export const RequestDetails = ({
           <p className="text-white">{request.aspectRatio}</p>
         </div>
         
-        {request.referenceImage && (
+        {request.productImage && (
           <div>
             <h3 className="text-sm font-medium text-gray-400">Reference Image</h3>
             <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
               <img 
-                src={request.referenceImage} 
+                src={request.productImage} 
                 alt="Reference" 
                 className="w-full h-full object-contain"
               />
