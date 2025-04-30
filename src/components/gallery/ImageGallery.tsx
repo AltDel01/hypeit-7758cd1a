@@ -9,15 +9,15 @@ interface ImageGalleryProps {
   activeTab: string;
 }
 
-const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: ImageGalleryProps) => {
+const ImageGallery = ({ feedImages, storyImages }: ImageGalleryProps) => {
   return (
     <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
       <div className="col-span-6 p-4 h-screen">
         <div className="h-full overflow-hidden">
           <ImageDisplay 
             images={feedImages}
-            generatedImage={generatedImage}
-            showGenerated={activeTab === "feed"}
+            generatedImage={null}
+            showGenerated={false}
             aspectRatio="square"
           />
         </div>
@@ -27,8 +27,8 @@ const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: Im
         <div className="h-full overflow-hidden">
           <ImageDisplay 
             images={storyImages}
-            generatedImage={generatedImage}
-            showGenerated={activeTab === "story"}
+            generatedImage={null}
+            showGenerated={false}
             aspectRatio="story"
           />
         </div>

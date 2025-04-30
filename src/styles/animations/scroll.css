@@ -1,6 +1,6 @@
 
 @layer utilities {
-  /* Smooth scroll animations with proper transform values */
+  /* Smooth scroll animations */
   @keyframes smooth-scroll-down {
     0% {
       transform: translateY(0);
