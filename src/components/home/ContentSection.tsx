@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import TabsContainer from '@/components/tabs/TabsContainer';
+import { useImageGenerator } from '@/hooks/useImageGenerator';
 
 const ContentSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -38,6 +39,15 @@ const ContentSection: React.FC = () => {
     };
   }, []);
 
+  // Get the image generator function from our hook
+  const generateImage = useImageGenerator(
+    prompt, 
+    productImage, 
+    user, 
+    activeTab, 
+    setIsGenerating
+  );
+
   return (
     <div className="col-span-5 p-6">
       <div className="max-w-xl mx-auto">
@@ -59,7 +69,7 @@ const ContentSection: React.FC = () => {
             productImage={productImage}
             setProductImage={setProductImage}
             isGenerating={isGenerating}
-            generateImage={useImageGenerator(prompt, productImage, user, activeTab, setIsGenerating)}
+            generateImage={generateImage}
             setXText={setXText}
             setLinkedinText={setLinkedinText}
             generatedImage={generatedImage}
