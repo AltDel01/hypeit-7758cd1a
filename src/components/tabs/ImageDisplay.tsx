@@ -57,12 +57,15 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   // Create multiple copies of images for smoother looping - increase for better looping
   const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
 
+  // Only show generated image if we have one AND showGenerated is true
+  const shouldShowGeneratedImage = Boolean(localGeneratedImage && showGenerated);
+
   return (
     <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>
-      {localGeneratedImage && showGenerated ? (
+      {shouldShowGeneratedImage && (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
-            src={localGeneratedImage} 
+            src={localGeneratedImage!} 
             alt="Generated AI image" 
             className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
           />
@@ -71,7 +74,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(localGeneratedImage)}
+              onClick={() => handleCopy(localGeneratedImage!)}
             >
               <Copy size={14} />
             </Button>
@@ -79,7 +82,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(localGeneratedImage)}
+              onClick={() => handleDownload(localGeneratedImage!)}
             >
               <Download size={14} />
             </Button>
@@ -88,7 +91,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
             Generated Image
           </div>
         </div>
-      ) : null}
+      )}
       
       {displayImages.map((image, index) => (
         <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
