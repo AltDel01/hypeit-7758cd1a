@@ -9,7 +9,7 @@ try {
   // Try to import the Sentry plugin, but don't fail if it's not available
   sentryVitePlugin = require("@sentry/vite-plugin").sentryVitePlugin;
 } catch (error) {
-  console.warn("Sentry Vite plugin couldn't be loaded. Sentry features will be disabled.");
+  console.warn("Plugin couldn't be loaded. Features will be disabled.");
 }
 
 // https://vitejs.dev/config/
@@ -43,7 +43,16 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      sourcemap: true, // Generate source maps for production builds
+      sourcemap: false, // Disable source maps for production builds
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true, // Remove console logs
+        },
+        format: {
+          comments: false, // Remove comments
+        },
+      },
     },
     optimizeDeps: {
       include: [
