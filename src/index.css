@@ -1,4 +1,9 @@
 
+/* Import base styles */
 @import './styles/base.css';
+
+/* Import animations */
 @import './styles/animations.css';
+
+/* Import utilities */
 @import './styles/utilities.css';
