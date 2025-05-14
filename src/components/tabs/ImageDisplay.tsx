@@ -54,18 +54,23 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
+  // Only show real images from the provided array, no placeholders
+  const filteredImages = images.filter(image => {
+    // Filter out any placeholder images or images with specific placeholder patterns
+    return !image.src.includes('placeholder') && 
+           !image.src.includes('unsplash') &&
+           !image.src.includes('Generating+Image');
+  });
 
-  // Only show generated image if we have one AND showGenerated is true
-  const shouldShowGeneratedImage = Boolean(localGeneratedImage && showGenerated);
+  // Do not show generated image section at all
+  const shouldShowGeneratedImage = false; // Disabled completely
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>
-      {shouldShowGeneratedImage && (
+      {shouldShowGeneratedImage && localGeneratedImage && (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
-            src={localGeneratedImage!} 
+            src={localGeneratedImage} 
             alt="Generated AI image" 
             className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
           />
@@ -74,7 +79,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(localGeneratedImage!)}
+              onClick={() => handleCopy(localGeneratedImage)}
             >
               <Copy size={14} />
             </Button>
@@ -82,7 +87,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
               size="sm" 
               variant="ghost" 
               className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(localGeneratedImage!)}
+              onClick={() => handleDownload(localGeneratedImage)}
             >
               <Download size={14} />
             </Button>
@@ -93,7 +98,7 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         </div>
       )}
       
-      {displayImages.map((image, index) => (
+      {filteredImages.map((image, index) => (
         <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
           <img 
             src={image.src} 
