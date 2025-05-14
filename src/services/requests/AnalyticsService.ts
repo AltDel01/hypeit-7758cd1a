@@ -29,7 +29,7 @@ class AnalyticsService {
     }
   }
 
-  trackStrategyGeneration(strategyType: string): void {
+  trackStrategyGeneration(strategyType: string, additionalData?: Record<string, any>): void {
     try {
       const existingData = this.getAnalyticsData();
       
@@ -39,6 +39,7 @@ class AnalyticsService {
           ...(existingData.generatedStrategies || []),
           {
             type: strategyType,
+            ...(additionalData || {}),
             generatedAt: new Date().toISOString()
           }
         ],
@@ -58,10 +59,34 @@ class AnalyticsService {
     }
   }
 
+  trackEvent(eventName: string, eventData?: Record<string, any>): void {
+    try {
+      const existingData = this.getAnalyticsData();
+      
+      const updatedData = {
+        ...existingData,
+        events: [
+          ...(existingData.events || []),
+          {
+            name: eventName,
+            ...(eventData || {}),
+            timestamp: new Date().toISOString()
+          }
+        ],
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedData));
+    } catch (error) {
+      console.error('Error tracking event:', error);
+    }
+  }
+
   private getAnalyticsData(): any {
     const defaultData = {
       steps: {},
       generatedStrategies: [],
+      events: [],
       lastUpdated: new Date().toISOString()
     };
     

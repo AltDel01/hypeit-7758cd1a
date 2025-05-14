@@ -4,7 +4,7 @@ import { analyticsService } from '@/services/requests';
 export const viralityService = {
   trackStrategyGeneration: (businessName: string) => {
     try {
-      analyticsService.trackEvent('virality_strategy_generated', {
+      analyticsService.trackStrategyGeneration('virality_strategy', {
         businessName,
         timestamp: new Date().toISOString(),
       });

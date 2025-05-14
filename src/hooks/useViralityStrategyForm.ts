@@ -12,7 +12,8 @@ import {
 import { getInitialViralityFormData } from '@/utils/virality/initialData';
 import { viralityService } from '@/services/virality/viralityService';
 
-export { 
+// Use proper export type syntax for re-exports
+export type { 
   BusinessInfo, 
   ToneOfVoice, 
   Demographic, 
