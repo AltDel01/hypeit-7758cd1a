@@ -23,10 +23,12 @@ import TrendingTopicsSidebar from '@/components/virality/TrendingTopicsSidebar';
 import { ArrowLeft, BarChart, TrendingUp, BarChart2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { analyticsService } from '@/services/requests';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ViralityDashboard = () => {
   const [activeSection, setActiveSection] = useState('analytics');
   const { showPremiumModal, selectedFeature, closePremiumModal } = usePremiumFeature();
+  const isMobile = useIsMobile();
 
   const menuItems = [
     { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
@@ -63,7 +65,7 @@ const ViralityDashboard = () => {
     <AuroraBackground>
       <div className="flex flex-col min-h-screen">
         <div className="flex flex-1 w-full">
-          <SidebarProvider defaultOpen={true}>
+          <SidebarProvider defaultOpen={!isMobile}>
             <ViralitySidebarToggle />
             
             <div className="flex">

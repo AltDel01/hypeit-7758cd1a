@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { toast } from '@/components/ui/use-toast';
 import { ArrowLeft, BarChart, LineChart, PieChart } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Analytics Content Components
 import OverviewContent from './sections/OverviewContent';
@@ -24,6 +25,7 @@ import AnalyticsSidebarToggle from './components/AnalyticsSidebarToggle';
 
 const AnalyticsDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
+  const isMobile = useIsMobile();
   
   const menuItems = [
     { id: 'overview', label: 'Influencers Overview', icon: PieChart },
@@ -54,7 +56,7 @@ const AnalyticsDashboard = () => {
     <AuroraBackground>
       <div className="flex flex-col min-h-screen">
         <div className="flex flex-1 w-full">
-          <SidebarProvider defaultOpen={true}>
+          <SidebarProvider defaultOpen={!isMobile}>
             <AnalyticsSidebarToggle />
             
             <div className="flex">
