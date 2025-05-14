@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -17,24 +18,28 @@ import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
 import ViralitySidebarToggle from './components/ViralitySidebarToggle';
 import SocialMediaAnalytics from '@/components/virality/sections/SocialMediaAnalytics';
 import SocialMediaStrategy from '@/components/virality/sections/SocialMediaStrategy';
+import CampaignAnalytics from '@/components/virality/sections/CampaignAnalytics';
 import TrendingTopicsSidebar from '@/components/virality/TrendingTopicsSidebar';
-import { ArrowLeft, BarChart, TrendingUp } from 'lucide-react';
+import { ArrowLeft, BarChart, TrendingUp, BarChart2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { analyticsService } from '@/services/requests';
 
 const ViralityDashboard = () => {
-  // Swap the default active section to keep "Social Media Analytics" first
   const [activeSection, setActiveSection] = useState('analytics');
   const { showPremiumModal, selectedFeature, closePremiumModal } = usePremiumFeature();
 
   const menuItems = [
     { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
     { id: 'strategy', label: 'Social Media Strategy', icon: TrendingUp },
+    { id: 'campaigns', label: 'Campaign Analytics', icon: BarChart2 }
   ];
 
   const renderContent = () => {
     switch (activeSection) {
       case 'analytics':
         return <SocialMediaAnalytics />;
+      case 'campaigns':
+        return <CampaignAnalytics />;
       default:
         return <SocialMediaStrategy />;
     }
@@ -42,6 +47,12 @@ const ViralityDashboard = () => {
 
   const handleMenuClick = (id: string) => {
     setActiveSection(id);
+    
+    // Track the section change using analytics service
+    if (id === 'strategy') {
+      analyticsService.trackStrategyGeneration('virality');
+    }
+    
     toast({
       title: "Section Changed",
       description: `Viewing ${id} section`,

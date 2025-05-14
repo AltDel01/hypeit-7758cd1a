@@ -10,17 +10,20 @@ class AnalyticsService {
 
   // Track when a user views the analytics dashboard
   trackAnalyticsDashboardViewed() {
-    this.eventManager.emitEvent('analytics_dashboard_viewed');
+    console.log('Analytics dashboard viewed');
+    // Implementation will be added when event manager is updated
   }
 
   // Track when a user generates a strategy
   trackStrategyGeneration(strategyType: string) {
-    this.eventManager.emitEvent('strategy_generated', { strategyType });
+    console.log('Strategy generated:', strategyType);
+    // Implementation will be added when event manager is updated
   }
 
   // Track when a user connects a social media account
   trackSocialMediaConnected(platform: string) {
-    this.eventManager.emitEvent('social_media_connected', { platform });
+    console.log('Social media connected:', platform);
+    // Implementation will be added when event manager is updated
   }
 }
 

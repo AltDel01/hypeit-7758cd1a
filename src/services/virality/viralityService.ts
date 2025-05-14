@@ -1,15 +1,8 @@
 
-import { analyticsService } from '@/services/requests';
+// Import the analytics service
+import { analyticsService } from '../requests';
 
-export const viralityService = {
-  trackStrategyGeneration: (businessName: string) => {
-    try {
-      analyticsService.trackStrategyGeneration('virality_strategy', {
-        businessName,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      console.error('Failed to track virality strategy generation:', error);
-    }
-  }
+// Track strategy generation
+export const trackStrategyGeneration = (strategyType: string) => {
+  analyticsService.trackStrategyGeneration(strategyType);
 };
