@@ -29,9 +29,14 @@ const CircularProgressIndicator = ({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress / 100);
   
+  // Only animate spin when actively loading (progress between 1-99)
+  const isLoading = progress > 0 && progress < 100;
+  
   return (
     <div className="relative" style={{ height: pixelSize, width: pixelSize }}>
-      <svg className="animate-spin h-full w-full" viewBox={`0 0 ${pixelSize} ${pixelSize}`}>
+      <svg className={isLoading ? "animate-spin h-full w-full" : "h-full w-full"} 
+           style={{ animationDuration: '3s' }}
+           viewBox={`0 0 ${pixelSize} ${pixelSize}`}>
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#9b87f5" />

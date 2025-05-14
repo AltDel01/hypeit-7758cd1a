@@ -209,11 +209,11 @@
   }
   
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 480s linear infinite;
+    animation: smooth-scroll-down 120s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 600s linear infinite;
+    animation: smooth-scroll-up 120s linear infinite;
   }
   
   .animate-ripple {

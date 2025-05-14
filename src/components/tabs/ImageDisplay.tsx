@@ -54,13 +54,14 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Only show real images from the provided array, no placeholders
-  const filteredImages = images.filter(image => {
-    // Filter out any placeholder images or images with specific placeholder patterns
-    return !image.src.includes('placeholder') && 
-           !image.src.includes('unsplash') &&
-           !image.src.includes('Generating+Image');
-  });
+  // Filter out placeholder images - but do it efficiently
+  const filteredImages = React.useMemo(() => {
+    return images.filter(image => {
+      return !image.src.includes('placeholder') && 
+             !image.src.includes('unsplash') &&
+             !image.src.includes('Generating+Image');
+    });
+  }, [images]);
 
   // Do not show generated image section at all
   const shouldShowGeneratedImage = false; // Disabled completely
@@ -103,7 +104,8 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
           <img 
             src={image.src} 
             alt={image.alt} 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
+            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`}
+            loading="lazy" 
           />
           <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button 
