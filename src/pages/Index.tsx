@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import { toast } from "sonner";
 import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
@@ -47,7 +47,9 @@ const Index = () => {
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
-      // Image generation is disabled, so we don't update the state
+      setGeneratedImage(event.detail.imageUrl);
+      setIsGenerating(false);
+      toast.success("Your image has been generated!");
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
@@ -61,15 +63,97 @@ const Index = () => {
     if (user) {
       const latestRequest = imageRequestService.getLatestRequestForUser(user.id);
       if (latestRequest && latestRequest.status === 'completed' && latestRequest.resultImage) {
-        // Don't set generated image as feature is disabled
+        setGeneratedImage(latestRequest.resultImage);
       }
     }
   }, [user]);
   
   const generateImage = async () => {
-    // Image generation is disabled
-    console.log("Image generation is disabled");
-    return;
+    if (!prompt.trim()) {
+      toast.error("Please enter a prompt to generate an image");
+      return;
+    }
+    
+    if (!user) {
+      toast.error("Please log in to generate images");
+      localStorage.setItem('authRedirectPath', '/');
+      localStorage.setItem('savedPrompt', prompt);
+      return;
+    }
+    
+    setIsGenerating(true);
+    try {
+      const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
+      console.log(`Generating image with aspect ratio: ${aspectRatio}`);
+      console.log(`Product image available: ${productImage !== null}`);
+      
+      let productImageUrl = null;
+      
+      if (productImage) {
+        console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
+        productImageUrl = URL.createObjectURL(productImage);
+      }
+      
+      Sentry.setContext("image_generation", {
+        prompt: prompt,
+        aspectRatio: aspectRatio,
+        hasProductImage: productImage !== null,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Get the batch size from local storage (set by VisualSettings)
+      const batchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '1', 10);
+      const isPremiumBatch = batchSize > 3;
+      
+      // Create request in the service
+      const request = imageRequestService.createRequest(
+        user.id,
+        user.email || 'Anonymous User',
+        prompt,
+        aspectRatio,
+        productImageUrl,
+        batchSize
+      );
+      
+      console.log("Image generation request created:", request);
+      
+      // Start progress simulation for user feedback
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 95) {
+          progress = 95;
+          clearInterval(interval);
+        }
+        
+        const progressEvent = new CustomEvent('imageGenerationProgress', {
+          detail: { progress, requestId: request.id }
+        });
+        window.dispatchEvent(progressEvent);
+      }, 800);
+      
+      // For premium batches (15 or 25 images), immediately navigate to Analytics > Generated Content
+      if (isPremiumBatch) {
+        // No toast notification - just immediately redirect
+        navigate('/analytics');
+        
+        // Add a small delay to allow the page to load before setting the active section
+        setTimeout(() => {
+          const event = new CustomEvent('setAnalyticsSection', { 
+            detail: { section: 'generated' } 
+          });
+          window.dispatchEvent(event);
+        }, 500);
+      } else {
+        toast.success("Your image generation request has been sent to our designers!");
+        toast.info("You'll receive a notification when your image is ready.");
+      }
+    } catch (error) {
+      console.error("Error generating image:", error);
+      Sentry.captureException(error);
+      toast.error(`Failed to submit request: ${error instanceof Error ? error.message : String(error)}`);
+      setIsGenerating(false);
+    }
   };
   
   return (
@@ -109,7 +193,7 @@ const Index = () => {
           <ImageGallery 
             feedImages={feedImages}
             storyImages={storyImages}
-            generatedImage={null} // Always pass null to prevent showing any generated images
+            generatedImage={generatedImage}
             activeTab={activeTab}
           />
         </main>
