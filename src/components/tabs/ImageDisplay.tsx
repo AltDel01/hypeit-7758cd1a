@@ -54,14 +54,11 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
       .catch(err => toast.error("Failed to copy URL: " + err.message));
   };
 
-  // Create multiple copies of images for smoother looping - increase for better looping
-  const displayImages = [...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images, ...images];
-
   // Only show generated image if we have one AND showGenerated is true
   const shouldShowGeneratedImage = Boolean(localGeneratedImage && showGenerated);
 
   return (
-    <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>
+    <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-fade-in" : "animate-fade-in"} scrollbar-hide`}>
       {shouldShowGeneratedImage && (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
@@ -93,33 +90,13 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
         </div>
       )}
       
-      {displayImages.map((image, index) => (
-        <div key={`${index}-${image.src}`} className="rounded-lg overflow-hidden relative group">
-          <img 
-            src={image.src} 
-            alt={image.alt} 
-            className={`w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[9/16]"} object-cover`} 
-          />
-          <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0 mr-2"
-              onClick={() => handleCopy(image.src)}
-            >
-              <Copy size={14} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="bg-black/70 text-white rounded-full h-8 w-8 p-0"
-              onClick={() => handleDownload(image.src)}
-            >
-              <Download size={14} />
-            </Button>
-          </div>
-        </div>
-      ))}
+      <div className="flex items-center justify-center p-8 bg-gray-900/70 rounded-lg border border-gray-800">
+        <p className="text-gray-400 text-center">
+          Image generation functionality is currently disabled.
+          <br />
+          <span className="text-sm text-gray-500">Please check back later when this feature is ready.</span>
+        </p>
+      </div>
     </div>
   );
 };
