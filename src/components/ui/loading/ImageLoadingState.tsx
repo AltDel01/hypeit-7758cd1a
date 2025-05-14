@@ -34,7 +34,7 @@ const ImageLoadingState = ({
         "Analyzing image structure...",
         "Processing visual elements...",
         "Optimizing for quality...",
-        "Our AI is carefully transforming your image. This typically takes around 60 seconds to ensure the highest quality results."
+        "Our AI is transforming your image. This typically takes 30-40 seconds."
       ];
       
       let textIndex = 0;
@@ -51,12 +51,12 @@ const ImageLoadingState = ({
       progressTextIntervalRef.current = window.setInterval(() => {
         textIndex = (textIndex + 1) % processingTexts.length;
         setProcessingText(processingTexts[textIndex]);
-      }, 3000);
+      }, 2000);
       
       detailIntervalRef.current = window.setInterval(() => {
         detailIndex = (detailIndex + 1) % detailTexts.length;
         setProcessingDetail(detailTexts[detailIndex]);
-      }, 5000);
+      }, 4000);
     } else {
       // If we're not actually loading, clear intervals and reset text
       if (progressTextIntervalRef.current) {

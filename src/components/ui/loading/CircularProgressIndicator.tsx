@@ -34,9 +34,11 @@ const CircularProgressIndicator = ({
   
   return (
     <div className="relative" style={{ height: pixelSize, width: pixelSize }}>
-      <svg className={isLoading ? "animate-spin h-full w-full" : "h-full w-full"} 
-           style={{ animationDuration: '3s' }}
-           viewBox={`0 0 ${pixelSize} ${pixelSize}`}>
+      <svg 
+        className={isLoading ? "animate-spin h-full w-full" : "h-full w-full"} 
+        style={{ animationDuration: '2s' }}
+        viewBox={`0 0 ${pixelSize} ${pixelSize}`}
+      >
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#9b87f5" />
@@ -44,7 +46,7 @@ const CircularProgressIndicator = ({
             <stop offset="100%" stopColor="#D946EF" />
           </linearGradient>
           <filter id={`${gradientId}Glow`}>
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feFlood floodColor="#8c52ff" floodOpacity="0.7" result="glow" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
             <feComposite in="glow" in2="blur" operator="in" result="glowBlur" />
@@ -70,7 +72,7 @@ const CircularProgressIndicator = ({
           strokeDasharray={circumference} 
           strokeDashoffset={strokeDashoffset} 
           filter={`url(#${gradientId}Glow)`}
-          className="drop-shadow-[0_0_8px_rgba(140,82,255,0.8)]"
+          className="drop-shadow-[0_0_6px_rgba(140,82,255,0.7)]"
         />
       </svg>
       {showPercentage && (

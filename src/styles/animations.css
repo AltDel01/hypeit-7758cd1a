@@ -1,4 +1,5 @@
 
+
 @layer utilities {
   @keyframes pop {
     0% {
@@ -205,45 +206,45 @@
   }
   
   .animate-fade-in-up {
-    animation: pop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    animation: pop 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
   }
   
   .animate-feed-scroll-down {
-    animation: smooth-scroll-down 120s linear infinite;
+    animation: smooth-scroll-down 60s linear infinite;
   }
   
   .animate-story-scroll-up {
-    animation: smooth-scroll-up 120s linear infinite;
+    animation: smooth-scroll-up 60s linear infinite;
   }
   
   .animate-ripple {
-    animation: ripple 1.5s infinite ease-in-out;
+    animation: ripple 1s infinite ease-in-out;
   }
   
   .animate-pulse-ring {
-    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
   
   .animate-float {
-    animation: float-gently 5s ease-in-out infinite;
+    animation: float-gently 4s ease-in-out infinite;
   }
   
   /* Animation classes for Ava button */
   .animate-listening-pulse {
-    animation: listening-pulse 1.5s ease-in-out infinite;
+    animation: listening-pulse 1s ease-in-out infinite;
   }
   
   .animate-outer-pulse {
-    animation: outer-pulse 2s infinite ease-out;
+    animation: outer-pulse 1.5s infinite ease-out;
   }
   
   .animate-wave-circle {
-    animation: wave-circle 2.5s infinite ease-out;
+    animation: wave-circle 2s infinite ease-out;
   }
   
   /* New animation class for batch image progress */
   .animate-batch-progress {
-    animation: batch-progress 60s ease-out forwards;
+    animation: batch-progress 30s ease-out forwards;
     background: linear-gradient(90deg, #8c52ff, #D946EF, #1EAEDB);
     background-size: 200% auto;
   }
@@ -254,3 +255,4 @@
                  0 0 30px rgba(254, 247, 205, 0.3);
   }
 }
+
