@@ -1,5 +1,8 @@
 
 import React from 'react';
-import AnalyticsPage from './analytics/AnalyticsPage';
+import { Navigate } from 'react-router-dom';
+import AnalyticsDashboard from './analytics/AnalyticsDashboard';
 
-export default AnalyticsPage;
+export default function Analytics() {
+  return <AnalyticsDashboard />;
+}
