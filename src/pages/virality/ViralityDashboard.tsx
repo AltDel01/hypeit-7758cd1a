@@ -18,7 +18,8 @@ import ViralitySidebarToggle from './components/ViralitySidebarToggle';
 import SocialMediaAnalytics from '@/components/virality/sections/SocialMediaAnalytics';
 import SocialMediaStrategy from '@/components/virality/sections/SocialMediaStrategy';
 import TrendingTopicsSidebar from '@/components/virality/TrendingTopicsSidebar';
-import { BarChart, Home, LineChart, PieChart, TrendingUp } from 'lucide-react';
+import { ArrowLeft, BarChart, TrendingUp } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const ViralityDashboard = () => {
   // Swap the default active section to keep "Social Media Analytics" first
@@ -26,10 +27,8 @@ const ViralityDashboard = () => {
   const { showPremiumModal, selectedFeature, closePremiumModal } = usePremiumFeature();
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: Home, link: '/' },
     { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
     { id: 'strategy', label: 'Social Media Strategy', icon: TrendingUp },
-    { id: 'analytics-page', label: 'Go to Analytics', icon: PieChart, link: '/analytics' },
   ];
 
   const renderContent = () => {
@@ -43,6 +42,10 @@ const ViralityDashboard = () => {
 
   const handleMenuClick = (id: string) => {
     setActiveSection(id);
+    toast({
+      title: "Section Changed",
+      description: `Viewing ${id} section`,
+    });
   };
 
   return (
@@ -58,39 +61,31 @@ const ViralityDashboard = () => {
                   <SidebarGroup>
                     <SidebarGroupContent>
                       <div className="p-4">
-                        <Link to="/" className="flex items-center mb-6">
-                          <img 
-                            src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
-                            alt="HYPEIT Logo" 
-                            className="h-9 w-auto"
-                          />
-                        </Link>
+                        <div className="flex items-center mb-6">
+                          <Link to="/" className="mr-2 text-gray-300 hover:text-white transition-colors">
+                            <ArrowLeft size={20} />
+                          </Link>
+                          <Link to="/" className="flex items-center">
+                            <img 
+                              src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
+                              alt="HYPEIT Logo" 
+                              className="h-9 w-auto"
+                            />
+                          </Link>
+                        </div>
                       </div>
                       <SidebarMenu className="space-y-2 p-2">
                         {menuItems.map((item) => (
                           <SidebarMenuItem key={item.id}>
-                            {item.link ? (
-                              <Link to={item.link}>
-                                <SidebarMenuButton
-                                  isActive={activeSection === item.id}
-                                  className="w-full h-12 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
-                                  tooltip={item.label}
-                                >
-                                  <item.icon className="w-5 h-5" />
-                                  <span className="ml-3 font-medium">{item.label}</span>
-                                </SidebarMenuButton>
-                              </Link>
-                            ) : (
-                              <SidebarMenuButton
-                                onClick={() => handleMenuClick(item.id)}
-                                isActive={activeSection === item.id}
-                                className="w-full h-12 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
-                                tooltip={item.label}
-                              >
-                                <item.icon className="w-5 h-5" />
-                                <span className="ml-3 font-medium">{item.label}</span>
-                              </SidebarMenuButton>
-                            )}
+                            <SidebarMenuButton
+                              onClick={() => handleMenuClick(item.id)}
+                              isActive={activeSection === item.id}
+                              className="w-full h-12 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
+                              tooltip={item.label}
+                            >
+                              <item.icon className="w-5 h-5" />
+                              <span className="ml-3 font-medium">{item.label}</span>
+                            </SidebarMenuButton>
                           </SidebarMenuItem>
                         ))}
                       </SidebarMenu>

@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { BarChart, ChevronDown, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, BarChart, TrendingUp } from 'lucide-react';
 import { 
   Sidebar,
   SidebarContent,
@@ -38,6 +39,18 @@ const ViralitySidebar: React.FC<ViralitySidebarProps> = ({ activeSection, setAct
           <SidebarGroup>
             <SidebarGroupContent>
               <div className="flex items-center justify-between px-4 py-2">
+                <div className="flex items-center">
+                  <Link to="/" className="mr-2 text-gray-300 hover:text-white transition-colors">
+                    <ArrowLeft size={20} />
+                  </Link>
+                  <Link to="/" className="flex items-center">
+                    <img 
+                      src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
+                      alt="HYPEIT Logo" 
+                      className="h-9 w-auto"
+                    />
+                  </Link>
+                </div>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
