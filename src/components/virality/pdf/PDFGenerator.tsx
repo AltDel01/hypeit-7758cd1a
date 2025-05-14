@@ -1,10 +1,9 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileDown } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
-import { ViralityStrategyData } from '@/hooks/useViralityStrategyForm';
+import { ViralityStrategyData } from '@/types/virality';
 
 // Import PDF components from the pdf directory
 import CoverPage from './CoverPage';

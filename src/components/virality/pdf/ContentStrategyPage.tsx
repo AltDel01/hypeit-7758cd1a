@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ContentPillar } from '@/hooks/useViralityStrategyForm';
+import { ContentPillar } from '@/types/virality';
 
 interface ContentStrategyPageProps {
   contentPillars: ContentPillar[];

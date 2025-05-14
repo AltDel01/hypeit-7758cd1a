@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ViralityStrategyData } from '@/hooks/useViralityStrategyForm';
+import { ViralityStrategyData } from '@/types/virality';
 import Step1BusinessInfo from './steps/Step1BusinessInfo';
 import Step2ToneOfVoice from './steps/Step2ToneOfVoice';
 import Step3Audience from './steps/Step3Audience';

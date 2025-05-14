@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Audience, Competitor } from '@/hooks/useViralityStrategyForm';
+import { Audience, Competitor } from '@/types/virality';
 
 interface AudiencePageProps {
   audience: Audience;

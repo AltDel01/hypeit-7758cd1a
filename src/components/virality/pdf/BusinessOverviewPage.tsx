@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { BusinessInfo, ToneOfVoice } from '@/hooks/useViralityStrategyForm';
+import { BusinessInfo, ToneOfVoice } from '@/types/virality';
 
 interface BusinessOverviewPageProps {
   businessInfo: BusinessInfo;
