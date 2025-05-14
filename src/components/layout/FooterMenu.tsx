@@ -54,7 +54,7 @@ const FooterMenu = () => {
           )}
         >
           <BarChart2 size={24} />
-          <span className="text-xs">Analytics</span>
+          <span className="text-xs">Influencers</span>
         </Link>
       </nav>
     </div>

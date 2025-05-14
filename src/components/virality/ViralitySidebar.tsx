@@ -29,7 +29,7 @@ const ViralitySidebar: React.FC<ViralitySidebarProps> = ({ activeSection, setAct
   // Menu items
   const menuItems = [
     { id: 'strategy', label: 'Social Media Strategy', icon: TrendingUp },
-    { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
+    { id: 'analytics', label: 'Social Media Influencers', icon: BarChart },
   ];
 
   return (

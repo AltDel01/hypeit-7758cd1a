@@ -26,7 +26,7 @@ const AnalyticsDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   
   const menuItems = [
-    { id: 'overview', label: 'Analytics Overview', icon: PieChart },
+    { id: 'overview', label: 'Influencers Overview', icon: PieChart },
     { id: 'social', label: 'Social Media', icon: BarChart },
     { id: 'content', label: 'Content Performance', icon: LineChart },
   ];
