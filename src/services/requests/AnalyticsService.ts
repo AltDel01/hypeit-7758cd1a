@@ -1,72 +1,69 @@
 
 import { imageRequestService } from './ImageRequestService';
-
-export interface SocialMediaStats {
-  platform: string;
-  followers: number;
-  engagement: number;
-  impressions: number;
-  growth: number;
-}
-
-export interface ContentPerformance {
-  id: string;
-  title: string;
-  type: 'image' | 'post' | 'video';
-  platform: string;
-  engagement: number;
-  reach: number;
-  conversions: number;
-  date: string;
-}
+import { Request, RequestStatus } from './types';
 
 class AnalyticsService {
-  // This is just a placeholder for future implementation
-  async getSocialMediaStats(): Promise<SocialMediaStats[]> {
-    // In a real app, this would fetch from an API
-    return [
-      {
-        platform: 'Instagram',
-        followers: 12500,
-        engagement: 3.2,
-        impressions: 45000,
-        growth: 1.8
-      },
-      {
-        platform: 'X',
-        followers: 8700,
-        engagement: 2.1,
-        impressions: 32000,
-        growth: 1.2
-      },
-      {
-        platform: 'LinkedIn',
-        followers: 5200,
-        engagement: 4.5,
-        impressions: 15000,
-        growth: 2.3
-      }
-    ];
-  }
-
-  async getContentPerformance(): Promise<ContentPerformance[]> {
-    // This would fetch from an API in a real implementation
-    const generatedImages = await imageRequestService.getAllRequests();
+  /**
+   * Get all requests by status
+   * @returns An object with count of requests by status
+   */
+  async getRequestsByStatus(): Promise<Record<RequestStatus, number>> {
+    const requests = await imageRequestService.getAllRequests();
     
-    // Map the generated images to content performance data
-    return generatedImages.map((image, index) => ({
-      id: image.id || `img-${index}`,
-      title: image.prompt?.substring(0, 30) + '...' || 'Untitled Image',
-      type: 'image',
-      platform: 'Various',
-      engagement: Math.random() * 100,
-      reach: Math.floor(Math.random() * 10000),
-      conversions: Math.floor(Math.random() * 100),
-      date: image.createdAt || new Date().toISOString()
-    }));
+    const statusCounts: Record<RequestStatus, number> = {
+      [RequestStatus.PENDING]: 0,
+      [RequestStatus.PROCESSING]: 0,
+      [RequestStatus.COMPLETED]: 0,
+      [RequestStatus.FAILED]: 0,
+      [RequestStatus.CANCELLED]: 0,
+    };
+    
+    for (const request of requests) {
+      statusCounts[request.status]++;
+    }
+    
+    return statusCounts;
   }
-
-  // Additional methods for future analytics functionality
+  
+  /**
+   * Get the total number of requests
+   * @returns The count of all requests
+   */
+  async getTotalRequests(): Promise<number> {
+    const requests = await imageRequestService.getAllRequests();
+    return requests.length;
+  }
+  
+  /**
+   * Get the success rate of requests
+   * @returns The percentage of successful requests
+   */
+  async getSuccessRate(): Promise<number> {
+    const requests = await imageRequestService.getAllRequests();
+    
+    if (requests.length === 0) {
+      return 0;
+    }
+    
+    const completedRequests = requests.filter(
+      (request) => request.status === RequestStatus.COMPLETED
+    );
+    
+    return (completedRequests.length / requests.length) * 100;
+  }
+  
+  /**
+   * Get the latest requests
+   * @param limit The number of requests to return
+   * @returns A list of the latest requests
+   */
+  async getLatestRequests(limit: number = 5): Promise<Request[]> {
+    const requests = await imageRequestService.getAllRequests();
+    
+    return requests
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, limit);
+  }
 }
 
 export const analyticsService = new AnalyticsService();

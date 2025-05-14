@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ViralityStrategyForm from '@/components/virality/ViralityStrategyForm';
@@ -210,14 +211,12 @@ const SocialMediaStrategy = () => {
 const Virality = () => {
   // Swap the default active section to keep "Social Media Analytics" first
   const [activeSection, setActiveSection] = useState('analytics');
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [activePremiumFeature, setActivePremiumFeature] = useState('');
   const { showPremiumModal, selectedFeature, closePremiumModal } = usePremiumFeature();
 
   // Update menu items order to swap Analytics and Strategy positions
   const menuItems = [
-    { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
     { id: 'strategy', label: 'Social Media Strategy', icon: TrendingUp },
+    { id: 'analytics', label: 'Social Media Analytics', icon: BarChart },
   ];
 
   const renderContent = () => {
@@ -233,7 +232,9 @@ const Virality = () => {
     <AuroraBackground>
       <div className="flex flex-col min-h-screen">
         <Navbar />
-        <div className="flex min-h-screen w-full">
+        
+        {/* Main content area - Now the sidebar starts below the navbar */}
+        <div className="flex flex-1 w-full">
           <SidebarProvider defaultOpen={true}>
             <FloatingSidebarToggle />
             
