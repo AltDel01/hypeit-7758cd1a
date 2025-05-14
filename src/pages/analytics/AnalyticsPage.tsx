@@ -1,14 +1,14 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { Instagram, BarChart, Users, Mail, Image, PanelLeft } from 'lucide-react';
-import PremiumFeatureModal from '@/components/pricing/PremiumFeatureModal';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import ConnectSocialGrid from './ConnectSocialGrid';
-import FeatureTabContent from './FeatureTabContent';
-import GeneratedContent from './GeneratedContent';
+import { 
+  BarChart, 
+  TrendingUp, 
+  PanelLeft,
+  LineChart,
+  PieChart
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -22,13 +22,13 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from '@/components/ui/button';
 import { 
   Tooltip, 
   TooltipContent, 
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import { Card } from '@/components/ui/card';
 
 // Create a separate component for the floating toggle button that appears when sidebar is collapsed
 const FloatingSidebarToggle = () => {
@@ -62,117 +62,233 @@ const FloatingSidebarToggle = () => {
   );
 };
 
+// Overview Content Component
+const OverviewContent = () => {
+  return (
+    <div className="w-full">
+      <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Analytics Overview</h1>
+      <p className="text-gray-400 mb-8">
+        Monitor and analyze your performance across all platforms.
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-white mb-4">Social Media Performance</h2>
+          <p className="text-gray-400">
+            Track engagement, follower growth, and reach across your social platforms.
+          </p>
+          
+          <div className="mt-8 flex justify-center">
+            <Button variant="secondary" className="opacity-70">
+              <BarChart className="mr-2 h-4 w-4" />
+              View Details
+            </Button>
+          </div>
+        </Card>
+        
+        <Card className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-white mb-4">Content Analytics</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Generated Content</span>
+                <span className="text-white">4</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-purple-600 rounded-full w-[40%]"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Brand Assets</span>
+                <span className="text-white">2</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-cyan-500 rounded-full w-[20%]"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Active Campaigns</span>
+                <span className="text-white">1</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-full w-[10%]"></div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+// Social Media Analytics Content Component
+const SocialMediaAnalytics = () => {
+  return (
+    <div className="w-full">
+      <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
+      <p className="text-gray-400 mb-8">
+        Monitor and analyze your social media performance across platforms.
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-white mb-4">Coming Soon</h2>
+          <p className="text-gray-400">
+            Social media analytics features will be available in the next update.
+            Connect your social accounts to get insights about your performance.
+          </p>
+          
+          <div className="mt-8 flex justify-center">
+            <Button variant="secondary" disabled className="opacity-70">
+              <BarChart className="mr-2 h-4 w-4" />
+              Feature Coming Soon
+            </Button>
+          </div>
+        </Card>
+        
+        <Card className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-white mb-4">Key Metrics Preview</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Engagement Rate</span>
+                <span className="text-white">--%</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full"></div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Follower Growth</span>
+                <span className="text-white">--%</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full"></div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Post Reach</span>
+                <span className="text-white">--%</span>
+              </div>
+              <div className="h-2 bg-gray-700 rounded-full"></div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+// Content Performance Content Component
+const ContentPerformance = () => {
+  return (
+    <div className="w-full">
+      <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Content Performance</h1>
+      <p className="text-gray-400 mb-8">
+        Track how your content is performing across different platforms.
+      </p>
+      
+      <div className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm mb-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Generated Content Analytics</h2>
+        <p className="text-gray-400 mb-6">
+          This feature will show performance metrics for all content generated through HYPEIT.
+        </p>
+        
+        <div className="text-center py-8">
+          <LineChart className="h-16 w-16 mx-auto text-gray-500 mb-4" />
+          <p className="text-gray-400">Connect your social accounts to start tracking content performance.</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AnalyticsPage = () => {
-  const { user } = useAuth();
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [activePremiumFeature, setActivePremiumFeature] = useState('');
-  const [activeSection, setActiveSection] = useState('connect');
-  const navigate = useNavigate();
-
-  // Listen for the custom event to set the active section
-  useEffect(() => {
-    const handleSetSection = (event: CustomEvent) => {
-      if (event.detail && event.detail.section) {
-        setActiveSection(event.detail.section);
-      }
-    };
-    
-    window.addEventListener('setAnalyticsSection', handleSetSection as EventListener);
-    
-    return () => {
-      window.removeEventListener('setAnalyticsSection', handleSetSection as EventListener);
-    };
-  }, []);
-
-  const handlePremiumFeature = (feature: string) => {
-    if (!user) {
-      localStorage.setItem('authRedirectPath', '/analytics');
-      navigate('/login');
-      return;
-    }
-    setActivePremiumFeature(feature);
-    setIsPremiumModalOpen(true);
-  };
-
+  const [activeSection, setActiveSection] = useState('overview');
+  
   const menuItems = [
-    { id: 'connect', label: 'Connect Accounts', icon: Instagram },
-    { id: 'generated', label: 'Generated Content', icon: Image },
-    { id: 'content', label: 'Content Analysis', icon: BarChart },
-    { id: 'influencers', label: 'Influencer Analytics', icon: Users },
-    { id: 'outreach', label: 'Influencer Outreach', icon: Mail },
+    { id: 'overview', label: 'Overview', icon: PieChart },
+    { id: 'social', label: 'Social Media', icon: BarChart },
+    { id: 'content', label: 'Content Performance', icon: LineChart },
   ];
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'connect':
-        return <ConnectSocialGrid onTrigger={handlePremiumFeature} />;
-      case 'generated':
-        return <GeneratedContent />;
+      case 'social':
+        return <SocialMediaAnalytics />;
+      case 'content':
+        return <ContentPerformance />;
       default:
-        return <FeatureTabContent onTrigger={handlePremiumFeature} />;
+        return <OverviewContent />;
     }
   };
 
   return (
     <AuroraBackground>
-      <Navbar />
-      <div className="flex min-h-screen w-full">
-        <SidebarProvider defaultOpen={true}>
-          <FloatingSidebarToggle />
-          
-          <div className="flex">
-            <Sidebar variant="sidebar" className="border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <SidebarContent>
-                <SidebarGroup>
-                  <SidebarGroupContent>
-                    <div className="flex items-center justify-between px-4 py-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarTrigger />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            Toggle Sidebar
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <SidebarMenu className="space-y-6 p-4">
-                      {menuItems.map((item) => (
-                        <SidebarMenuItem key={item.id}>
-                          <SidebarMenuButton
-                            onClick={() => setActiveSection(item.id)}
-                            isActive={activeSection === item.id}
-                            className="w-full h-14 rounded-xl transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
-                            tooltip={item.label}
-                          >
-                            <item.icon className="w-6 h-6" />
-                            <span className="ml-3 font-medium">{item.label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-              
-              <SidebarRail />
-            </Sidebar>
-          </div>
-          
-          <div className="w-full max-w-5xl mx-auto px-6 py-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">Analytics Dashboard</h1>
-            <div className="w-full">
-              {renderContent()}
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        
+        {/* Main content area with sidebar below navbar */}
+        <div className="flex flex-1 w-full">
+          <SidebarProvider defaultOpen={true}>
+            <FloatingSidebarToggle />
+            
+            <div className="flex">
+              <Sidebar variant="sidebar" className="border-r border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <SidebarContent>
+                  <SidebarGroup>
+                    <SidebarGroupContent>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarTrigger />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Toggle Sidebar
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <SidebarMenu className="space-y-6 p-4">
+                        {menuItems.map((item) => (
+                          <SidebarMenuItem key={item.id}>
+                            <SidebarMenuButton
+                              onClick={() => setActiveSection(item.id)}
+                              isActive={activeSection === item.id}
+                              className="w-full h-14 rounded-xl transition-all duration-200 hover:scale-105 hover:bg-purple-600/20 hover:shadow-lg active:scale-95 px-4"
+                              tooltip={item.label}
+                            >
+                              <item.icon className="w-6 h-6" />
+                              <span className="ml-3 font-medium">{item.label}</span>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                </SidebarContent>
+                
+                <SidebarRail />
+              </Sidebar>
             </div>
-          </div>
-        </SidebarProvider>
+            
+            <div className="w-full">
+              <main className="flex-1 relative z-10">
+                <div className="max-w-5xl mx-auto px-6 py-6">
+                  {renderContent()}
+                </div>
+              </main>
+            </div>
+          </SidebarProvider>
+        </div>
       </div>
-      <PremiumFeatureModal
-        isOpen={isPremiumModalOpen}
-        onClose={() => setIsPremiumModalOpen(false)}
-        feature={activePremiumFeature}
-      />
     </AuroraBackground>
   );
 };

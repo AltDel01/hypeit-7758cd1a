@@ -1,68 +1,74 @@
 
 import { imageRequestService } from './ImageRequestService';
-import { Request, RequestStatus } from './types';
+import type { ImageRequest, RequestStatus } from './types';
 
 class AnalyticsService {
-  /**
-   * Get all requests by status
-   * @returns An object with count of requests by status
-   */
-  async getRequestsByStatus(): Promise<Record<RequestStatus, number>> {
-    const requests = await imageRequestService.getAllRequests();
-    
-    const statusCounts: Record<RequestStatus, number> = {
-      [RequestStatus.PENDING]: 0,
-      [RequestStatus.PROCESSING]: 0,
-      [RequestStatus.COMPLETED]: 0,
-      [RequestStatus.FAILED]: 0,
-      [RequestStatus.CANCELLED]: 0,
+  // Get statistics about the number of requests by status
+  getRequestStatusCounts() {
+    const requests = imageRequestService.getAllRequests();
+    const statusCounts: Record<string, number> = {
+      'new': 0,
+      'processing': 0, 
+      'completed': 0,
+      'failed': 0,
+      'in-progress': 0
     };
     
-    for (const request of requests) {
-      statusCounts[request.status]++;
-    }
+    requests.forEach(request => {
+      if (request.status in statusCounts) {
+        statusCounts[request.status]++;
+      }
+    });
     
     return statusCounts;
   }
   
-  /**
-   * Get the total number of requests
-   * @returns The count of all requests
-   */
-  async getTotalRequests(): Promise<number> {
-    const requests = await imageRequestService.getAllRequests();
-    return requests.length;
+  // Get the total number of requests
+  getTotalRequestCount() {
+    return imageRequestService.getAllRequests().length;
   }
   
-  /**
-   * Get the success rate of requests
-   * @returns The percentage of successful requests
-   */
-  async getSuccessRate(): Promise<number> {
-    const requests = await imageRequestService.getAllRequests();
-    
-    if (requests.length === 0) {
-      return 0;
-    }
-    
-    const completedRequests = requests.filter(
-      (request) => request.status === RequestStatus.COMPLETED
-    );
-    
-    return (completedRequests.length / requests.length) * 100;
+  // Get the number of successful requests
+  getSuccessfulRequestCount() {
+    const requests = imageRequestService.getAllRequests();
+    return requests.filter(request => request.status === 'completed').length;
   }
   
-  /**
-   * Get the latest requests
-   * @param limit The number of requests to return
-   * @returns A list of the latest requests
-   */
-  async getLatestRequests(limit: number = 5): Promise<Request[]> {
-    const requests = await imageRequestService.getAllRequests();
+  // Get the number of failed requests
+  getFailedRequestCount() {
+    const requests = imageRequestService.getAllRequests();
+    return requests.filter(request => request.status === 'failed').length;
+  }
+  
+  // Get requests by status
+  getRequestsByStatus(status: string) {
+    const requests = imageRequestService.getAllRequests();
+    return requests.filter(request => request.status === status);
+  }
+  
+  // Get request completion rate
+  getRequestCompletionRate() {
+    const total = this.getTotalRequestCount();
+    if (total === 0) return 0;
     
-    return requests
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, limit);
+    const completed = this.getSuccessfulRequestCount();
+    return (completed / total) * 100;
+  }
+  
+  // Get requests grouped by date
+  getRequestsByDate() {
+    const requests = imageRequestService.getAllRequests();
+    const grouped: Record<string, number> = {};
+    
+    requests.forEach(request => {
+      const date = request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'Unknown';
+      if (!grouped[date]) {
+        grouped[date] = 0;
+      }
+      grouped[date]++;
+    });
+    
+    return grouped;
   }
 }
 
