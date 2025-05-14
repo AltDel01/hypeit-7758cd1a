@@ -13,7 +13,6 @@ const activePolls = new Map<string, boolean>();
 export async function pollForImageResult(params: PollImageParams): Promise<void> {
   // Image generation is disabled
   console.log("Image generation is currently disabled");
-  toast.info("Image generation is currently not available");
   
   // No polling or image generation will be performed
   return;
@@ -24,7 +23,6 @@ export async function pollForImageResult(params: PollImageParams): Promise<void>
  */
 function handleMaxRetriesReached(prompt: string, aspectRatio: string, requestId: string): void {
   console.log(`Maximum polling retries reached for request ${requestId}`);
-  toast.error("Image generation is currently disabled", { id: "generation-disabled" });
   
   activePolls.delete(requestId);
 }

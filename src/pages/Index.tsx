@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import { toast } from "sonner";
 import TabsContainer from '@/components/tabs/TabsContainer';
 import ImageGallery from '@/components/gallery/ImageGallery';
 import { feedImages, storyImages } from '@/data/galleryImages';
@@ -69,7 +68,6 @@ const Index = () => {
   
   const generateImage = async () => {
     // Image generation is disabled
-    toast.info("Image generation is currently not available");
     console.log("Image generation is disabled");
     return;
   };

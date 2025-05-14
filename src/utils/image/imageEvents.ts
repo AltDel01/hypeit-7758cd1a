@@ -4,8 +4,6 @@
  * NOTE: Image generation functionality is currently disabled
  */
 
-import { toast } from "sonner";
-
 /**
  * Interface for image generated event details
  */
@@ -40,7 +38,6 @@ export const dispatchImageGeneratedEvent = (
  */
 export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string, requestId?: string): void => {
   console.log("Image generation is currently disabled");
-  toast.info("Image generation is currently not available");
 };
 
 /**
@@ -71,5 +68,4 @@ export const addImageGeneratedListener = (
  */
 export const forceImageGenerationRetry = (prompt: string, aspectRatio: string = "1:1", requestId?: string): void => {
   console.log("Image generation is currently disabled");
-  toast.info("Image generation is currently not available");
 };
