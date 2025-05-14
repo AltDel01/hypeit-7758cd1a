@@ -51,7 +51,7 @@ class AnalyticsService {
 
   async getContentPerformance(): Promise<ContentPerformance[]> {
     // This would fetch from an API in a real implementation
-    const generatedImages = await imageRequestService.getRequests();
+    const generatedImages = await imageRequestService.getAllRequests();
     
     // Map the generated images to content performance data
     return generatedImages.map((image, index) => ({
