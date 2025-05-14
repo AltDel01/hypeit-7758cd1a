@@ -25,14 +25,14 @@ const FooterMenu = () => {
         </Link>
         
         <Link 
-          to="/analytics" 
+          to="/virality" 
           className={cn(
             "flex flex-col items-center justify-center text-xs gap-1 transition-all duration-300",
-            isActive('/analytics') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
+            isActive('/virality') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <BarChart2 size={24} />
-          <span className="text-xs">Analytics</span>
+          <TrendingUp size={24} />
+          <span className="text-xs">Virality</span>
         </Link>
         
         <Link 
@@ -47,14 +47,14 @@ const FooterMenu = () => {
         </Link>
         
         <Link 
-          to="/virality" 
+          to="/analytics" 
           className={cn(
             "flex flex-col items-center justify-center text-xs gap-1 transition-all duration-300",
-            isActive('/virality') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
+            isActive('/analytics') ? 'text-white scale-110 animate-glow-pulse' : 'text-gray-200'
           )}
         >
-          <TrendingUp size={24} />
-          <span className="text-xs">Virality</span>
+          <BarChart2 size={24} />
+          <span className="text-xs">Analytics</span>
         </Link>
       </nav>
     </div>

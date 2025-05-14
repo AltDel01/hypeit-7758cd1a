@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -37,9 +36,9 @@ const Navbar = () => {
   const NavLinks = () => (
     <>
       <NavLink to="/">Generate Content</NavLink>
-      <NavLink to="/analytics">Analytics</NavLink>
-      <NavLink to="/brand-identity">Brand Identity</NavLink>
       <NavLink to="/virality">Virality Strategy</NavLink>
+      <NavLink to="/brand-identity">Brand Identity</NavLink>
+      <NavLink to="/analytics">Analytics</NavLink>
     </>
   );
 
@@ -125,4 +124,3 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 };
 
 export default Navbar;
-

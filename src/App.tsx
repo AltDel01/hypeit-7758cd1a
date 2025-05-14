@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,7 @@ import CustomErrorBoundary from "./components/error/ErrorBoundary";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
-import Analytics from "./pages/analytics/AnalyticsPage";
+import Analytics from "./pages/Analytics";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -48,8 +47,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
-      <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
+      <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
       <Route 
         path="/dashboard" 
