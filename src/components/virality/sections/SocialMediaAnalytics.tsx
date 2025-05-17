@@ -101,12 +101,12 @@ const SocialMediaAnalytics: React.FC = () => {
         </div>
       </div>
       
-      {/* Adding Reset and Analyze buttons */}
+      {/* Adding Reset and Analyze buttons with equal width */}
       <div className="mt-8 flex gap-4">
         <Button 
           variant="outline" 
           onClick={handleReset}
-          className="px-8 py-2 text-base border-gray-600 hover:bg-gray-800 hover:text-white"
+          className="w-32 h-12 text-base border-gray-600 hover:bg-gray-800 hover:text-white"
         >
           Reset
         </Button>
@@ -114,7 +114,7 @@ const SocialMediaAnalytics: React.FC = () => {
           variant="newPurple" 
           onClick={handleAnalyze}
           disabled={isAnalyzing}
-          className="px-8 py-2 text-base"
+          className="w-32 h-12 text-base"
         >
           {isAnalyzing ? 'Analyzing...' : 'Analyze'}
         </Button>
