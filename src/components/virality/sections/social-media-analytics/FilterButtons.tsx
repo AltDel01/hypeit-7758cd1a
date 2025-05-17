@@ -46,7 +46,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <SelectTrigger className="w-full sm:w-auto bg-transparent border border-purple-500/30 text-white focus:ring-purple-600 hover:bg-purple-600/20">
           <SelectValue placeholder="Select Mode" />
         </SelectTrigger>
-        <SelectContent className="bg-background/95 backdrop-blur-sm border border-purple-500/30">
+        <SelectContent className="bg-background/95 backdrop-blur-sm">
           <SelectItem value="simple" className="hover:bg-purple-600/20">Simple Mode</SelectItem>
           <SelectItem value="advanced" className="hover:bg-purple-600/20">Advanced Mode</SelectItem>
           <SelectItem value="expert" className="hover:bg-purple-600/20">Expert Mode</SelectItem>
@@ -63,7 +63,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-purple-500/30">
+        <DropdownMenuContent className="bg-background/95 backdrop-blur-sm">
           <DropdownMenuItem className="hover:bg-purple-600/20">Export Data</DropdownMenuItem>
           <DropdownMenuItem className="hover:bg-purple-600/20">Share Report</DropdownMenuItem>
           <DropdownMenuItem className="hover:bg-purple-600/20">Schedule Analysis</DropdownMenuItem>

@@ -45,7 +45,7 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-purple-500/30">
+      <DropdownMenuContent className="bg-background/95 backdrop-blur-sm">
         {showDataOptions.map((option) => (
           <div 
             key={option} 
