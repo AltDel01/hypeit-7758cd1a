@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import FilterButtons from './FilterButtons';
 import ActionButtons from './ActionButtons';
 import SocialPlatformSection from './SocialPlatformSection';
+import { Instagram, Youtube } from 'lucide-react';
 
 interface SocialMediaAnalyticsContentProps {
   showDataOptions: string[];
@@ -31,6 +32,25 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
 }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
 
+  const renderPlatformIcon = (platform: 'instagram' | 'tiktok' | 'youtube') => {
+    switch (platform) {
+      case 'instagram':
+        return <Instagram className="h-5 w-5 text-pink-500" />;
+      case 'tiktok':
+        return (
+          <img 
+            src="/lovable-uploads/b847337c-33aa-4f13-ad9d-b555c0abcb78.png" 
+            alt="TikTok" 
+            className="h-5 w-5"
+          />
+        );
+      case 'youtube':
+        return <Youtube className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
@@ -46,18 +66,19 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
       />
 
       <div className="space-y-6">
-        <div className="flex space-x-4 border-b border-gray-700 pb-2">
+        <div className="flex border-b border-gray-700 pb-2">
           {['instagram', 'tiktok', 'youtube'].map((platform) => (
             <button
               key={platform}
-              className={`pb-2 px-1 font-medium text-sm transition-colors ${
+              className={`flex items-center space-x-2 pb-3 px-4 font-medium text-base transition-colors ${
                 selectedPlatform === platform 
                   ? 'text-purple-400 border-b-2 border-purple-400' 
                   : 'text-gray-400 hover:text-gray-200'
               }`}
               onClick={() => setSelectedPlatform(platform as 'instagram' | 'tiktok' | 'youtube')}
             >
-              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+              {renderPlatformIcon(platform as 'instagram' | 'tiktok' | 'youtube')}
+              <span className="ml-2">{platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
             </button>
           ))}
         </div>
@@ -65,13 +86,25 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
         <SocialPlatformSection platform={selectedPlatform} />
       </div>
       
-      <ActionButtons 
-        isResetActive={isResetActive}
-        isAnalyzing={isAnalyzing}
-        isAnalyzeDisabled={isAnalyzeDisabled}
-        handleReset={handleReset}
-        handleAnalyze={handleAnalyze}
-      />
+      <div className="flex justify-between pt-4">
+        <div>
+          {isResetActive && (
+            <button
+              onClick={handleReset}
+              className="bg-transparent border border-gray-700 text-white hover:bg-gray-800 px-4 py-2 rounded"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+        <ActionButtons 
+          isResetActive={false} // We're handling the reset button separately now
+          isAnalyzing={isAnalyzing}
+          isAnalyzeDisabled={isAnalyzeDisabled}
+          handleReset={handleReset}
+          handleAnalyze={handleAnalyze}
+        />
+      </div>
     </div>
   );
 };

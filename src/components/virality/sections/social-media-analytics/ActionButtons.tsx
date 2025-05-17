@@ -19,17 +19,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   handleAnalyze
 }) => {
   return (
-    <div className="flex justify-end space-x-3 pt-4">
-      {isResetActive && (
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          className="bg-transparent border border-gray-700 text-white hover:bg-gray-800"
-        >
-          Reset
-        </Button>
-      )}
-      
+    <div className="flex justify-end space-x-3">
+      {/* Reset button is now handled in the parent component */}
       <Button
         variant="newPurple"
         onClick={handleAnalyze}
