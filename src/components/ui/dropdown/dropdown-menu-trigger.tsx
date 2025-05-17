@@ -12,7 +12,7 @@ export const DropdownMenuTrigger = React.forwardRef<
 >(({ className, children, asChild = false, ...props }, ref) => (
   <DropdownMenuPrimitive.Trigger
     ref={ref}
-    className={cn("outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2", className)}
+    className={cn("outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 data-[state=open]:bg-purple-600/30", className)}
     asChild={asChild}
     {...props}
   >

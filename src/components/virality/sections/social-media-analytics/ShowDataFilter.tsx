@@ -39,7 +39,7 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className={`w-full sm:w-auto text-white justify-between border border-purple-500/30 hover:bg-purple-600/20 focus:ring-purple-600 ${showDataDropdownOpen ? 'bg-[#8c52ff]' : 'bg-transparent'}`}
+          className={`w-full sm:w-auto text-white justify-between hover:bg-purple-600/20 focus:ring-purple-600 ${showDataDropdownOpen ? 'bg-purple-600/30' : 'bg-transparent'}`}
         >
           Show Data
           <ChevronDown className="ml-2 h-4 w-4" />
