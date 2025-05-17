@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -24,6 +24,13 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
   setShowDataDropdownOpen,
   toggleDataOption
 }) => {
+  // This handler prevents the dropdown from closing when clicking on checkboxes
+  const handleCheckboxClick = (e: React.MouseEvent, option: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleDataOption(option);
+  };
+
   return (
     <DropdownMenu 
       open={showDataDropdownOpen}
@@ -40,19 +47,25 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
         {showDataOptions.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option}
-            checked={selectedDataOptions.includes(option)}
-            onCheckedChange={() => toggleDataOption(option)}
-            className="hover:bg-purple-600/20 flex items-center"
+          <div 
+            key={option} 
+            className="flex items-center hover:bg-purple-600/20 px-2 py-1.5 rounded-sm cursor-pointer"
+            onClick={(e) => handleCheckboxClick(e, option)}
           >
-            <div className="flex items-center">
-              <div className={`h-4 w-4 mr-2 flex items-center justify-center rounded-sm border ${selectedDataOptions.includes(option) ? 'bg-[#8c52ff] border-[#8c52ff]' : 'border-gray-500'}`}>
-                {selectedDataOptions.includes(option) && <Check className="h-3 w-3 text-white" />}
-              </div>
+            <Checkbox 
+              id={`option-${option}`}
+              checked={selectedDataOptions.includes(option)} 
+              className="mr-2"
+              onCheckedChange={() => toggleDataOption(option)}
+            />
+            <label 
+              htmlFor={`option-${option}`} 
+              className="text-sm cursor-pointer flex-grow"
+              onClick={(e) => e.preventDefault()}
+            >
               {option}
-            </div>
-          </DropdownMenuCheckboxItem>
+            </label>
+          </div>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
