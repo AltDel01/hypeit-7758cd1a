@@ -60,10 +60,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>Export Data</DropdownMenuItem>
-          <DropdownMenuItem>Share Report</DropdownMenuItem>
-          <DropdownMenuItem>Schedule Analysis</DropdownMenuItem>
+        <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
+          <DropdownMenuItem className="hover:bg-purple-600/20">Export Data</DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-purple-600/20">Share Report</DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-purple-600/20">Schedule Analysis</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

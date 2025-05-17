@@ -1,13 +1,11 @@
 
 import React from 'react';
-import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from '@/components/ui/label';
+import { ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -27,35 +25,29 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
   toggleDataOption
 }) => {
   return (
-    <DropdownMenu open={showDataDropdownOpen} onOpenChange={setShowDataDropdownOpen}>
+    <DropdownMenu 
+      open={showDataDropdownOpen}
+      onOpenChange={setShowDataDropdownOpen}
+    >
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-full sm:w-40 bg-transparent border border-gray-700 text-white justify-between">
+        <Button 
+          variant="outline" 
+          className="w-full sm:w-auto bg-transparent border border-gray-700 text-white justify-between"
+        >
           Show Data
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 sm:w-56 bg-gray-900 border-gray-700 max-h-[60vh] overflow-y-auto">
+      <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
         {showDataOptions.map((option) => (
-          <DropdownMenuItem 
+          <DropdownMenuCheckboxItem
             key={option}
-            className="flex items-center space-x-2 px-2 py-1.5 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
-            onSelect={(e) => {
-              e.preventDefault(); // Prevent menu from closing
-              toggleDataOption(option);
-            }}
+            checked={selectedDataOptions.includes(option)}
+            onCheckedChange={() => toggleDataOption(option)}
+            className="hover:bg-purple-600/20"
           >
-            <div className="flex items-center space-x-2 w-full">
-              <Checkbox 
-                id={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`}
-                checked={selectedDataOptions.includes(option)}
-                onCheckedChange={() => toggleDataOption(option)}
-                className="data-[state=checked]:bg-purple-600 border-gray-500"
-              />
-              <Label htmlFor={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`} className="text-white cursor-pointer text-sm truncate flex-1">
-                {option}
-              </Label>
-            </div>
-          </DropdownMenuItem>
+            {option}
+          </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

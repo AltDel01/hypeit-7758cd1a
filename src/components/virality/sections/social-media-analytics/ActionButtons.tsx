@@ -24,7 +24,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         <Button
           variant="outline"
           onClick={handleReset}
-          className="border-gray-700 text-white"
+          className="border-gray-700 text-white hover:bg-purple-600/20"
         >
           Reset
         </Button>
