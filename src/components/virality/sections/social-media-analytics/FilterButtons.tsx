@@ -43,10 +43,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       />
 
       <Select>
-        <SelectTrigger className="w-full sm:w-auto bg-transparent border border-gray-700 text-white focus:ring-purple-600">
+        <SelectTrigger className="w-full sm:w-auto bg-transparent border border-purple-500/30 text-white focus:ring-purple-600 hover:bg-purple-600/20">
           <SelectValue placeholder="Select Mode" />
         </SelectTrigger>
-        <SelectContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
+        <SelectContent className="bg-background/95 backdrop-blur-sm border border-purple-500/30">
           <SelectItem value="simple" className="hover:bg-purple-600/20">Simple Mode</SelectItem>
           <SelectItem value="advanced" className="hover:bg-purple-600/20">Advanced Mode</SelectItem>
           <SelectItem value="expert" className="hover:bg-purple-600/20">Expert Mode</SelectItem>
@@ -55,12 +55,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-gray-700 text-white justify-between hover:bg-purple-600/20">
+          <Button 
+            variant="outline" 
+            className="w-full sm:w-auto bg-transparent border-purple-500/30 text-white justify-between hover:bg-purple-600/20"
+          >
             More Action
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
+        <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-purple-500/30">
           <DropdownMenuItem className="hover:bg-purple-600/20">Export Data</DropdownMenuItem>
           <DropdownMenuItem className="hover:bg-purple-600/20">Share Report</DropdownMenuItem>
           <DropdownMenuItem className="hover:bg-purple-600/20">Schedule Analysis</DropdownMenuItem>
