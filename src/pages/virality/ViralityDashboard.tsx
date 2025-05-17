@@ -21,7 +21,6 @@ import SocialMediaStrategy from '@/components/virality/sections/SocialMediaStrat
 import CampaignAnalytics from '@/components/virality/sections/CampaignAnalytics';
 import TrendingTopicsSidebar from '@/components/virality/TrendingTopicsSidebar';
 import { ArrowLeft, BarChart, TrendingUp, BarChart2 } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
 import { analyticsService } from '@/services/requests';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -54,11 +53,6 @@ const ViralityDashboard = () => {
     if (id === 'strategy') {
       analyticsService.trackStrategyGeneration('virality');
     }
-    
-    toast({
-      title: "Section Changed",
-      description: `Viewing ${id} section`,
-    });
   };
 
   return (
