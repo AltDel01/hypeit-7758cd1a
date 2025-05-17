@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Instagram, Youtube, ChevronDown } from 'lucide-react';
+import { Instagram, Youtube, ChevronDown, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,10 +67,17 @@ const SocialMediaAnalytics: React.FC = () => {
             <SelectValue placeholder="Show Data" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Data</SelectItem>
-            <SelectItem value="engagement">Engagement</SelectItem>
-            <SelectItem value="followers">Followers</SelectItem>
-            <SelectItem value="reach">Reach</SelectItem>
+            <SelectItem value="user_performance">User Performance</SelectItem>
+            <SelectItem value="user_authenticity">User Authenticity</SelectItem>
+            <SelectItem value="significant_followers">Significant Followers</SelectItem>
+            <SelectItem value="follower_reachbilities">Follower Reachbilities</SelectItem>
+            <SelectItem value="profile_grouth">Profile Grouth</SelectItem>
+            <SelectItem value="audience_breakdown">Audience Breakdown</SelectItem>
+            <SelectItem value="top_hashtags">Top Hashtags</SelectItem>
+            <SelectItem value="top_mentions">Top Mentions</SelectItem>
+            <SelectItem value="top_interests">Top Interests</SelectItem>
+            <SelectItem value="top_contents">Top Contents</SelectItem>
+            <SelectItem value="look_a_likes">Look a Likes</SelectItem>
           </SelectContent>
         </Select>
 
