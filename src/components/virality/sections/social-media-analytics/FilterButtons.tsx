@@ -46,10 +46,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <SelectTrigger className="w-full sm:w-auto bg-transparent border border-gray-700 text-white">
           <SelectValue placeholder="Select Mode" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="simple">Simple Mode</SelectItem>
-          <SelectItem value="advanced">Advanced Mode</SelectItem>
-          <SelectItem value="expert">Expert Mode</SelectItem>
+        <SelectContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
+          <SelectItem value="simple" className="hover:bg-purple-600/20">Simple Mode</SelectItem>
+          <SelectItem value="advanced" className="hover:bg-purple-600/20">Advanced Mode</SelectItem>
+          <SelectItem value="expert" className="hover:bg-purple-600/20">Expert Mode</SelectItem>
         </SelectContent>
       </Select>
 

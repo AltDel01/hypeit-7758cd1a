@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,8 +31,8 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
     >
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="outline" 
-          className="w-full sm:w-auto bg-transparent border border-gray-700 text-white justify-between"
+          variant="newPurple" 
+          className="w-full sm:w-auto text-white justify-between"
         >
           Show Data
           <ChevronDown className="ml-2 h-4 w-4" />
@@ -44,9 +44,14 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
             key={option}
             checked={selectedDataOptions.includes(option)}
             onCheckedChange={() => toggleDataOption(option)}
-            className="hover:bg-purple-600/20"
+            className="hover:bg-purple-600/20 flex items-center"
           >
-            {option}
+            <div className="flex items-center">
+              <div className={`h-4 w-4 mr-2 flex items-center justify-center rounded-sm border ${selectedDataOptions.includes(option) ? 'bg-[#8c52ff] border-[#8c52ff]' : 'border-gray-500'}`}>
+                {selectedDataOptions.includes(option) && <Check className="h-3 w-3 text-white" />}
+              </div>
+              {option}
+            </div>
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
