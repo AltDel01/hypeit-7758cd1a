@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, TikTok, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Music } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -37,7 +37,7 @@ const SocialMediaAnalytics: React.FC = () => {
         {/* TikTok Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <TikTok className="w-6 h-6 text-white" />
+            <Music className="w-6 h-6 text-white" />
             <h2 className="text-xl font-semibold text-white">TikTok</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
