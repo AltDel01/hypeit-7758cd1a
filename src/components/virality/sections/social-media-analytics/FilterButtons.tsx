@@ -66,20 +66,6 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           <DropdownMenuItem>Schedule Analysis</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="newPurple" className="w-full sm:w-auto justify-between">
-            Compare
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>With Previous Month</DropdownMenuItem>
-          <DropdownMenuItem>With Competitors</DropdownMenuItem>
-          <DropdownMenuItem>Industry Average</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   );
 };

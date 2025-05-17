@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import FilterButtons from './FilterButtons';
 import ActionButtons from './ActionButtons';
 import SocialPlatformSection from './SocialPlatformSection';
@@ -35,20 +34,7 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
-        <h2 className="text-2xl font-semibold text-white">Social Media Analytics</h2>
-        <div className="flex space-x-3">
-          <Button 
-            variant="outline" 
-            className="bg-transparent border border-gray-700 text-white hover:bg-gray-800"
-          >
-            Connect Account
-          </Button>
-          <Button 
-            variant="newPurple"
-          >
-            Import Data
-          </Button>
-        </div>
+        <h2 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h2>
       </div>
 
       <FilterButtons 
