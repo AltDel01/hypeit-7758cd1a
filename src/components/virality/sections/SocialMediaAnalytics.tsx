@@ -7,11 +7,16 @@ import { Button } from '@/components/ui/button';
 
 const SocialMediaAnalytics: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isResetActive, setIsResetActive] = useState(false);
   
   const handleReset = () => {
-    // Reset functionality would go here
+    setIsResetActive(true);
     console.log('Reset clicked');
-    // You could add code to clear all inputs
+    // Simulate reset process
+    setTimeout(() => {
+      setIsResetActive(false);
+      // You could add code to clear all inputs
+    }, 500); // Return to original state after 500ms
   };
   
   const handleAnalyze = () => {
@@ -104,9 +109,9 @@ const SocialMediaAnalytics: React.FC = () => {
       {/* Adding Reset and Analyze buttons with equal width */}
       <div className="mt-8 flex gap-4">
         <Button 
-          variant="outline" 
+          variant={isResetActive ? "newPurple" : "outline"} 
           onClick={handleReset}
-          className="w-32 h-12 text-base border-gray-600 hover:bg-gray-800 hover:text-white"
+          className={`w-32 h-12 text-base ${isResetActive ? '' : 'bg-black text-white border-black hover:bg-[#1A1F2C]'}`}
         >
           Reset
         </Button>
