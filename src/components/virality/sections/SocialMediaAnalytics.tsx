@@ -1,10 +1,28 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 const SocialMediaAnalytics: React.FC = () => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  const handleReset = () => {
+    // Reset functionality would go here
+    console.log('Reset clicked');
+    // You could add code to clear all inputs
+  };
+  
+  const handleAnalyze = () => {
+    setIsAnalyzing(true);
+    console.log('Analyze clicked');
+    // Simulate analysis process
+    setTimeout(() => {
+      setIsAnalyzing(false);
+    }, 2000);
+  };
+  
   return (
     <div className="w-full">
       <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
@@ -81,6 +99,25 @@ const SocialMediaAnalytics: React.FC = () => {
             ))}
           </div>
         </div>
+      </div>
+      
+      {/* Adding Reset and Analyze buttons */}
+      <div className="mt-8 flex gap-4">
+        <Button 
+          variant="outline" 
+          onClick={handleReset}
+          className="px-8 py-2 text-base border-gray-600 hover:bg-gray-800 hover:text-white"
+        >
+          Reset
+        </Button>
+        <Button 
+          variant="newPurple" 
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+          className="px-8 py-2 text-base"
+        >
+          {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+        </Button>
       </div>
     </div>
   );
