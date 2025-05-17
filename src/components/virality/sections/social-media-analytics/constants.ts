@@ -5,7 +5,7 @@ export const showDataOptions = [
   "User Authenticity",
   "Significant Followers",
   "Follower Reachability",
-  "Profile Grouth",
+  "Profile Growth",
   "Audience Breakdown",
   "Top Hashtags",
   "Top Mentions",
