@@ -1,38 +1,6 @@
-
 import React, { useState } from 'react';
-import { Instagram, Youtube, ChevronDown, Check } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-// Data options for Show Data filter
-const showDataOptions = [
-  "User Performance",
-  "User Authenticity",
-  "Significant Followers",
-  "Follower Reachbilities",
-  "Profile Grouth",
-  "Audience Breakdown",
-  "Top Hashtags",
-  "Top Mentions",
-  "Top Interests",
-  "Top Contents",
-  "Look a Likes"
-];
+import { showDataOptions } from './social-media-analytics/constants';
+import SocialMediaAnalyticsContent from './social-media-analytics/SocialMediaAnalyticsContent';
 
 const SocialMediaAnalytics: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -81,177 +49,18 @@ const SocialMediaAnalytics: React.FC = () => {
   };
   
   return (
-    <div className="w-full">
-      <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
-      <p className="text-gray-400 mb-4">
-        Put social media handler to show account performance
-      </p>
-      
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        <DropdownMenu open={showDataDropdownOpen} onOpenChange={setShowDataDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-40 bg-transparent border border-gray-700 text-white justify-between">
-              Show Data
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-gray-900 border-gray-700">
-            {showDataOptions.map((option) => (
-              <DropdownMenuItem 
-                key={option}
-                className="flex items-center space-x-2 px-2 py-1.5 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
-                onSelect={(e) => {
-                  e.preventDefault(); // Prevent menu from closing
-                  toggleDataOption(option);
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`}
-                    checked={selectedDataOptions.includes(option)}
-                    onCheckedChange={() => toggleDataOption(option)}
-                    className="data-[state=checked]:bg-purple-600 border-gray-500"
-                  />
-                  <Label htmlFor={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`} className="text-white cursor-pointer">
-                    {option}
-                  </Label>
-                </div>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Select>
-          <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
-            <SelectValue placeholder="Select Mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="simple">Simple Mode</SelectItem>
-            <SelectItem value="advanced">Advanced Mode</SelectItem>
-            <SelectItem value="expert">Expert Mode</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-36 bg-transparent border-gray-700 text-white justify-between">
-              More Action
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Export Data</DropdownMenuItem>
-            <DropdownMenuItem>Share Report</DropdownMenuItem>
-            <DropdownMenuItem>Schedule Analysis</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="newPurple" className="w-36 justify-between">
-              Compare
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>With Previous Month</DropdownMenuItem>
-            <DropdownMenuItem>With Competitors</DropdownMenuItem>
-            <DropdownMenuItem>Industry Average</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      
-      <div className="space-y-8">
-        {/* Instagram Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Instagram className="w-6 h-6 text-pink-500" />
-            <h2 className="text-xl font-semibold text-white">Instagram</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((index) => (
-              <div key={`instagram-${index}`} className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <span className="text-gray-400">@</span>
-                </div>
-                <Input 
-                  placeholder="Enter username" 
-                  className="pl-8 bg-background/50 border-gray-700"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* TikTok Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 flex items-center justify-center">
-              <img 
-                src="/lovable-uploads/b847337c-33aa-4f13-ad9d-b555c0abcb78.png" 
-                alt="TikTok" 
-                className="w-5 h-5"
-              />
-            </div>
-            <h2 className="text-xl font-semibold text-white">TikTok</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((index) => (
-              <div key={`tiktok-${index}`} className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <span className="text-gray-400">@</span>
-                </div>
-                <Input 
-                  placeholder="Enter username" 
-                  className="pl-8 bg-background/50 border-gray-700"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* YouTube Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Youtube className="w-6 h-6 text-red-500" />
-            <h2 className="text-xl font-semibold text-white">Youtube</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((index) => (
-              <div key={`youtube-${index}`} className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <span className="text-gray-400">@</span>
-                </div>
-                <Input 
-                  placeholder="Enter username" 
-                  className="pl-8 bg-background/50 border-gray-700"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      {/* Adding Reset and Analyze buttons with equal width */}
-      <div className="mt-8 flex gap-4">
-        <Button 
-          variant={isResetActive ? "newPurple" : "outline"} 
-          onClick={handleReset}
-          className={`w-32 h-12 text-base ${isResetActive ? '' : 'bg-black text-white border-black hover:bg-[#1A1F2C]'}`}
-        >
-          Reset
-        </Button>
-        <Button 
-          variant={isAnalyzeDisabled ? "outline" : "newPurple"}
-          onClick={handleAnalyze}
-          disabled={isAnalyzing || isAnalyzeDisabled}
-          className={`w-32 h-12 text-base ${isAnalyzeDisabled ? 'bg-black text-white border-black hover:bg-[#1A1F2C]' : ''}`}
-        >
-          {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-        </Button>
-      </div>
-    </div>
+    <SocialMediaAnalyticsContent
+      showDataOptions={showDataOptions}
+      selectedDataOptions={selectedDataOptions}
+      showDataDropdownOpen={showDataDropdownOpen}
+      setShowDataDropdownOpen={setShowDataDropdownOpen}
+      toggleDataOption={toggleDataOption}
+      isResetActive={isResetActive}
+      isAnalyzing={isAnalyzing}
+      isAnalyzeDisabled={isAnalyzeDisabled}
+      handleReset={handleReset}
+      handleAnalyze={handleAnalyze}
+    />
   );
 };
 
