@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import FilterButtons from './FilterButtons';
 import ActionButtons from './ActionButtons';
@@ -30,6 +30,8 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
   handleReset,
   handleAnalyze
 }) => {
+  const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
@@ -57,7 +59,25 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
         toggleDataOption={toggleDataOption}
       />
 
-      <SocialPlatformSection />
+      <div className="space-y-6">
+        <div className="flex space-x-4 border-b border-gray-700 pb-2">
+          {['instagram', 'tiktok', 'youtube'].map((platform) => (
+            <button
+              key={platform}
+              className={`pb-2 px-1 font-medium text-sm transition-colors ${
+                selectedPlatform === platform 
+                  ? 'text-purple-400 border-b-2 border-purple-400' 
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+              onClick={() => setSelectedPlatform(platform as 'instagram' | 'tiktok' | 'youtube')}
+            >
+              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <SocialPlatformSection platform={selectedPlatform} />
+      </div>
       
       <ActionButtons 
         isResetActive={isResetActive}
