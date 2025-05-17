@@ -1,8 +1,22 @@
+
 import React, { useState } from 'react';
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SocialMediaAnalytics: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -41,9 +55,63 @@ const SocialMediaAnalytics: React.FC = () => {
   return (
     <div className="w-full">
       <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
-      <p className="text-gray-400 mb-8">
+      <p className="text-gray-400 mb-4">
         Put social media handler to show account performance
       </p>
+      
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <Select>
+          <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
+            <SelectValue placeholder="Show Data" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Data</SelectItem>
+            <SelectItem value="engagement">Engagement</SelectItem>
+            <SelectItem value="followers">Followers</SelectItem>
+            <SelectItem value="reach">Reach</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
+            <SelectValue placeholder="Select Mode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="simple">Simple Mode</SelectItem>
+            <SelectItem value="advanced">Advanced Mode</SelectItem>
+            <SelectItem value="expert">Expert Mode</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-36 bg-transparent border-gray-700 text-white justify-between">
+              More Action
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Export Data</DropdownMenuItem>
+            <DropdownMenuItem>Share Report</DropdownMenuItem>
+            <DropdownMenuItem>Schedule Analysis</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="newPurple" className="w-36 justify-between">
+              Compare
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>With Previous Month</DropdownMenuItem>
+            <DropdownMenuItem>With Competitors</DropdownMenuItem>
+            <DropdownMenuItem>Industry Average</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       
       <div className="space-y-8">
         {/* Instagram Section */}
