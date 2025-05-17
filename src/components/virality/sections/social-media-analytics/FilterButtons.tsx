@@ -57,7 +57,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
-            className="w-full sm:w-auto bg-transparent border border-purple-500/30 text-white justify-between hover:bg-purple-600/20"
+            className="w-full sm:w-auto bg-transparent border border-purple-500/30 text-white justify-between hover:bg-purple-600/20 focus:ring-purple-600"
           >
             More Action
             <ChevronDown className="ml-2 h-4 w-4" />
