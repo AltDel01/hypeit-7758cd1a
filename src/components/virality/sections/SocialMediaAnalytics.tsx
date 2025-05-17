@@ -19,10 +19,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Data options for Show Data filter
+const showDataOptions = [
+  "User Performance",
+  "User Authenticity",
+  "Significant Followers",
+  "Follower Reachbilities",
+  "Profile Grouth",
+  "Audience Breakdown",
+  "Top Hashtags",
+  "Top Mentions",
+  "Top Interests",
+  "Top Contents",
+  "Look a Likes"
+];
+
 const SocialMediaAnalytics: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isResetActive, setIsResetActive] = useState(false);
   const [isAnalyzeDisabled, setIsAnalyzeDisabled] = useState(false);
+  const [selectedDataOptions, setSelectedDataOptions] = useState<string[]>(showDataOptions);
+  const [showDataDropdownOpen, setShowDataDropdownOpen] = useState(false);
   
   const handleReset = () => {
     setIsResetActive(true);
@@ -52,6 +69,16 @@ const SocialMediaAnalytics: React.FC = () => {
       setIsAnalyzing(false);
     }, 2000);
   };
+
+  const toggleDataOption = (option: string) => {
+    setSelectedDataOptions(current => {
+      if (current.includes(option)) {
+        return current.filter(item => item !== option);
+      } else {
+        return [...current, option];
+      }
+    });
+  };
   
   return (
     <div className="w-full">
@@ -62,24 +89,38 @@ const SocialMediaAnalytics: React.FC = () => {
       
       {/* Filter Buttons */}
       <div className="flex flex-wrap gap-3 mb-8">
-        <Select>
-          <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
-            <SelectValue placeholder="Show Data" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="user_performance">User Performance</SelectItem>
-            <SelectItem value="user_authenticity">User Authenticity</SelectItem>
-            <SelectItem value="significant_followers">Significant Followers</SelectItem>
-            <SelectItem value="follower_reachbilities">Follower Reachbilities</SelectItem>
-            <SelectItem value="profile_grouth">Profile Grouth</SelectItem>
-            <SelectItem value="audience_breakdown">Audience Breakdown</SelectItem>
-            <SelectItem value="top_hashtags">Top Hashtags</SelectItem>
-            <SelectItem value="top_mentions">Top Mentions</SelectItem>
-            <SelectItem value="top_interests">Top Interests</SelectItem>
-            <SelectItem value="top_contents">Top Contents</SelectItem>
-            <SelectItem value="look_a_likes">Look a Likes</SelectItem>
-          </SelectContent>
-        </Select>
+        <DropdownMenu open={showDataDropdownOpen} onOpenChange={setShowDataDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-40 bg-transparent border border-gray-700 text-white justify-between">
+              Show Data
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 bg-gray-900 border-gray-700">
+            {showDataOptions.map((option) => (
+              <DropdownMenuItem 
+                key={option}
+                className="flex items-center space-x-2 px-2 py-1.5 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+                onSelect={(e) => {
+                  e.preventDefault(); // Prevent menu from closing
+                  toggleDataOption(option);
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`}
+                    checked={selectedDataOptions.includes(option)}
+                    onCheckedChange={() => toggleDataOption(option)}
+                    className="data-[state=checked]:bg-purple-600 border-gray-500"
+                  />
+                  <Label htmlFor={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`} className="text-white cursor-pointer">
+                    {option}
+                  </Label>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Select>
           <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
