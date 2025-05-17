@@ -1,8 +1,9 @@
 
 import React from 'react';
-import SocialPlatformSection from './SocialPlatformSection';
+import { Button } from "@/components/ui/button";
 import FilterButtons from './FilterButtons';
 import ActionButtons from './ActionButtons';
+import SocialPlatformSection from './SocialPlatformSection';
 
 interface SocialMediaAnalyticsContentProps {
   showDataOptions: string[];
@@ -30,12 +31,24 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
   handleAnalyze
 }) => {
   return (
-    <div className="w-full">
-      <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
-      <p className="text-gray-400 mb-4">
-        Put social media handler to show account performance
-      </p>
-      
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+        <h2 className="text-2xl font-semibold text-white">Social Media Analytics</h2>
+        <div className="flex space-x-3">
+          <Button 
+            variant="outline" 
+            className="bg-transparent border border-gray-700 text-white hover:bg-gray-800"
+          >
+            Connect Account
+          </Button>
+          <Button 
+            variant="newPurple"
+          >
+            Import Data
+          </Button>
+        </div>
+      </div>
+
       <FilterButtons 
         showDataOptions={showDataOptions}
         selectedDataOptions={selectedDataOptions}
@@ -43,12 +56,8 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
         setShowDataDropdownOpen={setShowDataDropdownOpen}
         toggleDataOption={toggleDataOption}
       />
-      
-      <div className="space-y-8">
-        <SocialPlatformSection platform="instagram" />
-        <SocialPlatformSection platform="tiktok" />
-        <SocialPlatformSection platform="youtube" />
-      </div>
+
+      <SocialPlatformSection />
       
       <ActionButtons 
         isResetActive={isResetActive}

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface ActionButtonsProps {
   isResetActive: boolean;
@@ -18,21 +19,31 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   handleAnalyze
 }) => {
   return (
-    <div className="mt-8 flex gap-4">
-      <Button 
-        variant={isResetActive ? "newPurple" : "outline"} 
-        onClick={handleReset}
-        className={`w-32 h-12 text-base ${isResetActive ? '' : 'bg-black text-white border-black hover:bg-[#1A1F2C]'}`}
-      >
-        Reset
-      </Button>
-      <Button 
-        variant={isAnalyzeDisabled ? "outline" : "newPurple"}
+    <div className="flex justify-end space-x-3 pt-4">
+      {isResetActive && (
+        <Button
+          variant="outline"
+          onClick={handleReset}
+          className="bg-transparent border border-gray-700 text-white hover:bg-gray-800"
+        >
+          Reset
+        </Button>
+      )}
+      
+      <Button
+        variant="newPurple"
         onClick={handleAnalyze}
-        disabled={isAnalyzing || isAnalyzeDisabled}
-        className={`w-32 h-12 text-base ${isAnalyzeDisabled ? 'bg-black text-white border-black hover:bg-[#1A1F2C]' : ''}`}
+        disabled={isAnalyzeDisabled}
+        className="min-w-[100px]"
       >
-        {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+        {isAnalyzing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Analyzing
+          </>
+        ) : (
+          'Analyze'
+        )}
       </Button>
     </div>
   );
