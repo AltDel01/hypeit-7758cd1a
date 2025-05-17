@@ -43,7 +43,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       />
 
       <Select>
-        <SelectTrigger className="w-full sm:w-auto bg-transparent border border-gray-700 text-white">
+        <SelectTrigger className="w-full sm:w-auto bg-transparent border border-gray-700 text-white focus:ring-purple-600">
           <SelectValue placeholder="Select Mode" />
         </SelectTrigger>
         <SelectContent className="bg-background/95 backdrop-blur-sm border border-gray-700">
@@ -55,7 +55,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-gray-700 text-white justify-between">
+          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-gray-700 text-white justify-between hover:bg-purple-600/20">
             More Action
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>

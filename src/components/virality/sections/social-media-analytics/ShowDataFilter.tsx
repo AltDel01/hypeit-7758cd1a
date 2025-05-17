@@ -24,8 +24,8 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
   setShowDataDropdownOpen,
   toggleDataOption
 }) => {
-  // This handler prevents the dropdown from closing when clicking on checkboxes
-  const handleCheckboxClick = (e: React.MouseEvent, option: string) => {
+  // This handler prevents the dropdown from closing when clicking on checkboxes or labels
+  const handleOptionClick = (e: React.MouseEvent, option: string) => {
     e.preventDefault();
     e.stopPropagation();
     toggleDataOption(option);
@@ -50,13 +50,14 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
           <div 
             key={option} 
             className="flex items-center hover:bg-purple-600/20 px-2 py-1.5 rounded-sm cursor-pointer"
-            onClick={(e) => handleCheckboxClick(e, option)}
+            onClick={(e) => handleOptionClick(e, option)}
           >
             <Checkbox 
               id={`option-${option}`}
               checked={selectedDataOptions.includes(option)} 
               className="mr-2"
               onCheckedChange={() => toggleDataOption(option)}
+              onClick={(e) => e.stopPropagation()}
             />
             <label 
               htmlFor={`option-${option}`} 
