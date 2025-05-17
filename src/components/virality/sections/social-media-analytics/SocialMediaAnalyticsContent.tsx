@@ -35,17 +35,17 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
   const renderPlatformIcon = (platform: 'instagram' | 'tiktok' | 'youtube') => {
     switch (platform) {
       case 'instagram':
-        return <Instagram className="h-5 w-5 text-pink-500" />;
+        return <Instagram className="h-6 w-6 text-pink-500" />;
       case 'tiktok':
         return (
           <img 
             src="/lovable-uploads/b847337c-33aa-4f13-ad9d-b555c0abcb78.png" 
             alt="TikTok" 
-            className="h-5 w-5"
+            className="h-6 w-6"
           />
         );
       case 'youtube':
-        return <Youtube className="h-5 w-5 text-red-500" />;
+        return <Youtube className="h-6 w-6 text-red-500" />;
       default:
         return null;
     }
@@ -66,19 +66,21 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
       />
 
       <div className="space-y-6">
-        <div className="flex border-b border-gray-700 pb-2">
+        <div className="flex justify-center border-b border-gray-700 pb-2">
           {['instagram', 'tiktok', 'youtube'].map((platform) => (
             <button
               key={platform}
-              className={`flex items-center space-x-2 pb-3 px-4 font-medium text-base transition-colors ${
+              className={`flex items-center space-x-3 pb-3 px-8 font-medium text-lg transition-colors ${
                 selectedPlatform === platform 
                   ? 'text-purple-400 border-b-2 border-purple-400' 
                   : 'text-gray-400 hover:text-gray-200'
               }`}
               onClick={() => setSelectedPlatform(platform as 'instagram' | 'tiktok' | 'youtube')}
             >
-              {renderPlatformIcon(platform as 'instagram' | 'tiktok' | 'youtube')}
-              <span className="ml-2">{platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+              <div className="flex items-center gap-3">
+                {renderPlatformIcon(platform as 'instagram' | 'tiktok' | 'youtube')}
+                <span>{platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+              </div>
             </button>
           ))}
         </div>
