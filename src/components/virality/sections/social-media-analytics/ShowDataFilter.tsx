@@ -29,12 +29,12 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
   return (
     <DropdownMenu open={showDataDropdownOpen} onOpenChange={setShowDataDropdownOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-40 bg-transparent border border-gray-700 text-white justify-between">
+        <Button variant="outline" className="w-full sm:w-40 bg-transparent border border-gray-700 text-white justify-between">
           Show Data
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-gray-900 border-gray-700">
+      <DropdownMenuContent className="w-64 sm:w-56 bg-gray-900 border-gray-700 max-h-[60vh] overflow-y-auto">
         {showDataOptions.map((option) => (
           <DropdownMenuItem 
             key={option}
@@ -44,14 +44,14 @@ const ShowDataFilter: React.FC<ShowDataFilterProps> = ({
               toggleDataOption(option);
             }}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 w-full">
               <Checkbox 
                 id={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`}
                 checked={selectedDataOptions.includes(option)}
                 onCheckedChange={() => toggleDataOption(option)}
                 className="data-[state=checked]:bg-purple-600 border-gray-500"
               />
-              <Label htmlFor={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`} className="text-white cursor-pointer">
+              <Label htmlFor={`checkbox-${option.replace(/\s+/g, '-').toLowerCase()}`} className="text-white cursor-pointer text-sm truncate flex-1">
                 {option}
               </Label>
             </div>

@@ -33,7 +33,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   toggleDataOption
 }) => {
   return (
-    <div className="flex flex-wrap gap-3 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap gap-2 sm:gap-3 mb-6 md:mb-8">
       <ShowDataFilter 
         showDataOptions={showDataOptions}
         selectedDataOptions={selectedDataOptions}
@@ -43,7 +43,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       />
 
       <Select>
-        <SelectTrigger className="w-36 bg-transparent border border-gray-700 text-white">
+        <SelectTrigger className="w-full sm:w-auto bg-transparent border border-gray-700 text-white">
           <SelectValue placeholder="Select Mode" />
         </SelectTrigger>
         <SelectContent>
@@ -55,7 +55,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-36 bg-transparent border-gray-700 text-white justify-between">
+          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-gray-700 text-white justify-between">
             More Action
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
@@ -69,7 +69,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="newPurple" className="w-36 justify-between">
+          <Button variant="newPurple" className="w-full sm:w-auto justify-between">
             Compare
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
