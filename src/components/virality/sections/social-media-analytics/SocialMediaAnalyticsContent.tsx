@@ -66,11 +66,11 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
       />
 
       <div className="space-y-6">
-        <div className="flex justify-center border-b border-gray-700 pb-2">
+        <div className="flex justify-start border-b border-gray-700 pb-2">
           {['instagram', 'tiktok', 'youtube'].map((platform) => (
             <button
               key={platform}
-              className={`flex items-center space-x-3 pb-3 px-8 font-medium text-lg transition-colors ${
+              className={`flex items-center space-x-3 pb-3 px-10 first:pl-0 font-medium text-lg transition-colors ${
                 selectedPlatform === platform 
                   ? 'text-purple-400 border-b-2 border-purple-400' 
                   : 'text-gray-400 hover:text-gray-200'
@@ -100,7 +100,7 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
           )}
         </div>
         <ActionButtons 
-          isResetActive={false} // We're handling the reset button separately now
+          isResetActive={isResetActive}
           isAnalyzing={isAnalyzing}
           isAnalyzeDisabled={isAnalyzeDisabled}
           handleReset={handleReset}

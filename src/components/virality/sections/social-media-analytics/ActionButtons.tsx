@@ -20,7 +20,15 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 }) => {
   return (
     <div className="flex justify-end space-x-3">
-      {/* Reset button is now handled in the parent component */}
+      {isResetActive && (
+        <Button
+          variant="outline"
+          onClick={handleReset}
+          className="border-gray-700 text-white"
+        >
+          Reset
+        </Button>
+      )}
       <Button
         variant="newPurple"
         onClick={handleAnalyze}
