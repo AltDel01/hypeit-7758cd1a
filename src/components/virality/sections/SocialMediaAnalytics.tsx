@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Youtube, Music } from 'lucide-react';
+import { Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -9,7 +9,7 @@ const SocialMediaAnalytics: React.FC = () => {
     <div className="w-full">
       <h1 className="text-4xl font-black text-white mb-4 animate-gradient-text animate-fade-in-up">Social Media Analytics</h1>
       <p className="text-gray-400 mb-8">
-        Connect your social media accounts to track performance across platforms.
+        Put social media handler to show account performance
       </p>
       
       <div className="space-y-8">
@@ -37,7 +37,13 @@ const SocialMediaAnalytics: React.FC = () => {
         {/* TikTok Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <Music className="w-6 h-6 text-white" />
+            <div className="w-6 h-6 flex items-center justify-center">
+              <img 
+                src="/lovable-uploads/b847337c-33aa-4f13-ad9d-b555c0abcb78.png" 
+                alt="TikTok" 
+                className="w-5 h-5"
+              />
+            </div>
             <h2 className="text-xl font-semibold text-white">TikTok</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
