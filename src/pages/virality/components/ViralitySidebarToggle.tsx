@@ -17,7 +17,7 @@ const ViralitySidebarToggle = () => {
   
   if (state === "expanded" && !isMobile) {
     return (
-      <div className="fixed left-4 top-6 z-50">
+      <div className="fixed left-16 top-6 z-50">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -43,7 +43,7 @@ const ViralitySidebarToggle = () => {
   // For mobile, we'll show a different type of toggle
   if (isMobile) {
     return (
-      <div className="fixed left-4 top-6 z-50">
+      <div className="fixed left-16 top-6 z-50">
         <Button 
           onClick={toggleSidebar} 
           size="icon" 
@@ -59,7 +59,7 @@ const ViralitySidebarToggle = () => {
   
   // For desktop when collapsed
   return (
-    <div className="fixed left-4 top-6 z-50">
+    <div className="fixed left-16 top-6 z-50">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
