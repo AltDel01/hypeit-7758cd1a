@@ -16,13 +16,34 @@ const ViralitySidebarToggle = () => {
   const isMobile = useIsMobile();
   
   if (state === "expanded" && !isMobile) {
-    return null;
+    return (
+      <div className="fixed left-4 top-6 z-50">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={toggleSidebar} 
+                size="icon" 
+                variant="secondary"
+                className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
+              >
+                <Minimize className="h-5 w-5" />
+                <span className="sr-only">Collapse Sidebar</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              Collapse Sidebar
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
   }
   
   // For mobile, we'll show a different type of toggle
   if (isMobile) {
     return (
-      <div className="fixed left-4 top-24 z-50">
+      <div className="fixed left-4 top-6 z-50">
         <Button 
           onClick={toggleSidebar} 
           size="icon" 
@@ -30,7 +51,7 @@ const ViralitySidebarToggle = () => {
           className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
         >
           <Minimize className="h-5 w-5" />
-          <span className="sr-only">Show Menu</span>
+          <span className="sr-only">Toggle Menu</span>
         </Button>
       </div>
     );
@@ -38,7 +59,7 @@ const ViralitySidebarToggle = () => {
   
   // For desktop when collapsed
   return (
-    <div className="fixed left-4 top-24 z-50">
+    <div className="fixed left-4 top-6 z-50">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -48,7 +69,7 @@ const ViralitySidebarToggle = () => {
               variant="secondary"
               className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
             >
-              <Minimize className="h-5 w-5" />
+              <Minimize className="h-5 w-5 rotate-180" />
               <span className="sr-only">Expand Sidebar</span>
             </Button>
           </TooltipTrigger>
