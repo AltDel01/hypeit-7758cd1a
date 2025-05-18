@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PanelLeft } from 'lucide-react';
+import { Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -29,7 +29,7 @@ const ViralitySidebarToggle = () => {
           variant="secondary"
           className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
         >
-          <PanelLeft className="h-5 w-5" />
+          <Minimize className="h-5 w-5" />
           <span className="sr-only">Show Menu</span>
         </Button>
       </div>
@@ -48,7 +48,7 @@ const ViralitySidebarToggle = () => {
               variant="secondary"
               className="h-10 w-10 rounded-full shadow-lg hover:bg-purple-600/20"
             >
-              <PanelLeft className="h-5 w-5" />
+              <Minimize className="h-5 w-5" />
               <span className="sr-only">Expand Sidebar</span>
             </Button>
           </TooltipTrigger>
