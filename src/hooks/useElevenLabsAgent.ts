@@ -22,15 +22,20 @@ export const useElevenLabsAgent = () => {
     },
     onMessage: (message) => {
       console.log("Received message:", message);
-      if (message.type === "agent_response") {
-        console.log("Ava responded:", message.message);
+      // Handle different message types based on the actual structure from ElevenLabs
+      if (message && typeof message === 'object' && 'message' in message) {
+        console.log("Ava message:", message.message);
+        if (message.source === 'ai') {
+          console.log("Ava responded:", message.message);
+        }
       }
     },
     clientTools: {
       // Add client tools to allow Ava to perform actions
       showMessage: (parameters: { message: string }) => {
         console.log("Ava says:", parameters.message);
-        return "Message received";
+        toast.info(`Ava: ${parameters.message}`);
+        return "Message displayed to user";
       },
       getCurrentTime: () => {
         const now = new Date();
@@ -39,6 +44,14 @@ export const useElevenLabsAgent = () => {
       getCurrentDate: () => {
         const now = new Date();
         return `Today's date is ${now.toLocaleDateString()}`;
+      },
+      getWeather: (parameters: { location: string }) => {
+        // Placeholder for weather information
+        return `I don't have access to real-time weather data for ${parameters.location}, but I can help you with other things!`;
+      },
+      helpWithSocialMedia: (parameters: { platform?: string; task?: string }) => {
+        const platform = parameters.platform || "social media";
+        return `I can help you with ${platform} content creation, strategy, and optimization. What specific help do you need?`;
       }
     },
     overrides: {
@@ -52,8 +65,14 @@ export const useElevenLabsAgent = () => {
           - Provide marketing advice and tips
           - Be conversational, friendly, and engaging
           - Always respond to user questions and engage in meaningful dialogue
+          - Use the available client tools to provide interactive experiences
           
-          Important: Always respond to user questions. Don't just greet - engage in conversation and provide helpful answers.
+          Important guidelines:
+          - Always respond to user questions with helpful, detailed answers
+          - Ask follow-up questions to better understand user needs
+          - Be proactive in offering suggestions and tips
+          - Use a friendly, conversational tone
+          - Don't just greet - engage meaningfully with every user input
           
           Platform features you can help with:
           - Image generation for social media posts
@@ -61,10 +80,18 @@ export const useElevenLabsAgent = () => {
           - Analytics and performance tracking
           - Brand identity creation
           - Virality strategies
+          - Campaign optimization
           
-          Be proactive in your responses and ask follow-up questions to help users better.`
+          Available tools you can use:
+          - showMessage: Display important information to users
+          - getCurrentTime: Get current time
+          - getCurrentDate: Get current date
+          - getWeather: Get weather information (placeholder)
+          - helpWithSocialMedia: Provide platform-specific guidance
+          
+          Be proactive in your responses and always try to provide value in every interaction.`
         },
-        firstMessage: "Hi! I'm Ava, your AI assistant for HYPEIT. I'm here to help you create amazing social media content and grow your online presence. What can I help you with today?",
+        firstMessage: "Hi! I'm Ava, your AI assistant for HYPEIT. I'm here to help you create amazing social media content and grow your online presence. What can I help you with today? Feel free to ask me anything about social media strategy, content creation, or our platform features!",
         language: "en"
       },
       tts: {
