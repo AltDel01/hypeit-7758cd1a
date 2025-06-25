@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { useConversation as useElevenLabsConversation } from "@11labs/react";
 import { toast } from "sonner";
@@ -15,15 +14,10 @@ export const useElevenLabsAgent = () => {
     },
     onDisconnect: (reason) => {
       console.log("ElevenLabs conversation disconnected. Reason:", reason);
-      setIsInitialized(false);
-      // Only show error if it's an unexpected disconnect (not user-initiated)
-      // We'll be more permissive and only show errors for actual connection issues
-      if (reason && typeof reason === 'object' && 'reason' in reason) {
-        // Only show error for technical disconnects, not user actions
-        if (reason.reason === 'error') {
-          toast.error("Connection to Ava was lost due to an error");
-        }
-      }
+      // Don't automatically set isInitialized to false unless it's a manual disconnect
+      // Only show errors for actual technical problems
+      console.log("Disconnect reason type:", typeof reason);
+      console.log("Disconnect reason details:", JSON.stringify(reason, null, 2));
     },
     onError: (error) => {
       console.error("ElevenLabs error details:", error);
@@ -105,28 +99,26 @@ export const useElevenLabsAgent = () => {
         return;
       }
 
-      // Start the conversation if not already initialized or connected
-      if (!isInitialized) {
-        console.log("Starting ElevenLabs conversation...");
-        await conversation.startSession({
-          agentId: "hELBJiIy7Zdh6wJPxqFW"
-        });
-        console.log("Conversation session started");
-      }
+      // Always try to start the session
+      console.log("Starting ElevenLabs conversation...");
+      await conversation.startSession({
+        agentId: "hELBJiIy7Zdh6wJPxqFW"
+      });
+      console.log("Conversation session started");
     } catch (error) {
       console.error("Failed to start conversation:", error);
       console.error("Error details:", JSON.stringify(error, null, 2));
       toast.error("Failed to connect to Ava. Please check your ElevenLabs API key and try again.");
       setIsInitialized(false);
     }
-  }, [conversation, isInitialized, hasPermission, requestMicrophonePermission]);
+  }, [conversation, hasPermission, requestMicrophonePermission]);
 
   const endConversation = useCallback(async () => {
     try {
       if (isInitialized || conversation?.status === "connected") {
         console.log("Ending conversation manually...");
-        await conversation.endSession();
         setIsInitialized(false);
+        await conversation.endSession();
         toast.info("Conversation ended");
       }
     } catch (error) {
