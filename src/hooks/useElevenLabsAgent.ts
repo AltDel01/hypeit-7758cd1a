@@ -9,8 +9,9 @@ export const useElevenLabsAgent = () => {
   
   const conversation = useElevenLabsConversation({
     onConnect: () => {
-      console.log("ElevenLabs conversation connected");
+      console.log("ElevenLabs conversation connected successfully");
       toast.success("Connected to Ava");
+      setIsInitialized(true);
     },
     onDisconnect: () => {
       console.log("ElevenLabs conversation disconnected");
@@ -18,10 +19,11 @@ export const useElevenLabsAgent = () => {
     },
     onError: (error) => {
       console.error("ElevenLabs error:", error);
-      toast.error("Error connecting to Ava - Please check your internet connection");
+      toast.error("Error connecting to Ava - Please check your API key and internet connection");
+      setIsInitialized(false);
     },
     onMessage: (message) => {
-      console.log("Received message:", message);
+      console.log("Received message from Ava:", message);
       // Handle different message types based on the actual structure from ElevenLabs
       if (message && typeof message === 'object' && 'message' in message) {
         console.log("Ava message:", message.message);
@@ -53,50 +55,6 @@ export const useElevenLabsAgent = () => {
         const platform = parameters.platform || "social media";
         return `I can help you with ${platform} content creation, strategy, and optimization. What specific help do you need?`;
       }
-    },
-    overrides: {
-      agent: {
-        prompt: {
-          prompt: `You are Ava, a helpful AI assistant for HYPEIT, a social media content creation platform. 
-          
-          Your role is to:
-          - Help users with social media strategy and content creation
-          - Answer questions about the platform features
-          - Provide marketing advice and tips
-          - Be conversational, friendly, and engaging
-          - Always respond to user questions and engage in meaningful dialogue
-          - Use the available client tools to provide interactive experiences
-          
-          Important guidelines:
-          - Always respond to user questions with helpful, detailed answers
-          - Ask follow-up questions to better understand user needs
-          - Be proactive in offering suggestions and tips
-          - Use a friendly, conversational tone
-          - Don't just greet - engage meaningfully with every user input
-          
-          Platform features you can help with:
-          - Image generation for social media posts
-          - Content strategy development
-          - Analytics and performance tracking
-          - Brand identity creation
-          - Virality strategies
-          - Campaign optimization
-          
-          Available tools you can use:
-          - showMessage: Display important information to users
-          - getCurrentTime: Get current time
-          - getCurrentDate: Get current date
-          - getWeather: Get weather information (placeholder)
-          - helpWithSocialMedia: Provide platform-specific guidance
-          
-          Be proactive in your responses and always try to provide value in every interaction.`
-        },
-        firstMessage: "Hi! I'm Ava, your AI assistant for HYPEIT. I'm here to help you create amazing social media content and grow your online presence. What can I help you with today? Feel free to ask me anything about social media strategy, content creation, or our platform features!",
-        language: "en"
-      },
-      tts: {
-        voiceId: "9BWtsMINqrJLrRacOk9x" // Aria voice
-      }
     }
   });
 
@@ -122,6 +80,8 @@ export const useElevenLabsAgent = () => {
 
   const startConversation = useCallback(async () => {
     try {
+      console.log("Starting conversation with agent ID: hELBJiIy7Zdh6wJPxqFW");
+      
       // Check microphone permission first
       if (!hasPermission) {
         const permissionGranted = await requestMicrophonePermission();
@@ -135,19 +95,18 @@ export const useElevenLabsAgent = () => {
         await conversation.startSession({
           agentId: "hELBJiIy7Zdh6wJPxqFW"
         });
-        setIsInitialized(true);
-        console.log("Conversation started successfully");
+        console.log("Conversation session started");
       }
     } catch (error) {
       console.error("Failed to start conversation:", error);
-      toast.error("Failed to connect to Ava. Please try again.");
+      toast.error("Failed to connect to Ava. Please check your ElevenLabs API key and try again.");
       setIsInitialized(false);
     }
   }, [conversation, isInitialized, hasPermission, requestMicrophonePermission]);
 
   const endConversation = useCallback(async () => {
     try {
-      if (isInitialized) {
+      if (isInitialized || conversation?.status === "connected") {
         console.log("Ending conversation...");
         await conversation.endSession();
         setIsInitialized(false);
