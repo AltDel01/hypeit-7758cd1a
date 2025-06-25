@@ -16,14 +16,13 @@ export const useElevenLabsAgent = () => {
     onDisconnect: (reason) => {
       console.log("ElevenLabs conversation disconnected. Reason:", reason);
       setIsInitialized(false);
-      // Only show error if it wasn't a manual disconnect
-      // Check if reason has a 'reason' property that indicates user action
+      // Only show error if it's an unexpected disconnect (not user-initiated)
+      // We'll be more permissive and only show errors for actual connection issues
       if (reason && typeof reason === 'object' && 'reason' in reason) {
-        if (reason.reason !== 'user' && reason.reason !== 'manual') {
-          toast.error("Connection to Ava was lost");
+        // Only show error for technical disconnects, not user actions
+        if (reason.reason === 'error') {
+          toast.error("Connection to Ava was lost due to an error");
         }
-      } else if (reason && reason !== 'user_initiated' && reason !== 'manual') {
-        toast.error("Connection to Ava was lost");
       }
     },
     onError: (error) => {
@@ -106,7 +105,8 @@ export const useElevenLabsAgent = () => {
         return;
       }
 
-      if (!isInitialized && conversation?.status !== "connected") {
+      // Start the conversation if not already initialized or connected
+      if (!isInitialized) {
         console.log("Starting ElevenLabs conversation...");
         await conversation.startSession({
           agentId: "hELBJiIy7Zdh6wJPxqFW"
@@ -124,7 +124,7 @@ export const useElevenLabsAgent = () => {
   const endConversation = useCallback(async () => {
     try {
       if (isInitialized || conversation?.status === "connected") {
-        console.log("Ending conversation...");
+        console.log("Ending conversation manually...");
         await conversation.endSession();
         setIsInitialized(false);
         toast.info("Conversation ended");
