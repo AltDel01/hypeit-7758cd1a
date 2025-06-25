@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { useConversation as useElevenLabsConversation } from "@11labs/react";
 import { toast } from "sonner";
@@ -8,16 +9,16 @@ export const useElevenLabsAgent = () => {
   
   const conversation = useElevenLabsConversation({
     onConnect: () => {
-      console.log("ElevenLabs conversation connected successfully");
+      console.log("ElevenLabs conversation connected successfully - AUTO DISCONNECT DISABLED");
       toast.success("Connected to Ava");
       setIsInitialized(true);
     },
     onDisconnect: (reason) => {
       console.log("ElevenLabs conversation disconnected. Reason:", reason);
-      // Don't automatically set isInitialized to false unless it's a manual disconnect
-      // Only show errors for actual technical problems
-      console.log("Disconnect reason type:", typeof reason);
-      console.log("Disconnect reason details:", JSON.stringify(reason, null, 2));
+      console.log("AUTO DISCONNECT IS DISABLED - This should only happen on manual disconnect");
+      // COMPLETELY DISABLE AUTO DISCONNECT BEHAVIOR
+      // Do not automatically end the session or change state
+      // Only manual disconnects through the button should work
     },
     onError: (error) => {
       console.error("ElevenLabs error details:", error);
@@ -82,7 +83,7 @@ export const useElevenLabsAgent = () => {
 
   const startConversation = useCallback(async () => {
     try {
-      console.log("Starting conversation with agent ID: hELBJiIy7Zdh6wJPxqFW");
+      console.log("Starting conversation with agent ID: hELBJiIy7Zdh6wJPxqFW - AUTO DISCONNECT DISABLED");
       
       // Check microphone permission first
       if (!hasPermission) {
@@ -94,17 +95,17 @@ export const useElevenLabsAgent = () => {
 
       // Check if already connected
       if (conversation?.status === "connected") {
-        console.log("Already connected to conversation");
+        console.log("Already connected to conversation - AUTO DISCONNECT DISABLED");
         setIsInitialized(true);
         return;
       }
 
       // Always try to start the session
-      console.log("Starting ElevenLabs conversation...");
+      console.log("Starting ElevenLabs conversation - AUTO DISCONNECT DISABLED");
       await conversation.startSession({
         agentId: "hELBJiIy7Zdh6wJPxqFW"
       });
-      console.log("Conversation session started");
+      console.log("Conversation session started - AUTO DISCONNECT DISABLED");
     } catch (error) {
       console.error("Failed to start conversation:", error);
       console.error("Error details:", JSON.stringify(error, null, 2));
@@ -116,7 +117,7 @@ export const useElevenLabsAgent = () => {
   const endConversation = useCallback(async () => {
     try {
       if (isInitialized || conversation?.status === "connected") {
-        console.log("Ending conversation manually...");
+        console.log("MANUAL DISCONNECT - Ending conversation manually...");
         setIsInitialized(false);
         await conversation.endSession();
         toast.info("Conversation ended");

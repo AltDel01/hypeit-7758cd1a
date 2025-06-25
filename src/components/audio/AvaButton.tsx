@@ -23,13 +23,14 @@ const AvaButton: React.FC = () => {
     requestMicrophonePermission 
   } = useElevenLabsAgent();
 
-  useEffect(() => {
-    return () => {
-      if (isVisualizerActive) {
-        endConversation();
-      }
-    };
-  }, [isVisualizerActive, endConversation]);
+  // Remove the auto-cleanup effect that was causing disconnects
+  // useEffect(() => {
+  //   return () => {
+  //     if (isVisualizerActive) {
+  //       endConversation();
+  //     }
+  //   };
+  // }, [isVisualizerActive, endConversation]);
 
   const handleButtonClick = async () => {
     if (!user) {
@@ -48,14 +49,20 @@ const AvaButton: React.FC = () => {
     }
     
     if (!isVisualizerActive) {
-      console.log("Starting Ava conversation...");
+      console.log("Starting Ava conversation - AUTO DISCONNECT DISABLED");
       await startConversation();
       setIsVisualizerActive(true);
     } else {
-      console.log("Ending Ava conversation...");
+      console.log("Ending Ava conversation manually...");
       await endConversation();
       setIsVisualizerActive(false);
     }
+  };
+
+  const handleVisualizerClose = () => {
+    console.log("Manual close from visualizer - AUTO DISCONNECT DISABLED");
+    endConversation();
+    setIsVisualizerActive(false);
   };
 
   const getButtonIcon = () => {
@@ -113,11 +120,7 @@ const AvaButton: React.FC = () => {
       {/* Always render the visualizer component, its visibility is controlled internally */}
       <MicrophoneVisualizer 
         isActive={isVisualizerActive} 
-        onClose={() => {
-          console.log("Closing visualizer");
-          endConversation();
-          setIsVisualizerActive(false);
-        }}
+        onClose={handleVisualizerClose}
         containerRef={buttonRef}
       />
     </div>
