@@ -13,12 +13,16 @@ export const useElevenLabsAgent = () => {
       toast.success("Connected to Ava");
       setIsInitialized(true);
     },
-    onDisconnect: () => {
-      console.log("ElevenLabs conversation disconnected");
+    onDisconnect: (reason) => {
+      console.log("ElevenLabs conversation disconnected. Reason:", reason);
       setIsInitialized(false);
+      // Only show error if it wasn't a manual disconnect
+      if (reason && reason !== 'manual') {
+        toast.error("Connection to Ava was lost");
+      }
     },
     onError: (error) => {
-      console.error("ElevenLabs error:", error);
+      console.error("ElevenLabs error details:", error);
       toast.error("Error connecting to Ava - Please check your API key and internet connection");
       setIsInitialized(false);
     },
@@ -90,6 +94,13 @@ export const useElevenLabsAgent = () => {
         }
       }
 
+      // Check if already connected
+      if (conversation?.status === "connected") {
+        console.log("Already connected to conversation");
+        setIsInitialized(true);
+        return;
+      }
+
       if (!isInitialized) {
         console.log("Starting ElevenLabs conversation...");
         await conversation.startSession({
@@ -99,6 +110,7 @@ export const useElevenLabsAgent = () => {
       }
     } catch (error) {
       console.error("Failed to start conversation:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       toast.error("Failed to connect to Ava. Please check your ElevenLabs API key and try again.");
       setIsInitialized(false);
     }
