@@ -17,7 +17,7 @@ export const useElevenLabsAgent = () => {
       console.log("ElevenLabs conversation disconnected. Reason:", reason);
       setIsInitialized(false);
       // Only show error if it wasn't a manual disconnect
-      if (reason && reason !== 'manual') {
+      if (reason && reason.code !== 'user_initiated') {
         toast.error("Connection to Ava was lost");
       }
     },
