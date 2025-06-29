@@ -207,7 +207,7 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
                 <span className="text-gray-400">Profile Views</span>
                 <span className="text-white">{profileData.profileViews}</span>
               </div>
-              <Progress value={45) className="h-2" />
+              <Progress value={45} className="h-2" />
             </div>
           </div>
         </CardContent>
