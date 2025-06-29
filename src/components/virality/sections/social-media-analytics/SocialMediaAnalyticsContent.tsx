@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import FilterButtons from './FilterButtons';
-import ActionButtons from './ActionButtons';
 import SocialPlatformSection from './SocialPlatformSection';
 import { Instagram, Youtube } from 'lucide-react';
 
@@ -99,13 +98,6 @@ const SocialMediaAnalyticsContent: React.FC<SocialMediaAnalyticsContentProps> = 
             </button>
           )}
         </div>
-        <ActionButtons 
-          isResetActive={isResetActive}
-          isAnalyzing={isAnalyzing}
-          isAnalyzeDisabled={isAnalyzeDisabled}
-          handleReset={handleReset}
-          handleAnalyze={handleAnalyze}
-        />
       </div>
     </div>
   );
