@@ -4,6 +4,7 @@ import { Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InstagramAnalyticsDashboard from './InstagramAnalyticsDashboard';
+import EndeavorIndoDashboard from './EndeavorIndoDashboard';
 
 interface SocialPlatformSectionProps {
   platform: 'instagram' | 'tiktok' | 'youtube';
@@ -25,10 +26,11 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   };
 
   const handleAnalyze = () => {
-    // Check if any username is "innovation.ui"
-    const targetUsername = usernames.find(username => 
-      username.toLowerCase().trim() === 'innovation.ui'
-    );
+    // Check for specific usernames
+    const targetUsername = usernames.find(username => {
+      const cleanUsername = username.toLowerCase().trim();
+      return cleanUsername === 'innovation.ui' || cleanUsername === 'endeavor_indo';
+    });
     
     if (targetUsername && platform === 'instagram') {
       setDashboardUsername(targetUsername);
@@ -42,20 +44,39 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   };
 
   if (showDashboard && platform === 'instagram') {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={handleBackToInputs}
-            className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
-          >
-            ← Back to Input
-          </Button>
+    const cleanUsername = dashboardUsername.toLowerCase().trim();
+    
+    if (cleanUsername === 'endeavor_indo') {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="outline" 
+              onClick={handleBackToInputs}
+              className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
+            >
+              ← Back to Input
+            </Button>
+          </div>
+          <EndeavorIndoDashboard username={dashboardUsername} />
         </div>
-        <InstagramAnalyticsDashboard username={dashboardUsername} />
-      </div>
-    );
+      );
+    } else {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="outline" 
+              onClick={handleBackToInputs}
+              className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
+            >
+              ← Back to Input
+            </Button>
+          </div>
+          <InstagramAnalyticsDashboard username={dashboardUsername} />
+        </div>
+      );
+    }
   }
 
   return (
