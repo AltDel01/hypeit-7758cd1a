@@ -41,10 +41,10 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   // Mock data based on the reference image
   const profileData = {
     username: username,
-    followers: '58.9K',
-    following: '5,448',
+    followers: '5,646',
+    following: '115',
     posts: '115',
-    engagement: '3.5%',
+    engagement: '58.9%',
     reach: '3,326',
     impressions: '35.8%',
     profileViews: '2,023'
