@@ -15,30 +15,49 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   const [showDashboard, setShowDashboard] = useState(false);
   const [dashboardUsername, setDashboardUsername] = useState('');
 
-  // Persist state in localStorage
+  // Persist state in sessionStorage for better tab persistence
   useEffect(() => {
-    const savedState = localStorage.getItem(`socialPlatform_${platform}`);
+    console.log('Loading saved state for platform:', platform);
+    const savedState = sessionStorage.getItem(`socialPlatform_${platform}`);
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        setUsernames(parsed.usernames || ['', '', '']);
-        setShowDashboard(parsed.showDashboard || false);
-        setDashboardUsername(parsed.dashboardUsername || '');
+        console.log('Restored state:', parsed);
+        if (parsed.usernames) setUsernames(parsed.usernames);
+        if (parsed.showDashboard) setShowDashboard(parsed.showDashboard);
+        if (parsed.dashboardUsername) setDashboardUsername(parsed.dashboardUsername);
       } catch (error) {
         console.error('Error parsing saved state:', error);
       }
     }
   }, [platform]);
 
-  // Save state to localStorage whenever it changes
+  // Save state to sessionStorage whenever it changes
   useEffect(() => {
     const stateToSave = {
       usernames,
       showDashboard,
       dashboardUsername
     };
-    localStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
+    console.log('Saving state to sessionStorage:', stateToSave);
+    sessionStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
   }, [usernames, showDashboard, dashboardUsername, platform]);
+
+  // Add visibility change listener to debug
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      console.log('Tab visibility changed. Hidden:', document.hidden, 'showDashboard:', showDashboard);
+      // Force save state when tab becomes hidden
+      if (document.hidden) {
+        const stateToSave = { usernames, showDashboard, dashboardUsername };
+        sessionStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
+        console.log('Force saved state on tab hide:', stateToSave);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [showDashboard, usernames, dashboardUsername, platform]);
 
   const getPlatformName = () => {
     return platform.charAt(0).toUpperCase() + platform.slice(1);
