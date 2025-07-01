@@ -15,43 +15,15 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   const [showDashboard, setShowDashboard] = useState(false);
   const [dashboardUsername, setDashboardUsername] = useState('');
 
-  // Persist state in sessionStorage for better tab persistence
-  useEffect(() => {
-    console.log('Loading saved state for platform:', platform);
-    const savedState = sessionStorage.getItem(`socialPlatform_${platform}`);
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState);
-        console.log('Restored state:', parsed);
-        if (parsed.usernames) setUsernames(parsed.usernames);
-        if (parsed.showDashboard) setShowDashboard(parsed.showDashboard);
-        if (parsed.dashboardUsername) setDashboardUsername(parsed.dashboardUsername);
-      } catch (error) {
-        console.error('Error parsing saved state:', error);
-      }
-    }
-  }, [platform]);
-
-  // Save state to sessionStorage whenever it changes
-  useEffect(() => {
-    const stateToSave = {
-      usernames,
-      showDashboard,
-      dashboardUsername
-    };
-    console.log('Saving state to sessionStorage:', stateToSave);
-    sessionStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
-  }, [usernames, showDashboard, dashboardUsername, platform]);
-
-  // Add visibility change listener to debug
+  // Only save state when tab becomes hidden, don't restore on mount
   useEffect(() => {
     const handleVisibilityChange = () => {
       console.log('Tab visibility changed. Hidden:', document.hidden, 'showDashboard:', showDashboard);
-      // Force save state when tab becomes hidden
+      // Save state when tab becomes hidden for debugging
       if (document.hidden) {
         const stateToSave = { usernames, showDashboard, dashboardUsername };
         sessionStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
-        console.log('Force saved state on tab hide:', stateToSave);
+        console.log('Saved state on tab hide:', stateToSave);
       }
     };
     
