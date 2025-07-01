@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,31 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   const [usernames, setUsernames] = useState<string[]>(['', '', '']);
   const [showDashboard, setShowDashboard] = useState(false);
   const [dashboardUsername, setDashboardUsername] = useState('');
+
+  // Persist state in localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem(`socialPlatform_${platform}`);
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setUsernames(parsed.usernames || ['', '', '']);
+        setShowDashboard(parsed.showDashboard || false);
+        setDashboardUsername(parsed.dashboardUsername || '');
+      } catch (error) {
+        console.error('Error parsing saved state:', error);
+      }
+    }
+  }, [platform]);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const stateToSave = {
+      usernames,
+      showDashboard,
+      dashboardUsername
+    };
+    localStorage.setItem(`socialPlatform_${platform}`, JSON.stringify(stateToSave));
+  }, [usernames, showDashboard, dashboardUsername, platform]);
 
   const getPlatformName = () => {
     return platform.charAt(0).toUpperCase() + platform.slice(1);
