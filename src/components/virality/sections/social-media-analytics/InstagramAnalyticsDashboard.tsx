@@ -188,13 +188,13 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
               </div>
               <Progress value={65} className="h-2" />
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Comments</span>
-                <span className="text-white">1</span>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Comments</span>
+                  <span className="text-white">1</span>
+                </div>
+                <Progress value={5} className="h-2" />
               </div>
-              <Progress value={25} className="h-2" />
-            </div>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-400">Impressions</span>
