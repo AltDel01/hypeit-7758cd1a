@@ -31,8 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
         
         if (event === 'SIGNED_IN') {
-          toast.success('Successfully signed in');
-          navigate('/');
+          // Only navigate on actual sign-in, not session refresh
+          const isActualSignIn = !session && currentSession;
+          if (isActualSignIn) {
+            toast.success('Successfully signed in');
+            navigate('/');
+          }
         } else if (event === 'SIGNED_OUT') {
           toast.info('You have been signed out');
           navigate('/login');
