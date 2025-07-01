@@ -121,7 +121,7 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
@@ -141,18 +141,6 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
               <div>
                 <p className="text-sm text-gray-400">Following</p>
                 <p className="text-2xl font-bold text-white">{profileData.following}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-purple-400" />
-              <div>
-                <p className="text-sm text-gray-400">Posts</p>
-                <p className="text-2xl font-bold text-white">{profileData.posts}</p>
               </div>
             </div>
           </CardContent>
@@ -183,31 +171,31 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-400">Reach</span>
-                <span className="text-white">{profileData.reach}</span>
+                <span className="text-gray-400">AVG. LIKES</span>
+                <span className="text-white">3.326</span>
               </div>
               <Progress value={65} className="h-2" />
             </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Comments</span>
-                  <span className="text-white">1</span>
-                </div>
-                <Progress value={5} className="h-2" />
-              </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-400">Impressions</span>
-                <span className="text-white">{profileData.impressions}</span>
+                <span className="text-gray-400">AVG. COMMENTS</span>
+                <span className="text-white">1</span>
               </div>
-              <Progress value={85} className="h-2" />
+              <Progress value={20} className="h-2" />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-400">Profile Views</span>
-                <span className="text-white">{profileData.profileViews}</span>
+                <span className="text-gray-400">AVG. VIEWS</span>
+                <span className="text-white">2.023</span>
               </div>
               <Progress value={45} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-400">VTR</span>
+                <span className="text-white">35,8%</span>
+              </div>
+              <Progress value={35} className="h-2" />
             </div>
           </div>
         </CardContent>
