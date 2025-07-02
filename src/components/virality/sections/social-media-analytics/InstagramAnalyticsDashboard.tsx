@@ -12,6 +12,9 @@ import TopCountries from './components/TopCountries';
 import TopCities from './components/TopCities';
 import AgeRange from './components/AgeRange';
 import Gender from './components/Gender';
+import TopHashtagsList from './components/TopHashtagsList';
+import TopMentionsList from './components/TopMentionsList';
+import TopInterestsList from './components/TopInterestsList';
 import RecentContent from './components/RecentContent';
 import TopHashtags from './components/TopHashtags';
 
@@ -74,6 +77,39 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   const genderData = [
     { name: 'Female', value: 44.8, color: '#93C5FD' },
     { name: 'Male', value: 55.2, color: '#3B82F6' }
+  ];
+
+  const topHashtagsList = [
+    '#universitasindonesia',
+    '#direktoratinovasidanrisetberda',
+    '#ui_unggul_impactful_untuk_indo',
+    '#dirbtui',
+    '#distpui',
+    '#inovasi',
+    '#stpui',
+    '#inovasiindonesia',
+    '#risetberdampaktinggi',
+    '#ui'
+  ];
+
+  const topMentionsList = [
+    '@univ_indonesia',
+    '@sandhy_yusuf',
+    '@herlens_id',
+    '@distp_ui',
+    '@innovation_ui',
+    '@chairul_hudaya',
+    '@teguh_iman_santoso',
+    '@brin_indonesia',
+    '@ferie_budiansyah',
+    '@hamdi_muluk'
+  ];
+
+  const topInterestsList = [
+    { name: 'Travel, Tourism & Aviation', percentage: 25.9 },
+    { name: 'Camera & Photography', percentage: 24.6 },
+    { name: 'Electronics & Computers', percentage: 24.4 },
+    { name: 'Friends, Family & Relationships', percentage: 22.8 }
   ];
 
   const profileGrowthData = [
@@ -173,6 +209,17 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
         {/* Gender */}
         <Gender data={genderData} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Hashtags */}
+        <TopHashtagsList hashtags={topHashtagsList} />
+
+        {/* Top Mentions */}
+        <TopMentionsList mentions={topMentionsList} />
+
+        {/* Top Interests */}
+        <TopInterestsList interests={topInterestsList} />
       </div>
 
       {/* Recent Content */}
