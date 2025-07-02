@@ -268,11 +268,11 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
       {/* Top Contents */}
       <TopContents metrics={topContentsMetrics} />
 
-      {/* Recent Contents */}
-      <RecentContents metrics={recentContentsMetrics} />
-
       {/* Recent Content */}
       <RecentContent content={recentContent} />
+
+      {/* Recent Contents */}
+      <RecentContents metrics={recentContentsMetrics} />
     </div>
   );
 };
