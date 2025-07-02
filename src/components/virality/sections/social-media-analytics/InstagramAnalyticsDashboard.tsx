@@ -18,6 +18,7 @@ import TopMentionsList from './components/TopMentionsList';
 import TopInterestsList from './components/TopInterestsList';
 import TopContents from './components/TopContents';
 import RecentContent from './components/RecentContent';
+import RecentContents from './components/RecentContents';
 
 
 interface InstagramAnalyticsDashboardProps {
@@ -119,6 +120,13 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { label: 'ENGAGEMENT', value: '1,468', icon: Users },
     { label: 'TOTAL VIEWS', value: '0', icon: Eye },
     { label: 'MEDIA LIKES', value: '1,168', icon: ThumbsUp }
+  ];
+
+  const recentContentsMetrics = [
+    { label: 'AVG. VIEWS', value: '0', icon: Eye },
+    { label: 'ENGAGEMENT', value: '3,382', icon: Users },
+    { label: 'TOTAL VIEWS', value: '0', icon: Eye },
+    { label: 'MEDIA LIKES', value: '3,332', icon: ThumbsUp }
   ];
 
   const profileGrowthData = [
@@ -259,6 +267,9 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
       {/* Top Contents */}
       <TopContents metrics={topContentsMetrics} />
+
+      {/* Recent Contents */}
+      <RecentContents metrics={recentContentsMetrics} />
 
       {/* Recent Content */}
       <RecentContent content={recentContent} />
