@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Eye, Users, ThumbsUp } from 'lucide-react';
 import KeyMetrics from './components/KeyMetrics';
 import UserPerformance from './components/UserPerformance';
 import UserAuthenticity from './components/UserAuthenticity';
@@ -15,6 +16,7 @@ import Gender from './components/Gender';
 import TopHashtagsList from './components/TopHashtagsList';
 import TopMentionsList from './components/TopMentionsList';
 import TopInterestsList from './components/TopInterestsList';
+import TopContents from './components/TopContents';
 import RecentContent from './components/RecentContent';
 import TopHashtags from './components/TopHashtags';
 
@@ -110,6 +112,13 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { name: 'Camera & Photography', percentage: 24.6 },
     { name: 'Electronics & Computers', percentage: 24.4 },
     { name: 'Friends, Family & Relationships', percentage: 22.8 }
+  ];
+
+  const topContentsMetrics = [
+    { label: 'AVG. VIEWS', value: '0', icon: Eye },
+    { label: 'ENGAGEMENT', value: '1,468', icon: Users },
+    { label: 'TOTAL VIEWS', value: '0', icon: Eye },
+    { label: 'MEDIA LIKES', value: '1,168', icon: ThumbsUp }
   ];
 
   const profileGrowthData = [
@@ -221,6 +230,9 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
         {/* Top Interests */}
         <TopInterestsList interests={topInterestsList} />
       </div>
+
+      {/* Top Contents */}
+      <TopContents metrics={topContentsMetrics} />
 
       {/* Recent Content */}
       <RecentContent content={recentContent} />
