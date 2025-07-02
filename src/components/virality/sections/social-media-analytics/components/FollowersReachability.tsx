@@ -36,7 +36,6 @@ const FollowersReachability: React.FC<FollowersReachabilityProps> = ({ data }) =
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
                 outerRadius={100}
                 dataKey="value"
               >
@@ -47,6 +46,17 @@ const FollowersReachability: React.FC<FollowersReachabilityProps> = ({ data }) =
               <Tooltip />
             </RechartsPieChart>
           </ResponsiveContainer>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          {data.map((item, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-sm text-gray-400">{item.name} - {item.value}%</span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

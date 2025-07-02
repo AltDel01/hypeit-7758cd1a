@@ -37,10 +37,10 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   ];
 
   const followersReachabilityData = [
-    { name: 'Reach 1', value: 45, color: '#3B82F6' },
-    { name: 'Reach 2', value: 25, color: '#EC4899' },
-    { name: 'Reach 3', value: 20, color: '#10B981' },
-    { name: 'Reach 4', value: 10, color: '#F59E0B' }
+    { name: '-500', value: 29.7, color: '#3B82F6' },
+    { name: '500-1000', value: 26.9, color: '#EC4899' },
+    { name: '1000-1500', value: 17.2, color: '#93C5FD' },
+    { name: '1500-', value: 26.3, color: '#10B981' }
   ];
 
   const contentBreakdownData = [
@@ -60,11 +60,12 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   ];
 
   const profileGrowthData = [
-    { month: 'Jan', followers: 45000 },
-    { month: 'Feb', followers: 48000 },
-    { month: 'Mar', followers: 52000 },
-    { month: 'Apr', followers: 55000 },
-    { month: 'May', followers: 58900 }
+    { month: '2024-12-01', followers: 4300, averageLikes: 400 },
+    { month: '2025-01-01', followers: 4500, averageLikes: 400 },
+    { month: '2025-02-01', followers: 4800, averageLikes: 300 },
+    { month: '2025-03-01', followers: 5000, averageLikes: 350 },
+    { month: '2025-04-01', followers: 5200, averageLikes: 400 },
+    { month: '2025-05-01', followers: 5500, averageLikes: 1700 }
   ];
 
   const significantFollowers = [

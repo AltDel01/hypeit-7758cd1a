@@ -7,13 +7,14 @@ import {
   XAxis, 
   YAxis, 
   Tooltip, 
-  Area,
-  AreaChart
+  LineChart,
+  Line
 } from 'recharts';
 
 interface GrowthData {
   month: string;
   followers: number;
+  averageLikes: number;
 }
 
 interface ProfileGrowthProps {
@@ -32,7 +33,7 @@ const ProfileGrowth: React.FC<ProfileGrowthProps> = ({ data }) => {
       <CardContent>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="month" stroke="#9CA3AF" />
               <YAxis stroke="#9CA3AF" />
@@ -43,14 +44,23 @@ const ProfileGrowth: React.FC<ProfileGrowthProps> = ({ data }) => {
                   borderRadius: '8px'
                 }}
               />
-              <Area 
+              <Line 
                 type="monotone" 
                 dataKey="followers" 
-                stroke="#8B5CF6" 
-                fill="#8B5CF6" 
-                fillOpacity={0.3}
+                stroke="#3B82F6" 
+                strokeWidth={2}
+                dot={{ r: 4, fill: '#3B82F6' }}
+                name="Followers Growth"
               />
-            </AreaChart>
+              <Line 
+                type="monotone" 
+                dataKey="averageLikes" 
+                stroke="#10B981" 
+                strokeWidth={2}
+                dot={{ r: 4, fill: '#10B981' }}
+                name="Average Likes"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
