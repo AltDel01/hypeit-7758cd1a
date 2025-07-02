@@ -7,23 +7,24 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip
+  Tooltip,
+  Cell
 } from 'recharts';
 
-interface HashtagData {
+interface CountryData {
   name: string;
-  reach: number;
+  value: number;
 }
 
-interface HashtagPerformanceProps {
-  data: HashtagData[];
+interface TopCountriesProps {
+  data: CountryData[];
 }
 
-const HashtagPerformance: React.FC<HashtagPerformanceProps> = ({ data }) => {
+const TopCountries: React.FC<TopCountriesProps> = ({ data }) => {
   return (
     <Card className="bg-gray-800/50 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-white">Hashtag Performance</CardTitle>
+        <CardTitle className="text-white">Top 5 Countries</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">
@@ -31,7 +32,7 @@ const HashtagPerformance: React.FC<HashtagPerformanceProps> = ({ data }) => {
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="name" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" domain={[0, 100]} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#1F2937', 
@@ -39,7 +40,14 @@ const HashtagPerformance: React.FC<HashtagPerformanceProps> = ({ data }) => {
                   borderRadius: '8px'
                 }}
               />
-              <Bar dataKey="reach" fill="#3B82F6" />
+              <Bar dataKey="value" radius={[2, 2, 0, 0]}>
+                {data.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.name === 'ID' ? '#10B981' : '#E5E7EB'} 
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -48,4 +56,4 @@ const HashtagPerformance: React.FC<HashtagPerformanceProps> = ({ data }) => {
   );
 };
 
-export default HashtagPerformance;
+export default TopCountries;

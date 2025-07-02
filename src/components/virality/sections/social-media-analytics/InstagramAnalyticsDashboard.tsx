@@ -8,8 +8,8 @@ import UserAuthenticity from './components/UserAuthenticity';
 import SignificantFollowers from './components/SignificantFollowers';
 import FollowersReachability from './components/FollowersReachability';
 import ProfileGrowth from './components/ProfileGrowth';
-import ContentBreakdown from './components/ContentBreakdown';
-import HashtagPerformance from './components/HashtagPerformance';
+import TopCountries from './components/TopCountries';
+import TopCities from './components/TopCities';
 import RecentContent from './components/RecentContent';
 import TopHashtags from './components/TopHashtags';
 
@@ -43,20 +43,22 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { name: '1500-', value: 26.3, color: '#10B981' }
   ];
 
-  const contentBreakdownData = [
-    { name: 'Jan', posts: 45 },
-    { name: 'Feb', posts: 52 },
-    { name: 'Mar', posts: 38 },
-    { name: 'Apr', posts: 65 },
-    { name: 'May', posts: 28 }
+  const topCountriesData = [
+    { name: 'ID', value: 95 },
+    { name: 'AU', value: 2 },
+    { name: 'JP', value: 1 },
+    { name: 'KR', value: 1 },
+    { name: 'MY', value: 1 },
+    { name: 'GB', value: 1 },
+    { name: 'NL', value: 1 }
   ];
 
-  const hashtagData = [
-    { name: 'Mon', reach: 120 },
-    { name: 'Tue', reach: 180 },
-    { name: 'Wed', reach: 95 },
-    { name: 'Thu', reach: 210 },
-    { name: 'Fri', reach: 150 }
+  const topCitiesData = [
+    { name: 'Jakarta', value: 22 },
+    { name: 'Depok', value: 20 },
+    { name: 'Bandung', value: 4 },
+    { name: 'Yogyakarta', value: 2 },
+    { name: 'Bogor', value: 1 }
   ];
 
   const profileGrowthData = [
@@ -143,11 +145,11 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
       <ProfileGrowth data={profileGrowthData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Content Breakdown */}
-        <ContentBreakdown data={contentBreakdownData} />
+        {/* Top 5 Countries */}
+        <TopCountries data={topCountriesData} />
 
-        {/* Hashtag Performance */}
-        <HashtagPerformance data={hashtagData} />
+        {/* Top 5 City */}
+        <TopCities data={topCitiesData} />
       </div>
 
       {/* Recent Content */}

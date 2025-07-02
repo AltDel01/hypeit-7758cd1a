@@ -10,20 +10,20 @@ import {
   Tooltip
 } from 'recharts';
 
-interface ContentData {
+interface CityData {
   name: string;
-  posts: number;
+  value: number;
 }
 
-interface ContentBreakdownProps {
-  data: ContentData[];
+interface TopCitiesProps {
+  data: CityData[];
 }
 
-const ContentBreakdown: React.FC<ContentBreakdownProps> = ({ data }) => {
+const TopCities: React.FC<TopCitiesProps> = ({ data }) => {
   return (
     <Card className="bg-gray-800/50 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-white">Content Breakdown</CardTitle>
+        <CardTitle className="text-white">Top 5 City</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">
@@ -31,7 +31,7 @@ const ContentBreakdown: React.FC<ContentBreakdownProps> = ({ data }) => {
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="name" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" domain={[0, 25]} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#1F2937', 
@@ -39,7 +39,11 @@ const ContentBreakdown: React.FC<ContentBreakdownProps> = ({ data }) => {
                   borderRadius: '8px'
                 }}
               />
-              <Bar dataKey="posts" fill="#10B981" />
+              <Bar 
+                dataKey="value" 
+                fill="#6B8AFF"
+                radius={[2, 2, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -48,4 +52,4 @@ const ContentBreakdown: React.FC<ContentBreakdownProps> = ({ data }) => {
   );
 };
 
-export default ContentBreakdown;
+export default TopCities;
