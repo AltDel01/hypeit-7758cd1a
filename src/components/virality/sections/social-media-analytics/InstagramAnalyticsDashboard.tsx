@@ -19,6 +19,7 @@ import TopInterestsList from './components/TopInterestsList';
 import TopContents from './components/TopContents';
 import RecentContent from './components/RecentContent';
 import RecentContents from './components/RecentContents';
+import LookalikesContentCreator from './components/LookalikesContentCreator';
 
 
 interface InstagramAnalyticsDashboardProps {
@@ -224,6 +225,13 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     }
   ];
 
+  const lookalikesCreators = [
+    { username: 'poppyzeidra', followers: '141,644', imageUrl: '/lovable-uploads/0fd10f4c-0b5f-4fc4-892f-30837ebb245c.png' },
+    { username: 'idvolunteering', followers: '599,913', imageUrl: '/lovable-uploads/f3159417-14bc-450e-984a-7cdf79ea3202.png' },
+    { username: 'berita_event', followers: '67,156', imageUrl: '/lovable-uploads/e3fb0fc7-2e4e-40c8-bbb1-5cbedad4cb5d.png' },
+    { username: 'info_beasiswa', followers: '2,322,206', imageUrl: '/lovable-uploads/07041b74-c04f-469d-bce8-e0c862490dc5.png' }
+  ];
+
   const topHashtags = [
     { hashtag: '#design', reach: '45.2K', percentage: 85 },
     { hashtag: '#ui', reach: '32.1K', percentage: 70 },
@@ -311,6 +319,9 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
       {/* New Content */}
       <RecentContent content={newContent} />
+
+      {/* Lookalikes Content Creator */}
+      <LookalikesContentCreator creators={lookalikesCreators} />
     </div>
   );
 };
