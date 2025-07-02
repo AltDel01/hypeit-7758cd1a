@@ -50,10 +50,11 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     profileViews: '2,023'
   };
 
-  const userAuthorityData = [
-    { name: 'Men Followers', value: 35.5, color: '#3B82F6' },
-    { name: 'Women Followers', value: 64.5, color: '#EC4899' },
-    { name: 'Other', value: 0, color: '#10B981' }
+  const userAuthenticityData = [
+    { name: 'Mass Followers', value: 26.3, color: '#3B82F6' },
+    { name: 'Suspicious', value: 10.9, color: '#EC4899' },
+    { name: 'Influencers', value: 13.2, color: '#93C5FD' },
+    { name: 'Real', value: 49.7, color: '#10B981' }
   ];
 
   const followersReachabilityData = [
@@ -88,10 +89,12 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   ];
 
   const significantFollowers = [
-    { name: 'john_photographer', followers: '125K', verified: true },
-    { name: 'design_master', followers: '89K', verified: false },
-    { name: 'creative_studio', followers: '67K', verified: true },
-    { name: 'art_direction', followers: '45K', verified: false }
+    { name: 'univ_indonesia', followers: '1.210.629', verified: true },
+    { name: 'dr.ibrahimagung', followers: '698.441', verified: true },
+    { name: 'dr.ibraheem_al_kaisy', followers: '285.200', verified: true },
+    { name: 'dianwidayanti', followers: '273.696', verified: false },
+    { name: 'fitria_irzan', followers: '243.583', verified: true },
+    { name: 'dunia.ui', followers: '101.080', verified: true }
   ];
 
   const recentContent = [
@@ -202,12 +205,12 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Authority */}
+        {/* User Authenticity */}
         <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <PieChart className="h-5 w-5 mr-2" />
-              User Authority
+              User Authenticity
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -215,14 +218,14 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
-                    data={userAuthorityData}
+                    data={userAuthenticityData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={100}
                     dataKey="value"
                   >
-                    {userAuthorityData.map((entry, index) => (
+                    {userAuthenticityData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -230,14 +233,14 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex justify-center space-x-4 mt-4">
-              {userAuthorityData.map((item, index) => (
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              {userAuthenticityData.map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <div 
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  <span className="text-sm text-gray-400">{item.name}: {item.value}%</span>
+                  <span className="text-sm text-gray-400">{item.name} - {item.value}%</span>
                 </div>
               ))}
             </div>
