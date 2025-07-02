@@ -116,9 +116,9 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
   const topContentsMetrics = [
     { label: 'AVG. VIEWS', value: '0', icon: Eye },
-    { label: 'ENGAGEMENT', value: '1,468', icon: Users },
+    { label: 'ENGAGEMENT', value: '3.382', icon: Users },
     { label: 'TOTAL VIEWS', value: '0', icon: Eye },
-    { label: 'MEDIA LIKES', value: '1,168', icon: ThumbsUp }
+    { label: 'MEDIA LIKES', value: '3.332', icon: ThumbsUp }
   ];
 
   const profileGrowthData = [
