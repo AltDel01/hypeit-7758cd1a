@@ -12,14 +12,14 @@ const TopMentionsList: React.FC<TopMentionsListProps> = ({ mentions }) => {
         <CardTitle className="text-white">Top Mentions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-sm text-gray-300 leading-relaxed">
+        <div className="text-sm text-gray-300 leading-relaxed flex flex-wrap gap-x-2 gap-y-1">
           {mentions.map((mention, index) => (
-            <span key={index}>
+            <React.Fragment key={index}>
               <span className="text-blue-400">{mention}</span>
               {index < mentions.length - 1 && (
-                <span className="text-gray-400 mx-2">/</span>
+                <span className="text-gray-400">/</span>
               )}
-            </span>
+            </React.Fragment>
           ))}
         </div>
       </CardContent>
