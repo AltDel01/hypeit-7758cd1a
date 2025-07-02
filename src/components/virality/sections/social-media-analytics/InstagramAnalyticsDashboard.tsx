@@ -54,11 +54,11 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   ];
 
   const topCitiesData = [
-    { name: 'Jakarta', value: 22 },
-    { name: 'Depok', value: 20 },
-    { name: 'Bandung', value: 4 },
-    { name: 'Yogyakarta', value: 2 },
-    { name: 'Bogor', value: 1 }
+    { name: 'Jakarta', value: 23 },
+    { name: 'Depok', value: 21 },
+    { name: 'Bandung', value: 5 },
+    { name: 'Yogyakarta', value: 3 },
+    { name: 'Bogor', value: 2 }
   ];
 
   const profileGrowthData = [
