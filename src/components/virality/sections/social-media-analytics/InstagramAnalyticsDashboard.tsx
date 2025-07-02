@@ -1,37 +1,17 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Users, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  TrendingUp, 
-  Eye,
-  UserPlus,
-  Calendar,
-  BarChart3,
-  PieChart
-} from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  PieChart as RechartsPieChart, 
-  Cell, 
-  Pie,
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  LineChart, 
-  Line,
-  Area,
-  AreaChart
-} from 'recharts';
+import KeyMetrics from './components/KeyMetrics';
+import UserPerformance from './components/UserPerformance';
+import UserAuthenticity from './components/UserAuthenticity';
+import SignificantFollowers from './components/SignificantFollowers';
+import FollowersReachability from './components/FollowersReachability';
+import ProfileGrowth from './components/ProfileGrowth';
+import ContentBreakdown from './components/ContentBreakdown';
+import HashtagPerformance from './components/HashtagPerformance';
+import RecentContent from './components/RecentContent';
+import TopHashtags from './components/TopHashtags';
 
 interface InstagramAnalyticsDashboardProps {
   username: string;
@@ -43,7 +23,6 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     username: username,
     followers: '5,646',
     following: '115',
-    posts: '115',
     engagement: '58.9%',
     reach: '3,326',
     impressions: '35.8%',
@@ -97,6 +76,13 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { name: 'dunia.ui', followers: '101.080', verified: true }
   ];
 
+  const userPerformanceMetrics = [
+    { label: 'AVG. LIKES', value: '3.326', progress: 65 },
+    { label: 'AVG. COMMENTS', value: '1', progress: 20 },
+    { label: 'AVG. VIEWS', value: '2.023', progress: 45 },
+    { label: 'VTR', value: '35,8%', progress: 35 }
+  ];
+
   const recentContent = [
     { id: 1, type: 'image', likes: 245, comments: 18, shares: 12 },
     { id: 2, type: 'carousel', likes: 389, comments: 32, shares: 24 },
@@ -104,6 +90,14 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { id: 4, type: 'image', likes: 198, comments: 14, shares: 8 },
     { id: 5, type: 'story', likes: 123, comments: 7, shares: 5 },
     { id: 6, type: 'carousel', likes: 445, comments: 28, shares: 19 }
+  ];
+
+  const topHashtags = [
+    { hashtag: '#design', reach: '45.2K', percentage: 85 },
+    { hashtag: '#ui', reach: '32.1K', percentage: 70 },
+    { hashtag: '#innovation', reach: '28.5K', percentage: 60 },
+    { hashtag: '#creativity', reach: '19.8K', percentage: 45 },
+    { hashtag: '#inspiration', reach: '15.2K', percentage: 35 }
   ];
 
   return (
@@ -124,337 +118,42 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-400" />
-              <div>
-                <p className="text-sm text-gray-400">Followers</p>
-                <p className="text-2xl font-bold text-white">{profileData.followers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <UserPlus className="h-5 w-5 text-green-400" />
-              <div>
-                <p className="text-sm text-gray-400">Following</p>
-                <p className="text-2xl font-bold text-white">{profileData.following}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Heart className="h-5 w-5 text-red-400" />
-              <div>
-                <p className="text-sm text-gray-400">Engagement</p>
-                <p className="text-2xl font-bold text-white">{profileData.engagement}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <KeyMetrics data={{
+        followers: profileData.followers,
+        following: profileData.following,
+        engagement: profileData.engagement
+      }} />
 
       {/* User Performance */}
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2" />
-            User Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400">AVG. LIKES</span>
-                <span className="text-white">3.326</span>
-              </div>
-              <Progress value={65} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400">AVG. COMMENTS</span>
-                <span className="text-white">1</span>
-              </div>
-              <Progress value={20} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400">AVG. VIEWS</span>
-                <span className="text-white">2.023</span>
-              </div>
-              <Progress value={45} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400">VTR</span>
-                <span className="text-white">35,8%</span>
-              </div>
-              <Progress value={35} className="h-2" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <UserPerformance metrics={userPerformanceMetrics} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* User Authenticity */}
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <PieChart className="h-5 w-5 mr-2" />
-              User Authenticity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={userAuthenticityData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    dataKey="value"
-                  >
-                    {userAuthenticityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              {userAuthenticityData.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: item.color }}
-                  ></div>
-                  <span className="text-sm text-gray-400">{item.name} - {item.value}%</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <UserAuthenticity data={userAuthenticityData} />
 
         {/* Significant Followers */}
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              Significant Followers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {significantFollowers.map((follower, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {follower.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">@{follower.name}</p>
-                      <p className="text-sm text-gray-400">{follower.followers} followers</p>
-                    </div>
-                  </div>
-                  {follower.verified && (
-                    <Badge className="bg-blue-600 text-white text-xs">Verified</Badge>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <SignificantFollowers followers={significantFollowers} />
       </div>
 
       {/* Followers Reachability */}
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Eye className="h-5 w-5 mr-2" />
-            Followers Reachability
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={followersReachabilityData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  dataKey="value"
-                >
-                  {followersReachabilityData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <FollowersReachability data={followersReachabilityData} />
 
       {/* Profile Growth */}
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <BarChart3 className="h-5 w-5 mr-2" />
-            Profile Growth - Last 6 Months
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={profileGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="month" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="followers" 
-                  stroke="#8B5CF6" 
-                  fill="#8B5CF6" 
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <ProfileGrowth data={profileGrowthData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Content Breakdown */}
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Content Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={contentBreakdownData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="name" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="posts" fill="#10B981" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <ContentBreakdown data={contentBreakdownData} />
 
         {/* Hashtag Performance */}
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Hashtag Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hashtagData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="name" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="reach" fill="#3B82F6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <HashtagPerformance data={hashtagData} />
       </div>
 
       {/* Recent Content */}
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Recent Content</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {recentContent.map((content) => (
-              <div key={content.id} className="bg-gray-700/30 rounded-lg p-4 space-y-2">
-                <div className="aspect-square bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">{content.type.charAt(0).toUpperCase()}</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Likes</span>
-                    <span className="text-white">{content.likes}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Comments</span>
-                    <span className="text-white">{content.comments}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Shares</span>
-                    <span className="text-white">{content.shares}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <RecentContent content={recentContent} />
 
       {/* Top Hashtags */}
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Top Hashtags</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { hashtag: '#design', reach: '45.2K', percentage: 85 },
-              { hashtag: '#ui', reach: '32.1K', percentage: 70 },
-              { hashtag: '#innovation', reach: '28.5K', percentage: 60 },
-              { hashtag: '#creativity', reach: '19.8K', percentage: 45 },
-              { hashtag: '#inspiration', reach: '15.2K', percentage: 35 }
-            ].map((item, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-purple-400 font-medium">{item.hashtag}</span>
-                  <span className="text-white">{item.reach}</span>
-                </div>
-                <Progress value={item.percentage} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <TopHashtags hashtags={topHashtags} />
     </div>
   );
 };
