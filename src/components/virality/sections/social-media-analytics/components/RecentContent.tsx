@@ -6,8 +6,8 @@ interface ContentItem {
   imageUrl: string;
   link: string;
   publishDate: string;
-  likes: number;
-  comments: number;
+  likes: number | null;
+  comments: number | null;
 }
 
 interface RecentContentProps {
@@ -37,11 +37,11 @@ const RecentContent: React.FC<RecentContentProps> = ({ content }) => {
                 <p className="text-gray-400">Publish at {item.publishDate}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Likes</span>
-                  <span className="text-white">{item.likes}</span>
+                  <span className="text-white">{item.likes ?? '-'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Comment</span>
-                  <span className="text-white">{item.comments}</span>
+                  <span className="text-white">{item.comments ?? '-'}</span>
                 </div>
               </div>
             </div>

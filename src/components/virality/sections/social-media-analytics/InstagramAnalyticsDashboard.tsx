@@ -189,6 +189,41 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     }
   ];
 
+  const newContent = [
+    { 
+      id: 5, 
+      imageUrl: '/lovable-uploads/3f240912-066d-4bea-9c34-87f4622a9f9c.png',
+      link: 'https://www.instagram.com/p/DK1v4RahKgi/',
+      publishDate: '2025-06-14',
+      likes: null, 
+      comments: null 
+    },
+    { 
+      id: 6, 
+      imageUrl: '/lovable-uploads/629f90f5-aa98-4f13-a5e5-d91db7016683.png',
+      link: 'https://www.instagram.com/p/DKwj-AXhD14/',
+      publishDate: '2025-06-12',
+      likes: null, 
+      comments: 3 
+    },
+    { 
+      id: 7, 
+      imageUrl: '/lovable-uploads/b3a17d85-81e5-4cfd-b272-9cdd272696bc.png',
+      link: 'https://www.instagram.com/p/DKrBan7TL1g/',
+      publishDate: '2025-06-09',
+      likes: 3326, 
+      comments: 2 
+    },
+    { 
+      id: 8, 
+      imageUrl: '/lovable-uploads/137aaf51-af8e-4e7f-9931-3600d4829938.png',
+      link: 'https://www.instagram.com/p/DKjEPqaBj8x/',
+      publishDate: '2025-06-06',
+      likes: null, 
+      comments: 10 
+    }
+  ];
+
   const topHashtags = [
     { hashtag: '#design', reach: '45.2K', percentage: 85 },
     { hashtag: '#ui', reach: '32.1K', percentage: 70 },
@@ -273,6 +308,9 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
       {/* Recent Contents */}
       <RecentContents metrics={recentContentsMetrics} />
+
+      {/* New Content */}
+      <RecentContent content={newContent} />
     </div>
   );
 };
