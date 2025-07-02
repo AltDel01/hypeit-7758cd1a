@@ -147,12 +147,38 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
   ];
 
   const recentContent = [
-    { id: 1, type: 'image', likes: 245, comments: 18, shares: 12 },
-    { id: 2, type: 'carousel', likes: 389, comments: 32, shares: 24 },
-    { id: 3, type: 'reel', likes: 567, comments: 45, shares: 38 },
-    { id: 4, type: 'image', likes: 198, comments: 14, shares: 8 },
-    { id: 5, type: 'story', likes: 123, comments: 7, shares: 5 },
-    { id: 6, type: 'carousel', likes: 445, comments: 28, shares: 19 }
+    { 
+      id: 1, 
+      imageUrl: '/lovable-uploads/1adb1d29-4142-452f-b42c-e4d462103943.png',
+      link: 'https://www.instagram.com/p/DCOjvLkztky/',
+      publishDate: '2024-11-12',
+      likes: 837, 
+      comments: 66 
+    },
+    { 
+      id: 2, 
+      imageUrl: '/lovable-uploads/30ea8caa-a226-4029-9933-1a8e5b289a5e.png',
+      link: 'https://www.instagram.com/p/DF_6CQhSP7_/',
+      publishDate: '2025-02-13',
+      likes: 96, 
+      comments: 1 
+    },
+    { 
+      id: 3, 
+      imageUrl: '/lovable-uploads/0a4cdcc3-887d-47da-a571-eb47c159dff0.png',
+      link: 'https://www.instagram.com/p/DC6AR_hhOA6/',
+      publishDate: '2024-11-28',
+      likes: 88, 
+      comments: 1 
+    },
+    { 
+      id: 4, 
+      imageUrl: '/lovable-uploads/f12f3f1a-c1be-43f8-b726-f104d80f1f00.png',
+      link: 'https://www.instagram.com/p/DDErRUovQhp/',
+      publishDate: '2024-12-03',
+      likes: 50, 
+      comments: 1 
+    }
   ];
 
   const topHashtags = [
