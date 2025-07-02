@@ -10,6 +10,8 @@ import FollowersReachability from './components/FollowersReachability';
 import ProfileGrowth from './components/ProfileGrowth';
 import TopCountries from './components/TopCountries';
 import TopCities from './components/TopCities';
+import AgeRange from './components/AgeRange';
+import Gender from './components/Gender';
 import RecentContent from './components/RecentContent';
 import TopHashtags from './components/TopHashtags';
 
@@ -59,6 +61,19 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
     { name: 'Bandung', value: 5 },
     { name: 'Yogyakarta', value: 3 },
     { name: 'Bogor', value: 2 }
+  ];
+
+  const ageRangeData = [
+    { name: '13-17', value: 4, percentage: 4.0 },
+    { name: '18-24', value: 28, percentage: 28.5 },
+    { name: '25-34', value: 57, percentage: 57.259 },
+    { name: '35-44', value: 8, percentage: 8.2 },
+    { name: '45-64', value: 2, percentage: 2.1 }
+  ];
+
+  const genderData = [
+    { name: 'Female', value: 44.8, color: '#93C5FD' },
+    { name: 'Male', value: 55.2, color: '#3B82F6' }
   ];
 
   const profileGrowthData = [
@@ -150,6 +165,14 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
         {/* Top 5 City */}
         <TopCities data={topCitiesData} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Age Range */}
+        <AgeRange data={ageRangeData} />
+
+        {/* Gender */}
+        <Gender data={genderData} />
       </div>
 
       {/* Recent Content */}
