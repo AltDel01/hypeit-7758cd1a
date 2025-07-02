@@ -18,7 +18,7 @@ import TopMentionsList from './components/TopMentionsList';
 import TopInterestsList from './components/TopInterestsList';
 import TopContents from './components/TopContents';
 import RecentContent from './components/RecentContent';
-import TopHashtags from './components/TopHashtags';
+
 
 interface InstagramAnalyticsDashboardProps {
   username: string;
@@ -262,9 +262,6 @@ const InstagramAnalyticsDashboard: React.FC<InstagramAnalyticsDashboardProps> = 
 
       {/* Recent Content */}
       <RecentContent content={recentContent} />
-
-      {/* Top Hashtags */}
-      <TopHashtags hashtags={topHashtags} />
     </div>
   );
 };

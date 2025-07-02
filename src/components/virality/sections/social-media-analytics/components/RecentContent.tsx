@@ -17,9 +17,6 @@ interface RecentContentProps {
 const RecentContent: React.FC<RecentContentProps> = ({ content }) => {
   return (
     <Card className="bg-gray-800/50 border-gray-700">
-      <CardHeader>
-        <CardTitle className="text-white">Recent Content</CardTitle>
-      </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {content.map((item) => (
