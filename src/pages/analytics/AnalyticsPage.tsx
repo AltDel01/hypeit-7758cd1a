@@ -223,14 +223,16 @@ const AnalyticsPage = () => {
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'discovery':
+        return <CreatorDiscovery />;
+      case 'overview':
+        return <OverviewContent />;
       case 'social':
         return <SocialMediaAnalytics />;
       case 'content':
         return <ContentPerformance />;
-      case 'discovery':
-        return <CreatorDiscovery />;
       default:
-        return <OverviewContent />;
+        return <CreatorDiscovery />;
     }
   };
 
