@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
+import CreatorDiscovery from './CreatorDiscovery';
 import { 
   BarChart, 
   TrendingUp, 
   PanelLeft,
   LineChart,
-  PieChart
+  PieChart,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -216,6 +218,7 @@ const AnalyticsPage = () => {
     { id: 'overview', label: 'Overview', icon: PieChart },
     { id: 'social', label: 'Social Media', icon: BarChart },
     { id: 'content', label: 'Content Performance', icon: LineChart },
+    { id: 'discovery', label: 'Creator Discovery', icon: Users },
   ];
 
   const renderContent = () => {
@@ -224,6 +227,8 @@ const AnalyticsPage = () => {
         return <SocialMediaAnalytics />;
       case 'content':
         return <ContentPerformance />;
+      case 'discovery':
+        return <CreatorDiscovery />;
       default:
         return <OverviewContent />;
     }
