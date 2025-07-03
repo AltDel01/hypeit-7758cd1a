@@ -7,7 +7,7 @@ import {
   TrendingUp, 
   PanelLeft,
   LineChart,
-  PieChart,
+  Clock,
   Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -212,13 +212,13 @@ const ContentPerformance = () => {
 };
 
 const AnalyticsPage = () => {
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('discovery');
   
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: PieChart },
-    { id: 'social', label: 'Social Media', icon: BarChart },
-    { id: 'content', label: 'Content Performance', icon: LineChart },
     { id: 'discovery', label: 'Creator Discovery', icon: Users },
+    { id: 'overview', label: 'Influencers Overview', icon: Clock },
+    { id: 'social', label: 'Social Media', icon: BarChart },
+    { id: 'content', label: 'Content Performance', icon: TrendingUp },
   ];
 
   const renderContent = () => {
