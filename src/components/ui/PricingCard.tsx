@@ -27,7 +27,7 @@ const PricingCard = ({
   description,
   features,
   popular = false,
-  buttonText = "Get Started",
+  buttonText = "Mulai Sekarang",
   onButtonClick,
   className,
 }: PricingCardProps) => {
@@ -43,7 +43,7 @@ const PricingCard = ({
     >
       {popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-brand-blue to-brand-teal text-white text-xs font-semibold py-1 px-4 rounded-full">
-          Most Popular
+          Paling Populer
         </div>
       )}
       
@@ -54,7 +54,8 @@ const PricingCard = ({
       
       <div className="mb-6">
         <span className="text-4xl font-bold">{price}</span>
-        {price !== 'Free' && <span className="text-brand-slate-500">/month</span>}
+        {price !== 'Rp. 0' && !price.includes('Rp.') && <span className="text-brand-slate-500">/bulan</span>}
+        {price.includes('Rp.') && price !== 'Rp. 0' && <span className="text-brand-slate-500">/bulan</span>}
       </div>
       
       <ul className="space-y-3 mb-8">

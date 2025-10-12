@@ -5,70 +5,65 @@ import { cn } from '@/lib/utils';
 const Pricing = () => {
   const pricing = [
     {
-      title: "Free",
-      price: "Free",
-      description: "Perfect for trying out BrandGen's core features",
+      title: "Gratis",
+      price: "Rp. 0",
+      description: "Sempurna untuk mencoba fitur inti",
       features: [
-        { name: "5 AI images per month", included: true },
-        { name: "10 text contents per month", included: true },
-        { name: "Basic moodboard creation", included: true },
-        { name: "1 logo suggestion", included: true },
-        { name: "Brand identity package", included: false },
-        { name: "Social media strategy", included: false },
-        { name: "Competitor analysis", included: false },
-        { name: "Priority support", included: false },
+        { name: "1 gambar branding per hari", included: true },
+        { name: "3 gambar branding per bulan", included: true },
+        { name: "10 konten teks per bulan", included: true },
+        { name: "Gratis 1 halaman moodboard yang dihasilkan", included: true },
+        { name: "Akses konsultasi dengan Ava", included: true },
       ],
       popular: false,
     },
     {
-      title: "Pro",
-      price: "$29",
-      description: "For professionals who need more creative power",
+      title: "Starter",
+      price: "Rp. 150.000,-",
+      description: "Untuk brand dan bisnis yang berkembang",
       features: [
-        { name: "25 AI images per month", included: true },
-        { name: "40 text contents per month", included: true },
-        { name: "Advanced moodboard creation", included: true },
-        { name: "5 logo suggestions", included: true },
-        { name: "Brand identity package", included: true },
-        { name: "Social media strategy", included: false },
-        { name: "Competitor analysis", included: false },
-        { name: "Priority support", included: true },
+        { name: "15 gambar branding per bulan", included: true },
+        { name: "25 konten teks per bulan", included: true },
+        { name: "Logo Gratis yang Dihasilkan", included: true },
+        { name: "Psikologi Warna Gratis", included: true },
+        { name: "15 halaman paket identitas brand lengkap per bulan", included: true },
+        { name: "Akses konsultasi dengan Ava", included: true },
       ],
       popular: true
     },
     {
-      title: "Business",
-      price: "$79",
-      description: "For businesses that need the complete package",
+      title: "Pro",
+      price: "Rp. 250.000,-",
+      description: "Untuk Bisnis yang Membutuhkan Konversi Tinggi",
       features: [
-        { name: "25 AI images per month", included: true },
-        { name: "40 text contents per month", included: true },
-        { name: "Advanced moodboard creation", included: true },
-        { name: "Unlimited logo suggestions", included: true },
-        { name: "Brand identity package", included: true },
-        { name: "Social media strategy", included: true },
-        { name: "Competitor analysis", included: true },
-        { name: "Priority support", included: true },
+        { name: "25 gambar branding per bulan", included: true },
+        { name: "40 konten teks per bulan", included: true },
+        { name: "Logo Gratis yang Dihasilkan", included: true },
+        { name: "Psikologi Warna Gratis", included: true },
+        { name: "15 halaman paket identitas brand lengkap per bulan", included: true },
+        { name: "Paket lengkap strategi viralitas", included: true },
+        { name: "Analitik media sosial", included: true },
+        { name: "Akses konsultasi dengan Ava", included: true },
       ],
       popular: false
     },
     {
-      title: "Vibe Marketing",
-      price: "$125",
-      description: "AI-powered end-to-end social growth and analytics",
+      title: "Specialist",
+      price: "Rp. 1.250.000,-",
+      description: "Pertumbuhan sosial dan analitik end-to-end berbasis AI",
       features: [
-        { name: "All Pro Benefits", included: true },
-        { name: "AI Automated posting to social media", included: true },
-        { name: "AI winning content analytics", included: true },
-        { name: "AI influencer recommendation and analytics", included: true },
-        { name: "AI contact, collect rate card, and generate brief with influencers automatically", included: true },
-        { name: "AI social media Audit", included: true },
-        { name: "AI competitor benchmarking", included: true },
-        { name: "AI social media reporting", included: true },
-        { name: "AI social media trend analytics", included: true },
+        { name: "Semua Manfaat Pro", included: true },
+        { name: "Posting otomatis AI ke media sosial", included: true },
+        { name: "Analitik konten pemenang AI", included: true },
+        { name: "Rekomendasi influencer dan analitik AI", included: true },
+        { name: "Kontak AI, kumpulkan rate card, dan buat brief dengan influencer secara otomatis", included: true },
+        { name: "Audit media sosial AI", included: true },
+        { name: "Benchmarking kompetitor AI", included: true },
+        { name: "Pelaporan media sosial AI", included: true },
+        { name: "Analitik tren media sosial AI", included: true },
       ],
       popular: false,
-      buttonText: "Upgrade to Specialist"
+      buttonText: "Upgrade ke Specialist"
     }
   ];
 
@@ -83,10 +78,10 @@ const Pricing = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-10">
         <div className="text-center mb-12 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Simple, transparent pricing
+            Harga yang Sederhana dan Transparan
           </h2>
           <p className="text-brand-slate-600 text-md md:text-lg">
-            Choose the plan that's right for your business. All plans include a 14-day free trial.
+            Pilih paket yang tepat untuk bisnis Anda. Semua paket termasuk uji coba gratis 14 hari.
           </p>
         </div>
         
@@ -104,11 +99,11 @@ const Pricing = () => {
                 features={plan.features}
                 popular={plan.popular}
                 buttonText={
-                  plan.title === "Free"
-                    ? "Get Started"
-                    : plan.title === "Vibe Marketing"
-                      ? "Upgrade to Specialist"
-                      : "Start Free Trial"}
+                  plan.title === "Gratis"
+                    ? "Mulai Sekarang"
+                    : plan.title === "Specialist"
+                      ? "Upgrade ke Specialist"
+                      : "Mulai Uji Coba Gratis"}
                 className={
                   (plan.popular
                     ? "md:scale-105 md:shadow-lg z-10"
@@ -120,11 +115,11 @@ const Pricing = () => {
         </div>
         
         <div className="mt-10 text-center text-brand-slate-500 text-sm px-2">
-          Need a custom plan?{" "}
+          Butuh paket khusus?{" "}
           <a href="#" className="text-brand-blue hover:underline">
-            Contact us
+            Hubungi kami
           </a>{" "}
-          for enterprise pricing.
+          untuk harga enterprise.
         </div>
       </div>
     </section>
