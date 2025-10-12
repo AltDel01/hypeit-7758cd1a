@@ -52,7 +52,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     ctx.fill();
     
     // Get frequency data and draw wave
-    analyser.getByteFrequencyData(dataArray);
+    analyser.getByteFrequencyData(dataArray as Uint8Array<ArrayBuffer>);
     
     const totalPoints = 128;
     const maxBarHeight = Math.min(width, height) * 0.35;
