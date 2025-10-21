@@ -7,6 +7,24 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
+const dummyCalendarContent = [
+  { day: 1, title: "Welcome Post", content: "Introduce your brand and what you offer", type: "Image Post" },
+  { day: 2, title: "Product Showcase", content: "Highlight your best-selling product", type: "Carousel" },
+  { day: 3, title: "Behind the Scenes", content: "Show your team at work", type: "Reel" },
+  { day: 4, title: "Customer Testimonial", content: "Share a 5-star review", type: "Story" },
+  { day: 5, title: "Educational Content", content: "Tips on using your product", type: "Image Post" },
+  { day: 6, title: "Friday Motivation", content: "Inspirational quote related to your niche", type: "Story" },
+  { day: 7, title: "Weekend Special", content: "Announce a weekend promotion", type: "Reel" },
+  { day: 8, title: "User Generated Content", content: "Repost customer content", type: "Image Post" },
+  { day: 9, title: "Product Tutorial", content: "How-to guide for your product", type: "Carousel" },
+  { day: 10, title: "Team Spotlight", content: "Feature a team member", type: "Reel" },
+  { day: 11, title: "Industry News", content: "Share relevant industry update", type: "Story" },
+  { day: 12, title: "Throwback Thursday", content: "Share your brand's journey", type: "Image Post" },
+  { day: 13, title: "Q&A Session", content: "Answer common customer questions", type: "Carousel" },
+  { day: 14, title: "Flash Sale Alert", content: "24-hour limited offer", type: "Reel" },
+  { day: 15, title: "Thank You Post", content: "Appreciate your community", type: "Image Post" },
+];
+
 const ContentPlanner = () => {
   const [businessInfo, setBusinessInfo] = useState({
     business: '',
@@ -133,20 +151,22 @@ const ContentPlanner = () => {
         </div>
       </Card>
 
-      {/* Calendar View Placeholder */}
+      {/* Calendar View */}
       <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
         <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-cyan-400" />
           15-Day Content Calendar
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {Array.from({ length: 15 }, (_, i) => (
+          {dummyCalendarContent.map((day) => (
             <Card 
-              key={i} 
+              key={day.day} 
               className="p-4 bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors cursor-pointer"
             >
-              <p className="text-sm font-medium text-white mb-1">Day {i + 1}</p>
-              <p className="text-xs text-muted-foreground">Click to add content</p>
+              <p className="text-sm font-medium text-white mb-2">Day {day.day}</p>
+              <p className="text-xs font-semibold text-purple-300 mb-1">{day.title}</p>
+              <p className="text-xs text-muted-foreground mb-2">{day.content}</p>
+              <span className="text-xs px-2 py-1 rounded-full bg-cyan-600/20 text-cyan-300">{day.type}</span>
             </Card>
           ))}
         </div>
