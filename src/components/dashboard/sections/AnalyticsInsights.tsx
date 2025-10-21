@@ -1,52 +1,89 @@
 import React, { useState } from 'react';
-import { BarChart3, TrendingUp, MessageSquare, Sparkles, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InstagramAnalyticsDashboard from '@/components/virality/sections/social-media-analytics/InstagramAnalyticsDashboard';
+import EndeavorIndoDashboard from '@/components/virality/sections/social-media-analytics/EndeavorIndoDashboard';
+import LlamaInsightsPanel from '@/components/virality/sections/social-media-analytics/LlamaInsightsPanel';
 
 const AnalyticsInsights = () => {
-  const [llamaQuery, setLlamaQuery] = useState('');
-  const [isQuerying, setIsQuerying] = useState(false);
-  const [insights, setInsights] = useState<string[]>([
-    "Reels engagement rose 32% this week; consider posting more 15s videos",
-    "Your audience is most active on weekdays between 6-8 PM",
-    "Product showcase posts get 2.5x more engagement than text-only posts"
-  ]);
+  const [platform, setPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
+  const [usernames, setUsernames] = useState<string[]>(['', '', '']);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [dashboardUsername, setDashboardUsername] = useState('');
 
-  const handleAskLlama = async () => {
-    if (!llamaQuery.trim()) {
-      toast({
-        title: "Query Required",
-        description: "Please enter a question for LLaMA",
-        variant: "destructive"
-      });
-      return;
-    }
+  const getPlatformName = () => {
+    return platform.charAt(0).toUpperCase() + platform.slice(1);
+  };
 
-    setIsQuerying(true);
-    try {
-      // TODO: Integrate with LLaMA Insight Summarizer
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const newInsight = `Based on your data: ${llamaQuery} - [AI-generated insight will appear here]`;
-      setInsights([newInsight, ...insights]);
-      setLlamaQuery('');
-      
-      toast({
-        title: "Insight Generated",
-        description: "LLaMA has analyzed your question",
-      });
-    } catch (error) {
-      toast({
-        title: "Query Failed",
-        description: "Failed to get insights. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsQuerying(false);
+  const handleUsernameChange = (index: number, value: string) => {
+    const newUsernames = [...usernames];
+    newUsernames[index] = value;
+    setUsernames(newUsernames);
+  };
+
+  const handleAnalyze = () => {
+    // Check for specific usernames
+    const targetUsername = usernames.find(username => {
+      const cleanUsername = username.toLowerCase().trim();
+      return cleanUsername === 'innovation.ui' || cleanUsername === 'endeavor_indo';
+    });
+    
+    if (targetUsername && platform === 'instagram') {
+      setDashboardUsername(targetUsername);
+      setShowDashboard(true);
     }
   };
+
+  const handleBackToInputs = () => {
+    setShowDashboard(false);
+    setDashboardUsername('');
+  };
+
+  if (showDashboard && platform === 'instagram') {
+    const cleanUsername = dashboardUsername.toLowerCase().trim();
+    
+    return (
+      <div className="space-y-6 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-white mb-2 animate-gradient-text">
+              Analytics & Insights
+            </h1>
+            <p className="text-muted-foreground">
+              Track performance with AI-powered insights from social media
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={handleBackToInputs}
+            className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
+          >
+            ← Back to Input
+          </Button>
+        </div>
+        
+        {/* 2-Column Layout: Report (Left) + LLama Insights (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Analytics Report (2/3 width) */}
+          <div className="lg:col-span-2">
+            {cleanUsername === 'endeavor_indo' ? (
+              <EndeavorIndoDashboard username={dashboardUsername} />
+            ) : (
+              <InstagramAnalyticsDashboard username={dashboardUsername} />
+            )}
+          </div>
+          
+          {/* Right Column - LLama Insights Panel (1/3 width) */}
+          <div className="lg:col-span-1">
+            <LlamaInsightsPanel username={dashboardUsername} platform={platform} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -60,133 +97,52 @@ const AnalyticsInsights = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Charts and Metrics (2/3 width) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Key Metrics */}
+      {/* Platform Selection Tabs */}
+      <Tabs defaultValue="instagram" onValueChange={(value) => setPlatform(value as 'instagram' | 'tiktok' | 'youtube')}>
+        <TabsList className="grid w-full max-w-md grid-cols-3 bg-background/60 border border-slate-700">
+          <TabsTrigger value="instagram" className="data-[state=active]:bg-purple-600/20">
+            <Instagram className="w-4 h-4 mr-2" />
+            Instagram
+          </TabsTrigger>
+          <TabsTrigger value="tiktok" className="data-[state=active]:bg-purple-600/20">
+            TikTok
+          </TabsTrigger>
+          <TabsTrigger value="youtube" className="data-[state=active]:bg-purple-600/20">
+            <Youtube className="w-4 h-4 mr-2" />
+            YouTube
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={platform} className="space-y-4 mt-6">
+          {/* Username Input Fields */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4 bg-background/60 backdrop-blur-sm border-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-600/20">
-                  <TrendingUp className="w-5 h-5 text-purple-400" />
+            {[1, 2, 3].map((index) => (
+              <div key={`${platform}-${index}`} className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <span className="text-gray-400">@</span>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Engagement</p>
-                  <p className="text-2xl font-bold text-white">+32%</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-background/60 backdrop-blur-sm border-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-cyan-600/20">
-                  <BarChart3 className="w-5 h-5 text-cyan-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Reach</p>
-                  <p className="text-2xl font-bold text-white">15.2K</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-background/60 backdrop-blur-sm border-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-600/20">
-                  <MessageSquare className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Comments</p>
-                  <p className="text-2xl font-bold text-white">248</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Charts Placeholder */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-4">Performance Overview</h2>
-            <div className="h-[300px] flex items-center justify-center border border-dashed border-slate-600 rounded-lg">
-              <p className="text-muted-foreground">Interactive charts will be displayed here</p>
-            </div>
-          </Card>
-
-          {/* Top Posts */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-4">Top Performing Posts</h2>
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-square bg-slate-700 rounded-lg"></div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Right Column - LLaMA Insights Panel (1/3 width) */}
-        <div className="space-y-4">
-          <Card className="p-6 bg-gradient-to-br from-purple-600/20 to-cyan-600/20 backdrop-blur-sm border-purple-500/50">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-              LLaMA Insight Summarizer
-            </h2>
-
-            {/* AI Insights List */}
-            <div className="space-y-3 mb-6">
-              {insights.map((insight, index) => (
-                <Card 
-                  key={index}
-                  className="p-3 bg-background/40 border-slate-600 animate-fade-in"
-                >
-                  <p className="text-sm text-white">{insight}</p>
-                </Card>
-              ))}
-            </div>
-
-            {/* Ask LLaMA Input */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-purple-300">
-                <MessageSquare className="w-4 h-4" />
-                Ask LLaMA
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="e.g., Why did my reach drop this week?"
-                  value={llamaQuery}
-                  onChange={(e) => setLlamaQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAskLlama()}
-                  className="bg-background/60"
+                <Input 
+                  placeholder="Enter username" 
+                  className="pl-8 bg-background/50 border-gray-700"
+                  value={usernames[index - 1]}
+                  onChange={(e) => handleUsernameChange(index - 1, e.target.value)}
                 />
-                <Button 
-                  onClick={handleAskLlama}
-                  disabled={isQuerying}
-                  size="icon"
-                  className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
-                >
-                  <Send className={`w-4 h-4 ${isQuerying ? 'animate-pulse' : ''}`} />
-                </Button>
               </div>
+            ))}
+          </div>
+          
+          {usernames.some(username => username.trim() !== '') && (
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleAnalyze}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Analyze {getPlatformName()} Profiles
+              </Button>
             </div>
-          </Card>
-
-          {/* Recommendations */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-3">AI Recommendations</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="text-green-400">•</span>
-                <span>Post more video content during peak hours</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-400">•</span>
-                <span>Increase posting frequency on Instagram</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400">•</span>
-                <span>Try carousel posts for product showcases</span>
-              </li>
-            </ul>
-          </Card>
-        </div>
-      </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
