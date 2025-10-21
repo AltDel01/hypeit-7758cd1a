@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InstagramAnalyticsDashboard from './InstagramAnalyticsDashboard';
 import EndeavorIndoDashboard from './EndeavorIndoDashboard';
+import LlamaInsightsPanel from './LlamaInsightsPanel';
 
 interface SocialPlatformSectionProps {
   platform: 'instagram' | 'tiktok' | 'youtube';
@@ -62,37 +63,36 @@ const SocialPlatformSection: React.FC<SocialPlatformSectionProps> = ({ platform 
   if (showDashboard && platform === 'instagram') {
     const cleanUsername = dashboardUsername.toLowerCase().trim();
     
-    if (cleanUsername === 'endeavor_indo') {
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="outline" 
-              onClick={handleBackToInputs}
-              className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
-            >
-              ← Back to Input
-            </Button>
-          </div>
-          <EndeavorIndoDashboard username={dashboardUsername} />
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Button 
+            variant="outline" 
+            onClick={handleBackToInputs}
+            className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
+          >
+            ← Back to Input
+          </Button>
         </div>
-      );
-    } else {
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="outline" 
-              onClick={handleBackToInputs}
-              className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800"
-            >
-              ← Back to Input
-            </Button>
+        
+        {/* 2-Column Layout: Report (Left) + LLama Insights (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Analytics Report (2/3 width) */}
+          <div className="lg:col-span-2">
+            {cleanUsername === 'endeavor_indo' ? (
+              <EndeavorIndoDashboard username={dashboardUsername} />
+            ) : (
+              <InstagramAnalyticsDashboard username={dashboardUsername} />
+            )}
           </div>
-          <InstagramAnalyticsDashboard username={dashboardUsername} />
+          
+          {/* Right Column - LLama Insights Panel (1/3 width) */}
+          <div className="lg:col-span-1">
+            <LlamaInsightsPanel username={dashboardUsername} platform={platform} />
+          </div>
         </div>
-      );
-    }
+      </div>
+    );
   }
 
   return (
