@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import demoResult from '@/assets/demo-result.png';
 
 const AIContentGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -13,6 +14,7 @@ const AIContentGenerator = () => {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,9 +43,13 @@ const AIContentGenerator = () => {
 
     setIsEnhancing(true);
     try {
-      // TODO: Integrate with LLaMA Smart Prompt Helper
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEnhancedPrompt(`${prompt}, professional product photography, high quality, detailed, vibrant colors, studio lighting, 4k resolution`);
+      setEnhancedPrompt(`Create a professional food product photo featuring the uploaded snack packaging placed on a warm wooden table. Surround the product with fresh red chili peppers on the left and several brown cassava roots, some sliced open to reveal their white flesh, on the right. Add natural warm lighting that creates soft shadows and a cozy, appetizing atmosphere. Include elegant white text at the bottom that reads:
+"Taste the tradition, Made with real ingredients. Discover Maicih."
+Style the composition like a commercial food advertisement with realistic textures, balanced colors, and a focus on authenticity and warmth.
+
+Style keywords:
+realistic product photography, food styling, warm lighting, natural shadows, soft focus background, high-quality commercial photo, appetizing presentation, premium Indonesian snack aesthetic.`);
       
       toast({
         title: "Prompt Enhanced!",
@@ -71,9 +77,10 @@ const AIContentGenerator = () => {
     }
 
     setIsGenerating(true);
+    setGeneratedImage(null);
     try {
-      // TODO: Integrate with Seedream & Seedance APIs
       await new Promise(resolve => setTimeout(resolve, 3000));
+      setGeneratedImage(demoResult);
       
       toast({
         title: "Content Generated!",
@@ -187,17 +194,17 @@ const AIContentGenerator = () => {
         {/* Right Column - Results */}
         <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
           <h2 className="text-xl font-semibold text-white mb-4">Result Gallery</h2>
-          <div className="flex items-center justify-center h-[500px] border-2 border-dashed border-slate-600 rounded-lg">
-            <p className="text-muted-foreground text-center">
-              {isGenerating ? (
-                <span className="flex flex-col items-center gap-2">
-                  <Wand2 className="w-8 h-8 animate-spin text-purple-400" />
-                  Generating your content...
-                </span>
-              ) : (
-                'Generated content will appear here'
-              )}
-            </p>
+          <div className="flex items-center justify-center h-[500px] border-2 border-dashed border-slate-600 rounded-lg overflow-hidden">
+            {isGenerating ? (
+              <span className="flex flex-col items-center gap-2">
+                <Wand2 className="w-8 h-8 animate-spin text-purple-400" />
+                <p className="text-muted-foreground">Generating your content...</p>
+              </span>
+            ) : generatedImage ? (
+              <img src={generatedImage} alt="Generated result" className="h-full w-full object-contain" />
+            ) : (
+              <p className="text-muted-foreground text-center">Generated content will appear here</p>
+            )}
           </div>
         </Card>
       </div>
