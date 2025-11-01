@@ -88,7 +88,7 @@ const PromptForm = ({
         )}
       </div>
       
-      {generatedImage && (
+      {!isGenerating && generatedImage && (
         <div className="mt-4 p-4 bg-[#1A1F2C] border border-[#8c52ff]/30 rounded-lg">
           <p className="text-white text-sm mb-2 font-medium">Generated Image:</p>
           <img 
