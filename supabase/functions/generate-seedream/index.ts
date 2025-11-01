@@ -33,11 +33,11 @@ serve(async (req) => {
 
     // Map aspect ratio to BytePlus size parameter
     const sizeMap: Record<string, string> = {
-      "1:1": "1024*1024",
-      "9:16": "768*1024",
-      "16:9": "1024*768",
+      "1:1": "1024x1024",
+      "9:16": "768x1024",
+      "16:9": "1024x768",
     };
-    const size = sizeMap[aspectRatio || "1:1"] || "1024*1024";
+    const size = sizeMap[aspectRatio || "1:1"] || "1024x1024";
 
     // Prepare the request body for BytePlus Seedream API
     const seedreamBody: any = {
