@@ -20,7 +20,7 @@ interface ImageGeneratedEvent extends CustomEvent {
 }
 
 /**
- * Dispatches an image generated event - DISABLED
+ * Dispatches an image generated event
  */
 export const dispatchImageGeneratedEvent = (
   imageUrl: string, 
@@ -28,16 +28,38 @@ export const dispatchImageGeneratedEvent = (
   error?: string,
   requestId?: string
 ): void => {
-  // Image generation event dispatching is disabled
-  console.log("Image generation events are disabled");
+  const event = new CustomEvent('imageGenerated', {
+    detail: {
+      imageUrl,
+      prompt,
+      success: !error,
+      error,
+      timestamp: Date.now(),
+      requestId
+    }
+  });
+  
+  window.dispatchEvent(event);
+  console.log("Dispatched imageGenerated event:", { imageUrl, prompt, requestId });
 };
 
 /**
- * Dispatches an image generation error event - DISABLED
+ * Dispatches an image generation error event
  */
 export const dispatchImageGenerationErrorEvent = (error: string, prompt?: string, requestId?: string): void => {
   console.error("Image generation error:", error);
-  // No action - image generation is disabled
+  toast.error(error || "Failed to generate image");
+  
+  const event = new CustomEvent('imageGenerationError', {
+    detail: {
+      error,
+      prompt,
+      requestId,
+      timestamp: Date.now()
+    }
+  });
+  
+  window.dispatchEvent(event);
 };
 
 /**
