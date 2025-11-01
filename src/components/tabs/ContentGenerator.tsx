@@ -119,6 +119,7 @@ const ContentGenerator = ({
         setProductImage={setProductImage}
         isGenerating={isGenerating}
         generateImage={onGenerate}
+        generatedImage={localGeneratedImage}
       />
       
       {hasProductImage && <ImageUploadStatus hasProductImage={hasProductImage} />}
