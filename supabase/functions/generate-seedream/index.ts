@@ -29,53 +29,79 @@ serve(async (req) => {
       );
     }
 
-    console.log('Generating image with Seedream 4.0:', { prompt, aspectRatio, batchSize });
+    console.log('Generating image with Seedream 4.0 via BytePlus:', { prompt, aspectRatio, batchSize });
 
-    // Prepare the request body for Seedream API
+    // Map aspect ratio to BytePlus size parameter
+    const sizeMap: Record<string, string> = {
+      "1:1": "1024*1024",
+      "9:16": "768*1024",
+      "16:9": "1024*768",
+    };
+    const size = sizeMap[aspectRatio || "1:1"] || "1024*1024";
+
+    // Prepare the request body for BytePlus Seedream API
     const seedreamBody: any = {
+      model: "seedream-4-0-250828",
       prompt: prompt,
-      num_images: batchSize || 1,
-      aspect_ratio: aspectRatio || "1:1",
+      size: size,
+      sequential_image_generation: "disabled",
+      response_format: "url",
+      stream: false,
+      watermark: true,
     };
 
-    // If product image is provided, include it
+    // If product image is provided, include it (BytePlus may support image input)
     if (productImage) {
       seedreamBody.image = productImage;
     }
 
-    // Call Seedream 4.0 API
-    const response = await fetch('https://api.seedream.ai/v1/generate', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${SEEDREAM_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(seedreamBody),
-    });
+    // Handle batch generation - BytePlus may not support batch in single request
+    const batch = batchSize || 1;
+    const allImages: string[] = [];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Seedream API error:', response.status, errorText);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to generate image', 
-          details: errorText 
-        }),
-        { 
-          status: response.status, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    for (let i = 0; i < batch; i++) {
+      console.log(`Generating image ${i + 1} of ${batch}`);
+      
+      // Call BytePlus Seedream 4.0 API
+      const response = await fetch('https://ark.ap-southeast.bytepluses.com/api/v3/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SEEDREAM_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(seedreamBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('BytePlus Seedream API error:', response.status, errorText);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to generate image', 
+            details: errorText 
+          }),
+          { 
+            status: response.status, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const data = await response.json();
+      console.log('BytePlus Seedream API response:', data);
+
+      // Extract image URL from response (adjust based on actual response structure)
+      const imageUrl = data.data?.[0]?.url || data.url || data.image;
+      if (imageUrl) {
+        allImages.push(imageUrl);
+      }
     }
-
-    const data = await response.json();
-    console.log('Seedream API response:', data);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        images: data.images || [data.image],
-        requestId: data.id || crypto.randomUUID()
+        images: allImages,
+        requestId: crypto.randomUUID()
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
