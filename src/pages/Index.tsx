@@ -82,16 +82,26 @@ const Index = () => {
     }
     
     setIsGenerating(true);
+    setGeneratedImage(null);
+    
     try {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       console.log(`Product image available: ${productImage !== null}`);
       
-      let productImageUrl = null;
+      // Get the batch size from local storage (set by VisualSettings)
+      const batchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '1', 10);
+      const isPremiumBatch = batchSize > 3;
       
+      // Convert product image to base64 if available
+      let productImageBase64 = null;
       if (productImage) {
-        console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
-        productImageUrl = URL.createObjectURL(productImage);
+        const reader = new FileReader();
+        productImageBase64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(productImage);
+        });
       }
       
       Sentry.setContext("image_generation", {
@@ -100,22 +110,6 @@ const Index = () => {
         hasProductImage: productImage !== null,
         timestamp: new Date().toISOString()
       });
-      
-      // Get the batch size from local storage (set by VisualSettings)
-      const batchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '1', 10);
-      const isPremiumBatch = batchSize > 3;
-      
-      // Create request in the service
-      const request = imageRequestService.createRequest(
-        user.id,
-        user.email || 'Anonymous User',
-        prompt,
-        aspectRatio,
-        productImageUrl,
-        batchSize
-      );
-      
-      console.log("Image generation request created:", request);
       
       // Start progress simulation for user feedback
       let progress = 0;
@@ -127,31 +121,83 @@ const Index = () => {
         }
         
         const progressEvent = new CustomEvent('imageGenerationProgress', {
-          detail: { progress, requestId: request.id }
+          detail: { progress }
         });
         window.dispatchEvent(progressEvent);
       }, 800);
       
-      // For premium batches (15 or 25 images), immediately navigate to Analytics > Generated Content
+      // Call the Seedream API through edge function
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-seedream', {
+        body: {
+          prompt,
+          productImage: productImageBase64,
+          aspectRatio,
+          batchSize
+        }
+      });
+      
+      clearInterval(interval);
+      
+      if (functionError) {
+        throw new Error(functionError.message);
+      }
+      
+      if (!functionData?.success) {
+        throw new Error(functionData?.error || 'Failed to generate image');
+      }
+      
+      // Create request in the service for tracking
+      const request = imageRequestService.createRequest(
+        user.id,
+        user.email || 'Anonymous User',
+        prompt,
+        aspectRatio,
+        productImageBase64,
+        batchSize
+      );
+      
+      // Handle the generated images
+      const images = functionData.images || [];
+      
       if (isPremiumBatch) {
-        // No toast notification - just immediately redirect
+        // For premium batches, store images and navigate to Analytics
+        images.forEach((imageUrl: string, index: number) => {
+          imageRequestService.addGeneratedImage(request.id, imageUrl);
+        });
+        
         navigate('/analytics');
         
-        // Add a small delay to allow the page to load before setting the active section
         setTimeout(() => {
           const event = new CustomEvent('setAnalyticsSection', { 
             detail: { section: 'generated' } 
           });
           window.dispatchEvent(event);
         }, 500);
+        
+        toast.success(`Successfully generated ${images.length} images!`);
       } else {
-        toast.success("Your image generation request has been sent to our designers!");
-        toast.info("You'll receive a notification when your image is ready.");
+        // For single/small batches, show the first image
+        if (images.length > 0) {
+          setGeneratedImage(images[0]);
+          imageRequestService.addGeneratedImage(request.id, images[0]);
+          toast.success("Your image has been generated!");
+        }
       }
+      
+      setIsGenerating(false);
+      
+      // Dispatch completion event
+      const completeEvent = new CustomEvent('imageGenerationProgress', {
+        detail: { progress: 100 }
+      });
+      window.dispatchEvent(completeEvent);
+      
     } catch (error) {
       console.error("Error generating image:", error);
       Sentry.captureException(error);
-      toast.error(`Failed to submit request: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
       setIsGenerating(false);
     }
   };
