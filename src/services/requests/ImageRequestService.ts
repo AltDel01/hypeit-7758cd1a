@@ -32,21 +32,6 @@ class ImageRequestService extends RequestManager {
     
     return true;
   }
-
-  addGeneratedImage(requestId: string, imageUrl: string) {
-    const request = this.getRequestById(requestId);
-    if (!request) return null;
-
-    const generatedImages = request.generatedImages || [];
-    generatedImages.push(imageUrl);
-
-    return this.updateRequest(requestId, {
-      generatedImages,
-      resultImage: generatedImages[0], // Set first image as result
-      status: 'completed',
-      completedAt: new Date().toISOString()
-    });
-  }
 }
 
 // Create and export a singleton instance

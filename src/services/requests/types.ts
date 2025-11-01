@@ -31,7 +31,6 @@ export interface ImageRequest {
   progress?: number;
   referenceImage?: string | null;
   completedAt?: string;
-  generatedImages?: string[];
 }
 
 export interface RequestStorage {

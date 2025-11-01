@@ -13,7 +13,6 @@ interface PromptFormProps {
   setProductImage: (file: File | null) => void;
   isGenerating: boolean;
   generateImage: () => void;
-  generatedImage?: string | null;
 }
 
 const PromptForm = ({ 
@@ -22,8 +21,7 @@ const PromptForm = ({
   productImage, 
   setProductImage, 
   isGenerating, 
-  generateImage,
-  generatedImage 
+  generateImage 
 }: PromptFormProps) => {
   const [generationProgress, setGenerationProgress] = useState(0);
   
@@ -87,17 +85,6 @@ const PromptForm = ({
           </div>
         )}
       </div>
-      
-      {!isGenerating && generatedImage && (
-        <div className="mt-4 p-4 bg-[#1A1F2C] border border-[#8c52ff]/30 rounded-lg">
-          <p className="text-white text-sm mb-2 font-medium">Generated Image:</p>
-          <img 
-            src={generatedImage} 
-            alt="Generated result" 
-            className="w-full rounded-lg shadow-lg"
-          />
-        </div>
-      )}
     </div>
   );
 };
