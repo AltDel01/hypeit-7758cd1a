@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Wand2, BarChart3, ArrowLeft } from 'lucide-react';
+import { Calendar, Wand2, BarChart3, ArrowLeft, Video } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +40,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       label: 'Analytics & Insights', 
       icon: BarChart3,
       description: 'Track performance'
+    },
+    { 
+      id: 'livestream', 
+      label: 'AI Host Live Stream', 
+      icon: Video,
+      description: 'AI-powered streaming'
     },
   ];
 
