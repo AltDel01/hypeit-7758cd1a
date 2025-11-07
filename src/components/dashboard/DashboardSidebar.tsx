@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Wand2, BarChart3, ArrowLeft, Video } from 'lucide-react';
+import { Calendar, Wand2, BarChart3, ArrowLeft, Video, Palette } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -46,6 +46,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       label: 'AI Host Live Stream', 
       icon: Video,
       description: 'AI-powered streaming'
+    },
+    { 
+      id: 'brandidentity', 
+      label: 'Generate Brand Identity', 
+      icon: Palette,
+      description: 'Create brand assets'
     },
   ];
 

@@ -7,6 +7,7 @@ import ContentPlanner from '@/components/dashboard/sections/ContentPlanner';
 import AIContentGenerator from '@/components/dashboard/sections/AIContentGenerator';
 import AnalyticsInsights from '@/components/dashboard/sections/AnalyticsInsights';
 import AIHostLiveStream from '@/components/dashboard/sections/AIHostLiveStream';
+import GenerateBrandIdentity from '@/components/dashboard/sections/GenerateBrandIdentity';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +35,8 @@ const Dashboard = () => {
         return <AnalyticsInsights />;
       case 'livestream':
         return <AIHostLiveStream />;
+      case 'brandidentity':
+        return <GenerateBrandIdentity />;
       default:
         return <ContentPlanner />;
     }
