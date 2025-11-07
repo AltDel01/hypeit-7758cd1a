@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, Send, MessageSquare, TrendingUp, Target, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-// LLaMA API Configuration
-const LLAMA_API_KEY = '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';
+// AI API Configuration
+const AI_API_KEY = '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';
 
 interface LlamaInsightsPanelProps {
   username: string;
@@ -20,7 +20,7 @@ const LlamaInsightsPanel: React.FC<LlamaInsightsPanelProps> = ({ username, platf
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(true);
 
   useEffect(() => {
-    // Simulate LLama generating initial summary
+    // Simulate AI generating initial summary
     const timer = setTimeout(() => {
       setMessages([
         {
@@ -38,7 +38,7 @@ const LlamaInsightsPanel: React.FC<LlamaInsightsPanelProps> = ({ username, platf
     if (!llamaQuery.trim()) {
       toast({
         title: "Query Required",
-        description: "Please enter a question for LLaMA",
+        description: "Please enter a question for AI",
         variant: "destructive"
       });
       return;
@@ -50,7 +50,7 @@ const LlamaInsightsPanel: React.FC<LlamaInsightsPanelProps> = ({ username, platf
     setIsQuerying(true);
 
     try {
-      // TODO: Integrate with actual LLaMA API
+      // TODO: Integrate with actual AI API
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const aiResponse = {
@@ -75,7 +75,7 @@ const LlamaInsightsPanel: React.FC<LlamaInsightsPanelProps> = ({ username, platf
       <Card className="p-6 bg-gradient-to-br from-purple-600/20 to-cyan-600/20 backdrop-blur-sm border-purple-500/50 flex-1 flex flex-col">
         <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-          LLaMA Insight Summarizer
+          AI Insight Summarizer
         </h2>
 
         {/* AI Insights Messages */}
@@ -111,11 +111,11 @@ const LlamaInsightsPanel: React.FC<LlamaInsightsPanelProps> = ({ username, platf
           )}
         </div>
 
-        {/* Ask LLaMA Input */}
+        {/* Ask AI Input */}
         <div className="space-y-3 border-t border-slate-700 pt-4">
           <div className="flex items-center gap-2 text-sm font-medium text-purple-300">
             <MessageSquare className="w-4 h-4" />
-            Ask LLaMA for More Insights
+            Ask AI for More Insights
           </div>
           <div className="flex gap-2">
             <Input

@@ -110,7 +110,7 @@ const AnalyticsInsights = () => {
           </Button>
         </div>
         
-        {/* 2-Column Layout: Report (Left) + LLama Insights (Right) */}
+        {/* 2-Column Layout: Report (Left) + AI Insights (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Analytics Report (2/3 width) */}
           <div className="lg:col-span-2">
@@ -121,7 +121,7 @@ const AnalyticsInsights = () => {
             )}
           </div>
           
-          {/* Right Column - LLama Insights Panel (1/3 width) */}
+          {/* Right Column - AI Insights Panel (1/3 width) */}
           <div className="lg:col-span-1">
             <LlamaInsightsPanel username={dashboardUsername} platform={platform} />
           </div>

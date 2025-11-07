@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import demoResult from '@/assets/demo-result.png';
 
-// LLaMA API Configuration
-const LLAMA_API_KEY = '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';
+// AI API Configuration
+const AI_API_KEY = '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';
 
 const VisualGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -56,7 +56,7 @@ realistic product photography, food styling, warm lighting, natural shadows, sof
       
       toast({
         title: "Prompt Enhanced!",
-        description: "LLaMA optimized your prompt for better results",
+        description: "AI optimized your prompt for better results",
       });
     } catch (error) {
       toast({
@@ -161,7 +161,7 @@ realistic product photography, food styling, warm lighting, natural shadows, sof
               className="w-full gap-2"
             >
               <Sparkles className={`w-4 h-4 ${isEnhancing ? 'animate-pulse' : ''}`} />
-              {isEnhancing ? 'Enhancing...' : 'Enhance Prompt with LLaMA'}
+              {isEnhancing ? 'Enhancing...' : 'Enhance Prompt with AI'}
             </Button>
 
             {enhancedPrompt && (

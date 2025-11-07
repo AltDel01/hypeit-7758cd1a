@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
-// LLaMA API Configuration
-const LLAMA_API_KEY = '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';
+// AI API Configuration
+const AI_API_KEY = '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';
 
 const dummyCalendarContent = [
   { 
@@ -149,7 +149,7 @@ Ensure the product is always the hero, surrounded by relatable lifestyle or cult
       
       toast({
         title: "Caption Enhanced!",
-        description: "LLaMA has optimized your caption for better engagement",
+        description: "AI has optimized your caption for better engagement",
       });
     } catch (error) {
       toast({
@@ -234,7 +234,7 @@ Ensure the product is always the hero, surrounded by relatable lifestyle or cult
             className="gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
           >
             <Sparkles className={`w-4 h-4 ${isEnhancing ? 'animate-pulse' : ''}`} />
-            {isEnhancing ? 'Enhancing with LLaMA...' : 'Enhance Caption with LLaMA'}
+            {isEnhancing ? 'Enhancing with AI...' : 'Enhance Caption with AI'}
           </Button>
 
           {enhancedCaption && (
