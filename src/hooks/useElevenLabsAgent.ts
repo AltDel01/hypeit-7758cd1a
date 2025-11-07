@@ -83,7 +83,7 @@ export const useElevenLabsAgent = () => {
 
   const startConversation = useCallback(async () => {
     try {
-      console.log("Starting conversation with agent ID: hELBJiIy7Zdh6wJPxqFW - AUTO DISCONNECT DISABLED");
+      console.log("Starting conversation with agent ID: agent_0601k9edw2z2fqy9pwgqw44tymt0 - AUTO DISCONNECT DISABLED");
       
       // Check microphone permission first
       if (!hasPermission) {
@@ -103,7 +103,7 @@ export const useElevenLabsAgent = () => {
       // Always try to start the session
       console.log("Starting ElevenLabs conversation - AUTO DISCONNECT DISABLED");
       await conversation.startSession({
-        agentId: "hELBJiIy7Zdh6wJPxqFW"
+        agentId: "agent_0601k9edw2z2fqy9pwgqw44tymt0"
       });
       console.log("Conversation session started - AUTO DISCONNECT DISABLED");
     } catch (error) {
