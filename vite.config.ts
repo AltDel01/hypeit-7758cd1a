@@ -35,6 +35,21 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '/api'),
+          configure: (proxy, _options) => {
+            proxy.on('proxyRes', (proxyRes, req, _res) => {
+              // Add CORS headers to the response
+              proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+            });
+          }
+        }
+      }
     },
     plugins,
     resolve: {
