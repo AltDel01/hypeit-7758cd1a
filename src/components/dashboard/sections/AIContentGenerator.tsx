@@ -114,17 +114,8 @@ const AIContentGenerator: React.FC = () => {
         const modLocal = await import(/* @vite-ignore */ "@/services/tmp-api.js");
         const apiLocal = (modLocal as any).default || modLocal;
         if (mounted) setApiModule(apiLocal as ModelArkApiModule);
-        return; // stop here if local import succeeds
       } catch (e) {
-        console.warn("Local ModelArk API module could not be loaded:", e);
-      }
-      try {
-        // Fallback to external absolute path (may be blocked by bundler in browser)
-        const mod = await import(/* @vite-ignore */ "/Users/bytedance/WorkAtByteDance/BytePlus/igdx-demo/src/services/api.js");
-        const api = (mod as any).default || mod;
-        if (mounted) setApiModule(api as ModelArkApiModule);
-      } catch (e) {
-        console.warn("External ModelArk API module could not be loaded:", e);
+        console.warn("ModelArk API module could not be loaded:", e);
       }
     })();
     return () => {
