@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// API Configuration - using direct ModelArk API for production/Lovable, proxy for local dev
-const API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname === 'localhost') 
-  ? '/api'  // Local development with proxy
-  : 'https://ark.ap-southeast.bytepluses.com/api/v3';  // Direct ModelArk API for production/Lovable
+// API Configuration - using proxy approach to avoid CORS issues
+const API_BASE_URL = '/api';  // Always use proxy to avoid CORS issues
 
 // Get API key from multiple sources for different environments
 const getApiKey = () => {
