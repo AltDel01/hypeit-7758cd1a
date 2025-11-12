@@ -1,22 +1,35 @@
 import axios from 'axios';
 
-// API Configuration - using Vite proxy for development, Vercel functions for production
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api'  // Vercel serverless functions
-  : '/api';  // Vite dev server proxy
+// API Configuration - using direct ModelArk API for production/Lovable, proxy for local dev
+const API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname === 'localhost') 
+  ? '/api'  // Local development with proxy
+  : 'https://api.modelark.ai/v1';  // Direct ModelArk API for production/Lovable
 
-// Get API key from localStorage first, then fallback to environment variables
-// Update getApiKey to avoid using process.env in browser and prefer localStorage / import.meta.env
+// Get API key from multiple sources for different environments
 const getApiKey = () => {
   try {
+    // 1. Check localStorage first (user-entered key)
     if (typeof window !== 'undefined' && window.localStorage) {
       const k = window.localStorage.getItem('modelark_api_key');
       if (k) return k;
     }
   } catch {}
-  const env = (typeof import.meta !== 'undefined' && (import.meta).env) ? (import.meta).env : {};
-  const fromVite = env?.VITE_ARK_API_KEY || env?.REACT_APP_ARK_API_KEY;
-  if (fromVite) return fromVite;
+  
+  // 2. Check Vite environment variables
+  try {
+    const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+    const fromVite = env?.VITE_ARK_API_KEY || env?.REACT_APP_ARK_API_KEY;
+    if (fromVite) return fromVite;
+  } catch {}
+  
+  // 3. Check hardcoded fallback for Lovable demo
+  try {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      // Use the API key from your .env file for Lovable/production
+      return "8651f800-d660-4df0-9644-eebecab86350";
+    }
+  } catch {}
+  
   return null;
 };
 
