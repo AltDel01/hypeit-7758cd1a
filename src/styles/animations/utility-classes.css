@@ -1,0 +1,57 @@
+
+@layer utilities {
+  /* Text and gradient utilities */
+  .animate-gradient-text {
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-text 1s ease infinite;
+    background-image: linear-gradient(45deg, #FEF7CD, #8c52ff, #1EAEDB, #FEF7CD);
+    background-size: 300% 300%;
+    font-weight: 800;
+  }
+  
+  .animate-glow-pulse {
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+  
+  .animate-gradient-rotate {
+    background: linear-gradient(90deg, #FEF7CD, #8c52ff, #1EAEDB, #8c52ff, #FEF7CD);
+    background-size: 200% 200%;
+    animation: gradient-rotate 3s ease infinite;
+  }
+  
+  /* Movement and transition utilities */
+  .animate-fade-in-up {
+    animation: pop 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+  
+  .animate-feed-scroll-down {
+    animation: smooth-scroll-down 60s linear infinite;
+  }
+  
+  .animate-story-scroll-up {
+    animation: smooth-scroll-up 60s linear infinite;
+  }
+  
+  /* Effect utilities */
+  .animate-ripple {
+    animation: ripple 1s infinite ease-in-out;
+  }
+  
+  .animate-pulse-ring {
+    animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+  
+  .animate-float {
+    animation: float-gently 4s ease-in-out infinite;
+  }
+  
+  /* Shadow effects */
+  .shadow-glow {
+    text-shadow: 0 0 10px rgba(140, 82, 255, 0.8), 
+                 0 0 20px rgba(30, 174, 219, 0.5), 
+                 0 0 30px rgba(254, 247, 205, 0.3);
+  }
+}

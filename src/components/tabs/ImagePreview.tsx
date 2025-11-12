@@ -1,0 +1,239 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import ImageLoadingState from '@/components/ui/loading/ImageLoadingState';
+import ImageErrorState from './ImageErrorState';
+import { forceImageGenerationRetry } from '@/utils/image/imageEvents';
+
+interface ImagePreviewProps {
+  imageUrl: string | null;
+  prompt: string;
+  onRetry: () => void;
+}
+
+const ImagePreview = ({ imageUrl, prompt, onRetry }: ImagePreviewProps) => {
+  const [imageError, setImageError] = useState<boolean>(false);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const loadingTimeoutRef = useRef<number | null>(null);
+
+  // Listen for image generation progress updates
+  useEffect(() => {
+    const handleProgressUpdate = (event: CustomEvent) => {
+      console.log("Progress update received:", event.detail.progress);
+      setLoadingProgress(event.detail.progress);
+    };
+    
+    window.addEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('imageGenerationProgress', handleProgressUpdate as EventListener);
+    };
+  }, []);
+
+  // Listen for image generation retry events
+  useEffect(() => {
+    const handleRetryEvent = () => {
+      console.log("ImagePreview received retry event");
+      handleImageRetry();
+    };
+    
+    window.addEventListener('retryImageGeneration', handleRetryEvent);
+    
+    return () => {
+      window.removeEventListener('retryImageGeneration', handleRetryEvent);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (imageUrl) {
+      console.log("ImagePreview: New image URL received:", imageUrl?.substring(0, 50) + "...");
+      setImageLoading(true);
+      setImageError(false);
+      
+      // Reset loading progress if this is a new image URL (not just a retry)
+      setLoadingProgress(0);
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      // Clear any existing timeouts
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+      
+      // Set a hard timeout for loading
+      loadingTimeoutRef.current = window.setTimeout(() => {
+        console.log("Hard loading timeout reached, triggering retry");
+        handleImageRetry();
+      }, 30000); // 30 seconds maximum total loading time
+    } else {
+      // Reset loading state when imageUrl is null
+      setImageLoading(false);
+      setLoadingProgress(0);
+      
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    }
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+  }, [imageUrl]);
+
+  const handleImageLoad = () => {
+    console.log("Image loaded successfully");
+    setImageError(false);
+    setImageLoading(false);
+    setLoadingProgress(100);
+    
+    if (progressIntervalRef.current) {
+      window.clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+  };
+
+  const handleImageError = () => {
+    console.log("Image failed to load, marking as error");
+    setImageError(true);
+    setImageLoading(false);
+    
+    if (progressIntervalRef.current) {
+      window.clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    
+    // Auto-retry once for images
+    if (retryCount === 0) {
+      console.log("Auto-retrying image load");
+      setTimeout(() => handleImageRetry(), 1000);
+    }
+  };
+
+  const handleImageRetry = () => {
+    console.log("Handling image retry");
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    
+    setRetryCount(prev => prev + 1);
+    setLoadingProgress(0);
+    setImageLoading(true);
+    setImageError(false);
+    
+    // Call the onRetry callback
+    onRetry();
+    
+    // Also trigger a retry through the event system to ensure all components are aware
+    if (prompt) {
+      forceImageGenerationRetry(prompt);
+    }
+  };
+
+  const isPlaceholder = imageUrl?.includes('placeholder.com') || imageUrl?.includes('Generating+Image');
+
+  return (
+    <div className="mt-6 mb-4 border border-[#8c52ff] rounded-md overflow-hidden">
+      <div className="bg-[#8c52ff] px-2 py-1 text-white text-xs flex justify-between items-center">
+        <span>Generated Image</span>
+        {(imageError || retryCount > 0 || (loadingProgress > 90 && imageLoading) || imageUrl) && (
+          <Button 
+            onClick={handleImageRetry} 
+            variant="ghost" 
+            className="h-5 py-0 px-1 text-white text-xs hover:bg-[#7a45e6] flex items-center"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${imageLoading ? 'animate-spin' : ''}`} />
+            Retry
+          </Button>
+        )}
+      </div>
+      
+      <div className="p-2 bg-gray-900 min-h-[200px] flex items-center justify-center">
+        {(imageLoading && imageUrl) || isPlaceholder ? (
+          <ImageLoadingState 
+            loadingProgress={loadingProgress}
+            setLoadingProgress={setLoadingProgress}
+          />
+        ) : imageError ? (
+          <ImageErrorState onRetry={handleImageRetry} />
+        ) : imageUrl ? (
+          <img 
+            ref={imageRef}
+            key={`${imageUrl}-${retryCount}`} // Force re-render when URL changes or retry count increases
+            src={imageUrl} 
+            alt="Generated content" 
+            className="w-full h-48 object-contain rounded"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            loading="eager"
+            decoding="sync"
+            crossOrigin="anonymous" // Help with CORS issues for some image sources
+          />
+        ) : (
+          <div className="text-gray-400 text-center p-8">
+            <p>No generated image yet</p>
+            <p className="text-xs mt-2">Fill out the form and click Generate to create an image</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ImagePreview;
