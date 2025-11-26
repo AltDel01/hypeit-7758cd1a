@@ -43,13 +43,7 @@ const VideoGenerator = () => {
     setIsEnhancing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEnhancedPrompt(`Generate a vertical video (similar to TikTok/Reel style) featuring an attractive female food blogger (age 25-30) in a modern snack aisle. She is vlogging, holding a camera or phone on a gimbal/selfie stick.
-
-Shot 1 (0-3s - Discovery): The blogger walks past a colourful shelf, her eyes immediately zero in on the bright red Maicih Keripik Singkong Level 10 bag. She grabs it with a look of excited anticipation. She presents the bag to the camera, pointing at the 'Hot Spicy' Level 10 indicator.
-
-Shot 2 (4-7s - Action & Reaction): Quick close-up as she expertly rips open the bag (emphasize the sound). She picks up a chip—which is visibly covered in intense red spice dust—and pops it in her mouth.
-
-Shot 3 (8-10s - The Kick): Transition to an Extreme Close-up on her face. Initial expression is shocked spice (eyes wide, slight sweat on forehead), quickly followed by a powerful, satisfying smile and a nod, confirming the delicious heat. Final image is her holding the bag triumphantly.`);
+      setEnhancedPrompt(`A photorealistic, 4k commercial video shot in a bright, well-lit supermarket aisle. A young, attractive Asian woman with long wavy black hair, wearing a fitted red long-sleeve top, stands holding a blue and gold bag of popcorn. She looks excitedly at the camera, reaches into the bag to pick out a single, round, golden mushroom popcorn kernel. She brings it to her mouth, eats it with a distinct crunch, and her face lights up with a look of pure delight and satisfaction, nodding in approval. The background features shelves fully stocked with yellow and blue snack bags, slightly out of focus (depth of field) to keep attention on the woman. The lighting is even, bright, and professional store lighting.`);
       
       toast({
         title: "Prompt Enhanced!",
@@ -80,7 +74,7 @@ Shot 3 (8-10s - The Kick): Transition to an Extreme Close-up on her face. Initia
     setGeneratedVideo(null);
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
-      setGeneratedVideo('/videos/demo-food-blogger.mp4');
+      setGeneratedVideo('/videos/popcorn-promo-demo.mp4');
       
       toast({
         title: "Video Generated!",
