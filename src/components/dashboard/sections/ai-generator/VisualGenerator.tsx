@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import demoResult from '@/assets/barbeque-popcorn-demo.jpg';
+import demoResult from '@/assets/barbeque-bliss-result.jpg';
 
 // AI API Configuration
 const AI_API_KEY = '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';
