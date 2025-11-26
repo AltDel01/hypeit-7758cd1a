@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import demoResult from '@/assets/demo-result.png';
+import demoResult from '@/assets/barbeque-popcorn-demo.jpg';
 
 // AI API Configuration
 const AI_API_KEY = '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';
@@ -47,12 +47,7 @@ const VisualGenerator = () => {
     setIsEnhancing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEnhancedPrompt(`Create a professional food product photo featuring the uploaded snack packaging placed on a warm wooden table. Surround the product with fresh red chili peppers on the left and several brown cassava roots, some sliced open to reveal their white flesh, on the right. Add natural warm lighting that creates soft shadows and a cozy, appetizing atmosphere. Include elegant white text at the bottom that reads:
-"Taste the tradition, Made with real ingredients. Discover Maicih."
-Style the composition like a commercial food advertisement with realistic textures, balanced colors, and a focus on authenticity and warmth.
-
-Style keywords:
-realistic product photography, food styling, warm lighting, natural shadows, soft focus background, high-quality commercial photo, appetizing presentation, premium Indonesian snack aesthetic.`);
+      setEnhancedPrompt(`Commercial food photography of a standing red and gold foil snack bag labeled "Premium Mushroom Popcorn," sitting on a rustic dark wood table. The bag is surrounded by appetizing props: wooden bowls filled with round golden mushroom popcorn, a small dipping bowl of red BBQ sauce, a small pile of red BBQ spice powder, and fresh green rosemary sprigs scattered on the table. In the background, there is a soft-focus (bokeh) view of a charcoal BBQ grill with visible flames and rising smoke, suggesting a backyard cookout atmosphere. The lighting is warm, golden-hour sunlight coming from the top left, creating dramatic shadows and highlights on the popcorn kernels. Ultra-realistic, 8k resolution, cinematic lighting, advertising quality.`);
       
       toast({
         title: "Prompt Enhanced!",
