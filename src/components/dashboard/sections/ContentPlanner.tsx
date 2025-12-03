@@ -6,6 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // AI API Configuration
 const AI_API_KEY = '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';
@@ -118,6 +124,14 @@ const dummyCalendarContent = [
   },
 ];
 
+interface CalendarItem {
+  day: number;
+  title: string;
+  pillar: string;
+  prompt: string;
+  caption: string;
+}
+
 const ContentPlanner = () => {
   const [businessInfo, setBusinessInfo] = useState({
     business: '',
@@ -126,13 +140,16 @@ const ContentPlanner = () => {
     caption: ''
   });
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [enhancedCaption, setEnhancedCaption] = useState('');
+  const [selectedDay, setSelectedDay] = useState<CalendarItem | null>(null);
+  const [showCalendar, setShowCalendar] = useState(true);
 
   const handleEnhanceCaption = async () => {
     if (!businessInfo.caption.trim()) {
       toast({
-        title: "Caption Required",
-        description: "Please enter a caption to enhance",
+        title: "Business Idea Required",
+        description: "Please enter a business idea to enhance",
         variant: "destructive"
       });
       return;
@@ -148,17 +165,46 @@ Include subtle text overlays with emotional taglines (e.g., "Taste the Tradition
 Ensure the product is always the hero, surrounded by relatable lifestyle or cultural scenes`);
       
       toast({
-        title: "Caption Enhanced!",
-        description: "AI has optimized your caption for better engagement",
+        title: "Business Idea Enhanced!",
+        description: "AI has optimized your business idea for better engagement",
       });
     } catch (error) {
       toast({
         title: "Enhancement Failed",
-        description: "Failed to enhance caption. Please try again.",
+        description: "Failed to enhance business idea. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsEnhancing(false);
+    }
+  };
+
+  const handleGenerateCalendar = async () => {
+    if (!enhancedCaption) {
+      toast({
+        title: "Enhanced Idea Required",
+        description: "Please enhance your business idea first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setShowCalendar(true);
+      toast({
+        title: "Content Calendar Generated!",
+        description: "Your 15-day content calendar is ready",
+      });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate calendar. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -217,12 +263,12 @@ Ensure the product is always the hero, surrounded by relatable lifestyle or cult
           </div>
         </div>
 
-        {/* Caption Enhancer */}
+        {/* Business Idea Enhancer */}
         <div className="space-y-4">
-          <Label htmlFor="caption">Caption / Content Idea</Label>
+          <Label htmlFor="caption">Business Idea</Label>
           <Textarea
             id="caption"
-            placeholder="Enter your caption or content idea here..."
+            placeholder="Enter your business idea here..."
             className="min-h-[120px]"
             value={businessInfo.caption}
             onChange={(e) => setBusinessInfo({...businessInfo, caption: e.target.value})}
@@ -234,39 +280,90 @@ Ensure the product is always the hero, surrounded by relatable lifestyle or cult
             className="gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
           >
             <Sparkles className={`w-4 h-4 ${isEnhancing ? 'animate-pulse' : ''}`} />
-            {isEnhancing ? 'Enhancing with AI...' : 'Enhance Caption with AI'}
+            {isEnhancing ? 'Enhancing with AI...' : 'Enhance Business Idea with AI'}
           </Button>
 
           {enhancedCaption && (
             <Card className="p-4 bg-purple-600/10 border-purple-500/50 animate-fade-in">
-              <p className="text-sm font-medium text-purple-300 mb-2">Enhanced Caption:</p>
+              <p className="text-sm font-medium text-purple-300 mb-2">Enhanced Business Idea:</p>
               <p className="text-white whitespace-pre-wrap">{enhancedCaption}</p>
             </Card>
+          )}
+
+          {enhancedCaption && (
+            <Button 
+              onClick={handleGenerateCalendar}
+              disabled={isGenerating}
+              className="gap-2 bg-gradient-to-r from-cyan-600 to-green-600 hover:from-cyan-700 hover:to-green-700"
+            >
+              <Calendar className={`w-4 h-4 ${isGenerating ? 'animate-pulse' : ''}`} />
+              {isGenerating ? 'Generating Calendar...' : 'Generate Content Calendar'}
+            </Button>
           )}
         </div>
       </Card>
 
       {/* Calendar View */}
-      <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-cyan-400" />
-          15-Day Content Calendar
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {dummyCalendarContent.map((day) => (
-            <Card 
-              key={day.day} 
-              className="p-4 bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors cursor-pointer flex flex-col"
-            >
-              <p className="text-sm font-medium text-white mb-2">Day {day.day}</p>
-              <p className="text-xs font-semibold text-purple-300 mb-1">{day.title}</p>
-              <span className="text-xs px-2 py-1 rounded-full bg-cyan-600/20 text-cyan-300 mb-2 inline-block w-fit">{day.pillar}</span>
-              <p className="text-xs text-muted-foreground mb-2 line-clamp-3">{day.prompt}</p>
-              <p className="text-xs text-slate-400 mt-auto line-clamp-2">{day.caption}</p>
-            </Card>
-          ))}
-        </div>
-      </Card>
+      {showCalendar && (
+        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-cyan-400" />
+            15-Day Content Calendar
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {dummyCalendarContent.map((day) => (
+              <Card 
+                key={day.day} 
+                className="p-4 bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors cursor-pointer flex flex-col"
+                onClick={() => setSelectedDay(day)}
+              >
+                <p className="text-sm font-medium text-white mb-2">Day {day.day}</p>
+                <p className="text-xs font-semibold text-purple-300 mb-1">{day.title}</p>
+                <span className="text-xs px-2 py-1 rounded-full bg-cyan-600/20 text-cyan-300 mb-2 inline-block w-fit">{day.pillar}</span>
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-3">{day.prompt}</p>
+                <p className="text-xs text-slate-400 mt-auto line-clamp-2">{day.caption}</p>
+              </Card>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Day Detail Dialog */}
+      <Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <span className="text-purple-400">Day {selectedDay?.day}</span>
+              <span>-</span>
+              <span>{selectedDay?.title}</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedDay && (
+            <div className="space-y-4">
+              <div>
+                <span className="text-xs px-3 py-1 rounded-full bg-cyan-600/20 text-cyan-300">
+                  {selectedDay.pillar}
+                </span>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-purple-300 mb-2">Visual Prompt:</h4>
+                <p className="text-sm text-muted-foreground bg-slate-800/50 p-4 rounded-lg">
+                  {selectedDay.prompt}
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-purple-300 mb-2">Caption:</h4>
+                <p className="text-sm text-white bg-slate-800/50 p-4 rounded-lg whitespace-pre-wrap">
+                  {selectedDay.caption}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
