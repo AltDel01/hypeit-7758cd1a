@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import AspectRatioSelector from './AspectRatioSelector';
 
 const VideoGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -14,6 +15,7 @@ const VideoGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState('1:1');
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -161,16 +163,25 @@ const VideoGenerator = () => {
                 <p className="text-white text-sm">{enhancedPrompt}</p>
               </Card>
             )}
-
-            <Button 
-              onClick={handleGenerate}
-              disabled={isGenerating || !uploadedImage}
-              className="w-full gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
-            >
-              <Wand2 className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
-              {isGenerating ? 'Generating...' : 'Generate Video'}
-            </Button>
           </div>
+        </Card>
+
+        {/* Aspect Ratio Selection */}
+        <AspectRatioSelector 
+          selectedRatio={aspectRatio} 
+          onRatioChange={setAspectRatio} 
+        />
+
+        {/* Generate Button */}
+        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+          <Button 
+            onClick={handleGenerate}
+            disabled={isGenerating || !uploadedImage}
+            className="w-full gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
+          >
+            <Wand2 className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+            {isGenerating ? 'Generating...' : 'Generate Video'}
+          </Button>
         </Card>
       </div>
 
