@@ -294,7 +294,7 @@ Ensure the product is always the hero, surrounded by relatable lifestyle or cult
             <Button 
               onClick={handleGenerateCalendar}
               disabled={isGenerating}
-              className="gap-2 bg-gradient-to-r from-cyan-600 to-green-600 hover:from-cyan-700 hover:to-green-700"
+              className="gap-2 bg-[#8c52ff] hover:bg-[#7a45e6]"
             >
               <Calendar className={`w-4 h-4 ${isGenerating ? 'animate-pulse' : ''}`} />
               {isGenerating ? 'Generating Calendar...' : 'Generate Content Calendar'}
