@@ -10,7 +10,9 @@ interface AspectRatioSelectorProps {
 
 const ratioOptions = [
   { value: '1:1', label: '1:1', width: 40, height: 40 },
+  { value: '4:5', label: '4:5', width: 36, height: 45 },
   { value: '9:16', label: '9:16', width: 28, height: 50 },
+  { value: '16:9', label: '16:9', width: 50, height: 28 },
 ];
 
 const AspectRatioSelector: React.FC<AspectRatioSelectorProps> = ({
