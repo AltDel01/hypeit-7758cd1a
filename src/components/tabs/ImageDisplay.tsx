@@ -16,27 +16,31 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
   
   // Update when prop changes
   useEffect(() => {
-    console.log("ImageDisplay - generatedImage prop updated:", generatedImage);
+    console.log(`📺 ImageDisplay (${aspectRatio}) - generatedImage prop updated:`, generatedImage);
     setLocalGeneratedImage(generatedImage);
-  }, [generatedImage]);
+  }, [generatedImage, aspectRatio]);
   
   // Listen for generated image events
   useEffect(() => {
     // Listen for the imageGenerated event
     const handleImageGenerated = (event: CustomEvent) => {
-      console.log("Image display caught generated event:", event.detail);
+      console.log(`📺 ImageDisplay (${aspectRatio}) caught generated event:`, event.detail);
       
       if (showGenerated) {
+        console.log(`✅ ImageDisplay (${aspectRatio}) setting image:`, event.detail.imageUrl?.substring(0, 100));
         setLocalGeneratedImage(event.detail.imageUrl);
+      } else {
+        console.log(`⏭️  ImageDisplay (${aspectRatio}) skipping - showGenerated is false`);
       }
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    console.log(`🎧 ImageDisplay (${aspectRatio}) event listener registered, showGenerated:`, showGenerated);
     
     return () => {
       window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
     };
-  }, [showGenerated]);
+  }, [showGenerated, aspectRatio]);
   
   const handleDownload = (imageUrl: string) => {
     const a = document.createElement('a');
@@ -63,12 +67,19 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
     });
   }, [images]);
 
-  // Do not show generated image section at all
-  const shouldShowGeneratedImage = false; // Disabled completely
+  // Show generated image when available and showGenerated flag is true
+  const shouldShowGeneratedImage = showGenerated && localGeneratedImage;
+  
+  console.log(`🎬 ImageDisplay (${aspectRatio}) render state:`, {
+    showGenerated,
+    hasLocalImage: !!localGeneratedImage,
+    shouldShow: shouldShowGeneratedImage,
+    imagePreview: localGeneratedImage?.substring(0, 80)
+  });
 
   return (
     <div className={`grid grid-cols-1 gap-5 ${aspectRatio === "square" ? "animate-feed-scroll-down" : "animate-story-scroll-up"} scrollbar-hide`}>
-      {shouldShowGeneratedImage && localGeneratedImage && (
+      {shouldShowGeneratedImage && (
         <div className="rounded-lg overflow-hidden relative group mb-5 border-2 border-[#9b87f5]">
           <img 
             src={localGeneratedImage} 

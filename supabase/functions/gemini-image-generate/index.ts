@@ -37,18 +37,19 @@ serve(async (req) => {
     // Prepare the request to Gemini API
     const genaiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent";
     
-    // Build the request body
+    // Build the request body - Gemini 2.0 Flash image generation format
     const requestBody: any = {
       contents: [
         {
-          role: "user",
           parts: [
             { text: prompt },
           ],
         },
       ],
-      response_modalities: ["image", "text"],
-      response_mime_type: "text/plain",
+      generationConfig: {
+        responseModalities: ["image"],
+        responseMimeType: "image/jpeg"
+      }
     };
 
     // Add product image if provided
@@ -65,8 +66,8 @@ serve(async (req) => {
           product_image;
         
         requestBody.contents[0].parts.push({
-          inline_data: {
-            mime_type: mimeType,
+          inlineData: {
+            mimeType: mimeType,
             data: base64Data
           }
         });
@@ -79,6 +80,7 @@ serve(async (req) => {
 
     console.log("Sending request to Gemini API with prompt");
     console.log(`Using aspect ratio: ${aspect_ratio}`);
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
     
     let imageData = null;
     let textResponse = null;
@@ -114,12 +116,15 @@ serve(async (req) => {
       console.log("Received response from Gemini API");
       
       // Extract the image data
+      console.log("Response data structure:", JSON.stringify(responseData, null, 2).substring(0, 500));
+      
       if (responseData.candidates && responseData.candidates.length > 0 &&
           responseData.candidates[0].content && responseData.candidates[0].content.parts) {
         
         for (const part of responseData.candidates[0].content.parts) {
-          if (part.inline_data) {
-            imageData = part.inline_data.data;
+          if (part.inlineData) {
+            imageData = part.inlineData.data;
+            console.log("Found image data in response");
           } else if (part.text) {
             textResponse = part.text;
           }
@@ -127,7 +132,7 @@ serve(async (req) => {
       }
     } catch (apiError) {
       console.error("API call error:", apiError);
-      errorResponse = apiError.message || "Error calling Gemini API";
+      errorResponse = (apiError as Error).message || "Error calling Gemini API";
     }
 
     if (!imageData) {
@@ -137,7 +142,7 @@ serve(async (req) => {
       // Use fallback image with Unsplash
       const searchTerms = prompt
         .split(' ')
-        .filter(word => word.length > 3)
+        .filter((word: string) => word.length > 3)
         .slice(0, 3)
         .join(',');
       
@@ -189,7 +194,7 @@ serve(async (req) => {
     // Generate a fallback image URL from Unsplash
     const searchTerms = promptForFallback
       .split(' ')
-      .filter(word => word.length > 3)
+      .filter((word: string) => word.length > 3)
       .slice(0, 3)
       .join(',');
     const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${Date.now()}`;
