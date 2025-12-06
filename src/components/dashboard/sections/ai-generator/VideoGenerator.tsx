@@ -115,36 +115,14 @@ const VideoGenerator = () => {
         
         console.log("Video generation completed");
         
-        // If we have a proxy URL, fetch the video directly
-        if (data.proxyUrl) {
-          try {
-            console.log("Fetching video from proxy endpoint:", data.proxyUrl.substring(0, 100));
-            
-            const videoResponse = await fetch(data.proxyUrl);
-            
-            if (!videoResponse.ok) {
-              const errorText = await videoResponse.text().catch(() => 'No error details');
-              console.error(`Proxy fetch failed: ${videoResponse.status}`, errorText);
-              throw new Error(`Failed to fetch video from proxy: ${videoResponse.status}`);
-            }
-            
-            // Get the video blob
-            const videoBlob = await videoResponse.blob();
-            console.log(`Video blob received: ${videoBlob.size} bytes, type: ${videoBlob.type}`);
-            
-            // Create object URL for the blob
-            const blobUrl = URL.createObjectURL(videoBlob);
-            console.log("Blob URL created successfully");
-            return blobUrl;
-          } catch (proxyError) {
-            console.error('Error fetching through proxy:', proxyError);
-            // Return null to trigger error handling
-            return null;
-          }
+        // The video URL is now a data URL (base64) that can be used directly
+        if (data.videoUrl) {
+          console.log("Video URL received, type:", data.videoUrl.substring(0, 20));
+          return data.videoUrl;
         }
         
-        // No proxy URL, can't get the video
-        console.warn("No proxy URL in response");
+        // No video URL in response
+        console.warn("No video URL in response");
         return null;
       } else if (data?.status === "error") {
         // Clear polling interval on error
@@ -223,29 +201,19 @@ const VideoGenerator = () => {
       if (data?.status === "completed") {
         console.log("Video ready in response");
         
-        // Try proxy URL first if available
-        if (data.proxyUrl) {
-          try {
-            const videoResponse = await fetch(data.proxyUrl);
-            if (videoResponse.ok) {
-              const videoBlob = await videoResponse.blob();
-              const blobUrl = URL.createObjectURL(videoBlob);
-              setGeneratedVideo(blobUrl);
-              toast({
-                title: "Video Generated!",
-                description: "Your AI-generated video is ready",
-              });
-              setIsGenerating(false);
-              return;
-            }
-          } catch (proxyError) {
-            console.error('Immediate proxy fetch failed:', proxyError);
-          }
+        // The video URL is now a data URL that can be used directly
+        if (data.videoUrl) {
+          console.log("Setting video URL directly");
+          setGeneratedVideo(data.videoUrl);
+          toast({
+            title: "Video Generated!",
+            description: "Your AI-generated video is ready",
+          });
+          setIsGenerating(false);
+          return;
         }
         
-        // Fallback: if no proxy or proxy fails, we can't display the video directly
-        // because it requires authentication
-        throw new Error("Unable to retrieve video. Please try again.");
+        throw new Error("No video URL in response");
       }
 
       // If processing, start polling

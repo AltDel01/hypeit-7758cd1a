@@ -82,7 +82,7 @@ async function generateWithGemini(
     
     // Veo 3.1 API endpoint for video generation (predictLongRunning)
     // Note: This requires Google AI Pro or Ultra subscription
-    const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning";
+    const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning";
     
     // Build the request body for video generation according to official Veo 3.1 REST API
     // Format: { instances: [{ prompt }], parameters: { aspectRatio } }
