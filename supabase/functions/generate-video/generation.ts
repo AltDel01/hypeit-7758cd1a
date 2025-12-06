@@ -85,15 +85,18 @@ async function generateWithGemini(
     // Note: This requires Google AI Pro or Ultra subscription
     const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:generateVideos";
     
-    // Build the request body for video generation
+    // Build the request body for video generation according to official Veo 3.1 API
     const requestBody: any = {
       prompt: prompt,
-      config: {
-        aspectRatio: aspectRatio,
-      }
     };
 
-    // Add reference image if provided
+    // Add config with aspect ratio
+    const config: any = {
+      aspectRatio: aspectRatio,
+    };
+
+    // Add image if provided (for image-to-video generation)
+    // According to docs: image should be { imageBytes, mimeType }
     if (productImage) {
       try {
         console.log("Product image provided, adding to video generation request");
@@ -107,16 +110,22 @@ async function generateWithGemini(
           productImage.split("base64,")[1] : 
           productImage;
         
-        // For Veo API, we can include the image as a data URI
-        const imageDataUri = `data:${mimeType};base64,${base64Data}`;
-        
-        requestBody.config.referenceImages = [imageDataUri];
+        // Veo API expects image with imageBytes and mimeType for image-to-video
+        requestBody.image = {
+          imageBytes: base64Data,
+          mimeType: mimeType
+        };
         
         console.log("Product image added to video generation request");
       } catch (imageError) {
         console.error("Error processing product image for video generation:", imageError);
         // Continue without the image
       }
+    }
+
+    // Add config to request body
+    if (Object.keys(config).length > 0) {
+      requestBody.config = config;
     }
 
     console.log("Sending video generation request to Veo API");
@@ -167,7 +176,8 @@ async function generateWithGemini(
     const responseData = await response.json();
     console.log("Received response from Veo API for video generation");
     
-    // Check if the response contains an operation (async processing)
+    // Veo API always returns an operation object for async processing
+    // The operation has a 'name' field that we use for polling
     if (responseData.name) {
       // This is an operation that needs polling
       console.log(`Video generation operation started: ${responseData.name}`);
@@ -184,16 +194,17 @@ async function generateWithGemini(
       );
     }
     
-    // Check if video is directly available
-    if (responseData.videoUrl || responseData.video) {
-      const videoUrl = responseData.videoUrl || responseData.video;
+    // If operation is already done (unlikely but possible)
+    if (responseData.done && responseData.response?.generatedVideos?.[0]?.video) {
+      const videoFile = responseData.response.generatedVideos[0].video;
       console.log("Video generated successfully");
+      // The video is a file reference that needs to be downloaded
       return new Response(
         JSON.stringify({ 
           status: "completed",
           requestId: requestId,
           prompt: prompt,
-          videoUrl: videoUrl,
+          videoFile: videoFile, // File reference for download
           message: "Video generated successfully"
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
