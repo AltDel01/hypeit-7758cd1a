@@ -50,19 +50,23 @@ serve(async (req) => {
 
     console.log(`Proxying video request for URL: ${videoUrl.substring(0, 100)}...`);
 
-    // Fetch the video from Google's API with the API key in headers (not query params)
+    // For Google's file download endpoint, we need to append the API key as a query parameter
+    // The x-goog-api-key header doesn't work for file downloads, only for API requests
+    let fetchUrl = videoUrl;
+    if (apiKey) {
+      // Add the API key as a query parameter
+      fetchUrl = videoUrl.includes('?') 
+        ? `${videoUrl}&key=${apiKey}` 
+        : `${videoUrl}?key=${apiKey}`;
+    }
+    
+    console.log(`Fetching from: ${fetchUrl.substring(0, 150)}...`);
+    
     const fetchHeaders: HeadersInit = {
       'Accept': 'video/*',
     };
-
-    // Use x-goog-api-key header instead of query parameter for better security and reliability
-    if (apiKey) {
-      fetchHeaders['x-goog-api-key'] = apiKey;
-    }
     
-    console.log(`Fetching from: ${videoUrl.substring(0, 100)}...`);
-    
-    const response = await fetch(videoUrl, { headers: fetchHeaders });
+    const response = await fetch(fetchUrl, { headers: fetchHeaders });
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'No error details');
