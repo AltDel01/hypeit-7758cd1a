@@ -70,8 +70,11 @@ const Index = () => {
       }
 
       if (imageUrl) {
-        console.log("🖼️  Setting generated image in Index.tsx:", imageUrl.substring(0, 100) + "...");
+        console.log("🖼️  Setting generated image in Index.tsx:", imageUrl);
+        console.log("🖼️  Current activeTab:", activeTab);
+        console.log("🖼️  Calling setGeneratedImage...");
         setGeneratedImage(imageUrl);
+        console.log("🖼️  setGeneratedImage called successfully");
       }
       
       setIsGenerating(false);

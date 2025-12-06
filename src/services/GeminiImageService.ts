@@ -81,7 +81,7 @@ export class GeminiImageService {
           console.warn("Note: Using fallback image due to:", (response as any).originalError || "API unavailable");
           toast.success("Image generated (using fallback source)");
         } else {
-          toast.success("Image generated with Gemini 2.0 Flash!");
+          toast.success("Image generated");
         }
         
         // Dispatch event with the image

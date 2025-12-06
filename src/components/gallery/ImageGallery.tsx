@@ -17,6 +17,14 @@ interface ImageGalleryProps {
 }
 
 const ImageGallery = ({ feedImages, storyImages, generatedImage, activeTab }: ImageGalleryProps) => {
+  console.log("🖼️  ImageGallery render:", {
+    activeTab,
+    hasGeneratedImage: !!generatedImage,
+    generatedImagePreview: generatedImage?.substring(0, 100),
+    feedShowGenerated: activeTab === "feed",
+    storyShowGenerated: activeTab === "story"
+  });
+
   return (
     <div className="col-span-7 grid grid-cols-12 gap-0 h-screen">
       <div className="col-span-6 p-4 overflow-hidden max-h-screen">
