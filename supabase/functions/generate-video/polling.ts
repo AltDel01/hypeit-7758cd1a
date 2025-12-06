@@ -64,7 +64,8 @@ async function checkGeminiOperationStatus(
     });
 
     if (!response.ok) {
-      console.error("Error checking Gemini operation status:", response.status);
+      const errorText = await response.text();
+      console.error("Error checking Veo operation status:", response.status, errorText);
       return handleDirectStatusCheck(requestId, prompt);
     }
 
@@ -72,18 +73,40 @@ async function checkGeminiOperationStatus(
     
     // Check if operation is done
     if (operationData.done) {
-      // Operation completed
-      if (operationData.response?.videoUrl || operationData.response?.video) {
-        const videoUrl = operationData.response.videoUrl || operationData.response.video;
-        return new Response(
-          JSON.stringify({ 
-            status: "completed", 
-            videoUrl: videoUrl,
-            requestId: requestId,
-            message: "Video generation completed" 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      // Operation completed - check for video in response
+      // According to official docs: operation.response.generatedVideos[0].video
+      if (operationData.response?.generatedVideos?.[0]?.video) {
+        const videoFile = operationData.response.generatedVideos[0].video;
+        
+        // Download the video file from Veo API
+        // The video file reference has a 'name' field like "files/..."
+        try {
+          const downloadUrl = `https://generativelanguage.googleapis.com/v1/${videoFile.name}?key=${VEO_API_KEY}&alt=media`;
+          
+          // Return the download URL and file info
+          return new Response(
+            JSON.stringify({ 
+              status: "completed", 
+              videoUrl: downloadUrl, // Direct download URL
+              videoFile: videoFile, // File reference for additional info
+              requestId: requestId,
+              message: "Video generation completed"
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } catch (downloadError) {
+          console.error("Error preparing video download URL:", downloadError);
+          // Return file reference if download URL creation fails
+          return new Response(
+            JSON.stringify({ 
+              status: "completed", 
+              videoFile: videoFile, // File reference object
+              requestId: requestId,
+              message: "Video generation completed (download URL unavailable)"
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
       } else if (operationData.error) {
         // Operation failed
         return new Response(
