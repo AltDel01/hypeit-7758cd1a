@@ -74,7 +74,8 @@ const ImageDisplay = ({ images, generatedImage, showGenerated, aspectRatio }: Im
     showGenerated,
     hasLocalImage: !!localGeneratedImage,
     shouldShow: shouldShowGeneratedImage,
-    imagePreview: localGeneratedImage?.substring(0, 80)
+    localGeneratedImageValue: localGeneratedImage,
+    imagePreview: localGeneratedImage?.substring(0, 100)
   });
 
   return (

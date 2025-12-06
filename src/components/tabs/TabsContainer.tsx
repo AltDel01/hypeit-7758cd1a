@@ -97,7 +97,7 @@ const TabsContainer = ({
                 </div>
               </DropdownMenuItem>
             ))}
-          </DropdownMenuContent>
+           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       

@@ -15,7 +15,7 @@ export class FallbackService {
   }
 
   private static getPicsumUrl(seed: number, width: number, height: number): string {
-    return `https://picsum.photos/seed/${seed}/${width}/${height}`;
+    return `https://picsum.photos/seed/${seed}/${width}/${height}.jpg`;
   }
 
   static async getFallbackImage(prompt: string, aspectRatio: string = "1:1"): Promise<string> {
@@ -36,7 +36,7 @@ export class FallbackService {
       dispatchImageGeneratedEvent(fallbackUrl, prompt);
     } catch (error) {
       console.error("Error in fallback handling:", error);
-      const emergencyFallback = "https://picsum.photos/800/800";
+      const emergencyFallback = "https://picsum.photos/800/800.jpg";
       dispatchImageGeneratedEvent(emergencyFallback, prompt);
     }
   }

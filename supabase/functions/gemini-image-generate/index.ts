@@ -34,61 +34,44 @@ serve(async (req) => {
     const requestId = crypto.randomUUID();
     console.log(`Assigned request ID: ${requestId}`);
 
-    // Prepare the request to Gemini API
-    const genaiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent";
+    // Prepare the request to Imagen 3 API
+    const imagenUrl = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict";
     
-    // Build the request body - Gemini 2.0 Flash image generation format
-    // Note: Don't specify responseMimeType for image generation - it only accepts text formats
+    // Build the request body for Imagen 3
+    // Imagen supports numberOfImages (1-4), aspectRatio, and personGeneration
     const requestBody: any = {
-      contents: [
+      instances: [
         {
-          parts: [
-            { text: prompt },
-          ],
-        },
+          prompt: prompt
+        }
       ],
-      generationConfig: {
-        responseModalities: ["image"]
+      parameters: {
+        sampleCount: 1, // Generate 1 image (can be 1-4)
+        aspectRatio: aspect_ratio || "1:1", // Support aspect ratios: "1:1", "3:4", "4:3", "9:16", "16:9"
+        personGeneration: "allow_adult", // Default: allow adults but not children
+        safetySetting: "block_some", // Filter harmful content
+        addWatermark: false // Set to false to avoid SynthID watermark (if needed)
       }
     };
 
-    // Add product image if provided
+    // Note: Imagen 3 doesn't support reference images in the same way as Gemini
+    // If you need to use product_image, you might need to incorporate it into the prompt
     if (product_image) {
-      try {
-        console.log("Product image provided, adding to request");
-        
-        const mimeType = product_image.startsWith("data:image/") ? 
-          product_image.split(';')[0].split(':')[1] : 
-          "image/jpeg";
-          
-        const base64Data = product_image.includes("base64,") ? 
-          product_image.split("base64,")[1] : 
-          product_image;
-        
-        requestBody.contents[0].parts.push({
-          inlineData: {
-            mimeType: mimeType,
-            data: base64Data
-          }
-        });
-        
-        console.log("Product image added to request with mime type:", mimeType);
-      } catch (imageError) {
-        console.error("Error processing product image:", imageError);
-      }
+      console.log("Product image provided, but Imagen 3 doesn't support reference images directly");
+      console.log("Consider adding image description to the prompt instead");
+      // You could enhance the prompt with: "based on the provided product" or similar
     }
 
-    console.log("Sending request to Gemini API with prompt");
+    console.log("Sending request to Imagen 3 API with prompt");
     console.log(`Using aspect ratio: ${aspect_ratio}`);
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
     
     let imageData = null;
-    let textResponse = null;
     let errorResponse = null;
     
     try {
-      // Call Gemini API
-      const response = await fetch(`${genaiUrl}?key=${GEMINI_API_KEY}`, {
+      // Call Imagen 3 API
+      const response = await fetch(`${imagenUrl}?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,45 +81,46 @@ serve(async (req) => {
   
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Gemini API error:", response.status, errorText);
+        console.error("Imagen API error:", response.status, errorText);
         
         // Try to parse the error response as JSON
         try {
           const errorData = JSON.parse(errorText);
-          errorResponse = `Gemini API error: ${errorData.error?.message || response.statusText}`;
+          errorResponse = `Imagen API error: ${errorData.error?.message || response.statusText}`;
         } catch (e) {
           // If parsing fails, use the raw error text
-          errorResponse = `Gemini API error: Status ${response.status} - ${errorText || response.statusText}`;
+          errorResponse = `Imagen API error: Status ${response.status} - ${errorText || response.statusText}`;
         }
         
         throw new Error(errorResponse);
       }
   
       const responseData = await response.json();
-      console.log("Received response from Gemini API");
+      console.log("Received response from Imagen 3 API");
       
-      // Extract the image data
+      // Extract the image data from Imagen 3 response
       console.log("Response data structure:", JSON.stringify(responseData, null, 2).substring(0, 500));
       
-      if (responseData.candidates && responseData.candidates.length > 0 &&
-          responseData.candidates[0].content && responseData.candidates[0].content.parts) {
+      // Imagen 3 returns predictions array with images
+      if (responseData.predictions && responseData.predictions.length > 0) {
+        const prediction = responseData.predictions[0];
         
-        for (const part of responseData.candidates[0].content.parts) {
-          if (part.inlineData) {
-            imageData = part.inlineData.data;
-            console.log("Found image data in response");
-          } else if (part.text) {
-            textResponse = part.text;
-          }
+        // Imagen returns base64 encoded images in bytesBase64Encoded or image field
+        if (prediction.bytesBase64Encoded) {
+          imageData = prediction.bytesBase64Encoded;
+          console.log("Found image data in bytesBase64Encoded field");
+        } else if (prediction.image) {
+          imageData = prediction.image;
+          console.log("Found image data in image field");
         }
       }
     } catch (apiError) {
       console.error("API call error:", apiError);
-      errorResponse = (apiError as Error).message || "Error calling Gemini API";
+      errorResponse = (apiError as Error).message || "Error calling Imagen API";
     }
 
     if (!imageData) {
-      console.warn("No image data in Gemini API response, using fallback");
+      console.warn("No image data in Imagen API response, using fallback");
       console.warn("Error details:", errorResponse);
       
       // Use fallback image with Picsum (Unsplash is unreliable with 503 errors)
@@ -146,7 +130,8 @@ serve(async (req) => {
         return a & a;
       }, 0));
       
-      const fallbackUrl = `https://picsum.photos/seed/${seed}/800/800`;
+      // Use a direct Picsum URL that doesn't redirect
+      const fallbackUrl = `https://picsum.photos/seed/${seed}/800/800.jpg`;
       
       console.log("Fallback image URL:", fallbackUrl);
       
@@ -154,23 +139,23 @@ serve(async (req) => {
         status: "completed",
         imageUrl: fallbackUrl,
         requestId,
-        message: "Using fallback image (Gemini API unavailable)",
+        message: "Using fallback image (Imagen API unavailable)",
         usedFallback: true,
-        originalError: errorResponse || "No image data in Gemini API response"
+        originalError: errorResponse || "No image data in Imagen API response"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     // Return the image data
-    console.log("Successfully generated image with Gemini API");
+    console.log("Successfully generated image with Imagen 3");
     console.log("Image data length:", imageData.length, "characters");
     
     return new Response(JSON.stringify({ 
       status: "completed",
-      imageUrl: `data:image/jpeg;base64,${imageData}`,
+      imageUrl: `data:image/png;base64,${imageData}`,
       requestId,
-      message: textResponse || "Image generated successfully with Gemini 2.0 Flash",
+      message: "Image generated successfully with Imagen 3",
       usedFallback: false
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -191,12 +176,12 @@ serve(async (req) => {
       // Ignore parsing errors in error handler
     }
     
-    // Generate a fallback image URL from Picsum
+    // Generate a fallback image URL from Picsum (use .jpg to avoid redirects)
     const seed = Math.abs(promptForFallback.split('').reduce((a: number, b: string) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0));
-    const fallbackImageUrl = `https://picsum.photos/seed/${seed}/800/800`;
+    const fallbackImageUrl = `https://picsum.photos/seed/${seed}/800/800.jpg`;
     
     console.log("Returning fallback image due to error:", fallbackImageUrl);
     

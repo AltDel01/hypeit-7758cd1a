@@ -122,6 +122,64 @@ const ContentGenerator = ({
       />
       
       {hasProductImage && <ImageUploadStatus hasProductImage={hasProductImage} />}
+      
+      {/* Generated Image Preview Box */}
+      {localGeneratedImage && (
+        <div className="mt-4 p-4 rounded-lg border-2 border-[#9b87f5] bg-gray-800/50">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-[#9b87f5] flex items-center gap-2">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Generated Result
+            </h3>
+            <button
+              onClick={() => {
+                const a = document.createElement('a');
+                a.href = localGeneratedImage;
+                a.download = 'generated-image.jpg';
+                a.click();
+                toast.success("Image downloaded");
+              }}
+              className="text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              Download
+            </button>
+          </div>
+          <div className="relative rounded-lg overflow-hidden bg-gray-900">
+            <img 
+              src={localGeneratedImage} 
+              alt="Generated result" 
+              className="w-full aspect-square object-cover"
+              onError={(e) => {
+                console.error("Image failed to load:", localGeneratedImage);
+                toast.error("Failed to load generated image");
+              }}
+            />
+            <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+              AI Generated
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">
+            Your generated image is ready! It also appears in the gallery on the right →
+          </p>
+        </div>
+      )}
+      
+      {isGenerating && !localGeneratedImage && (
+        <div className="mt-4 p-4 rounded-lg border-2 border-gray-600 bg-gray-800/50">
+          <div className="flex items-center justify-center mb-3">
+            <div className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
+            <h3 className="text-sm font-semibold text-gray-300">
+              Generating...
+            </h3>
+          </div>
+          <div className="relative rounded-lg overflow-hidden bg-gray-900 aspect-square flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-700 border-t-[#9b87f5] mb-3"></div>
+              <p className="text-sm text-gray-400">Creating your image...</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
