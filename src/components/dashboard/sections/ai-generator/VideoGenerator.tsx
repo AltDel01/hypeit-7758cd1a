@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Wand2, Sparkles, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import AspectRatioSelector from './AspectRatioSelector';
 
 const VideoGenerator = () => {
@@ -14,12 +15,16 @@ const VideoGenerator = () => {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
-  const [aspectRatio, setAspectRatio] = useState('1:1');
+  const [aspectRatio, setAspectRatio] = useState('16:9');
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const pollingIntervalRef = useRef<number | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setUploadedImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
@@ -44,8 +49,14 @@ const VideoGenerator = () => {
 
     setIsEnhancing(true);
     try {
+      // Call OpenAI or another service to enhance the prompt
+      // For now, use a simple enhancement
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEnhancedPrompt(`A photorealistic, 4k commercial video shot in a bright, well-lit supermarket aisle. A young, attractive Asian woman with long wavy black hair, wearing a fitted red long-sleeve top, stands holding a blue and gold bag of popcorn. She looks excitedly at the camera, reaches into the bag to pick out a single, round, golden mushroom popcorn kernel. She brings it to her mouth, eats it with a distinct crunch, and her face lights up with a look of pure delight and satisfaction, nodding in approval. The background features shelves fully stocked with yellow and blue snack bags, slightly out of focus (depth of field) to keep attention on the woman. The lighting is even, bright, and professional store lighting.`);
+      
+      // Enhanced prompt with more video-specific details
+      const enhanced = `A photorealistic, 4k commercial video shot in a bright, well-lit supermarket aisle. A young, attractive Asian woman with long wavy black hair, wearing a fitted red long-sleeve top, stands holding a blue and gold bag of popcorn. She looks excitedly at the camera, reaches into the bag to pick out a single, round, golden mushroom popcorn kernel. She brings it to her mouth, eats it with a distinct crunch, and her face lights up with a look of pure delight and satisfaction, nodding in approval. The background features shelves fully stocked with yellow and blue snack bags, slightly out of focus (depth of field) to keep attention on the woman. The lighting is even, bright, and professional store lighting. Smooth camera movement, cinematic quality, professional commercial production.`;
+      
+      setEnhancedPrompt(enhanced);
       
       toast({
         title: "Prompt Enhanced!",
@@ -62,8 +73,63 @@ const VideoGenerator = () => {
     }
   };
 
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // Remove data URL prefix if present
+        const base64 = base64String.includes(',') 
+          ? base64String.split(',')[1] 
+          : base64String;
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const pollVideoStatus = async (reqId: string, prompt: string, operationName?: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-video", {
+        body: {
+          requestId: reqId,
+          checkOnly: true,
+          prompt: prompt,
+          operationName: operationName
+        }
+      });
+
+      if (error) {
+        console.error('Polling error:', error);
+        return null;
+      }
+
+      if (data?.status === "completed" && data?.videoUrl) {
+        // Clear polling interval
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        return data.videoUrl;
+      } else if (data?.status === "error") {
+        // Clear polling interval on error
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        throw new Error(data.error || "Video generation failed");
+      }
+
+      return null; // Still processing
+    } catch (error) {
+      console.error('Polling error:', error);
+      return null;
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!uploadedImage) {
+    if (!uploadedImage || !uploadedImageFile) {
       toast({
         title: "Image Required",
         description: "Please upload a product image first",
@@ -72,26 +138,128 @@ const VideoGenerator = () => {
       return;
     }
 
-    setIsGenerating(true);
-    setGeneratedVideo(null);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setGeneratedVideo('/videos/popcorn-promo-demo.mp4');
-      
+    const finalPrompt = enhancedPrompt || prompt;
+    if (!finalPrompt.trim()) {
       toast({
-        title: "Video Generated!",
-        description: "Your AI-generated video is ready",
-      });
-    } catch (error) {
-      toast({
-        title: "Generation Failed",
-        description: "Failed to generate video. Please try again.",
+        title: "Prompt Required",
+        description: "Please enter a prompt or enhance your prompt first",
         variant: "destructive"
       });
-    } finally {
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedVideo(null);
+    
+    // Clear any existing polling interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
+    try {
+      // Convert image to base64
+      const imageBase64 = await convertImageToBase64(uploadedImageFile);
+      
+      // Call the video generation function
+      const { data, error } = await supabase.functions.invoke("generate-video", {
+        body: {
+          prompt: finalPrompt,
+          enhanced_prompt: enhancedPrompt || undefined,
+          aspect_ratio: aspectRatio,
+          product_image: imageBase64,
+          product_image_name: uploadedImageFile.name,
+          product_image_type: uploadedImageFile.type
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to start video generation");
+      }
+
+      if (data?.status === "error") {
+        throw new Error(data.error || "Video generation failed");
+      }
+
+      // If video is immediately available
+      if (data?.status === "completed" && data?.videoUrl) {
+        setGeneratedVideo(data.videoUrl);
+        toast({
+          title: "Video Generated!",
+          description: "Your AI-generated video is ready",
+        });
+        setIsGenerating(false);
+        return;
+      }
+
+      // If processing, start polling
+      if (data?.requestId) {
+        setRequestId(data.requestId);
+        const operationName = data?.operationName;
+        
+        // Start polling for video status
+        const pollInterval = setInterval(async () => {
+          const videoUrl = await pollVideoStatus(data.requestId, finalPrompt, operationName);
+          if (videoUrl) {
+            setGeneratedVideo(videoUrl);
+            setIsGenerating(false);
+            toast({
+              title: "Video Generated!",
+              description: "Your AI-generated video is ready",
+            });
+          }
+        }, 5000); // Poll every 5 seconds
+
+        pollingIntervalRef.current = pollInterval as unknown as number;
+
+        // Set a maximum polling time (e.g., 2 minutes)
+        setTimeout(() => {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          if (isGenerating) {
+            setIsGenerating(false);
+            toast({
+              title: "Generation Timeout",
+              description: "Video generation is taking longer than expected. Please check back later.",
+              variant: "destructive"
+            });
+          }
+        }, 120000); // 2 minutes timeout
+
+        toast({
+          title: "Video Generation Started",
+          description: "Your video is being generated. This may take a few moments...",
+        });
+      } else {
+        throw new Error("Invalid response from video generation service");
+      }
+    } catch (error) {
+      console.error('Video generation error:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate video. Please try again.",
+        variant: "destructive"
+      });
       setIsGenerating(false);
+      
+      // Clear polling on error
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
   };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
