@@ -139,66 +139,31 @@ async function checkGeminiOperationStatus(
       if (videoUri) {
         console.log("Found video URI:", videoUri);
         
-        // Fetch the video directly from Google and return it as a data URL
+        // Add API key to the video URL
         const VEO_API_KEY = process.env.VEO_API_KEY;
+        const videoUrlWithKey = videoUri.includes('?') 
+          ? `${videoUri}&key=${VEO_API_KEY}` 
+          : `${videoUri}?key=${VEO_API_KEY}`;
         
-        try {
-          // Add API key to the video URL
-          const videoUrlWithKey = videoUri.includes('?') 
-            ? `${videoUri}&key=${VEO_API_KEY}` 
-            : `${videoUri}?key=${VEO_API_KEY}`;
-          
-          console.log("Fetching video from Google API...");
-          
-          const videoResponse = await fetch(videoUrlWithKey, {
-            headers: {
-              'Accept': 'video/*',
-            }
-          });
-          
-          if (!videoResponse.ok) {
-            const errorText = await videoResponse.text().catch(() => 'No error details');
-            console.error(`Failed to fetch video: ${videoResponse.status}`, errorText);
-            throw new Error(`Failed to fetch video: ${videoResponse.status}`);
-          }
-          
-          // Get video as base64
-          const videoBuffer = await videoResponse.arrayBuffer();
-          const videoBase64 = btoa(String.fromCharCode(...new Uint8Array(videoBuffer)));
-          const videoDataUrl = `data:video/mp4;base64,${videoBase64}`;
-          
-          console.log(`Video fetched successfully: ${videoBuffer.byteLength} bytes`);
-          
-          // Cache this result for future polls
-          completedVideosCache.set(operationName, {
-            videoUri: videoDataUrl,
-            proxyUrl: videoDataUrl,
-            timestamp: Date.now()
-          });
-          console.log(`Cached result for operation ${operationName}`);
-          
-          return new Response(
-            JSON.stringify({ 
-              status: "completed", 
-              videoUrl: videoDataUrl,
-              requestId: requestId,
-              message: "Video generation completed"
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        } catch (fetchError) {
-          console.error("Error fetching video:", fetchError);
-          // Return error if we can't fetch the video
-          return new Response(
-            JSON.stringify({ 
-              status: "error", 
-              error: "Failed to retrieve video from Google",
-              message: fetchError instanceof Error ? fetchError.message : "Unknown error",
-              requestId: requestId
-            }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+        console.log("Video URL prepared with API key");
+        
+        // Cache this result for future polls
+        completedVideosCache.set(operationName, {
+          videoUri: videoUrlWithKey,
+          proxyUrl: videoUrlWithKey,
+          timestamp: Date.now()
+        });
+        console.log(`Cached result for operation ${operationName}`);
+        
+        return new Response(
+          JSON.stringify({ 
+            status: "completed", 
+            videoUrl: videoUrlWithKey,
+            requestId: requestId,
+            message: "Video generation completed"
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
       // If operation is done but no video found, log detailed info

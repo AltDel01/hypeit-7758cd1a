@@ -115,9 +115,9 @@ const VideoGenerator = () => {
         
         console.log("Video generation completed");
         
-        // The video URL is now a data URL (base64) that can be used directly
+        // The video URL now includes the API key and can be used directly in the video element
         if (data.videoUrl) {
-          console.log("Video URL received, type:", data.videoUrl.substring(0, 20));
+          console.log("Video URL received");
           return data.videoUrl;
         }
         
@@ -201,7 +201,7 @@ const VideoGenerator = () => {
       if (data?.status === "completed") {
         console.log("Video ready in response");
         
-        // The video URL is now a data URL that can be used directly
+        // The video URL includes the API key and can be used directly
         if (data.videoUrl) {
           console.log("Setting video URL directly");
           setGeneratedVideo(data.videoUrl);
