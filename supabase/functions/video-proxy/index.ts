@@ -17,12 +17,31 @@ serve(async (req) => {
   }
 
   try {
-    // Get the video URL from query parameters
-    const url = new URL(req.url);
-    const videoUrl = url.searchParams.get('url');
-    const apiKey = url.searchParams.get('key');
+    // Parse the request - can be query parameters or JSON body
+    let videoUrl: string | null = null;
+    let apiKey: string | null = null;
+
+    if (req.method === 'GET') {
+      // Get from query parameters
+      const url = new URL(req.url);
+      videoUrl = url.searchParams.get('url');
+      apiKey = url.searchParams.get('key');
+    } else if (req.method === 'POST') {
+      // Get from JSON body
+      try {
+        const body = await req.json();
+        videoUrl = body.url;
+        apiKey = body.key;
+      } catch {
+        // Fall back to query parameters
+        const url = new URL(req.url);
+        videoUrl = url.searchParams.get('url');
+        apiKey = url.searchParams.get('key');
+      }
+    }
 
     if (!videoUrl) {
+      console.error('Missing video URL parameter');
       return new Response(
         JSON.stringify({ error: 'Missing video URL parameter' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -31,79 +50,45 @@ serve(async (req) => {
 
     console.log(`Proxying video request for URL: ${videoUrl.substring(0, 100)}...`);
 
-    // Fetch the video from Google's API
-    const headers: HeadersInit = {
+    // Fetch the video from Google's API with the API key in headers (not query params)
+    const fetchHeaders: HeadersInit = {
       'Accept': 'video/*',
     };
 
-    // Add API key if provided
+    // Use x-goog-api-key header instead of query parameter for better security and reliability
     if (apiKey) {
-      // The URL might already have the key, but adding it again shouldn't hurt
-      const fetchUrl = videoUrl.includes('?') 
-        ? `${videoUrl}&key=${apiKey}` 
-        : `${videoUrl}?key=${apiKey}`;
-      
-      console.log(`Fetching from: ${fetchUrl.substring(0, 100)}...`);
-      
-      const response = await fetch(fetchUrl, { headers });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Video fetch failed: ${response.status}`, errorText);
-        return new Response(
-          JSON.stringify({ 
-            error: `Failed to fetch video: ${response.status}`,
-            details: errorText
-          }),
-          { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Get the video blob
-      const videoBlob = await response.blob();
-      console.log(`Video fetched successfully, size: ${videoBlob.size} bytes`);
-
-      // Return the video with appropriate headers
-      return new Response(videoBlob, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': videoBlob.type || 'video/mp4',
-          'Content-Length': videoBlob.size.toString(),
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
-        },
-      });
-    } else {
-      // Try without API key (might work if URL is already authenticated)
-      console.log(`Fetching from: ${videoUrl.substring(0, 100)}...`);
-      
-      const response = await fetch(videoUrl, { headers });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Video fetch failed: ${response.status}`, errorText);
-        return new Response(
-          JSON.stringify({ 
-            error: `Failed to fetch video: ${response.status}`,
-            details: errorText
-          }),
-          { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Get the video blob
-      const videoBlob = await response.blob();
-      console.log(`Video fetched successfully, size: ${videoBlob.size} bytes`);
-
-      // Return the video with appropriate headers
-      return new Response(videoBlob, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': videoBlob.type || 'video/mp4',
-          'Content-Length': videoBlob.size.toString(),
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
-        },
-      });
+      fetchHeaders['x-goog-api-key'] = apiKey;
     }
+    
+    console.log(`Fetching from: ${videoUrl.substring(0, 100)}...`);
+    
+    const response = await fetch(videoUrl, { headers: fetchHeaders });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details');
+      console.error(`Video fetch failed: ${response.status}`, errorText);
+      return new Response(
+        JSON.stringify({ 
+          error: `Failed to fetch video: ${response.status}`,
+          details: errorText
+        }),
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get the video data as ArrayBuffer
+    const videoBuffer = await response.arrayBuffer();
+    console.log(`Video fetched successfully, size: ${videoBuffer.byteLength} bytes`);
+
+    // Return the video binary data with appropriate headers
+    return new Response(videoBuffer, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'video/mp4',
+        'Content-Length': videoBuffer.byteLength.toString(),
+        'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+      },
+    });
   } catch (error) {
     console.error('Video proxy error:', error);
     return new Response(
