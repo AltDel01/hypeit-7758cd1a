@@ -3,14 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { LocalStorageHandler } from '../storage/LocalStorageHandler';
 import { ImageRequest, RequestStatus } from '../types';
 
+// Use a loose type lookup to avoid TypeScript complaining about env typings
+const ENABLE_REQUEST_SIMULATION = (import.meta as any)?.env?.VITE_ENABLE_REQUEST_SIMULATION === 'true';
+
 export class RequestManager {
   private storageHandler: LocalStorageHandler;
 
   constructor() {
     this.storageHandler = new LocalStorageHandler();
-    
-    // Start polling for request updates
-    this.startPolling();
+
+    // Only simulate progress if explicitly enabled
+    if (ENABLE_REQUEST_SIMULATION) {
+      this.startPolling();
+    }
   }
 
   getStorageHandler(): LocalStorageHandler {

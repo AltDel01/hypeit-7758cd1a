@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AvaButton from '@/components/audio/AvaButton';
 import { imageRequestService } from '@/services/requests';
 import { useNavigate } from 'react-router-dom';
+import GeminiImageService from '@/services/GeminiImageService';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("feed");
@@ -47,9 +48,30 @@ const Index = () => {
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
       console.log("Index.tsx caught image generated event:", event.detail);
-      setGeneratedImage(event.detail.imageUrl);
+      const { imageUrl, error, requestId } = event.detail as {
+        imageUrl?: string;
+        error?: string;
+        requestId?: string;
+      };
+
+      if (requestId) {
+        imageRequestService.updateRequest(requestId, {
+          status: error ? 'failed' : 'completed',
+          resultImage: imageUrl || null,
+          progress: error ? 0 : 100,
+          completedAt: error ? undefined : new Date().toISOString()
+        });
+      }
+
+      if (error) {
+        toast.error(error);
+      }
+
+      if (imageUrl) {
+        setGeneratedImage(imageUrl);
+      }
+      
       setIsGenerating(false);
-      toast.success("Your image has been generated!");
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
@@ -82,12 +104,14 @@ const Index = () => {
     }
     
     setIsGenerating(true);
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+
     try {
       const aspectRatio = activeTab === "feed" ? "1:1" : "9:16";
       console.log(`Generating image with aspect ratio: ${aspectRatio}`);
       console.log(`Product image available: ${productImage !== null}`);
       
-      let productImageUrl = null;
+      let productImageUrl: string | null = null;
       
       if (productImage) {
         console.log(`Product image: ${productImage.name}, size: ${productImage.size}`);
@@ -101,11 +125,9 @@ const Index = () => {
         timestamp: new Date().toISOString()
       });
       
-      // Get the batch size from local storage (set by VisualSettings)
       const batchSize = parseInt(localStorage.getItem('selectedImagesPerBatch') || '1', 10);
       const isPremiumBatch = batchSize > 3;
       
-      // Create request in the service
       const request = imageRequestService.createRequest(
         user.id,
         user.email || 'Anonymous User',
@@ -115,43 +137,47 @@ const Index = () => {
         batchSize
       );
       
-      console.log("Image generation request created:", request);
-      
-      // Start progress simulation for user feedback
+      // Start progress updates for UI feedback while waiting on backend
       let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 10;
+      progressInterval = setInterval(() => {
+        progress += Math.random() * 12;
         if (progress >= 95) {
           progress = 95;
-          clearInterval(interval);
+          if (progressInterval) clearInterval(progressInterval);
         }
         
         const progressEvent = new CustomEvent('imageGenerationProgress', {
           detail: { progress, requestId: request.id }
         });
         window.dispatchEvent(progressEvent);
-      }, 800);
+      }, 900);
+      
+      await GeminiImageService.generateImage({
+        prompt,
+        aspectRatio,
+        productImage,
+        requestId: request.id
+      });
       
       // For premium batches (15 or 25 images), immediately navigate to Analytics > Generated Content
       if (isPremiumBatch) {
-        // No toast notification - just immediately redirect
         navigate('/analytics');
         
-        // Add a small delay to allow the page to load before setting the active section
         setTimeout(() => {
           const event = new CustomEvent('setAnalyticsSection', { 
             detail: { section: 'generated' } 
           });
           window.dispatchEvent(event);
         }, 500);
-      } else {
-        toast.success("Your image generation request has been sent to our designers!");
-        toast.info("You'll receive a notification when your image is ready.");
       }
     } catch (error) {
       console.error("Error generating image:", error);
       Sentry.captureException(error);
-      toast.error(`Failed to submit request: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setIsGenerating(false);
     }
   };
