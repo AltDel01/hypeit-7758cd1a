@@ -83,7 +83,11 @@ async function generateWithGemini(
     
     // Veo 3.1 API endpoint for video generation
     // Note: This requires Google AI Pro or Ultra subscription
+    // Using the REST API endpoint format - may need to use SDK instead
     const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:generateVideos";
+    
+    // Alternative endpoint format if above doesn't work:
+    // const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview/generateVideos";
     
     // Build the request body for video generation according to official Veo 3.1 API
     const requestBody: any = {
@@ -129,9 +133,14 @@ async function generateWithGemini(
     }
 
     console.log("Sending video generation request to Veo API");
+    console.log("Request URL:", veoUrl);
+    console.log("Request body keys:", Object.keys(requestBody));
     
     // Call Veo API for video generation
-    const response = await fetch(`${veoUrl}?key=${veoApiKey}`, {
+    const apiUrl = `${veoUrl}?key=${veoApiKey}`;
+    console.log("Full API URL (key hidden):", `${veoUrl}?key=${veoApiKey.substring(0, 10)}...`);
+    
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -141,13 +150,18 @@ async function generateWithGemini(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Veo API error:", response.status, errorText);
+      console.error("Veo API error:", response.status);
+      console.error("Error response:", errorText);
+      console.error("Request URL:", `${veoUrl}?key=${veoApiKey.substring(0, 10)}...`);
+      console.error("Request body:", JSON.stringify(requestBody).substring(0, 200));
       
       // Try to parse the error response as JSON
       let errorMessage = `Veo API error: Status ${response.status}`;
+      let errorDetails = errorText;
       try {
         const errorData = JSON.parse(errorText);
         errorMessage = `Veo API error: ${errorData.error?.message || response.statusText}`;
+        errorDetails = JSON.stringify(errorData, null, 2);
         
         // Check if it's a subscription/access issue
         if (errorData.error?.message?.includes("subscription") || 
@@ -159,22 +173,23 @@ async function generateWithGemini(
         errorMessage = `Veo API error: Status ${response.status} - ${errorText || response.statusText}`;
       }
       
-      // Return processing status with error info for polling
+      // Return error response instead of processing status
       return new Response(
         JSON.stringify({ 
-          status: "processing",
+          status: "error",
           requestId: requestId,
           prompt: prompt,
-          estimatedTime: 30,
           error: errorMessage,
-          message: "Video generation started (may require subscription upgrade)"
+          errorDetails: errorDetails,
+          message: "Video generation failed"
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const responseData = await response.json();
     console.log("Received response from Veo API for video generation");
+    console.log("Response data:", JSON.stringify(responseData).substring(0, 500));
     
     // Veo API always returns an operation object for async processing
     // The operation has a 'name' field that we use for polling
