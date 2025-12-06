@@ -1,11 +1,10 @@
 
-import { toast } from "sonner";
 import { PollImageParams, ImageStatusResult } from "./types";
 import { checkImageStatus } from "./statusChecker";
 import { delayExecution } from "./helpers";
 import { processImageUrl } from "./imageProcessor";
 import { useFallbackImage } from "./fallbackHandler";
-import { forceImageGenerationRetry, dispatchImageGenerationErrorEvent } from '../imageEvents';
+import { dispatchImageGenerationErrorEvent } from '../imageEvents';
 import { POLLING_CONFIG, calculateNextDelay, isValidResponse, isProcessing } from './pollingUtils';
 
 const activePolls = new Map<string, boolean>();
@@ -15,24 +14,46 @@ export async function pollForImageResult(params: PollImageParams): Promise<void>
     requestId, 
     prompt, 
     aspectRatio, 
-    style,
-    retries = POLLING_CONFIG.MAX_RETRIES, 
     delay = POLLING_CONFIG.INITIAL_DELAY, 
     maxRetries = POLLING_CONFIG.MAX_RETRIES 
   } = params;
   
-  // Immediately return without doing anything - image generation disabled
-  console.log("Image generation is currently disabled");
-  return;
+  if (!requestId || activePolls.has(requestId)) {
+    return;
+  }
+  
+  activePolls.set(requestId, true);
+  let attempt = 0;
+  let currentDelay = delay;
+  
+  while (attempt < maxRetries) {
+    try {
+      const result = await checkImageStatus(requestId);
+      const handled = await handleStatusCheckResult(result, params);
+      if (handled) {
+        activePolls.delete(requestId);
+        return;
+      }
+    } catch (error) {
+      handleApiError(error, prompt, aspectRatio, requestId);
+      break;
+    }
+    
+    attempt += 1;
+    await delayExecution(currentDelay);
+    currentDelay = calculateNextDelay(currentDelay);
+  }
+  
+  await handleMaxRetriesReached(prompt, aspectRatio, requestId);
 }
 
 /**
  * Handles the case when maximum retries are reached
  */
-function handleMaxRetriesReached(prompt: string, aspectRatio: string, requestId: string): void {
+async function handleMaxRetriesReached(prompt: string, aspectRatio: string, requestId: string): Promise<void> {
   console.log(`Maximum polling retries reached for request ${requestId}`);
   activePolls.delete(requestId);
-  // Image generation fallback disabled
+  await useFallbackImage(prompt, aspectRatio);
 }
 
 /**
@@ -41,9 +62,25 @@ function handleMaxRetriesReached(prompt: string, aspectRatio: string, requestId:
 export async function handleStatusCheckResult(
   result: ImageStatusResult, 
   params: PollImageParams
-): Promise<void> {
-  // Image generation is disabled, do nothing
-  return;
+): Promise<boolean> {
+  const { prompt, aspectRatio, requestId } = params;
+  
+  if (result.error || result.apiError) {
+    dispatchImageGenerationErrorEvent(result.error || result.apiError || "Unknown error", prompt, requestId);
+    return true;
+  }
+  
+  if (result.status && isValidResponse(result.status, result.imageUrl)) {
+    await processImageUrl(result.imageUrl as string, prompt);
+    return true;
+  }
+  
+  if (!isProcessing(result.status)) {
+    await useFallbackImage(prompt, aspectRatio);
+    return true;
+  }
+  
+  return false;
 }
 
 /**
@@ -51,14 +88,8 @@ export async function handleStatusCheckResult(
  */
 function handleApiError(error: any, prompt: string, aspectRatio: string, requestId: string): void {
   console.error(`Error from API for ${requestId}:`, error);
+  dispatchImageGenerationErrorEvent(error instanceof Error ? error.message : String(error), prompt, requestId);
   activePolls.delete(requestId);
-}
-
-/**
- * Schedules the next polling attempt
- */
-function scheduleNextPoll(params: PollImageParams): void {
-  // Image generation polling disabled
 }
 
 /**
@@ -66,6 +97,7 @@ function scheduleNextPoll(params: PollImageParams): void {
  */
 export function handlePollingError(error: any, params: PollImageParams): void {
   console.error(`Error in polling for ${params.requestId}:`, error);
+  dispatchImageGenerationErrorEvent(error instanceof Error ? error.message : String(error), params.prompt, params.requestId);
 }
 
 /**

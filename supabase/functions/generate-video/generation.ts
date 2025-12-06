@@ -1,4 +1,3 @@
-
 import { corsHeaders, ERROR_MESSAGES } from "./config.ts";
 
 /**
@@ -45,7 +44,7 @@ export async function handleVideoGenerationRequest(requestData: VideoGenerationR
   const finalPrompt = enhanced_prompt || prompt;
   
   try {
-    const VEO_API_KEY = Deno.env.get("VEO_API_KEY");
+    const VEO_API_KEY = process.env.VEO_API_KEY; // Changed from Deno to Node.js environment variable access
     
     if (!VEO_API_KEY) {
       console.error("VEO_API_KEY environment variable not set");
@@ -119,16 +118,10 @@ async function generateWithGemini(
     }
 
     // Build request body with instances array
-    const requestBody: any = {
-      instances: [instance],
+    const requestBody = {
+      instances: [instance], // Use the instance object that includes image if provided
+      parameters: { aspectRatio }
     };
-
-    // Add parameters if needed (aspectRatio, etc.)
-    if (aspectRatio) {
-      requestBody.parameters = {
-        aspectRatio: aspectRatio,
-      };
-    }
 
     console.log("Sending video generation request to Veo API");
     console.log("Request URL:", veoUrl);

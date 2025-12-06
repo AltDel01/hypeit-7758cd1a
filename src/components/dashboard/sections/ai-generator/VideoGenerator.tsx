@@ -111,8 +111,8 @@ const VideoGenerator = () => {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
-        // Handle both videoUrl and videoFile (backend converts videoFile to videoUrl)
-        const videoUrl = data.videoUrl || (data.videoFile?.name ? 
+        // Prefer proxyUrl for authenticated access, fallback to videoUrl
+        const videoUrl = data.proxyUrl || data.videoUrl || (data.videoFile?.name ? 
           `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
         if (videoUrl) {
           return videoUrl;
@@ -191,8 +191,8 @@ const VideoGenerator = () => {
 
       // If video is immediately available
       if (data?.status === "completed") {
-        // Handle both videoUrl and videoFile
-        const videoUrl = data.videoUrl || (data.videoFile?.name ? 
+        // Prefer proxyUrl for authenticated access, fallback to videoUrl
+        const videoUrl = data.proxyUrl || data.videoUrl || (data.videoFile?.name ? 
           `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
         if (videoUrl) {
           setGeneratedVideo(videoUrl);
