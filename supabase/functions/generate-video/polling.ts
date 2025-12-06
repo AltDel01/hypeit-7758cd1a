@@ -112,26 +112,23 @@ async function checkGeminiOperationStatus(
         console.log("Found video URI:", videoUri);
         
         // The URI from Google's API is: https://generativelanguage.googleapis.com/v1beta/files/{id}:download?alt=media
-        // This needs to be called through a proxy endpoint on the backend that includes the API key
-        // Convert the direct URI to use the proxy
+        // Since the API key can't be passed as a query parameter to the file download endpoint,
+        // we need to proxy the request through our backend
         const VEO_API_KEY = process.env.VEO_API_KEY;
         
-        // Create a proxy URL that our backend can use to fetch the video with authentication
-        const proxyUrl = new URL("https://current-domain/functions/v1/video-proxy");
-        proxyUrl.searchParams.set('url', videoUri);
-        if (VEO_API_KEY) {
-          proxyUrl.searchParams.set('key', VEO_API_KEY);
-        }
+        // Return the proxy URL that the frontend should call to get the video
+        // Use the full Supabase function URL for absolute path reliability
+        const SUPABASE_FUNCTION_URL = "https://mkwinxbualpcivkujlfd.supabase.co/functions/v1/video-proxy";
+        const proxyUrl = `${SUPABASE_FUNCTION_URL}?url=${encodeURIComponent(videoUri)}&key=${encodeURIComponent(VEO_API_KEY || '')}`;
         
-        // For now, return the original URL but the frontend should use the proxy
-        // We'll let the frontend handle the proxy call
-        console.log("Video download URL ready:", videoUri.substring(0, 100) + "...");
+        console.log("Returning proxy URL for video streaming");
+        console.log("Proxy URL:", proxyUrl.substring(0, 150) + "...");
         
         return new Response(
           JSON.stringify({ 
             status: "completed", 
             videoUrl: videoUri,
-            proxyUrl: `/functions/v1/video-proxy?url=${encodeURIComponent(videoUri)}&key=${encodeURIComponent(VEO_API_KEY || '')}`,
+            proxyUrl: proxyUrl,
             requestId: requestId,
             message: "Video generation completed"
           }),

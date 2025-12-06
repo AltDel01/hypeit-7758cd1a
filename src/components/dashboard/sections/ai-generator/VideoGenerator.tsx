@@ -17,6 +17,7 @@ const VideoGenerator = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [aspectRatio, setAspectRatio] = useState('16:9');
   const [requestId, setRequestId] = useState<string | null>(null);
   const pollingIntervalRef = useRef<number | null>(null);
@@ -111,12 +112,40 @@ const VideoGenerator = () => {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
-        // Prefer proxyUrl for authenticated access, fallback to videoUrl
-        const videoUrl = data.proxyUrl || data.videoUrl || (data.videoFile?.name ? 
-          `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
-        if (videoUrl) {
-          return videoUrl;
+        
+        console.log("Video generation completed");
+        
+        // If we have a proxy URL, fetch the video directly
+        if (data.proxyUrl) {
+          try {
+            console.log("Fetching video from proxy endpoint:", data.proxyUrl.substring(0, 100));
+            
+            const videoResponse = await fetch(data.proxyUrl);
+            
+            if (!videoResponse.ok) {
+              const errorText = await videoResponse.text().catch(() => 'No error details');
+              console.error(`Proxy fetch failed: ${videoResponse.status}`, errorText);
+              throw new Error(`Failed to fetch video from proxy: ${videoResponse.status}`);
+            }
+            
+            // Get the video blob
+            const videoBlob = await videoResponse.blob();
+            console.log(`Video blob received: ${videoBlob.size} bytes, type: ${videoBlob.type}`);
+            
+            // Create object URL for the blob
+            const blobUrl = URL.createObjectURL(videoBlob);
+            console.log("Blob URL created successfully");
+            return blobUrl;
+          } catch (proxyError) {
+            console.error('Error fetching through proxy:', proxyError);
+            // Return null to trigger error handling
+            return null;
+          }
         }
+        
+        // No proxy URL, can't get the video
+        console.warn("No proxy URL in response");
+        return null;
       } else if (data?.status === "error") {
         // Clear polling interval on error
         if (pollingIntervalRef.current) {
@@ -155,8 +184,16 @@ const VideoGenerator = () => {
     }
 
     try {
-      // Convert image to base64
-      const imageBase64 = await convertImageToBase64(uploadedImageFile);
+      // Convert image to base64 only if image exists
+      let imageBase64: string | undefined = undefined;
+      let imageName: string | undefined = undefined;
+      let imageType: string | undefined = undefined;
+      
+      if (uploadedImageFile) {
+        imageBase64 = await convertImageToBase64(uploadedImageFile);
+        imageName = uploadedImageFile.name;
+        imageType = uploadedImageFile.type;
+      }
       
       // Call the video generation function
       const { data, error } = await supabase.functions.invoke("generate-video", {
@@ -164,9 +201,11 @@ const VideoGenerator = () => {
           prompt: finalPrompt,
           enhanced_prompt: enhancedPrompt || undefined,
           aspect_ratio: aspectRatio,
-          product_image: imageBase64,
-          product_image_name: uploadedImageFile.name,
-          product_image_type: uploadedImageFile.type
+          ...(imageBase64 && {
+            product_image: imageBase64,
+            product_image_name: imageName,
+            product_image_type: imageType
+          })
         }
       });
 
@@ -182,18 +221,31 @@ const VideoGenerator = () => {
 
       // If video is immediately available
       if (data?.status === "completed") {
-        // Prefer proxyUrl for authenticated access, fallback to videoUrl
-        const videoUrl = data.proxyUrl || data.videoUrl || (data.videoFile?.name ? 
-          `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
-        if (videoUrl) {
-          setGeneratedVideo(videoUrl);
-          toast({
-            title: "Video Generated!",
-            description: "Your AI-generated video is ready",
-          });
-          setIsGenerating(false);
-          return;
+        console.log("Video ready in response");
+        
+        // Try proxy URL first if available
+        if (data.proxyUrl) {
+          try {
+            const videoResponse = await fetch(data.proxyUrl);
+            if (videoResponse.ok) {
+              const videoBlob = await videoResponse.blob();
+              const blobUrl = URL.createObjectURL(videoBlob);
+              setGeneratedVideo(blobUrl);
+              toast({
+                title: "Video Generated!",
+                description: "Your AI-generated video is ready",
+              });
+              setIsGenerating(false);
+              return;
+            }
+          } catch (proxyError) {
+            console.error('Immediate proxy fetch failed:', proxyError);
+          }
         }
+        
+        // Fallback: if no proxy or proxy fails, we can't display the video directly
+        // because it requires authentication
+        throw new Error("Unable to retrieve video. Please try again.");
       }
 
       // If processing, start polling
