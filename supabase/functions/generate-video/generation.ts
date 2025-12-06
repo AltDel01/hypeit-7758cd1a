@@ -79,28 +79,19 @@ async function generateWithGemini(
   veoApiKey: string
 ): Promise<Response> {
   try {
-    console.log("Generating video with Veo 3.1");
+    console.log("Generating video with Veo 3.1 (Gemini REST)");
     
-    // Veo 3.1 API endpoint for video generation
+    // Veo 3.1 API endpoint for video generation (predictLongRunning)
     // Note: This requires Google AI Pro or Ultra subscription
-    // Using the REST API endpoint format - may need to use SDK instead
-    const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:generateVideos";
+    const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning";
     
-    // Alternative endpoint format if above doesn't work:
-    // const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview/generateVideos";
-    
-    // Build the request body for video generation according to official Veo 3.1 API
-    const requestBody: any = {
+    // Build the request body for video generation according to official Veo 3.1 REST API
+    // Format: { instances: [{ prompt, ... }], parameters: { ... } }
+    const instance: any = {
       prompt: prompt,
     };
 
-    // Add config with aspect ratio
-    const config: any = {
-      aspectRatio: aspectRatio,
-    };
-
     // Add image if provided (for image-to-video generation)
-    // According to docs: image should be { imageBytes, mimeType }
     if (productImage) {
       try {
         console.log("Product image provided, adding to video generation request");
@@ -114,8 +105,8 @@ async function generateWithGemini(
           productImage.split("base64,")[1] : 
           productImage;
         
-        // Veo API expects image with imageBytes and mimeType for image-to-video
-        requestBody.image = {
+        // Add image to instance
+        instance.image = {
           imageBytes: base64Data,
           mimeType: mimeType
         };
@@ -127,9 +118,16 @@ async function generateWithGemini(
       }
     }
 
-    // Add config to request body
-    if (Object.keys(config).length > 0) {
-      requestBody.config = config;
+    // Build request body with instances array
+    const requestBody: any = {
+      instances: [instance],
+    };
+
+    // Add parameters if needed (aspectRatio, etc.)
+    if (aspectRatio) {
+      requestBody.parameters = {
+        aspectRatio: aspectRatio,
+      };
     }
 
     console.log("Sending video generation request to Veo API");
@@ -137,13 +135,14 @@ async function generateWithGemini(
     console.log("Request body keys:", Object.keys(requestBody));
     
     // Call Veo API for video generation
-    const apiUrl = `${veoUrl}?key=${veoApiKey}`;
-    console.log("Full API URL (key hidden):", `${veoUrl}?key=${veoApiKey.substring(0, 10)}...`);
+    // IMPORTANT: Use x-goog-api-key header, NOT query parameter
+    console.log("Calling Veo API with x-goog-api-key header");
     
-    const response = await fetch(apiUrl, {
+    const response = await fetch(veoUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": veoApiKey,
       },
       body: JSON.stringify(requestBody),
     });
@@ -152,7 +151,7 @@ async function generateWithGemini(
       const errorText = await response.text();
       console.error("Veo API error:", response.status);
       console.error("Error response:", errorText);
-      console.error("Request URL:", `${veoUrl}?key=${veoApiKey.substring(0, 10)}...`);
+      console.error("Request URL:", veoUrl);
       console.error("Request body:", JSON.stringify(requestBody).substring(0, 200));
       
       // Try to parse the error response as JSON
