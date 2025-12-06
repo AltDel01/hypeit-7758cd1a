@@ -118,10 +118,8 @@ const VideoGenerator = () => {
         // If we have a proxy URL, fetch the video directly
         if (data.proxyUrl) {
           try {
-            console.log("Fetching video from proxy endpoint");
+            console.log("Fetching video from proxy endpoint:", data.proxyUrl.substring(0, 100));
             
-            // The proxy URL is relative path like /functions/v1/video-proxy?url=...&key=...
-            // Supabase hosts functions at the same origin, so we can fetch relative
             const videoResponse = await fetch(data.proxyUrl);
             
             if (!videoResponse.ok) {
@@ -136,6 +134,7 @@ const VideoGenerator = () => {
             
             // Create object URL for the blob
             const blobUrl = URL.createObjectURL(videoBlob);
+            console.log("Blob URL created successfully");
             return blobUrl;
           } catch (proxyError) {
             console.error('Error fetching through proxy:', proxyError);

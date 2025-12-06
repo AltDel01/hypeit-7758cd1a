@@ -117,10 +117,12 @@ async function checkGeminiOperationStatus(
         const VEO_API_KEY = process.env.VEO_API_KEY;
         
         // Return the proxy URL that the frontend should call to get the video
-        // The frontend will use supabase.functions.invoke('video-proxy', ...) or fetch with proper headers
-        const proxyUrl = `/functions/v1/video-proxy?url=${encodeURIComponent(videoUri)}&key=${encodeURIComponent(VEO_API_KEY || '')}`;
+        // Use the full Supabase function URL for absolute path reliability
+        const SUPABASE_FUNCTION_URL = "https://mkwinxbualpcivkujlfd.supabase.co/functions/v1/video-proxy";
+        const proxyUrl = `${SUPABASE_FUNCTION_URL}?url=${encodeURIComponent(videoUri)}&key=${encodeURIComponent(VEO_API_KEY || '')}`;
         
         console.log("Returning proxy URL for video streaming");
+        console.log("Proxy URL:", proxyUrl.substring(0, 150) + "...");
         
         return new Response(
           JSON.stringify({ 
