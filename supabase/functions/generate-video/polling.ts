@@ -22,8 +22,11 @@ export async function handleVideoPollingRequest(requestData: {
   try {
     // If we have an operation name, check Veo API directly
     if (operationName) {
+      console.log(`Using operationName path for polling: ${operationName}`);
       return await checkGeminiOperationStatus(operationName, requestId, prompt);
     }
+    
+    console.log("No operationName provided, using fallback status check");
     
     // For direct status checks (without webhook), return a processing or completed response
     if (checkOnly) {
@@ -51,9 +54,10 @@ async function checkGeminiOperationStatus(
   requestId: string,
   prompt: string
 ): Promise<Response> {
-  const VEO_API_KEY = Deno.env.get("VEO_API_KEY");
+  const VEO_API_KEY = process.env.VEO_API_KEY;
   
   if (!VEO_API_KEY) {
+    console.warn("VEO_API_KEY not available, falling back to direct status check");
     return handleDirectStatusCheck(requestId, prompt);
   }
 
@@ -61,6 +65,8 @@ async function checkGeminiOperationStatus(
     // Check operation status with Veo API
     // The operation name format is typically: operations/{operation_id}
     const operationUrl = `https://generativelanguage.googleapis.com/v1/${operationName}`;
+    
+    console.log(`Checking Veo operation status at: ${operationUrl}`);
     
     // IMPORTANT: Use x-goog-api-key header, NOT query parameter
     const response = await fetch(operationUrl, {
@@ -78,58 +84,79 @@ async function checkGeminiOperationStatus(
     }
 
     const operationData = await response.json();
+    console.log(`Operation status response - done: ${operationData.done}, has error: ${!!operationData.error}`);
+    console.log(`Full operation response:`, JSON.stringify(operationData).substring(0, 500));
+    
+    // Check if operation failed
+    if (operationData.error) {
+      console.error("Operation error:", operationData.error);
+      return new Response(
+        JSON.stringify({ 
+          status: "error", 
+          error: operationData.error.message || operationData.error.toString() || "Video generation failed",
+          requestId: requestId
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Check if operation is done
     if (operationData.done) {
-      // Operation completed - check for video in response
-      // According to official docs: operation.response.generatedVideos[0].video
-      if (operationData.response?.generatedVideos?.[0]?.video) {
-        const videoFile = operationData.response.generatedVideos[0].video;
+      console.log("Operation marked as done, checking for video in response");
+      
+      // The response structure from Veo API is:
+      // response.generateVideoResponse.generatedSamples[0].video.uri
+      const videoUri = operationData.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      
+      if (videoUri) {
+        console.log("Found video URI:", videoUri);
         
-        // Download the video file from Veo API
-        // The video file reference has a 'name' field like "files/..."
-        // Note: For actual download, may need to use fetch with x-goog-api-key header
-        try {
-          const downloadUrl = `https://generativelanguage.googleapis.com/v1/${videoFile.name}?alt=media`;
-          
-          // Return the download URL and file info
-          return new Response(
-            JSON.stringify({ 
-              status: "completed", 
-              videoUrl: downloadUrl, // Direct download URL
-              videoFile: videoFile, // File reference for additional info
-              requestId: requestId,
-              message: "Video generation completed"
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        } catch (downloadError) {
-          console.error("Error preparing video download URL:", downloadError);
-          // Return file reference if download URL creation fails
-          return new Response(
-            JSON.stringify({ 
-              status: "completed", 
-              videoFile: videoFile, // File reference object
-              requestId: requestId,
-              message: "Video generation completed (download URL unavailable)"
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+        // The URI from Google's API is: https://generativelanguage.googleapis.com/v1beta/files/{id}:download?alt=media
+        // This needs to be called through a proxy endpoint on the backend that includes the API key
+        // Convert the direct URI to use the proxy
+        const VEO_API_KEY = process.env.VEO_API_KEY;
+        
+        // Create a proxy URL that our backend can use to fetch the video with authentication
+        const proxyUrl = new URL("https://current-domain/functions/v1/video-proxy");
+        proxyUrl.searchParams.set('url', videoUri);
+        if (VEO_API_KEY) {
+          proxyUrl.searchParams.set('key', VEO_API_KEY);
         }
-      } else if (operationData.error) {
-        // Operation failed
+        
+        // For now, return the original URL but the frontend should use the proxy
+        // We'll let the frontend handle the proxy call
+        console.log("Video download URL ready:", videoUri.substring(0, 100) + "...");
+        
         return new Response(
           JSON.stringify({ 
-            status: "error", 
-            error: operationData.error.message || "Video generation failed",
-            requestId: requestId
+            status: "completed", 
+            videoUrl: videoUri,
+            proxyUrl: `/functions/v1/video-proxy?url=${encodeURIComponent(videoUri)}&key=${encodeURIComponent(VEO_API_KEY || '')}`,
+            requestId: requestId,
+            message: "Video generation completed"
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      
+      // If operation is done but no video found, log detailed info
+      console.warn("Operation is done but no video data found");
+      console.log("Full response structure:", JSON.stringify(operationData).substring(0, 1000));
+      
+      // Return error instead of completed, so frontend knows something went wrong
+      return new Response(
+        JSON.stringify({ 
+          status: "error", 
+          error: "Video generation completed but video file not found in response",
+          message: "Failed to retrieve generated video",
+          requestId: requestId
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
     // Operation still in progress
+    console.log("Operation still in progress, returning processing status");
     return new Response(
       JSON.stringify({ 
         status: "processing", 
@@ -149,7 +176,8 @@ async function checkGeminiOperationStatus(
  * Handles direct status checks without calling the webhook
  */
 function handleDirectStatusCheck(requestId: string, prompt: string): Response {
-  console.log("Providing fallback response for video status check");
+  console.log("Providing fallback response for video status check - this should only be temporary during API errors");
+  console.log("WARNING: Actual Veo API status check failed, using demo/fallback mode");
   
   // For now, simulate a completed video after some time
   // In production, this would check the actual video generation service status
@@ -157,20 +185,22 @@ function handleDirectStatusCheck(requestId: string, prompt: string): Response {
   
   // Simulate: if requestId exists and enough time has passed, return completed
   // Otherwise return processing
-  const isCompleted = Math.random() > 0.3; // 70% chance of completion for demo
+  const isCompleted = Math.random() > 0.7; // 30% chance of completion for demo (reduced from 70% to avoid false positives)
   
   if (isCompleted) {
     // Return a placeholder video URL
     // In production, this would be the actual generated video URL
+    console.log("Fallback mode: Returning demo completion");
     return new Response(
       JSON.stringify({ 
         status: "completed", 
         videoUrl: "/videos/popcorn-promo-demo.mp4", // Placeholder
-        message: "Video generation completed (demo mode)" 
+        message: "Video generation completed (demo mode - API check failed)" 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } else {
+    console.log("Fallback mode: Still processing");
     return new Response(
       JSON.stringify({ 
         status: "processing", 
