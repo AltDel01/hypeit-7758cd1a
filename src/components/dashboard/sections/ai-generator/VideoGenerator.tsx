@@ -135,15 +135,6 @@ const VideoGenerator = () => {
   };
 
   const handleGenerate = async () => {
-    if (!uploadedImage || !uploadedImageFile) {
-      toast({
-        title: "Image Required",
-        description: "Please upload a product image first",
-        variant: "destructive"
-      });
-      return;
-    }
-
     const finalPrompt = enhancedPrompt || prompt;
     if (!finalPrompt.trim()) {
       toast({
@@ -297,11 +288,11 @@ const VideoGenerator = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left Column - Input */}
       <div className="space-y-6">
-        {/* Image Upload */}
+        {/* Image Upload - Optional */}
         <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
             <Video className="w-5 h-5 text-cyan-400" />
-            Product Image
+            Product Image <span className="text-xs font-normal text-gray-400 ml-2">(Optional)</span>
           </h2>
           
           <div className="space-y-4">
@@ -314,7 +305,7 @@ const VideoGenerator = () => {
               ) : (
                 <div className="text-center">
                   <Upload className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to upload product image</p>
+                  <p className="text-sm text-muted-foreground">Click to upload product image (optional)</p>
                 </div>
               )}
             </Label>
@@ -325,6 +316,7 @@ const VideoGenerator = () => {
               className="hidden"
               onChange={handleImageUpload}
             />
+            <p className="text-xs text-gray-500">Note: Image upload is currently optional. The video will be generated based on your prompt.</p>
           </div>
         </Card>
 
@@ -376,7 +368,7 @@ const VideoGenerator = () => {
         <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
           <Button 
             onClick={handleGenerate}
-            disabled={isGenerating || !uploadedImage}
+            disabled={isGenerating}
             className="w-full gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
           >
             <Wand2 className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />

@@ -85,47 +85,29 @@ async function generateWithGemini(
     const veoUrl = "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning";
     
     // Build the request body for video generation according to official Veo 3.1 REST API
-    // Format: { instances: [{ prompt, ... }], parameters: { ... } }
+    // Format: { instances: [{ prompt }], parameters: { aspectRatio } }
+    // NOTE: Veo 3.1 REST API does NOT support imageBytes in the request
+    // Image-to-video features are not available in the REST API preview
     const instance: any = {
       prompt: prompt,
     };
 
-    // Add image if provided (for image-to-video generation)
+    // Log if image was provided but won't be used
     if (productImage) {
-      try {
-        console.log("Product image provided, adding to video generation request");
-        
-        // Process the image - remove data URL prefix if present
-        const mimeType = productImage.startsWith("data:image/") ? 
-          productImage.split(';')[0].split(':')[1] : 
-          "image/jpeg";
-          
-        const base64Data = productImage.includes("base64,") ? 
-          productImage.split("base64,")[1] : 
-          productImage;
-        
-        // Add image to instance
-        instance.image = {
-          imageBytes: base64Data,
-          mimeType: mimeType
-        };
-        
-        console.log("Product image added to video generation request");
-      } catch (imageError) {
-        console.error("Error processing product image for video generation:", imageError);
-        // Continue without the image
-      }
+      console.log("Product image provided but Veo 3.1 REST API does not support image-to-video generation");
+      console.log("Proceeding with text-to-video only using prompt: " + productImage);
     }
 
-    // Build request body with instances array
+    // Build request body with instances array (without image)
     const requestBody = {
-      instances: [instance], // Use the instance object that includes image if provided
+      instances: [instance], // Only prompt, no image support in REST API
       parameters: { aspectRatio }
     };
 
     console.log("Sending video generation request to Veo API");
     console.log("Request URL:", veoUrl);
     console.log("Request body keys:", Object.keys(requestBody));
+    console.log("Request body:", JSON.stringify(requestBody).substring(0, 200));
     
     // Call Veo API for video generation
     // IMPORTANT: Use x-goog-api-key header, NOT query parameter
