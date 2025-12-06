@@ -6,24 +6,23 @@ import { dispatchImageGeneratedEvent } from '../imageEvents';
  * Service to handle image fallback scenarios
  */
 export class FallbackService {
-  private static extractKeywords(prompt: string): string[] {
-    return prompt
-      .split(' ')
-      .filter(word => word.length > 3)
-      .slice(0, 3);
+  private static generateSeedFromPrompt(prompt: string): number {
+    // Generate a deterministic seed from the prompt
+    return Math.abs(prompt.split('').reduce((a: number, b: string) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0));
   }
 
-  private static getUnsplashUrl(keywords: string[], size: string = '800x800'): string {
-    const searchTerms = keywords.join(',');
-    const timestamp = Date.now();
-    return `https://source.unsplash.com/featured/${size}/?${encodeURIComponent(searchTerms)}&t=${timestamp}`;
+  private static getPicsumUrl(seed: number, width: number, height: number): string {
+    return `https://picsum.photos/seed/${seed}/${width}/${height}`;
   }
 
   static async getFallbackImage(prompt: string, aspectRatio: string = "1:1"): Promise<string> {
     try {
-      const keywords = this.extractKeywords(prompt);
-      const size = aspectRatio === "9:16" ? "600x900" : "800x800";
-      return this.getUnsplashUrl(keywords, size);
+      const seed = this.generateSeedFromPrompt(prompt);
+      const [width, height] = aspectRatio === "9:16" ? [600, 900] : [800, 800];
+      return this.getPicsumUrl(seed, width, height);
     } catch (error) {
       console.error("Error getting fallback image:", error);
       return "https://placehold.co/800x800/333/white?text=Image+Generation+Failed";
@@ -37,7 +36,7 @@ export class FallbackService {
       dispatchImageGeneratedEvent(fallbackUrl, prompt);
     } catch (error) {
       console.error("Error in fallback handling:", error);
-      const emergencyFallback = "https://source.unsplash.com/featured/800x800/?product";
+      const emergencyFallback = "https://picsum.photos/800/800";
       dispatchImageGeneratedEvent(emergencyFallback, prompt);
     }
   }

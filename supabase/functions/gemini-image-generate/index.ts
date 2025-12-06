@@ -38,6 +38,7 @@ serve(async (req) => {
     const genaiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent";
     
     // Build the request body - Gemini 2.0 Flash image generation format
+    // Note: Don't specify responseMimeType for image generation - it only accepts text formats
     const requestBody: any = {
       contents: [
         {
@@ -47,8 +48,7 @@ serve(async (req) => {
         },
       ],
       generationConfig: {
-        responseModalities: ["image"],
-        responseMimeType: "image/jpeg"
+        responseModalities: ["image"]
       }
     };
 
@@ -139,20 +139,20 @@ serve(async (req) => {
       console.warn("No image data in Gemini API response, using fallback");
       console.warn("Error details:", errorResponse);
       
-      // Use fallback image with Unsplash
-      const searchTerms = prompt
-        .split(' ')
-        .filter((word: string) => word.length > 3)
-        .slice(0, 3)
-        .join(',');
+      // Use fallback image with Picsum (Unsplash is unreliable with 503 errors)
+      // Generate a deterministic seed from the prompt for consistent results
+      const seed = Math.abs(prompt.split('').reduce((a: number, b: string) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0));
       
-      const unsplashUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${Date.now()}`;
+      const fallbackUrl = `https://picsum.photos/seed/${seed}/800/800`;
       
-      console.log("Fallback image URL:", unsplashUrl);
+      console.log("Fallback image URL:", fallbackUrl);
       
       return new Response(JSON.stringify({ 
         status: "completed",
-        imageUrl: unsplashUrl,
+        imageUrl: fallbackUrl,
         requestId,
         message: "Using fallback image (Gemini API unavailable)",
         usedFallback: true,
@@ -191,13 +191,12 @@ serve(async (req) => {
       // Ignore parsing errors in error handler
     }
     
-    // Generate a fallback image URL from Unsplash
-    const searchTerms = promptForFallback
-      .split(' ')
-      .filter((word: string) => word.length > 3)
-      .slice(0, 3)
-      .join(',');
-    const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${Date.now()}`;
+    // Generate a fallback image URL from Picsum
+    const seed = Math.abs(promptForFallback.split('').reduce((a: number, b: string) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0));
+    const fallbackImageUrl = `https://picsum.photos/seed/${seed}/800/800`;
     
     console.log("Returning fallback image due to error:", fallbackImageUrl);
     
