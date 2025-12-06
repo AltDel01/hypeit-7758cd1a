@@ -11,7 +11,13 @@ export async function handleVideoPollingRequest(requestData: {
   operationName?: string
 }): Promise<Response> {
   const { requestId, checkOnly, prompt = "video", operationName } = requestData;
-  console.log(`Polling for video status, requestId: ${requestId}, checkOnly: ${checkOnly}, operationName: ${operationName}`);
+  console.log(`Polling for video status, requestId: ${requestId}, checkOnly: ${checkOnly}, operationName: ${operationName || 'undefined'}`);
+  
+  // If operationName is missing, we can't poll properly
+  if (!operationName && checkOnly) {
+    console.warn("operationName is missing, cannot poll Veo API");
+    return handleDirectStatusCheck(requestId, prompt);
+  }
   
   try {
     // If we have an operation name, check Veo API directly

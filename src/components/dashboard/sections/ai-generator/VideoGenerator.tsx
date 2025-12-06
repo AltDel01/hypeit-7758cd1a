@@ -105,20 +105,26 @@ const VideoGenerator = () => {
         return null;
       }
 
-      if (data?.status === "completed" && data?.videoUrl) {
+      if (data?.status === "completed") {
         // Clear polling interval
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
-        return data.videoUrl;
+        // Handle both videoUrl and videoFile (backend converts videoFile to videoUrl)
+        const videoUrl = data.videoUrl || (data.videoFile?.name ? 
+          `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
+        if (videoUrl) {
+          return videoUrl;
+        }
       } else if (data?.status === "error") {
         // Clear polling interval on error
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
-        throw new Error(data.error || "Video generation failed");
+        const errorMsg = data.error || data.errorDetails || "Video generation failed";
+        throw new Error(errorMsg);
       }
 
       return null; // Still processing
@@ -178,18 +184,25 @@ const VideoGenerator = () => {
       }
 
       if (data?.status === "error") {
-        throw new Error(data.error || "Video generation failed");
+        const errorMsg = data.error || data.errorDetails || "Video generation failed";
+        console.error("Video generation error:", data);
+        throw new Error(errorMsg);
       }
 
       // If video is immediately available
-      if (data?.status === "completed" && data?.videoUrl) {
-        setGeneratedVideo(data.videoUrl);
-        toast({
-          title: "Video Generated!",
-          description: "Your AI-generated video is ready",
-        });
-        setIsGenerating(false);
-        return;
+      if (data?.status === "completed") {
+        // Handle both videoUrl and videoFile
+        const videoUrl = data.videoUrl || (data.videoFile?.name ? 
+          `https://generativelanguage.googleapis.com/v1/${data.videoFile.name}?alt=media` : null);
+        if (videoUrl) {
+          setGeneratedVideo(videoUrl);
+          toast({
+            title: "Video Generated!",
+            description: "Your AI-generated video is ready",
+          });
+          setIsGenerating(false);
+          return;
+        }
       }
 
       // If processing, start polling
@@ -199,13 +212,28 @@ const VideoGenerator = () => {
         
         // Start polling for video status
         const pollInterval = setInterval(async () => {
-          const videoUrl = await pollVideoStatus(data.requestId, finalPrompt, operationName);
-          if (videoUrl) {
-            setGeneratedVideo(videoUrl);
+          try {
+            const videoUrl = await pollVideoStatus(data.requestId, finalPrompt, operationName);
+            if (videoUrl) {
+              setGeneratedVideo(videoUrl);
+              setIsGenerating(false);
+              toast({
+                title: "Video Generated!",
+                description: "Your AI-generated video is ready",
+              });
+            }
+          } catch (pollError) {
+            // Handle polling errors
+            console.error('Polling error:', pollError);
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
             setIsGenerating(false);
             toast({
-              title: "Video Generated!",
-              description: "Your AI-generated video is ready",
+              title: "Generation Failed",
+              description: pollError instanceof Error ? pollError.message : "Video generation failed during polling",
+              variant: "destructive"
             });
           }
         }, 5000); // Poll every 5 seconds
@@ -237,10 +265,14 @@ const VideoGenerator = () => {
       }
     } catch (error) {
       console.error('Video generation error:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate video. Please try again.";
+      
+      // Show detailed error if available
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate video. Please try again.",
-        variant: "destructive"
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000 // Show for 5 seconds
       });
       setIsGenerating(false);
       
