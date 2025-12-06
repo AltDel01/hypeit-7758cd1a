@@ -60,12 +60,14 @@ async function checkGeminiOperationStatus(
   try {
     // Check operation status with Veo API
     // The operation name format is typically: operations/{operation_id}
-    const operationUrl = `https://generativelanguage.googleapis.com/v1/${operationName}?key=${VEO_API_KEY}`;
+    const operationUrl = `https://generativelanguage.googleapis.com/v1/${operationName}`;
     
+    // IMPORTANT: Use x-goog-api-key header, NOT query parameter
     const response = await fetch(operationUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": VEO_API_KEY,
       }
     });
 
@@ -86,8 +88,9 @@ async function checkGeminiOperationStatus(
         
         // Download the video file from Veo API
         // The video file reference has a 'name' field like "files/..."
+        // Note: For actual download, may need to use fetch with x-goog-api-key header
         try {
-          const downloadUrl = `https://generativelanguage.googleapis.com/v1/${videoFile.name}?key=${VEO_API_KEY}&alt=media`;
+          const downloadUrl = `https://generativelanguage.googleapis.com/v1/${videoFile.name}?alt=media`;
           
           // Return the download URL and file info
           return new Response(
