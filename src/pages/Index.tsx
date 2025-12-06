@@ -47,7 +47,7 @@ const Index = () => {
   
   useEffect(() => {
     const handleImageGenerated = (event: CustomEvent) => {
-      console.log("Index.tsx caught image generated event:", event.detail);
+      console.log("🏠 Index.tsx caught image generated event:", event.detail);
       const { imageUrl, error, requestId } = event.detail as {
         imageUrl?: string;
         error?: string;
@@ -55,6 +55,7 @@ const Index = () => {
       };
 
       if (requestId) {
+        console.log("📝 Updating request:", requestId);
         imageRequestService.updateRequest(requestId, {
           status: error ? 'failed' : 'completed',
           resultImage: imageUrl || null,
@@ -64,10 +65,12 @@ const Index = () => {
       }
 
       if (error) {
+        console.error("❌ Generation error:", error);
         toast.error(error);
       }
 
       if (imageUrl) {
+        console.log("🖼️  Setting generated image in Index.tsx:", imageUrl.substring(0, 100) + "...");
         setGeneratedImage(imageUrl);
       }
       
@@ -75,9 +78,11 @@ const Index = () => {
     };
     
     window.addEventListener('imageGenerated', handleImageGenerated as EventListener);
+    console.log("✅ Index.tsx: imageGenerated event listener registered");
     
     return () => {
       window.removeEventListener('imageGenerated', handleImageGenerated as EventListener);
+      console.log("🗑️  Index.tsx: imageGenerated event listener removed");
     };
   }, []);
 

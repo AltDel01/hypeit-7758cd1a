@@ -28,6 +28,13 @@ export const dispatchImageGeneratedEvent = (
   error?: string,
   requestId?: string
 ): void => {
+  console.log("🎨 Dispatching imageGenerated event:", {
+    imageUrl: imageUrl?.substring(0, 100) + "...",
+    prompt,
+    hasError: !!error,
+    requestId
+  });
+  
   const event = new CustomEvent('imageGenerated', {
     detail: {
       imageUrl,
@@ -40,6 +47,7 @@ export const dispatchImageGeneratedEvent = (
   });
 
   window.dispatchEvent(event);
+  console.log("✅ imageGenerated event dispatched successfully");
 };
 
 /**
