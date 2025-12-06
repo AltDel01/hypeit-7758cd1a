@@ -71,8 +71,18 @@ export class GeminiImageService {
       
       // If we got a direct image URL (immediate success)
       if (response.imageUrl && response.status === "completed") {
+        const isBase64 = response.imageUrl.startsWith('data:image/');
+        const usedFallback = (response as any).usedFallback === true;
+        
         console.log("Image generated successfully:", response.imageUrl.substring(0, 50) + "...");
-        toast.success("Image generated successfully!");
+        console.log("Source:", isBase64 ? "Gemini API" : usedFallback ? "Fallback (Unsplash)" : "Unknown");
+        
+        if (usedFallback) {
+          console.warn("Note: Using fallback image due to:", (response as any).originalError || "API unavailable");
+          toast.success("Image generated (using fallback source)");
+        } else {
+          toast.success("Image generated with Gemini 2.0 Flash!");
+        }
         
         // Dispatch event with the image
         dispatchImageGeneratedEvent(response.imageUrl, prompt, undefined, requestId);

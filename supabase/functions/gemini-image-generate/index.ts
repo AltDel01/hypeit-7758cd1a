@@ -131,7 +131,8 @@ serve(async (req) => {
     }
 
     if (!imageData) {
-      console.error("No image data in response");
+      console.warn("No image data in Gemini API response, using fallback");
+      console.warn("Error details:", errorResponse);
       
       // Use fallback image with Unsplash
       const searchTerms = prompt
@@ -140,42 +141,69 @@ serve(async (req) => {
         .slice(0, 3)
         .join(',');
       
-      const unsplashUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}`;
+      const unsplashUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${Date.now()}`;
+      
+      console.log("Fallback image URL:", unsplashUrl);
       
       return new Response(JSON.stringify({ 
         status: "completed",
         imageUrl: unsplashUrl,
         requestId,
-        message: "Using fallback image source due to API error",
-        error: errorResponse || "No image data in Gemini API response"
+        message: "Using fallback image (Gemini API unavailable)",
+        usedFallback: true,
+        originalError: errorResponse || "No image data in Gemini API response"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     // Return the image data
+    console.log("Successfully generated image with Gemini API");
+    console.log("Image data length:", imageData.length, "characters");
+    
     return new Response(JSON.stringify({ 
       status: "completed",
       imageUrl: `data:image/jpeg;base64,${imageData}`,
       requestId,
-      message: textResponse || "Image generated successfully",
+      message: textResponse || "Image generated successfully with Gemini 2.0 Flash",
+      usedFallback: false
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error("Error in gemini-image-generate function:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
     
-    // Generate a fallback image URL from Unsplash based on the error
-    const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?product&error=${Date.now()}`;
+    // Extract prompt for fallback, even if request parsing failed
+    let promptForFallback = 'product';
+    try {
+      const errorRequestData = await req.clone().json();
+      if (errorRequestData.prompt) {
+        promptForFallback = errorRequestData.prompt;
+      }
+    } catch (e) {
+      // Ignore parsing errors in error handler
+    }
+    
+    // Generate a fallback image URL from Unsplash
+    const searchTerms = promptForFallback
+      .split(' ')
+      .filter(word => word.length > 3)
+      .slice(0, 3)
+      .join(',');
+    const fallbackImageUrl = `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(searchTerms || 'product')}&t=${Date.now()}`;
+    
+    console.log("Returning fallback image due to error:", fallbackImageUrl);
     
     return new Response(
       JSON.stringify({ 
-        status: "error", 
-        imageUrl: fallbackImageUrl,  // Always provide an image URL, even in case of errors
+        status: "completed",  // Use "completed" since we provide a valid image
+        imageUrl: fallbackImageUrl,
         requestId: crypto.randomUUID(),
         message: "Using fallback image due to error",
-        error: error instanceof Error ? error.message : String(error)
+        usedFallback: true,
+        originalError: error instanceof Error ? error.message : String(error)
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
