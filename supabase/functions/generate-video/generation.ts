@@ -44,7 +44,7 @@ export async function handleVideoGenerationRequest(requestData: VideoGenerationR
   const finalPrompt = enhanced_prompt || prompt;
   
   try {
-    const VEO_API_KEY = process.env.VEO_API_KEY; // Changed from Deno to Node.js environment variable access
+    const VEO_API_KEY = Deno.env.get('VEO_API_KEY');
     
     if (!VEO_API_KEY) {
       console.error("VEO_API_KEY environment variable not set");
