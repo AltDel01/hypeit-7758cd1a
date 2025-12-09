@@ -61,7 +61,7 @@ async function checkGeminiOperationStatus(
   requestId: string,
   prompt: string
 ): Promise<Response> {
-  const VEO_API_KEY = process.env.VEO_API_KEY;
+  const VEO_API_KEY = Deno.env.get('VEO_API_KEY');
   
   if (!VEO_API_KEY) {
     console.warn("VEO_API_KEY not available, falling back to direct status check");
@@ -140,7 +140,7 @@ async function checkGeminiOperationStatus(
         console.log("Found video URI:", videoUri);
         
         // Add API key to the video URL
-        const VEO_API_KEY = process.env.VEO_API_KEY;
+        const VEO_API_KEY = Deno.env.get('VEO_API_KEY');
         const videoUrlWithKey = videoUri.includes('?') 
           ? `${videoUri}&key=${VEO_API_KEY}` 
           : `${videoUri}?key=${VEO_API_KEY}`;

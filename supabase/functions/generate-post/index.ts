@@ -26,7 +26,8 @@ const generateFallbackContent = (platform: string, tone: string, prompt: string)
   };
   
   // Default to professional tone if specified tone isn't available
-  const content = fallbackResponses[platform]?.[tone] || fallbackResponses[platform].professional;
+  const platformResponses = fallbackResponses[platform as keyof typeof fallbackResponses];
+  const content = platformResponses?.[tone as keyof typeof platformResponses] || platformResponses?.professional;
   return content;
 };
 
@@ -184,7 +185,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('General error in generate-post function:', error);
     return new Response(
-      JSON.stringify({ error: 'Server error', details: error.message }),
+      JSON.stringify({ error: 'Server error', details: error instanceof Error ? error.message : String(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

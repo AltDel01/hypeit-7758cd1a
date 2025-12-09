@@ -43,7 +43,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        message: `Server error: ${error.message}` 
+        message: `Server error: ${error instanceof Error ? error.message : String(error)}` 
       }),
       { 
         status: 500, 

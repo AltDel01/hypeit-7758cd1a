@@ -21,106 +21,106 @@ const dummyCalendarContent = [
     day: 1, 
     title: "Welcome Post", 
     pillar: "Branding",
-    prompt: "Create a warm, rustic photo of a Maicih Keripik Singkong bag placed on a wooden table surrounded by red chili peppers and cassava roots. Add glowing sunlight and a subtle tagline: \"Taste the Tradition.\"",
-    caption: "🔥 Welcome to the world of Maicih!\nFrom humble beginnings to Indonesia's favorite spicy cassava chips — taste the legacy, feel the heat, and embrace the tradition.\n#Maicih #SnackLokal #TasteTheTradition"
+    prompt: "Create a warm, inviting photo of De'karrel Popcorn bags (Caramele and Barbeque flavors) arranged on a rustic wooden table with scattered popcorn kernels and golden lighting. Add tagline: \"Enjoy the Taste of Happiness.\"",
+    caption: "🍿 Welcome to De'karrel Popcorn!\nPremium mushroom popcorn made in Indonesia since 2000 — crunchy, sweet, and irresistibly delicious!\n#DekarrelPopcorn #PremiumPopcorn #MadeInIndonesia"
   },
   { 
     day: 2, 
     title: "Product Showcase", 
     pillar: "Product Highlight",
-    prompt: "Professional product photo of Maicih chips spilling from the bag into a small bowl, with chili flakes scattered around and glowing red lighting.",
-    caption: "Level 10? Only for the brave. 🌶️\nCrunchy, spicy, and proudly Indonesian — this is how we do keripik singkong!\n#MaicihLevel10 #SpicyLegend #SnackIndonesia"
+    prompt: "Professional product photo of De'karrel Caramele Popcorn spilling from the bag into a stylish bowl, with golden caramel drizzle effect and warm studio lighting.",
+    caption: "Sweet, crunchy, and absolutely addictive! 🍯\nOur Caramele flavor is coated with rich, buttery caramel goodness.\n#DekarrelCaramele #SweetTreat #PopcornLovers"
   },
   { 
     day: 3, 
     title: "Behind the Scenes", 
     pillar: "Authenticity",
-    prompt: "Show a cozy kitchen or home factory scene where cassava is being sliced and fried, with the Maicih bag subtly visible in the background.",
-    caption: "Every pack of Maicih is crafted with passion.\nReal cassava. Real spice. Real dedication. ❤️\n#BehindTheSpice #MaicihStory"
+    prompt: "Show a clean factory scene where premium mushroom corn is being popped and coated, with De'karrel packaging visible in the background and quality control process.",
+    caption: "Every kernel is crafted with care ❤️\nNon GMO corn. No MSG. No artificial coloring. Just pure happiness!\n#BehindTheScenes #DekarrelQuality"
   },
   { 
     day: 4, 
     title: "Customer Testimonial", 
     pillar: "Community",
-    prompt: "A happy customer holding a Maicih bag while smiling with friends in a casual hangout spot, bright and natural lighting.",
-    caption: "⭐️⭐️⭐️⭐️⭐️\n\"Nggak bisa berhenti ngemil! Level 10-nya bikin nagih banget!\"\nThank you for the love, Maicih fans!\n#MaicihFans #SnackLokalBangga"
+    prompt: "Happy customers enjoying De'karrel Popcorn at a movie night or casual hangout, with warm natural lighting and genuine smiles.",
+    caption: "⭐️⭐️⭐️⭐️⭐️\n\"Nggak bisa berhenti ngemil! Rasa Caramele-nya juara banget!\"\nThank you for the love, Popcorn fans!\n#DekarrelFans #CustomerLove"
   },
   { 
     day: 5, 
     title: "Educational Content", 
     pillar: "Education",
-    prompt: "Infographic-style visual showing cassava roots, chili peppers, and text labels \"Real Ingredients. Real Flavor.\"",
-    caption: "Did you know? 🌿\nMaicih is made from hand-picked cassava and real chili — no shortcuts, no compromises.\n#FunFactMaicih #RealIngredientsRealFlavor"
+    prompt: "Infographic-style visual showing mushroom popcorn kernels, \"Non GMO Corn\", \"No MSG\", \"No Coloring\" badges with De'karrel branding.",
+    caption: "Did you know? 🌿\nDe'karrel uses premium mushroom corn — rounder, crunchier, and perfect for coating!\n#FunFactDekarrel #HealthySnack"
   },
   { 
     day: 6, 
     title: "Friday Motivation", 
     pillar: "Engagement",
-    prompt: "Artistic visual of a Maicih bag with spicy flames and quote overlay: \"Stay spicy, stay strong.\"",
-    caption: "🔥 \"Be bold. Be brave. Be spicy.\"\nBecause life's too short for bland snacks.\n#SpicyMotivation #MaicihEnergy"
+    prompt: "Artistic visual of De'karrel Barbeque Popcorn with smoky effects and quote overlay: \"Pop your way to happiness.\"",
+    caption: "🔥 \"Life is better with popcorn.\"\nEnd your week with the smoky, savory taste of Barbeque!\n#FridayVibes #DekarrelBarbeque"
   },
   { 
     day: 7, 
     title: "Weekend Special", 
     pillar: "Promotion",
-    prompt: "Dynamic visual showing multiple Maicih bags with \"Weekend Spicy Deal\" glowing text.",
-    caption: "Weekend's here! 🌶️\nEnjoy special deals on your favorite Maicih — only this weekend!\n#WeekendSpice #MaicihPromo"
+    prompt: "Dynamic visual showing both De'karrel Caramele and Barbeque bags with \"Weekend Snack Deal\" glowing text.",
+    caption: "Weekend's here! 🎉\nGrab both flavors — Caramele AND Barbeque — perfect for movie marathon!\n#WeekendTreat #DekarrelPromo"
   },
   { 
     day: 8, 
     title: "User Generated Content", 
     pillar: "Community",
-    prompt: "Collage of user-submitted photos of people enjoying Maicih (mock-up style).",
-    caption: "We love seeing YOU enjoy Maicih ❤️\nTag us with #MaicihMoments for a chance to be featured!\n#MaicihFans #SnackCommunity"
+    prompt: "Collage of user-submitted photos of people enjoying De'karrel Popcorn at various moments (movies, parties, snacking).",
+    caption: "We love seeing YOU enjoy De'karrel! 🍿❤️\nTag us with #DekarrelMoments for a chance to be featured!\n#PopcornCommunity #DekarrelFans"
   },
   { 
     day: 9, 
     title: "Product Tutorial", 
     pillar: "Education",
-    prompt: "Flat lay showing Maicih chips mixed with other Indonesian street snacks (cilok, tahu, or mie).",
-    caption: "💡 Maicih Hack:\nSprinkle Maicih Level 10 on your instant noodles or tahu goreng — instant upgrade!\n#SnackHack #MaicihStyle"
+    prompt: "Flat lay showing De'karrel Popcorn as perfect pairing with hot chocolate, coffee, or as movie snack setup.",
+    caption: "💡 De'karrel Hack:\nPair our Caramele with hot chocolate or Barbeque with cold drinks — perfect combo!\n#SnackHack #DekarrelStyle"
   },
   { 
     day: 10, 
     title: "Team Spotlight", 
     pillar: "Branding / Human Touch",
-    prompt: "Portrait of a Maicih production team member smiling proudly with chili baskets behind.",
-    caption: "Meet one of our heroes behind the crunch 🌶️\nCrafting your favorite snack with heart, every day.\n#TeamMaicih #BehindTheCrunch"
+    prompt: "Portrait of a De'karrel production team member smiling proudly with popcorn production equipment behind.",
+    caption: "Meet one of our heroes behind the crunch 🍿\nCrafting your favorite snack with heart, every day since 2000!\n#TeamDekarrel #BehindTheCrunch"
   },
   { 
     day: 11, 
     title: "Industry News", 
     pillar: "Education / Awareness",
-    prompt: "Clean graphic of trending \"Indonesian Snack Exports Rising\" with Maicih packaging subtly featured.",
-    caption: "Proudly local, going global 🌏\nIndonesian snacks are winning hearts worldwide — and we're spicing up the journey!\n#SnackIndustry #MaicihGoesGlobal"
+    prompt: "Clean graphic showing \"Indonesian Premium Snacks\" trend with De'karrel packaging featured prominently.",
+    caption: "Proudly local, made with love 🇮🇩\nIndonesian snacks are winning hearts — and we're popping up the flavor!\n#SupportLocalBrand #DekarrelPride"
   },
   { 
     day: 12, 
     title: "Throwback Thursday", 
     pillar: "Storytelling",
-    prompt: "Vintage-style visual of the first Maicih packaging and street vendor vibes.",
-    caption: "Throwback to the OG Maicih days 🚚🔥\nFrom street to legend — thank you for growing with us!\n#TBTMaicih #SnackHistory"
+    prompt: "Vintage-style visual showing De'karrel heritage since EST. 2000 with nostalgic Indonesian snack vibes.",
+    caption: "Throwback to when it all started 🏭✨\nFrom 2000 to now — thank you for growing with us!\n#TBTDekarrel #Since2000"
   },
   { 
     day: 13, 
     title: "Q&A Session", 
     pillar: "Engagement",
-    prompt: "Simple visual with Maicih bag and bold text overlay: \"Ask Maicih Anything!\"",
-    caption: "Got a spicy question? Drop it below! 👇\nWe're answering your Maicih curiosities all day!\n#AskMaicih #SpicyTalk"
+    prompt: "Simple visual with De'karrel bags and bold text overlay: \"Ask De'karrel Anything!\"",
+    caption: "Got a crunchy question? Drop it below! 👇\nWe're answering your De'karrel curiosities all day!\n#AskDekarrel #PopcornTalk"
   },
   { 
     day: 14, 
     title: "Flash Sale Alert", 
     pillar: "Promotion",
-    prompt: "Eye-catching visual with fiery background, timer icon, and text \"24-Hour Spicy Deal!\"",
-    caption: "FLASH SALE ⚡\nGrab your favorite Maicih before it's gone — 24 hours only!\n#MaicihFlashSale #SpicyDeal"
+    prompt: "Eye-catching visual with golden popcorn background, timer icon, and text \"24-Hour Popcorn Deal!\"",
+    caption: "FLASH SALE ⚡\nGrab your favorite De'karrel flavors before they're gone — 24 hours only!\n#DekarrelFlashSale #PopcornDeal"
   },
   { 
     day: 15, 
     title: "Thank You Post", 
     pillar: "Community",
-    prompt: "Heartwarming group of fans holding Maicih bags, smiling together outdoors.",
-    caption: "You make Maicih what it is ❤️\nFrom our hearts (and chilies) to yours — thank you for keeping the fire alive!\n#ThankYouMaicih #SnackLokalPride"
+    prompt: "Heartwarming visual of De'karrel bags with \"Thank You\" message and happy customer montage.",
+    caption: "You make De'karrel what it is ❤️\nFrom our hearts to yours — thank you for enjoying the taste of happiness!\n#ThankYouDekarrel #PopcornPride"
   },
 ];
 
@@ -158,11 +158,11 @@ const ContentPlanner = () => {
     setIsEnhancing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEnhancedCaption(`Create a series of social media visuals promoting Maicih Keripik Singkong, a traditional spicy cassava chip from Indonesia.
-Each post should follow a monthly storytelling theme that connects Indonesian heritage, community, and the joy of spicy snacks.
-Use warm lighting, rustic tones, wooden textures, and real ingredients like chili peppers and cassava roots to express authenticity and tradition.
-Include subtle text overlays with emotional taglines (e.g., "Taste the Tradition", "Level 10, Only for the Brave", "Snack with Soul").
-Ensure the product is always the hero, surrounded by relatable lifestyle or cultural scenes`);
+      setEnhancedCaption(`Create a series of social media visuals promoting De'karrel Popcorn, a premium mushroom popcorn brand made in Indonesia since 2000.
+Each post should follow a monthly storytelling theme that connects Indonesian heritage, quality ingredients, and the joy of crunchy snacking.
+Use warm golden lighting, cozy textures, and showcase both Caramele and Barbeque flavors to express premium quality and happiness.
+Include subtle text overlays with emotional taglines (e.g., "Enjoy the Taste of Happiness", "Crunchy! Sweet!", "Premium Mushroom Popcorn").
+Highlight key selling points: Non GMO Corn, No MSG, No Coloring, and HALAL certified.`);
       
       toast({
         title: "Business Idea Enhanced!",
