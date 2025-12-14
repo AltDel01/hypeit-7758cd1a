@@ -13,8 +13,8 @@ const MobileTopBar = () => {
     <div className="flex md:hidden items-center justify-between w-full px-4 py-1 h-16">
       <Link to="/" className="flex items-center">
         <img 
-          src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
-          alt="HYPEIT Logo" 
+          src="/lovable-uploads/viralin-logo.png" 
+          alt="Viralin Logo" 
           className="h-10 w-auto"
         />
       </Link>
@@ -90,8 +90,8 @@ const Navbar = () => {
               <div className={cn("flex items-center", isMobile ? "flex-1" : "")}>
                 <Link to="/" className="flex items-center h-20">
                   <img 
-                    src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
-                    alt="HYPEIT Logo" 
+                    src="/lovable-uploads/viralin-logo.png" 
+                    alt="Viralin Logo" 
                     className="h-12 w-auto"
                   />
                 </Link>

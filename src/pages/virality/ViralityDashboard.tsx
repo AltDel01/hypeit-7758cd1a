@@ -71,8 +71,8 @@ const ViralityDashboard = () => {
                         <div className="flex items-center mb-6">
                           <Link to="/" className="flex items-center">
                             <img 
-                              src="/lovable-uploads/04ce31a6-f289-4db5-8b56-7c67d26d6113.png" 
-                              alt="HYPEIT Logo" 
+                              src="/lovable-uploads/viralin-logo.png" 
+                              alt="Viralin Logo" 
                               className="h-9 w-auto"
                             />
                           </Link>
