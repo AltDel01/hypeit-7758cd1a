@@ -29,8 +29,10 @@ const GenerateButton = ({ isGenerating, disabled, onClick }: GenerateButtonProps
   return (
     <div className="flex justify-center mt-5">
       <Button 
-        className={cn("bg-[#8c52ff] hover:bg-[#7a45e6] text-sm", 
-          isMobile ? "px-4 py-2 w-full" : "px-6 h-8")}
+        className={cn(
+          "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] hover:from-[#7a45e6] hover:to-[#a014c4] text-white text-sm transition-all", 
+          isMobile ? "px-4 py-2 w-full" : "px-6 h-8"
+        )}
         disabled={disabled || isGenerating}
         onClick={handleClick}
       >
