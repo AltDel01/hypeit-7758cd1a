@@ -50,7 +50,7 @@ const TabsContainer = ({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <DropdownMenu open={visualMenuOpen} onOpenChange={setVisualMenuOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
+            <button className="flex items-center justify-between w-full px-4 py-3 rounded-md text-white transition-all bg-gradient-to-r from-[#8c52ff] to-[#b616d6] hover:from-[#7a45e6] hover:to-[#a014c4]">
               <span>Social Media Visual</span>
               <ChevronDown className="ml-2 h-5 w-5" />
             </button>
@@ -67,7 +67,7 @@ const TabsContainer = ({
         
         <DropdownMenu open={writerMenuOpen} onOpenChange={setWriterMenuOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center justify-between w-full px-4 py-3 bg-gray-700 rounded-md text-gray-300 hover:bg-gray-600 transition-colors">
+            <button className="flex items-center justify-between w-full px-4 py-3 rounded-md text-white transition-all bg-gradient-to-r from-[#8c52ff] to-[#b616d6] hover:from-[#7a45e6] hover:to-[#a014c4]">
               <span>Ghost Writer</span>
               <ChevronDown className="ml-2 h-5 w-5" />
             </button>
