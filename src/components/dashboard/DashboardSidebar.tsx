@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Wand2, BarChart3, ArrowLeft, Video, Palette } from 'lucide-react';
+import { Calendar, Wand2, BarChart3, ArrowLeft, Video, Palette, Clapperboard } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -34,6 +34,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       label: 'AI Content Generator', 
       icon: Wand2,
       description: 'Create visuals & videos'
+    },
+    { 
+      id: 'videoeditor', 
+      label: 'AI Video Editor', 
+      icon: Clapperboard,
+      description: 'Edit videos like a pro'
     },
     { 
       id: 'analytics', 
