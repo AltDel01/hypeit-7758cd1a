@@ -6,6 +6,7 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ContentPlanner from '@/components/dashboard/sections/ContentPlanner';
 import AIContentGenerator from '@/components/dashboard/sections/AIContentGenerator';
 import AIVideoEditor from '@/components/dashboard/sections/AIVideoEditor';
+import ViralClipsDashboard from '@/components/dashboard/sections/video-editor/ViralClipsDashboard';
 import AnalyticsInsights from '@/components/dashboard/sections/AnalyticsInsights';
 import AIHostLiveStream from '@/components/dashboard/sections/AIHostLiveStream';
 import GenerateBrandIdentity from '@/components/dashboard/sections/GenerateBrandIdentity';
@@ -34,6 +35,8 @@ const Dashboard = () => {
         return <AIContentGenerator />;
       case 'videoeditor':
         return <AIVideoEditor />;
+      case 'viralclips':
+        return <ViralClipsDashboard />;
       case 'analytics':
         return <AnalyticsInsights />;
       case 'livestream':
