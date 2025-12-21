@@ -36,6 +36,9 @@
     --ring: 210 100% 50%;
 
     --radius: 0.5rem;
+    
+    --gradient-brand: linear-gradient(135deg, #8c52ff, #b616d6);
+    --gradient-brand-hover: linear-gradient(135deg, #7a45e6, #a014c4);
   }
 }
 

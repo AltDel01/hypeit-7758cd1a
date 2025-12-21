@@ -1,22 +1,20 @@
 
-@layer utilities {
-  /* Animation classes for Ava button */
-  .animate-listening-pulse {
-    animation: listening-pulse 1s ease-in-out infinite;
-  }
-  
-  .animate-outer-pulse {
-    animation: outer-pulse 1.5s infinite ease-out;
-  }
-  
-  .animate-wave-circle {
-    animation: wave-circle 2s infinite ease-out;
-  }
-  
-  /* Batch progress animation */
-  .animate-batch-progress {
-    animation: batch-progress 30s ease-out forwards;
-    background: linear-gradient(90deg, #8c52ff, #D946EF, #1EAEDB);
-    background-size: 200% auto;
-  }
+/* Animation classes for Ava button */
+.animate-listening-pulse {
+  animation: listening-pulse 1s ease-in-out infinite;
+}
+
+.animate-outer-pulse {
+  animation: outer-pulse 1.5s infinite ease-out;
+}
+
+.animate-wave-circle {
+  animation: wave-circle 2s infinite ease-out;
+}
+
+/* Batch progress animation */
+.animate-batch-progress {
+  animation: batch-progress 30s ease-out forwards;
+  background: linear-gradient(90deg, #8c52ff, #D946EF, #1EAEDB);
+  background-size: 200% auto;
 }
