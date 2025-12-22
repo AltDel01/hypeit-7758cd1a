@@ -411,6 +411,16 @@ const AICreatorGenerator = () => {
             <span className="text-muted-foreground text-xs">OFF</span>
           </div>
         </div>
+
+        {/* Generate Button */}
+        <div className="flex justify-center pt-6">
+          <Button 
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg font-semibold rounded-lg"
+            size="lg"
+          >
+            Generate AI Creator
+          </Button>
+        </div>
       </Card>
     </div>
   );
