@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   ImagePlus, 
   Lightbulb, 
@@ -12,7 +12,8 @@ import {
   Play, 
   Settings, 
   Ban,
-  ChevronDown
+  ChevronDown,
+  Upload
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,13 +22,27 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
+// Asian character placeholder avatars
 const sampleAvatars = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face',
+];
+
+// Avatar selection grid - more diverse Asian avatars
+const avatarSelectionGrid = [
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face',
 ];
 
 const AICreatorGenerator = () => {
@@ -38,15 +53,62 @@ const AICreatorGenerator = () => {
   const [guidanceScale, setGuidanceScale] = useState([1]);
   const [autoEnhancement, setAutoEnhancement] = useState(false);
   const [resolution1080, setResolution1080] = useState(false);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [showAvatarSelection, setShowAvatarSelection] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedPhoto(event.target?.result as string);
+        setSelectedAvatar(null);
+        setShowAvatarSelection(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSelectAvatar = () => {
+    setShowAvatarSelection(!showAvatarSelection);
+  };
+
+  const handleAvatarGridSelect = (avatarUrl: string) => {
+    setUploadedPhoto(avatarUrl);
+    setShowAvatarSelection(false);
+    setSelectedAvatar(null);
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+      {/* Hidden File Input */}
+      <Input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       {/* Left Panel - Avatar Selection */}
       <Card className="p-8 bg-background/60 backdrop-blur-sm border-dashed border-2 border-muted-foreground/30">
         <div className="flex flex-col items-center justify-center space-y-6">
-          {/* Upload Icon */}
-          <div className="w-16 h-16 flex items-center justify-center">
-            <ImagePlus className="w-12 h-12 text-muted-foreground" />
+          {/* Upload Icon or Uploaded Photo */}
+          <div className="w-32 h-32 flex items-center justify-center rounded-lg overflow-hidden">
+            {uploadedPhoto ? (
+              <img 
+                src={uploadedPhoto} 
+                alt="Uploaded avatar" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ImagePlus className="w-12 h-12 text-muted-foreground" />
+            )}
           </div>
 
           {/* Title with Tips */}
@@ -63,13 +125,44 @@ const AICreatorGenerator = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button variant="outline" className="bg-muted/50 border-muted-foreground/30 hover:bg-muted">
+            <Button 
+              variant="outline" 
+              className="bg-muted/50 border-muted-foreground/30 hover:bg-muted gap-2"
+              onClick={handleUploadClick}
+            >
+              <Upload className="w-4 h-4" />
               Upload photo
             </Button>
-            <Button variant="outline" className="bg-muted/50 border-muted-foreground/30 hover:bg-muted">
+            <Button 
+              variant="outline" 
+              className={`bg-muted/50 border-muted-foreground/30 hover:bg-muted ${showAvatarSelection ? 'ring-2 ring-purple-500' : ''}`}
+              onClick={handleSelectAvatar}
+            >
               Select avatar
             </Button>
           </div>
+
+          {/* Avatar Selection Grid */}
+          {showAvatarSelection && (
+            <div className="w-full p-4 bg-muted/30 rounded-lg border border-muted-foreground/20">
+              <p className="text-sm text-muted-foreground mb-3">Choose an avatar</p>
+              <div className="grid grid-cols-4 gap-3">
+                {avatarSelectionGrid.map((avatar, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAvatarGridSelect(avatar)}
+                    className="w-full aspect-square rounded-lg overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all"
+                  >
+                    <img 
+                      src={avatar} 
+                      alt={`Avatar option ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="w-full flex items-center gap-4 py-4">
@@ -83,7 +176,11 @@ const AICreatorGenerator = () => {
             {sampleAvatars.map((avatar, index) => (
               <button
                 key={index}
-                onClick={() => setSelectedAvatar(index)}
+                onClick={() => {
+                  setSelectedAvatar(index);
+                  setUploadedPhoto(avatar);
+                  setShowAvatarSelection(false);
+                }}
                 className={`w-16 h-16 rounded-lg overflow-hidden transition-all ${
                   selectedAvatar === index 
                     ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-background' 
