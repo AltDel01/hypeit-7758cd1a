@@ -252,19 +252,10 @@ const AICreatorGenerator = () => {
             </Button>
           </div>
 
-          {/* Prompt Section - Moved below avatars */}
-          <div className="w-full space-y-3 pt-4">
-            <span className="text-foreground font-medium">Prompt</span>
-            <Textarea 
-              placeholder="Cinematic shoulders-up shot with teal gradient, soft lighting, natural pose, hyper-real clarity."
-              className="min-h-[140px] bg-muted/20 border-muted-foreground/20 resize-none text-sm w-full"
-            />
-          </div>
-
-          {/* Reference Product Images/Videos Section */}
+          {/* Add more Image/Video Footage Section */}
           <div className="w-full space-y-3 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-foreground font-medium">Reference Images/Videos</span>
+              <span className="text-foreground font-medium">Add more Image/Video Footage</span>
               <span className="text-muted-foreground text-xs">{referenceFiles.length}/10 files</span>
             </div>
             
@@ -315,6 +306,15 @@ const AICreatorGenerator = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Prompt Section */}
+          <div className="w-full space-y-3 pt-4">
+            <span className="text-foreground font-medium">Prompt</span>
+            <Textarea 
+              placeholder="Cinematic shoulders-up shot with teal gradient, soft lighting, natural pose, hyper-real clarity."
+              className="min-h-[140px] bg-muted/20 border-muted-foreground/20 resize-none text-sm w-full"
+            />
           </div>
         </div>
       </Card>
