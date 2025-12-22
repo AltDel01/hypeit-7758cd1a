@@ -55,10 +55,16 @@ const AICreatorGenerator = () => {
   const [resolution1080, setResolution1080] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const [showAvatarSelection, setShowAvatarSelection] = useState(false);
+  const [uploadedAudioVideo, setUploadedAudioVideo] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioVideoInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleAudioVideoUploadClick = () => {
+    audioVideoInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +80,13 @@ const AICreatorGenerator = () => {
     }
   };
 
+  const handleAudioVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedAudioVideo(file);
+    }
+  };
+
   const handleSelectAvatar = () => {
     setShowAvatarSelection(!showAvatarSelection);
   };
@@ -86,13 +99,22 @@ const AICreatorGenerator = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-      {/* Hidden File Input */}
+      {/* Hidden File Input for Photo */}
       <Input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         className="hidden"
         onChange={handleFileChange}
+      />
+
+      {/* Hidden File Input for Audio/Video */}
+      <Input
+        ref={audioVideoInputRef}
+        type="file"
+        accept="audio/*,video/*,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.avi,.mov,.mkv"
+        className="hidden"
+        onChange={handleAudioVideoChange}
       />
 
       {/* Left Panel - Avatar Selection */}
@@ -225,11 +247,42 @@ const AICreatorGenerator = () => {
               <TabsTrigger value="script" className="flex-1 data-[state=active]:bg-muted">
                 Add Script
               </TabsTrigger>
-              <TabsTrigger value="audio" className="flex-1 data-[state=active]:bg-muted">
-                Upload Audio
+              <TabsTrigger 
+                value="audio" 
+                className="flex-1 data-[state=active]:bg-muted"
+                onClick={handleAudioVideoUploadClick}
+              >
+                Upload Audio/Video
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          {/* Uploaded Audio/Video Display */}
+          {uploadedAudioVideo && (
+            <div className="p-3 bg-muted/30 rounded-lg border border-muted-foreground/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <Play className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-foreground text-sm font-medium truncate max-w-[200px]">
+                    {uploadedAudioVideo.name}
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    {(uploadedAudioVideo.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setUploadedAudioVideo(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Remove
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Script Section */}
