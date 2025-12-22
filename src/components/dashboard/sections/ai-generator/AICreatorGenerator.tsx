@@ -56,8 +56,10 @@ const AICreatorGenerator = () => {
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const [showAvatarSelection, setShowAvatarSelection] = useState(false);
   const [uploadedAudioVideo, setUploadedAudioVideo] = useState<File | null>(null);
+  const [referenceFiles, setReferenceFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioVideoInputRef = useRef<HTMLInputElement>(null);
+  const referenceInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -85,6 +87,21 @@ const AICreatorGenerator = () => {
     if (file) {
       setUploadedAudioVideo(file);
     }
+  };
+
+  const handleReferenceUploadClick = () => {
+    referenceInputRef.current?.click();
+  };
+
+  const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setReferenceFiles(prev => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const removeReferenceFile = (index: number) => {
+    setReferenceFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSelectAvatar = () => {
@@ -115,6 +132,16 @@ const AICreatorGenerator = () => {
         accept="audio/*,video/*,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.avi,.mov,.mkv"
         className="hidden"
         onChange={handleAudioVideoChange}
+      />
+
+      {/* Hidden File Input for Reference Files */}
+      <Input
+        ref={referenceInputRef}
+        type="file"
+        accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.avi,.mkv,.webm"
+        multiple
+        className="hidden"
+        onChange={handleReferenceChange}
       />
 
       {/* Left Panel - Avatar Selection */}
@@ -232,6 +259,62 @@ const AICreatorGenerator = () => {
               placeholder="Cinematic shoulders-up shot with teal gradient, soft lighting, natural pose, hyper-real clarity."
               className="min-h-[140px] bg-muted/20 border-muted-foreground/20 resize-none text-sm w-full"
             />
+          </div>
+
+          {/* Reference Product Images/Videos Section */}
+          <div className="w-full space-y-3 pt-4">
+            <div className="flex items-center justify-between">
+              <span className="text-foreground font-medium">Reference Images/Videos</span>
+              <span className="text-muted-foreground text-xs">{referenceFiles.length}/10 files</span>
+            </div>
+            
+            <div 
+              className="p-4 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-purple-500/50 transition-colors"
+              onClick={handleReferenceUploadClick}
+            >
+              {referenceFiles.length === 0 ? (
+                <div className="text-center py-4">
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground text-sm">Upload product images or video footage</p>
+                  <p className="text-muted-foreground text-xs mt-1">Click to browse or drag & drop</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-4 gap-2">
+                    {referenceFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        {file.type.startsWith('image/') ? (
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt={`Reference ${index + 1}`}
+                            className="w-full aspect-square object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-full aspect-square bg-muted/50 rounded-lg flex items-center justify-center">
+                            <Play className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeReferenceFile(index);
+                          }}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                        <p className="text-xs text-muted-foreground truncate mt-1">{file.name}</p>
+                      </div>
+                    ))}
+                    {referenceFiles.length < 10 && (
+                      <div className="w-full aspect-square border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center hover:border-purple-500/50 transition-colors">
+                        <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Card>
