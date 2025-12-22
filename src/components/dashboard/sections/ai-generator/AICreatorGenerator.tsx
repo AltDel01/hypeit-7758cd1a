@@ -202,6 +202,15 @@ const AICreatorGenerator = () => {
               <RefreshCw className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
+
+          {/* Prompt Section - Moved below avatars */}
+          <div className="w-full space-y-3 pt-4">
+            <span className="text-foreground font-medium">Prompt</span>
+            <Textarea 
+              placeholder="Cinematic shoulders-up shot with teal gradient, soft lighting, natural pose, hyper-real clarity."
+              className="min-h-[140px] bg-muted/20 border-muted-foreground/20 resize-none text-sm w-full"
+            />
+          </div>
         </div>
       </Card>
 
@@ -301,27 +310,13 @@ const AICreatorGenerator = () => {
         </div>
 
         {/* Caption Style */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <span className="text-foreground font-medium">Caption style</span>
-            <div className="flex items-center justify-center p-8 bg-muted/20 rounded-lg border border-muted-foreground/20">
-              <div className="text-center space-y-2">
-                <Ban className="w-8 h-8 text-muted-foreground mx-auto" />
-                <span className="text-muted-foreground text-sm">No caption</span>
-              </div>
+        <div className="space-y-3">
+          <span className="text-foreground font-medium">Caption style</span>
+          <div className="flex items-center justify-center p-8 bg-muted/20 rounded-lg border border-muted-foreground/20">
+            <div className="text-center space-y-2">
+              <Ban className="w-8 h-8 text-muted-foreground mx-auto" />
+              <span className="text-muted-foreground text-sm">No caption</span>
             </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-foreground font-medium">Custom prompt</span>
-              <Badge variant="outline" className="text-yellow-500 border-yellow-500/50 text-xs">BETA</Badge>
-              <Info className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <Textarea 
-              placeholder="Cinematic shoulders-up shot with teal gradient, soft lighting, natural pose, hyper-real clarity."
-              className="min-h-[100px] bg-muted/20 border-muted-foreground/20 resize-none text-sm"
-            />
           </div>
         </div>
 
