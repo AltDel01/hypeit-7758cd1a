@@ -57,6 +57,7 @@ const AICreatorGenerator = () => {
   const [showAvatarSelection, setShowAvatarSelection] = useState(false);
   const [uploadedAudioVideo, setUploadedAudioVideo] = useState<File | null>(null);
   const [referenceFiles, setReferenceFiles] = useState<File[]>([]);
+  const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16' | '1:1' | '4:5'>('16:9');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioVideoInputRef = useRef<HTMLInputElement>(null);
   const referenceInputRef = useRef<HTMLInputElement>(null);
@@ -424,6 +425,41 @@ const AICreatorGenerator = () => {
             <Button size="icon" className="h-8 w-8 bg-purple-600 hover:bg-purple-700 rounded-full">
               <Play className="w-4 h-4 fill-current" />
             </Button>
+          </div>
+        </div>
+
+        {/* Aspect Ratio Selection */}
+        <div className="space-y-3">
+          <span className="text-foreground font-medium">Aspect Ratio</span>
+          <div className="grid grid-cols-4 gap-2">
+            {(['16:9', '9:16', '1:1', '4:5'] as const).map((ratio) => {
+              const getShape = () => {
+                switch (ratio) {
+                  case '16:9': return 'w-10 h-6';
+                  case '9:16': return 'w-5 h-8';
+                  case '1:1': return 'w-7 h-7';
+                  case '4:5': return 'w-6 h-8';
+                }
+              };
+              return (
+                <button
+                  key={ratio}
+                  onClick={() => setAspectRatio(ratio)}
+                  className={`p-3 rounded-lg border-2 flex items-center gap-2 transition-all ${
+                    aspectRatio === ratio
+                      ? 'border-cyan-400 bg-cyan-400/10'
+                      : 'border-muted-foreground/30 hover:border-muted-foreground/50'
+                  }`}
+                >
+                  <div className={`${getShape()} border-2 rounded-sm ${
+                    aspectRatio === ratio ? 'border-cyan-400' : 'border-muted-foreground/50'
+                  }`} />
+                  <span className={`text-sm ${aspectRatio === ratio ? 'text-cyan-400' : 'text-muted-foreground'}`}>
+                    {ratio}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
