@@ -35,7 +35,7 @@ const AIVideoEditor: React.FC = () => {
       </div>
 
       {/* Sub-tab Navigation */}
-      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-700/50">
+      <div className="flex items-center gap-2 mb-6">
         {subTabs.map((tab) => (
           <button
             key={tab.id}
