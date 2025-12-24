@@ -24,6 +24,16 @@ const AIVideoEditor: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#b616d6] to-[#d946ef] bg-clip-text text-transparent mb-2">
+          AI Video Editor
+        </h1>
+        <p className="text-slate-400">
+          Edit videos like a pro with AI-powered tools and viral clip detection
+        </p>
+      </div>
+
       {/* Sub-tab Navigation */}
       <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-700/50">
         {subTabs.map((tab) => (
