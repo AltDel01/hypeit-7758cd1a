@@ -23,13 +23,13 @@ const AIVideoEditor: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
+    <div className="space-y-6 animate-fade-in">
       {/* Header Section */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#b616d6] to-[#d946ef] bg-clip-text text-transparent mb-2">
+      <div>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-2 animate-gradient-text">
           AI Video Editor
         </h1>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Edit videos like a pro with AI-powered tools and viral clip detection
         </p>
       </div>
@@ -55,9 +55,9 @@ const AIVideoEditor: React.FC = () => {
 
       {/* Content based on active sub-tab */}
       {activeSubTab === 'editor' ? (
-        <div className="flex-1 flex gap-4 overflow-hidden">
+        <div className="flex gap-4">
           {/* LEFT SIDEBAR - Viral Clips & Assets */}
-          <div className="w-[280px] shrink-0 flex flex-col gap-4 overflow-hidden">
+          <div className="w-[280px] shrink-0 flex flex-col gap-4">
             <ViralClipsList 
               selectedClipId={selectedClipId}
               onSelectClip={setSelectedClipId}
@@ -66,7 +66,7 @@ const AIVideoEditor: React.FC = () => {
           </div>
 
           {/* CENTER STAGE - Canvas & Timeline */}
-          <div className="flex-1 flex flex-col gap-4 min-w-0">
+          <div className="flex-1 flex flex-col gap-4">
             <VideoCanvas 
               isPlaying={isPlaying}
               onPlayPause={() => setIsPlaying(!isPlaying)}
@@ -86,9 +86,7 @@ const AIVideoEditor: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto">
-          <ViralClipsDashboard />
-        </div>
+        <ViralClipsDashboard />
       )}
     </div>
   );
