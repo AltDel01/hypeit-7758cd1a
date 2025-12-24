@@ -77,7 +77,7 @@ const ViralClipsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-180px)] flex gap-6">
+    <div className="flex gap-6 pb-6">
       {/* LEFT - Input Section */}
       <div className="w-[450px] shrink-0 space-y-6">
         {/* Tabs for Upload/YouTube */}
