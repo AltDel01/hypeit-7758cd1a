@@ -367,31 +367,55 @@ const ViralClipsDashboard: React.FC = () => {
           
           {/* Timeline Thumbnails */}
           <div className="relative">
-            <div className="flex gap-0.5 rounded-lg overflow-hidden border-2 border-[#b616d6]/50">
-              {timelineThumbnails.map((i) => (
-                <div 
-                  key={i} 
-                  className={cn(
-                    "flex-1 h-16 bg-slate-800 relative",
-                    i >= (selectedRange[0] / 100) * 12 && i < (selectedRange[1] / 100) * 12 
-                      ? "opacity-100" 
-                      : "opacity-40"
-                  )}
-                >
-                  <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
-                </div>
-              ))}
+            {/* Selection overlay */}
+            <div 
+              className="absolute top-0 bottom-0 border-2 border-[#b616d6] rounded-lg z-10 pointer-events-none"
+              style={{
+                left: `${selectedRange[0]}%`,
+                width: `${selectedRange[1] - selectedRange[0]}%`,
+              }}
+            />
+            
+            <div className="flex gap-0.5 rounded-lg overflow-hidden bg-slate-900/50">
+              {timelineThumbnails.map((i) => {
+                const thumbnailStart = (i / 12) * 100;
+                const thumbnailEnd = ((i + 1) / 12) * 100;
+                const isInRange = thumbnailEnd > selectedRange[0] && thumbnailStart < selectedRange[1];
+                
+                return (
+                  <div 
+                    key={i} 
+                    onClick={() => {
+                      // Click to set start point at this thumbnail
+                      const clickPosition = (i / 12) * 100;
+                      if (clickPosition < selectedRange[1]) {
+                        handleRangeChange([clickPosition, selectedRange[1]]);
+                      }
+                    }}
+                    className={cn(
+                      "flex-1 h-16 bg-slate-800 relative cursor-pointer transition-opacity",
+                      isInRange ? "opacity-100" : "opacity-40"
+                    )}
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
+                    {/* Time label on hover */}
+                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-white/60 opacity-0 hover:opacity-100">
+                      {formatTime((i / 12) * videoDuration)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
-            {/* Range Slider Overlay */}
+            {/* Range Slider */}
             <div className="mt-3">
               <Slider
                 value={selectedRange}
                 onValueChange={handleRangeChange}
                 min={0}
                 max={100}
-                step={1}
-                className="w-full"
+                step={0.5}
+                className="w-full [&_[role=slider]]:bg-white [&_[role=slider]]:border-2 [&_[role=slider]]:border-cyan-400 [&_.bg-primary]:bg-cyan-500"
               />
             </div>
           </div>
