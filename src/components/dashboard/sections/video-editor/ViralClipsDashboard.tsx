@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Sparkles, Youtube, Upload, Play, Clock, ChevronRight, Link2, Wand2 } from 'lucide-react';
+import { Sparkles, Youtube, Upload, Play, Clock, ChevronRight, Link2, Wand2, ArrowLeft, Download, ChevronDown, ThumbsUp, Zap, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +26,22 @@ const durationOptions = [
   { id: 'custom', label: 'Custom', icon: null, description: 'Set your own length' },
 ];
 
+const badgeTypes = [
+  { label: 'Well-structured', icon: Zap, color: 'bg-cyan-500' },
+  { label: 'On topic', icon: ThumbsUp, color: 'bg-green-500' },
+  { label: 'Engaging', icon: Users, color: 'bg-orange-500' },
+];
+
+interface GeneratedClip {
+  id: string;
+  title: string;
+  duration: string;
+  startTime: string;
+  endTime: string;
+  badge: typeof badgeTypes[number];
+  thumbnailColor: string;
+}
+
 const ViralClipsDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -36,6 +52,8 @@ const ViralClipsDashboard: React.FC = () => {
   const [selectedDuration, setSelectedDuration] = useState('auto');
   const [numberOfClips, setNumberOfClips] = useState(3);
   const [processing, setProcessing] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [generatedClips, setGeneratedClips] = useState<GeneratedClip[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const captionScrollRef = useRef<HTMLDivElement>(null);
 
@@ -51,8 +69,34 @@ const ViralClipsDashboard: React.FC = () => {
   const handleGetShorts = () => {
     setProcessing(true);
     setTimeout(() => {
+      // Generate mock clips based on numberOfClips
+      const clips: GeneratedClip[] = Array.from({ length: numberOfClips }, (_, i) => ({
+        id: `clip-${i + 1}`,
+        title: [
+          "Behind the Scenes: The Making of Our Latest Project!",
+          "Why This Strategy Sparked Massive Debate in the Community!",
+          "Our Vision: More Than Just Content, A Revolution!",
+          "What You Need to Know About This Trending Topic!",
+          "The Ultimate Guide to Going Viral on Social Media!",
+          "How We Built Something Amazing From Scratch!",
+          "Top Secrets Revealed: Industry Insiders Speak Out!",
+          "Breaking Down the Most Engaging Content Strategies!",
+        ][i % 8],
+        duration: ['03:57', '02:27', '03:35', '03:20', '02:45', '01:58', '02:12', '03:10'][i % 8],
+        startTime: `${String(Math.floor(i * 3)).padStart(2, '0')}:${String((i * 24) % 60).padStart(2, '0')}`,
+        endTime: `${String(Math.floor(i * 3) + 3).padStart(2, '0')}:${String((i * 24 + 30) % 60).padStart(2, '0')}`,
+        badge: badgeTypes[i % badgeTypes.length],
+        thumbnailColor: ['from-slate-700 to-slate-800', 'from-slate-600 to-slate-700', 'from-slate-700 to-slate-900'][i % 3],
+      }));
+      setGeneratedClips(clips);
       setProcessing(false);
-    }, 3000);
+      setShowResults(true);
+    }, 2000);
+  };
+
+  const handleBackToEditor = () => {
+    setShowResults(false);
+    setGeneratedClips([]);
   };
 
   const scrollCaptions = (direction: 'left' | 'right') => {
@@ -64,6 +108,85 @@ const ViralClipsDashboard: React.FC = () => {
 
   // Generate mock timeline thumbnails
   const timelineThumbnails = Array.from({ length: 12 }, (_, i) => i);
+
+  // Results View
+  if (showResults) {
+    return (
+      <div className="space-y-6 pb-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleBackToEditor}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <h2 className="text-lg text-white">
+              <span className="text-cyan-400 font-semibold">{generatedClips.length} clips</span>
+              {' '}are created from your video
+            </h2>
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+            <span className="text-white font-medium">Recommended</span>
+            <ChevronDown className="w-4 h-4 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Clips Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {generatedClips.map((clip) => (
+            <div key={clip.id} className="group">
+              {/* Video Thumbnail */}
+              <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900 mb-3">
+                {/* Badge */}
+                <div className={cn(
+                  "absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-white",
+                  clip.badge.color
+                )}>
+                  <clip.badge.icon className="w-3 h-3" />
+                  {clip.badge.label}
+                </div>
+
+                {/* Download Button */}
+                <button className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                  <Download className="w-4 h-4 text-white" />
+                </button>
+
+                {/* Mock video content */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center">
+                    <Play className="w-12 h-12 text-white/30" />
+                  </div>
+                </div>
+
+                {/* Caption preview */}
+                <div className="absolute bottom-12 left-0 right-0 text-center px-4">
+                  <p className="text-white font-bold text-sm [text-shadow:2px_2px_4px_rgba(0,0,0,0.8)]">
+                    sample caption text
+                  </p>
+                </div>
+
+                {/* Duration badge */}
+                <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium">
+                  {clip.duration}
+                </div>
+              </div>
+
+              {/* Clip Info */}
+              <h3 className="text-white text-sm font-medium line-clamp-2 mb-1.5">
+                {clip.title}
+              </h3>
+              <div className="flex items-center gap-1.5 text-slate-400 text-xs">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{clip.startTime} - {clip.endTime}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-8">
