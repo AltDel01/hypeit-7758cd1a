@@ -299,30 +299,22 @@ const ViralClipsDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Get Shorts Button */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-4 text-sm text-slate-400">
-          <span>Time needed: <span className="text-white font-medium">~{numberOfClips * 2}m</span></span>
-          <span className="text-slate-600">|</span>
-          <span className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            Time left: <span className="text-white font-medium">30m</span>
-          </span>
-        </div>
+      {/* Get Clip Button */}
+      <div className="flex justify-center pt-6">
         <Button 
           onClick={handleGetShorts}
           disabled={processing || (!videoPreviewUrl && !youtubeUrl)}
-          className="h-12 px-8 bg-gradient-to-r from-cyan-500 to-[#b616d6] hover:opacity-90 text-white font-semibold"
+          className="h-14 px-20 bg-gradient-to-r from-cyan-500 to-[#b616d6] hover:opacity-90 text-white font-semibold text-lg"
         >
           {processing ? (
             <>
-              <div className="w-4 h-4 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-5 h-5 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Processing...
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Get shorts
+              <Sparkles className="w-5 h-5 mr-2" />
+              Get Clip
             </>
           )}
         </Button>
