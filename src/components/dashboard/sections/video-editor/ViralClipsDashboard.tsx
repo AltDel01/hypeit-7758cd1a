@@ -42,9 +42,40 @@ interface GeneratedClip {
   thumbnailColor: string;
 }
 
+// Helper to extract YouTube video ID from various URL formats
+const extractYouTubeVideoId = (url: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
+// Helper to format seconds to HH:MM:SS
+const formatTime = (seconds: number): string => {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
+// Helper to parse HH:MM:SS to seconds
+const parseTime = (timeStr: string): number => {
+  const parts = timeStr.split(':').map(Number);
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return 0;
+};
+
 const ViralClipsDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
   const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState([0, 100]);
@@ -54,8 +85,52 @@ const ViralClipsDashboard: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [generatedClips, setGeneratedClips] = useState<GeneratedClip[]>([]);
+  const [videoDuration, setVideoDuration] = useState(600); // Default 10 minutes in seconds
+  const [startTime, setStartTime] = useState('00:00:00');
+  const [endTime, setEndTime] = useState('00:10:00');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const captionScrollRef = useRef<HTMLDivElement>(null);
+
+  // Handle YouTube URL change and extract video ID
+  const handleYoutubeUrlChange = (url: string) => {
+    setYoutubeUrl(url);
+    const videoId = extractYouTubeVideoId(url);
+    setYoutubeVideoId(videoId);
+    if (videoId) {
+      // Reset to full duration when new video is loaded
+      setSelectedRange([0, 100]);
+      setStartTime('00:00:00');
+      setEndTime(formatTime(videoDuration));
+    }
+  };
+
+  // Update timestamps when range slider changes
+  const handleRangeChange = (newRange: number[]) => {
+    setSelectedRange(newRange);
+    const newStartTime = (newRange[0] / 100) * videoDuration;
+    const newEndTime = (newRange[1] / 100) * videoDuration;
+    setStartTime(formatTime(newStartTime));
+    setEndTime(formatTime(newEndTime));
+  };
+
+  // Update range slider when timestamps change
+  const handleStartTimeChange = (value: string) => {
+    setStartTime(value);
+    const seconds = parseTime(value);
+    const percentage = (seconds / videoDuration) * 100;
+    if (percentage >= 0 && percentage < selectedRange[1]) {
+      setSelectedRange([percentage, selectedRange[1]]);
+    }
+  };
+
+  const handleEndTimeChange = (value: string) => {
+    setEndTime(value);
+    const seconds = parseTime(value);
+    const percentage = (seconds / videoDuration) * 100;
+    if (percentage > selectedRange[0] && percentage <= 100) {
+      setSelectedRange([selectedRange[0], percentage]);
+    }
+  };
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -246,26 +321,34 @@ const ViralClipsDashboard: React.FC = () => {
               <Input 
                 placeholder="Paste YouTube URL here..." 
                 value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
+                onChange={(e) => handleYoutubeUrlChange(e.target.value)}
                 className="pl-10 bg-slate-800/50 border-slate-600 h-12"
               />
             </div>
-            <Button 
-              className="h-12 px-6 bg-[#b616d6] hover:bg-[#a014c0]"
-              disabled={!youtubeUrl}
-            >
-              Load Video
-            </Button>
           </div>
           
-          {/* Placeholder for YouTube preview */}
-          {youtubeUrl && (
+          {/* YouTube Video Embed */}
+          {youtubeVideoId && (
             <div className="rounded-xl overflow-hidden bg-slate-900/50 border border-slate-700/50">
-              <div className="aspect-video bg-slate-800 flex items-center justify-center">
-                <div className="text-center">
-                  <Youtube className="w-16 h-16 text-red-500 mx-auto mb-3" />
-                  <p className="text-slate-400">YouTube video will appear here</p>
-                </div>
+              <div className="aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?rel=0`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
+          )}
+          
+          {/* Invalid URL message */}
+          {youtubeUrl && !youtubeVideoId && (
+            <div className="rounded-xl overflow-hidden bg-slate-900/50 border border-red-500/30 p-6">
+              <div className="text-center">
+                <Youtube className="w-12 h-12 text-red-400 mx-auto mb-2" />
+                <p className="text-red-400 text-sm">Please enter a valid YouTube URL</p>
               </div>
             </div>
           )}
@@ -273,12 +356,12 @@ const ViralClipsDashboard: React.FC = () => {
       </Tabs>
 
       {/* Timeline Selection - Only show when video is loaded */}
-      {(videoPreviewUrl || youtubeUrl) && (
+      {(videoPreviewUrl || youtubeVideoId) && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-white font-semibold">Select the part you want to create shorts</h3>
             <span className="text-slate-400 text-sm">
-              {Math.round(selectedRange[1] - selectedRange[0])} seconds selected
+              {formatTime(((selectedRange[1] - selectedRange[0]) / 100) * videoDuration)} selected
             </span>
           </div>
           
@@ -304,7 +387,7 @@ const ViralClipsDashboard: React.FC = () => {
             <div className="mt-3">
               <Slider
                 value={selectedRange}
-                onValueChange={setSelectedRange}
+                onValueChange={handleRangeChange}
                 min={0}
                 max={100}
                 step={1}
@@ -323,13 +406,15 @@ const ViralClipsDashboard: React.FC = () => {
               <Input 
                 placeholder="00:00:00" 
                 className="w-24 bg-slate-800/50 border-slate-600 text-center text-sm h-9"
-                defaultValue="00:00:00"
+                value={startTime}
+                onChange={(e) => handleStartTimeChange(e.target.value)}
               />
               <span className="text-slate-500">to</span>
               <Input 
-                placeholder="00:16:00" 
+                placeholder="00:10:00" 
                 className="w-24 bg-slate-800/50 border-slate-600 text-center text-sm h-9"
-                defaultValue="00:16:00"
+                value={endTime}
+                onChange={(e) => handleEndTimeChange(e.target.value)}
               />
             </div>
           </div>
