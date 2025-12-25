@@ -376,32 +376,44 @@ const ViralClipsDashboard: React.FC = () => {
               }}
             />
             
-            <div className="flex gap-0.5 rounded-lg overflow-hidden bg-slate-900/50">
+            <div className="flex gap-0.5 rounded-lg overflow-hidden bg-slate-900/50 border border-white/20">
               {timelineThumbnails.map((i) => {
                 const thumbnailStart = (i / 12) * 100;
                 const thumbnailEnd = ((i + 1) / 12) * 100;
                 const isInRange = thumbnailEnd > selectedRange[0] && thumbnailStart < selectedRange[1];
                 
+                // YouTube provides thumbnails at different points: 0.jpg, 1.jpg, 2.jpg, 3.jpg
+                const thumbnailIndex = i % 4;
+                const thumbnailUrl = youtubeVideoId 
+                  ? `https://img.youtube.com/vi/${youtubeVideoId}/${thumbnailIndex}.jpg`
+                  : null;
+                
                 return (
                   <div 
                     key={i} 
                     onClick={() => {
-                      // Click to set start point at this thumbnail
                       const clickPosition = (i / 12) * 100;
                       if (clickPosition < selectedRange[1]) {
                         handleRangeChange([clickPosition, selectedRange[1]]);
                       }
                     }}
                     className={cn(
-                      "flex-1 h-16 bg-slate-800 relative cursor-pointer transition-opacity",
+                      "flex-1 h-16 bg-slate-800 relative cursor-pointer transition-opacity overflow-hidden",
                       isInRange ? "opacity-100" : "opacity-40"
                     )}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
-                    {/* Time label on hover */}
-                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-white/60 opacity-0 hover:opacity-100">
-                      {formatTime((i / 12) * videoDuration)}
-                    </div>
+                    {thumbnailUrl ? (
+                      <img 
+                        src={thumbnailUrl} 
+                        alt={`Frame ${i}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
+                    )}
                   </div>
                 );
               })}
