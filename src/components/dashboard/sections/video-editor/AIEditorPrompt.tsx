@@ -88,10 +88,10 @@ const AIEditorPrompt: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
       {/* Title */}
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-8 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-        From Imagination to Creation
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent px-4">
+        Create Stop Scrolling Video
       </h1>
 
       {/* Editing Feature Buttons */}
