@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import { Clapperboard, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ViralClipsList from './video-editor/ViralClipsList';
-import AssetsGrid from './video-editor/AssetsGrid';
-import VideoCanvas from './video-editor/VideoCanvas';
-import BlockTimeline from './video-editor/BlockTimeline';
-import TuningDeck from './video-editor/TuningDeck';
+import AIEditorPrompt from './video-editor/AIEditorPrompt';
 import ViralClipsDashboard from './video-editor/ViralClipsDashboard';
 
 type SubTab = 'editor' | 'viralclips';
 
 const AIVideoEditor: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('editor');
-  const [isTextEditMode, setIsTextEditMode] = useState(false);
-  const [selectedClipId, setSelectedClipId] = useState<string | null>('clip-1');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
 
   const subTabs = [
     { id: 'editor' as SubTab, label: 'AI Editor', icon: Clapperboard },
@@ -55,36 +47,7 @@ const AIVideoEditor: React.FC = () => {
 
       {/* Content based on active sub-tab */}
       {activeSubTab === 'editor' ? (
-        <div className="flex gap-4">
-          {/* LEFT SIDEBAR - Viral Clips & Assets */}
-          <div className="w-[280px] shrink-0 flex flex-col gap-4">
-            <ViralClipsList 
-              selectedClipId={selectedClipId}
-              onSelectClip={setSelectedClipId}
-            />
-            <AssetsGrid />
-          </div>
-
-          {/* CENTER STAGE - Canvas & Timeline */}
-          <div className="flex-1 flex flex-col gap-4">
-            <VideoCanvas 
-              isPlaying={isPlaying}
-              onPlayPause={() => setIsPlaying(!isPlaying)}
-              currentTime={currentTime}
-            />
-            <BlockTimeline 
-              isTextEditMode={isTextEditMode}
-              onToggleTextEdit={() => setIsTextEditMode(!isTextEditMode)}
-              currentTime={currentTime}
-              onSeek={setCurrentTime}
-            />
-          </div>
-
-          {/* RIGHT SIDEBAR - Tuning Deck */}
-          <div className="w-[300px] shrink-0">
-            <TuningDeck />
-          </div>
-        </div>
+        <AIEditorPrompt />
       ) : (
         <ViralClipsDashboard />
       )}
