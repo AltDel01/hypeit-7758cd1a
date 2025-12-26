@@ -114,7 +114,7 @@ const AIEditorPrompt: React.FC = () => {
       </div>
 
       {/* Prompt Box */}
-      <div className="w-full max-w-3xl">
+      <div className="w-full max-w-4xl">
         <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
           {/* Uploaded Files Preview */}
           {uploadedFiles.length > 0 && (
