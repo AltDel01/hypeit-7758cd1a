@@ -113,22 +113,9 @@ const AIEditorPrompt: React.FC = () => {
         ))}
       </div>
 
-      {/* Example Prompts */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-4xl">
-        {examplePrompts.map((example, index) => (
-          <button
-            key={index}
-            onClick={() => handleExampleClick(example)}
-            className="px-4 py-2 rounded-full text-sm bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all duration-200"
-          >
-            {example}
-          </button>
-        ))}
-      </div>
-
       {/* Prompt Box */}
       <div className="w-full max-w-3xl">
-        <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-4 backdrop-blur-sm">
+        <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
           {/* Uploaded Files Preview */}
           {uploadedFiles.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
@@ -159,11 +146,24 @@ const AIEditorPrompt: React.FC = () => {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe how you want to edit your video, or what video you want to create..."
-            className="min-h-[120px] bg-transparent border-none text-white placeholder:text-slate-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+            className="min-h-[160px] bg-transparent border-none text-white placeholder:text-slate-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
           />
 
+          {/* Example Prompts inside box */}
+          <div className="flex flex-wrap gap-2 mb-4 mt-2">
+            {examplePrompts.map((example, index) => (
+              <button
+                key={index}
+                onClick={() => handleExampleClick(example)}
+                className="px-4 py-2 rounded-full text-sm bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all duration-200"
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+
           {/* Bottom Actions */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700/50">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
             {/* Upload Button */}
             <div className="flex items-center gap-2">
               <input
@@ -176,13 +176,12 @@ const AIEditorPrompt: React.FC = () => {
               />
               <Button
                 variant="ghost"
-                size="icon"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-slate-400 hover:text-white hover:bg-slate-800"
+                className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
               >
-                <Upload className="w-5 h-5" />
+                <Film className="w-5 h-5" />
+                <span className="text-sm">Upload Images or Videos</span>
               </Button>
-              <span className="text-xs text-slate-500">Upload images or videos</span>
             </div>
 
             {/* Create Button */}
