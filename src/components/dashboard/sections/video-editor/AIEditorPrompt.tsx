@@ -90,7 +90,7 @@ const AIEditorPrompt: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
       {/* Title */}
-      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent px-4">
+      <h1 className="relative z-10 inline-block text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 leading-tight py-1 px-4 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent shadow-glow">
         Create Stop Scrolling Video
       </h1>
 
