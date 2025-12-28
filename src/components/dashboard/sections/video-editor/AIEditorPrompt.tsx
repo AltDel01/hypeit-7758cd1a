@@ -10,7 +10,8 @@ import {
   Image,
   Upload,
   Video,
-  X
+  X,
+  ZoomIn
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const editingFeatures = [
   { id: 'b-roll', label: 'B-roll', icon: Film, description: 'Add stock footage' },
   { id: 'transitions', label: 'Transitions', icon: Layers, description: 'Add smooth transitions' },
   { id: 'effects', label: 'Effects', icon: Wand2, description: 'Apply visual effects' },
+  { id: 'zoom', label: 'Zoom', icon: ZoomIn, description: 'Add dynamic zoom effects' },
   { id: 'thumbnail', label: 'Thumbnail Generator', icon: Image, description: 'Create eye-catching thumbnails' },
 ];
 
