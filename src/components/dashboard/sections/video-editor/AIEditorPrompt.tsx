@@ -11,12 +11,17 @@ import {
   Upload,
   Video,
   X,
-  ZoomIn
+  ZoomIn,
+  ArrowLeft,
+  Download,
+  Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import demoVideo from '@/assets/jake-paul-demo.mp4';
 
 const editingFeatures = [
   { id: 'ai-edit', label: 'AI Edit', icon: Sparkles, description: 'Smart auto-edit with effects & transitions' },
@@ -44,6 +49,7 @@ const AIEditorPrompt: React.FC = () => {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFeatureClick = (featureId: string) => {
@@ -81,13 +87,73 @@ const AIEditorPrompt: React.FC = () => {
     // Simulate processing
     setTimeout(() => {
       setIsProcessing(false);
+      setIsGenerated(true);
       toast.success('Video created successfully!', { id: 'processing' });
     }, 2000);
+  };
+
+  const handleBackToEditor = () => {
+    setIsGenerated(false);
   };
 
   const handleExampleClick = (example: string) => {
     setPrompt(example);
   };
+
+  // Generated video result view
+  if (isGenerated) {
+    return (
+      <div className="animate-fade-in space-y-6 px-6">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            onClick={handleBackToEditor}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Editor
+          </Button>
+          <h2 className="text-xl font-semibold text-foreground">Generated AI Video</h2>
+        </div>
+        
+        <Card className="p-6 bg-background/60 backdrop-blur-sm border-muted-foreground/20">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Video Player */}
+            <div className="flex-1">
+              <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+                <video 
+                  src={demoVideo}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            
+            {/* Actions Sidebar */}
+            <div className="lg:w-64 space-y-4">
+              <h3 className="text-foreground font-medium">Export Options</h3>
+              <Button className="w-full gap-2 bg-purple-600 hover:bg-purple-700">
+                <Download className="w-4 h-4" />
+                Download Video
+              </Button>
+              <Button variant="outline" className="w-full gap-2">
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+              <div className="pt-4 border-t border-muted-foreground/20">
+                <p className="text-sm text-muted-foreground mb-2">Video Details</p>
+                <div className="space-y-1 text-sm">
+                  <p className="text-foreground">Format: MP4</p>
+                  <p className="text-foreground">Feature: {selectedFeature || 'AI Edit'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
