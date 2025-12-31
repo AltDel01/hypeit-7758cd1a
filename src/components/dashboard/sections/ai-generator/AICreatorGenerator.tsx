@@ -13,8 +13,12 @@ import {
   Settings, 
   Ban,
   ChevronDown,
-  Upload
+  Upload,
+  ArrowLeft,
+  Download,
+  Share2
 } from 'lucide-react';
+import demoVideo from '@/assets/paul-logan-demo.mp4';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,6 +65,21 @@ const AICreatorGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioVideoInputRef = useRef<HTMLInputElement>(null);
   const referenceInputRef = useRef<HTMLInputElement>(null);
+  const [isGenerated, setIsGenerated] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerate = () => {
+    setIsGenerating(true);
+    // Simulate generation time
+    setTimeout(() => {
+      setIsGenerating(false);
+      setIsGenerated(true);
+    }, 2000);
+  };
+
+  const handleBackToEditor = () => {
+    setIsGenerated(false);
+  };
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -114,6 +133,61 @@ const AICreatorGenerator = () => {
     setShowAvatarSelection(false);
     setSelectedAvatar(null);
   };
+
+  // Generated video result view
+  if (isGenerated) {
+    return (
+      <div className="animate-fade-in space-y-6">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            onClick={handleBackToEditor}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Editor
+          </Button>
+          <h2 className="text-xl font-semibold text-foreground">Generated AI Creator Video</h2>
+        </div>
+        
+        <Card className="p-6 bg-background/60 backdrop-blur-sm border-muted-foreground/20">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Video Player */}
+            <div className="flex-1">
+              <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+                <video 
+                  src={demoVideo}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            
+            {/* Actions Sidebar */}
+            <div className="lg:w-64 space-y-4">
+              <h3 className="text-foreground font-medium">Export Options</h3>
+              <Button className="w-full gap-2 bg-purple-600 hover:bg-purple-700">
+                <Download className="w-4 h-4" />
+                Download Video
+              </Button>
+              <Button variant="outline" className="w-full gap-2">
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+              <div className="pt-4 border-t border-muted-foreground/20">
+                <p className="text-sm text-muted-foreground mb-2">Video Details</p>
+                <div className="space-y-1 text-sm">
+                  <p className="text-foreground">Resolution: {resolution1080 ? '1080p' : '720p'}</p>
+                  <p className="text-foreground">Aspect Ratio: {aspectRatio}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
@@ -534,10 +608,12 @@ const AICreatorGenerator = () => {
         {/* Generate Button */}
         <div className="flex justify-center pt-6">
           <Button 
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg font-semibold rounded-lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg font-semibold rounded-lg disabled:opacity-50"
             size="lg"
+            onClick={handleGenerate}
+            disabled={isGenerating}
           >
-            Generate AI Creator
+            {isGenerating ? 'Generating...' : 'Generate AI Creator'}
           </Button>
         </div>
       </Card>
