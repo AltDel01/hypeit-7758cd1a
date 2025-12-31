@@ -46,17 +46,22 @@ const examplePrompts = [
 
 const AIEditorPrompt: React.FC = () => {
   const [prompt, setPrompt] = useState('');
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFeatureClick = (featureId: string) => {
-    setSelectedFeature(selectedFeature === featureId ? null : featureId);
+    setSelectedFeatures(prev => 
+      prev.includes(featureId) 
+        ? prev.filter(id => id !== featureId)
+        : [...prev, featureId]
+    );
     const feature = editingFeatures.find(f => f.id === featureId);
     if (feature) {
-      toast.info(`${feature.label} selected`, {
+      const isSelected = !selectedFeatures.includes(featureId);
+      toast.info(`${feature.label} ${isSelected ? 'added' : 'removed'}`, {
         description: feature.description
       });
     }
@@ -145,7 +150,7 @@ const AIEditorPrompt: React.FC = () => {
                 <p className="text-sm text-muted-foreground mb-2">Video Details</p>
                 <div className="space-y-1 text-sm">
                   <p className="text-foreground">Format: MP4</p>
-                  <p className="text-foreground">Feature: {selectedFeature || 'AI Edit'}</p>
+                  <p className="text-foreground">Features: {selectedFeatures.length > 0 ? selectedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).join(', ') : 'AI Edit'}</p>
                 </div>
               </div>
             </div>
@@ -170,7 +175,7 @@ const AIEditorPrompt: React.FC = () => {
             onClick={() => handleFeatureClick(feature.id)}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-              selectedFeature === feature.id
+              selectedFeatures.includes(feature.id)
                 ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
                 : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
             )}
