@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 // Import demo clips
 import demoClip1 from '@/assets/viral-clips/clip-4.mp4';
-import demoClip2 from '@/assets/viral-clips/clip-4.mp4';
+import demoClip2 from '@/assets/viral-clips/clip-2.mp4';
 import demoClip3 from '@/assets/viral-clips/clip-4.mp4';
 import demoClip4 from '@/assets/viral-clips/clip-4.mp4';
 
