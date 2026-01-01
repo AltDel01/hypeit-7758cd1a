@@ -89,7 +89,7 @@ const ViralClipsDashboard: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState([0, 100]);
   const [selectedCaption, setSelectedCaption] = useState('default');
   const [selectedDuration, setSelectedDuration] = useState('auto');
-  const [numberOfClips, setNumberOfClips] = useState(3);
+  const [numberOfClips, setNumberOfClips] = useState(4);
   const [processing, setProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [generatedClips, setGeneratedClips] = useState<GeneratedClip[]>([]);
