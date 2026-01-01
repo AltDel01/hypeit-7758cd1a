@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils';
 
 // Import demo clips
 import demoClip1 from '@/assets/viral-clips/clip-4.mp4';
-import demoClip2 from '@/assets/jake-paul-demo.mp4';
-import demoClip3 from '@/assets/paul-logan-demo.mp4';
+import demoClip2 from '@/assets/viral-clips/clip-4.mp4';
+import demoClip3 from '@/assets/viral-clips/clip-4.mp4';
+import demoClip4 from '@/assets/viral-clips/clip-4.mp4';
 
 const captionTemplates = [
   { id: 'default', name: 'Default', style: 'text-white font-medium' },
@@ -38,7 +39,7 @@ const badgeTypes = [
 ];
 
 // Demo video clips array
-const demoClips = [demoClip1, demoClip2, demoClip3, demoClip1];
+const demoClips = [demoClip1, demoClip2, demoClip3, demoClip4];
 
 interface GeneratedClip {
   id: string;
