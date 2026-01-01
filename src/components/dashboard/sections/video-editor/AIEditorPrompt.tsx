@@ -189,22 +189,39 @@ const AIEditorPrompt: React.FC = () => {
       {/* Prompt Box */}
       <div className="w-full max-w-4xl">
         <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
-          {/* Uploaded Files Preview */}
-          {uploadedFiles.length > 0 && (
+          {/* Video Preview */}
+          {uploadedFiles.some(file => file.type.startsWith('video/')) && (
+            <div className="mb-4">
+              {uploadedFiles.filter(file => file.type.startsWith('video/')).map((file, index) => (
+                <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
+                  <video 
+                    src={URL.createObjectURL(file)}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
+                  <button 
+                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Uploaded Files Tags (for images and other files) */}
+          {uploadedFiles.filter(file => !file.type.startsWith('video/')).length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {uploadedFiles.map((file, index) => (
+              {uploadedFiles.filter(file => !file.type.startsWith('video/')).map((file, index) => (
                 <div 
                   key={index}
                   className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg text-sm"
                 >
-                  {file.type.startsWith('video/') ? (
-                    <Video className="w-4 h-4 text-[#b616d6]" />
-                  ) : (
-                    <Image className="w-4 h-4 text-[#8c52ff]" />
-                  )}
+                  <Image className="w-4 h-4 text-[#8c52ff]" />
                   <span className="text-slate-300 max-w-[150px] truncate">{file.name}</span>
                   <button 
-                    onClick={() => removeFile(index)}
+                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
                     className="text-slate-500 hover:text-white transition-colors"
                   >
                     <X className="w-4 h-4" />
