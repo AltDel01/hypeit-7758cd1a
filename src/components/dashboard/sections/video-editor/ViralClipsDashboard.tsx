@@ -6,6 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 
+// Import demo clips
+import demoClip1 from '@/assets/viral-clips/clip-1.mp4';
+import demoClip2 from '@/assets/jake-paul-demo.mp4';
+
 const captionTemplates = [
   { id: 'default', name: 'Default', style: 'text-white font-medium' },
   { id: 'quick', name: 'THE QUICK', style: 'text-white font-bold uppercase tracking-wider' },
@@ -32,6 +36,9 @@ const badgeTypes = [
   { label: 'Engaging', icon: Users, color: 'bg-orange-500' },
 ];
 
+// Demo video clips array
+const demoClips = [demoClip1, demoClip2, demoClip1, demoClip2];
+
 interface GeneratedClip {
   id: string;
   title: string;
@@ -40,6 +47,7 @@ interface GeneratedClip {
   endTime: string;
   badge: typeof badgeTypes[number];
   thumbnailColor: string;
+  videoUrl: string;
 }
 
 // Helper to extract YouTube video ID from various URL formats
@@ -144,24 +152,21 @@ const ViralClipsDashboard: React.FC = () => {
   const handleGetShorts = () => {
     setProcessing(true);
     setTimeout(() => {
-      // Generate mock clips based on numberOfClips
+      // Generate clips using demo videos
       const clips: GeneratedClip[] = Array.from({ length: numberOfClips }, (_, i) => ({
         id: `clip-${i + 1}`,
         title: [
-          "Behind the Scenes: The Making of Our Latest Project!",
-          "Why This Strategy Sparked Massive Debate in the Community!",
-          "Our Vision: More Than Just Content, A Revolution!",
-          "What You Need to Know About This Trending Topic!",
-          "The Ultimate Guide to Going Viral on Social Media!",
-          "How We Built Something Amazing From Scratch!",
-          "Top Secrets Revealed: Industry Insiders Speak Out!",
-          "Breaking Down the Most Engaging Content Strategies!",
-        ][i % 8],
-        duration: ['03:57', '02:27', '03:35', '03:20', '02:45', '01:58', '02:12', '03:10'][i % 8],
+          "Breaking the Box: Jake Paul Defies Labels and Dominates Multiple Worlds!",
+          "Jake Paul's Confidence vs Boxing Community Doubts: The Ultimate Underdog Story!",
+          "Jake Paul's Pressure-Free Mindset: Why He's Fighting with No Fear!",
+          "Jake Paul's Response to Critics: It's His Life, His Fight, His Legacy!",
+        ][i % 4],
+        duration: ['00:32', '00:28', '00:35', '00:30'][i % 4],
         startTime: `${String(Math.floor(i * 3)).padStart(2, '0')}:${String((i * 24) % 60).padStart(2, '0')}`,
         endTime: `${String(Math.floor(i * 3) + 3).padStart(2, '0')}:${String((i * 24 + 30) % 60).padStart(2, '0')}`,
         badge: badgeTypes[i % badgeTypes.length],
         thumbnailColor: ['from-slate-700 to-slate-800', 'from-slate-600 to-slate-700', 'from-slate-700 to-slate-900'][i % 3],
+        videoUrl: demoClips[i % demoClips.length],
       }));
       setGeneratedClips(clips);
       setProcessing(false);
@@ -212,11 +217,11 @@ const ViralClipsDashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {generatedClips.map((clip) => (
             <div key={clip.id} className="group">
-              {/* Video Thumbnail */}
+              {/* Video Player */}
               <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900 mb-3">
                 {/* Badge */}
                 <div className={cn(
-                  "absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-white",
+                  "absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-white z-10",
                   clip.badge.color
                 )}>
                   <clip.badge.icon className="w-3 h-3" />
@@ -224,26 +229,19 @@ const ViralClipsDashboard: React.FC = () => {
                 </div>
 
                 {/* Download Button */}
-                <button className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                <button className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10">
                   <Download className="w-4 h-4 text-white" />
                 </button>
 
-                {/* Mock video content */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center">
-                    <Play className="w-12 h-12 text-white/30" />
-                  </div>
-                </div>
-
-                {/* Caption preview */}
-                <div className="absolute bottom-12 left-0 right-0 text-center px-4">
-                  <p className="text-white font-bold text-sm [text-shadow:2px_2px_4px_rgba(0,0,0,0.8)]">
-                    sample caption text
-                  </p>
-                </div>
+                {/* Actual video player */}
+                <video 
+                  src={clip.videoUrl}
+                  controls
+                  className="w-full h-full object-cover"
+                />
 
                 {/* Duration badge */}
-                <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium">
+                <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium z-10">
                   {clip.duration}
                 </div>
               </div>
