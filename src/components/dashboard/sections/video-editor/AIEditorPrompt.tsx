@@ -16,7 +16,10 @@ import {
   Download,
   Share2,
   AudioLines,
-  Plus
+  Plus,
+  ChevronDown,
+  Square,
+  Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +27,43 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import demoVideo from '@/assets/jake-paul-demo.mp4';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+// Selection options
+const frameOptions = [
+  { value: 'first-last', label: 'First and last frames' },
+  { value: 'keyframes', label: 'Keyframes only' },
+  { value: 'all', label: 'All frames' },
+  { value: 'custom', label: 'Custom selection' },
+];
+
+const aspectRatioOptions = [
+  { value: '16:9', label: '16:9' },
+  { value: '9:16', label: '9:16' },
+  { value: '4:3', label: '4:3' },
+  { value: '1:1', label: '1:1' },
+  { value: '21:9', label: '21:9' },
+];
+
+const resolutionOptions = [
+  { value: '4K', label: '4K' },
+  { value: '1080P', label: '1080P' },
+  { value: '720P', label: '720P' },
+  { value: '480P', label: '480P' },
+];
+
+const durationOptions = [
+  { value: '5s', label: '5s' },
+  { value: '10s', label: '10s' },
+  { value: '15s', label: '15s' },
+  { value: '30s', label: '30s' },
+  { value: '60s', label: '60s' },
+];
 
 const editingFeatures = [
   { id: 'ai-edit', label: 'AI Edit', icon: Sparkles, description: 'Smart auto-edit with effects & transitions' },
@@ -55,6 +95,12 @@ const AIEditorPrompt: React.FC = () => {
   const [isGenerated, setIsGenerated] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  
+  // Selection states
+  const [selectedFrames, setSelectedFrames] = useState('first-last');
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('4:3');
+  const [selectedResolution, setSelectedResolution] = useState('720P');
+  const [selectedDuration, setSelectedDuration] = useState('5s');
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
@@ -271,7 +317,7 @@ const AIEditorPrompt: React.FC = () => {
 
           {/* Bottom Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
-            {/* Upload Buttons */}
+            {/* Upload Buttons and Selection Options */}
             <div className="flex items-center gap-3">
               {/* Video Upload */}
               <input
@@ -312,6 +358,108 @@ const AIEditorPrompt: React.FC = () => {
                 </div>
                 <span className="text-[10px] text-slate-400 group-hover:text-white">Voice</span>
               </button>
+
+              {/* Divider */}
+              <div className="w-px h-10 bg-slate-700/50 mx-1" />
+
+              {/* Frames Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all text-sm text-slate-300">
+                    <Film className="w-4 h-4 text-slate-400" />
+                    <span className="max-w-[120px] truncate">{frameOptions.find(f => f.value === selectedFrames)?.label}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
+                  {frameOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setSelectedFrames(option.value)}
+                      className={cn(
+                        "text-slate-300 hover:text-white focus:text-white",
+                        selectedFrames === option.value && "bg-slate-700"
+                      )}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Aspect Ratio Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all text-sm text-slate-300">
+                    <Square className="w-4 h-4 text-slate-400" />
+                    <span>{selectedAspectRatio}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
+                  {aspectRatioOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setSelectedAspectRatio(option.value)}
+                      className={cn(
+                        "text-slate-300 hover:text-white focus:text-white",
+                        selectedAspectRatio === option.value && "bg-slate-700"
+                      )}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Resolution Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all text-sm text-slate-300">
+                    <span>{selectedResolution}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
+                  {resolutionOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setSelectedResolution(option.value)}
+                      className={cn(
+                        "text-slate-300 hover:text-white focus:text-white",
+                        selectedResolution === option.value && "bg-slate-700"
+                      )}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Duration Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all text-sm text-slate-300">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span>{selectedDuration}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
+                  {durationOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setSelectedDuration(option.value)}
+                      className={cn(
+                        "text-slate-300 hover:text-white focus:text-white",
+                        selectedDuration === option.value && "bg-slate-700"
+                      )}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Create Button */}
