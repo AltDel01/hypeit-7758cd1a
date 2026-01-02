@@ -15,7 +15,8 @@ import {
   ArrowLeft,
   Download,
   Share2,
-  AudioLines
+  AudioLines,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -285,7 +286,10 @@ const AIEditorPrompt: React.FC = () => {
                 onClick={() => videoInputRef.current?.click()}
                 className="flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-xl bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all duration-200 group"
               >
-                <Video className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <div className="flex items-center gap-0.5">
+                  <Plus className="w-3 h-3 text-slate-400 group-hover:text-white" />
+                  <Video className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                </div>
                 <span className="text-[10px] text-slate-400 group-hover:text-white">Video</span>
               </button>
 
@@ -302,7 +306,10 @@ const AIEditorPrompt: React.FC = () => {
                 onClick={() => audioInputRef.current?.click()}
                 className="flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-xl bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all duration-200 group"
               >
-                <AudioLines className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <div className="flex items-center gap-0.5">
+                  <Plus className="w-3 h-3 text-slate-400 group-hover:text-white" />
+                  <AudioLines className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                </div>
                 <span className="text-[10px] text-slate-400 group-hover:text-white">Voice</span>
               </button>
             </div>
