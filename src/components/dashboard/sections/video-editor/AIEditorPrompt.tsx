@@ -19,7 +19,8 @@ import {
   Plus,
   ChevronDown,
   Square,
-  Clock
+  Clock,
+  Timer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -101,6 +102,8 @@ const AIEditorPrompt: React.FC = () => {
   const [selectedAspectRatio, setSelectedAspectRatio] = useState('4:3');
   const [selectedResolution, setSelectedResolution] = useState('720P');
   const [selectedDuration, setSelectedDuration] = useState('5s');
+  const [startTimestamp, setStartTimestamp] = useState('00:00');
+  const [endTimestamp, setEndTimestamp] = useState('00:05');
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
@@ -313,6 +316,55 @@ const AIEditorPrompt: React.FC = () => {
                 {example}
               </button>
             ))}
+          </div>
+
+          {/* Timestamp Selection */}
+          <div className="flex items-center gap-4 py-3 border-t border-slate-700/50">
+            <div className="flex items-center gap-2">
+              <Timer className="w-4 h-4 text-slate-400" />
+              <span className="text-sm text-slate-400">Timeline:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500">Start</span>
+                <input
+                  type="text"
+                  value={startTimestamp}
+                  onChange={(e) => setStartTimestamp(e.target.value)}
+                  placeholder="00:00"
+                  className="w-16 px-2 py-1 text-sm text-center bg-slate-800/80 border border-slate-700/50 rounded-md text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-purple-500/50"
+                />
+              </div>
+              <span className="text-slate-500">—</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500">End</span>
+                <input
+                  type="text"
+                  value={endTimestamp}
+                  onChange={(e) => setEndTimestamp(e.target.value)}
+                  placeholder="00:05"
+                  className="w-16 px-2 py-1 text-sm text-center bg-slate-800/80 border border-slate-700/50 rounded-md text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-purple-500/50"
+                />
+              </div>
+            </div>
+            {/* Quick timestamp presets */}
+            <div className="flex items-center gap-1.5">
+              {['0:00-0:05', '0:00-0:10', '0:00-0:30'].map((preset) => {
+                const [start, end] = preset.split('-');
+                return (
+                  <button
+                    key={preset}
+                    onClick={() => {
+                      setStartTimestamp(start);
+                      setEndTimestamp(end);
+                    }}
+                    className="px-2 py-1 text-xs rounded bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all"
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Bottom Actions */}
