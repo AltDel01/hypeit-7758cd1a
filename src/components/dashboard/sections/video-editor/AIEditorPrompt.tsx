@@ -43,11 +43,11 @@ const frameOptions = [
 ];
 
 const aspectRatioOptions = [
-  { value: '16:9', label: '16:9' },
-  { value: '9:16', label: '9:16' },
-  { value: '4:3', label: '4:3' },
-  { value: '1:1', label: '1:1' },
-  { value: '21:9', label: '21:9' },
+  { value: '16:9', label: '16:9', width: 20, height: 11 },
+  { value: '9:16', label: '9:16', width: 11, height: 20 },
+  { value: '4:3', label: '4:3', width: 16, height: 12 },
+  { value: '1:1', label: '1:1', width: 14, height: 14 },
+  { value: '21:9', label: '21:9', width: 21, height: 9 },
 ];
 
 const resolutionOptions = [
@@ -402,10 +402,19 @@ const AIEditorPrompt: React.FC = () => {
                       key={option.value}
                       onClick={() => setSelectedAspectRatio(option.value)}
                       className={cn(
-                        "text-slate-300 hover:text-white focus:text-white",
+                        "flex items-center gap-2 text-slate-300 hover:text-white focus:text-white",
                         selectedAspectRatio === option.value && "bg-slate-700"
                       )}
                     >
+                      <div 
+                        className={cn(
+                          "border rounded-sm",
+                          selectedAspectRatio === option.value 
+                            ? "border-purple-400 bg-purple-900/30" 
+                            : "border-slate-500"
+                        )}
+                        style={{ width: option.width, height: option.height }}
+                      />
                       {option.label}
                     </DropdownMenuItem>
                   ))}
