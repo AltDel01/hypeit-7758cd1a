@@ -347,24 +347,6 @@ const AIEditorPrompt: React.FC = () => {
                 />
               </div>
             </div>
-            {/* Quick timestamp presets */}
-            <div className="flex items-center gap-1.5">
-              {['0:00-0:05', '0:00-0:10', '0:00-0:30'].map((preset) => {
-                const [start, end] = preset.split('-');
-                return (
-                  <button
-                    key={preset}
-                    onClick={() => {
-                      setStartTimestamp(start);
-                      setEndTimestamp(end);
-                    }}
-                    className="px-2 py-1 text-xs rounded bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all"
-                  >
-                    {preset}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Bottom Actions */}
