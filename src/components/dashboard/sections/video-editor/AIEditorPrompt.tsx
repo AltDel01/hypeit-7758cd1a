@@ -234,22 +234,43 @@ const AIEditorPrompt: React.FC = () => {
       </h1>
 
       {/* Editing Feature Buttons */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-4xl">
-        {editingFeatures.map((feature) => (
-          <button
-            key={feature.id}
-            onClick={() => handleFeatureClick(feature.id)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-              selectedFeatures.includes(feature.id)
-                ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
-                : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
-            )}
-          >
-            <feature.icon className="w-4 h-4" />
-            {feature.label}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-2 mb-6 max-w-4xl">
+        {/* First row - 5 buttons */}
+        <div className="flex flex-wrap justify-center gap-2">
+          {editingFeatures.slice(0, 5).map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => handleFeatureClick(feature.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                selectedFeatures.includes(feature.id)
+                  ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
+                  : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
+              )}
+            >
+              <feature.icon className="w-4 h-4" />
+              {feature.label}
+            </button>
+          ))}
+        </div>
+        {/* Second row - 4 buttons */}
+        <div className="flex flex-wrap justify-center gap-2">
+          {editingFeatures.slice(5).map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => handleFeatureClick(feature.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                selectedFeatures.includes(feature.id)
+                  ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
+                  : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
+              )}
+            >
+              <feature.icon className="w-4 h-4" />
+              {feature.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Prompt Box */}
