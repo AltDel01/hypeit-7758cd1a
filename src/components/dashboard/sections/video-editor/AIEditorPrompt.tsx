@@ -14,7 +14,8 @@ import {
   ZoomIn,
   ArrowLeft,
   Download,
-  Share2
+  Share2,
+  AudioLines
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -47,10 +48,12 @@ const examplePrompts = [
 const AIEditorPrompt: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
+  const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
@@ -67,21 +70,34 @@ const AIEditorPrompt: React.FC = () => {
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files);
-      setUploadedFiles(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} file(s) added`);
+      setUploadedVideos(prev => [...prev, ...newFiles]);
+      toast.success(`${newFiles.length} video(s) added`);
     }
   };
 
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedAudio(prev => [...prev, ...newFiles]);
+      toast.success(`${newFiles.length} audio file(s) added`);
+    }
+  };
+
+  const removeVideo = (index: number) => {
+    setUploadedVideos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeAudio = (index: number) => {
+    setUploadedAudio(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleCreate = () => {
-    if (!prompt.trim() && uploadedFiles.length === 0) {
+    if (!prompt.trim() && uploadedVideos.length === 0) {
       toast.error('Please enter a prompt or upload media');
       return;
     }
@@ -190,9 +206,9 @@ const AIEditorPrompt: React.FC = () => {
       <div className="w-full max-w-4xl">
         <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
           {/* Video Preview */}
-          {uploadedFiles.some(file => file.type.startsWith('video/')) && (
+          {uploadedVideos.length > 0 && (
             <div className="mb-4">
-              {uploadedFiles.filter(file => file.type.startsWith('video/')).map((file, index) => (
+              {uploadedVideos.map((file, index) => (
                 <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
                   <video 
                     src={URL.createObjectURL(file)}
@@ -200,7 +216,7 @@ const AIEditorPrompt: React.FC = () => {
                     className="w-full h-full object-contain"
                   />
                   <button 
-                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                    onClick={() => removeVideo(index)}
                     className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -210,18 +226,18 @@ const AIEditorPrompt: React.FC = () => {
             </div>
           )}
 
-          {/* Uploaded Files Tags (for images and other files) */}
-          {uploadedFiles.filter(file => !file.type.startsWith('video/')).length > 0 && (
+          {/* Audio Files Tags */}
+          {uploadedAudio.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {uploadedFiles.filter(file => !file.type.startsWith('video/')).map((file, index) => (
+              {uploadedAudio.map((file, index) => (
                 <div 
                   key={index}
                   className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg text-sm"
                 >
-                  <Image className="w-4 h-4 text-[#8c52ff]" />
+                  <AudioLines className="w-4 h-4 text-[#b616d6]" />
                   <span className="text-slate-300 max-w-[150px] truncate">{file.name}</span>
                   <button 
-                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                    onClick={() => removeAudio(index)}
                     className="text-slate-500 hover:text-white transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -254,24 +270,41 @@ const AIEditorPrompt: React.FC = () => {
 
           {/* Bottom Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
-            {/* Upload Button */}
-            <div className="flex items-center gap-2">
+            {/* Upload Buttons */}
+            <div className="flex items-center gap-3">
+              {/* Video Upload */}
               <input
                 type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept="image/*,video/*"
+                ref={videoInputRef}
+                onChange={handleVideoUpload}
+                accept="video/*"
                 multiple
                 className="hidden"
               />
-              <Button
-                variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-slate-400 hover:text-white hover:bg-slate-800 gap-2"
+              <button
+                onClick={() => videoInputRef.current?.click()}
+                className="flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-xl bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all duration-200 group"
               >
-                <Film className="w-5 h-5" />
-                <span className="text-sm">Upload Images or Videos</span>
-              </Button>
+                <Video className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <span className="text-[10px] text-slate-400 group-hover:text-white">Video</span>
+              </button>
+
+              {/* Audio/Voice Upload */}
+              <input
+                type="file"
+                ref={audioInputRef}
+                onChange={handleAudioUpload}
+                accept="audio/*"
+                multiple
+                className="hidden"
+              />
+              <button
+                onClick={() => audioInputRef.current?.click()}
+                className="flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-xl bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600 transition-all duration-200 group"
+              >
+                <AudioLines className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <span className="text-[10px] text-slate-400 group-hover:text-white">Voice</span>
+              </button>
             </div>
 
             {/* Create Button */}
