@@ -255,7 +255,7 @@ const HeroWithEditor: React.FC = () => {
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe how you want to edit your video, or what video you want to create..."
+              placeholder="Describe what you want to create, generate, or edit..."
               className="min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
             />
 
@@ -347,6 +347,31 @@ const HeroWithEditor: React.FC = () => {
                 </button>
 
                 <div className="w-px h-10 bg-gray-700/50 mx-1" />
+
+                {/* Frame Options */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-sm text-gray-300">
+                      <Film className="w-4 h-4 text-gray-400" />
+                      <span className="max-w-[120px] truncate">{frameOptions.find(f => f.value === selectedFrames)?.label}</span>
+                      <ChevronDown className="w-3 h-3 text-gray-500" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
+                    {frameOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => setSelectedFrames(option.value)}
+                        className={cn(
+                          "cursor-pointer",
+                          selectedFrames === option.value && "bg-purple-500/20"
+                        )}
+                      >
+                        <span className="text-gray-200">{option.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Aspect Ratio */}
                 <DropdownMenu>
@@ -446,7 +471,7 @@ const HeroWithEditor: React.FC = () => {
                 ) : (
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4" />
-                    Create Video
+                    Generate Content
                   </div>
                 )}
               </Button>
