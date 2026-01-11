@@ -194,9 +194,12 @@ const AIEditorPrompt: React.FC = () => {
     setVideosReady({ original: false, result: false });
   };
 
-  // Handle video ready state and sync playback
-  const handleVideoCanPlay = (video: 'original' | 'result') => {
+  // Handle video ready state and sync playback - use onLoadedData instead to fire only once
+  const handleVideoLoaded = (video: 'original' | 'result') => {
     setVideosReady(prev => {
+      // Only process if this video wasn't already ready
+      if (prev[video]) return prev;
+      
       const newState = { ...prev, [video]: true };
       
       // If both videos are ready, play them together
@@ -278,7 +281,7 @@ const AIEditorPrompt: React.FC = () => {
                       src={originalVideoUrl || demoVideo}
                       controls
                       muted
-                      onCanPlay={() => handleVideoCanPlay('original')}
+                      onLoadedData={() => handleVideoLoaded('original')}
                       className="w-full h-full object-contain"
                     />
                   </div>
@@ -292,7 +295,7 @@ const AIEditorPrompt: React.FC = () => {
                       ref={resultVideoRef}
                       src={demoVideo}
                       controls
-                      onCanPlay={() => handleVideoCanPlay('result')}
+                      onLoadedData={() => handleVideoLoaded('result')}
                       className="w-full h-full object-contain"
                     />
                   </div>
