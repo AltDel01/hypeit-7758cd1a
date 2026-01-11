@@ -94,8 +94,12 @@ const AIEditorPrompt: React.FC = () => {
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
+  const [videoOrientation, setVideoOrientation] = useState<'landscape' | 'portrait' | 'square'>('landscape');
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const originalVideoRef = useRef<HTMLVideoElement>(null);
+  const resultVideoRef = useRef<HTMLVideoElement>(null);
   
   // Selection states
   const [selectedFrames, setSelectedFrames] = useState('first-last');
@@ -125,6 +129,27 @@ const AIEditorPrompt: React.FC = () => {
     if (files) {
       const newFiles = Array.from(files);
       setUploadedVideos(prev => [...prev, ...newFiles]);
+      
+      // Store the first video URL for before/after comparison
+      if (newFiles.length > 0) {
+        const url = URL.createObjectURL(newFiles[0]);
+        setOriginalVideoUrl(url);
+        
+        // Detect video orientation
+        const video = document.createElement('video');
+        video.src = url;
+        video.onloadedmetadata = () => {
+          const { videoWidth, videoHeight } = video;
+          if (videoWidth > videoHeight) {
+            setVideoOrientation('landscape');
+          } else if (videoHeight > videoWidth) {
+            setVideoOrientation('portrait');
+          } else {
+            setVideoOrientation('square');
+          }
+        };
+      }
+      
       toast.success(`${newFiles.length} video(s) added`);
     }
   };
@@ -171,6 +196,35 @@ const AIEditorPrompt: React.FC = () => {
     setPrompt(example);
   };
 
+  // Get aspect ratio class based on video orientation
+  const getAspectRatioClass = () => {
+    switch (videoOrientation) {
+      case 'portrait':
+        return 'aspect-[9/16]';
+      case 'square':
+        return 'aspect-square';
+      case 'landscape':
+      default:
+        return 'aspect-video';
+    }
+  };
+
+  // Get container layout based on orientation
+  const getContainerClass = () => {
+    if (videoOrientation === 'portrait') {
+      return 'flex flex-row gap-4 justify-center';
+    }
+    return 'grid grid-cols-1 md:grid-cols-2 gap-4';
+  };
+
+  // Get video container width based on orientation
+  const getVideoContainerClass = () => {
+    if (videoOrientation === 'portrait') {
+      return 'w-full max-w-[280px]';
+    }
+    return 'w-full';
+  };
+
   // Generated video result view
   if (isGenerated) {
     return (
@@ -189,15 +243,35 @@ const AIEditorPrompt: React.FC = () => {
         
         <Card className="p-6 bg-background/60 backdrop-blur-sm border-muted-foreground/20">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Video Player */}
+            {/* Video Comparison - Before & After */}
             <div className="flex-1">
-              <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-                <video 
-                  src={demoVideo}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                />
+              <div className={getContainerClass()}>
+                {/* Original Video (Before) */}
+                <div className={getVideoContainerClass()}>
+                  <p className="text-sm text-muted-foreground mb-2 text-center font-medium">Original</p>
+                  <div className={cn("relative rounded-lg overflow-hidden bg-black", getAspectRatioClass())}>
+                    <video 
+                      ref={originalVideoRef}
+                      src={originalVideoUrl || demoVideo}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+                
+                {/* Result Video (After) */}
+                <div className={getVideoContainerClass()}>
+                  <p className="text-sm text-muted-foreground mb-2 text-center font-medium">AI Enhanced</p>
+                  <div className={cn("relative rounded-lg overflow-hidden bg-black", getAspectRatioClass())}>
+                    <video 
+                      ref={resultVideoRef}
+                      src={demoVideo}
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -216,6 +290,7 @@ const AIEditorPrompt: React.FC = () => {
                 <p className="text-sm text-muted-foreground mb-2">Video Details</p>
                 <div className="space-y-1 text-sm">
                   <p className="text-foreground">Format: MP4</p>
+                  <p className="text-foreground">Orientation: {videoOrientation.charAt(0).toUpperCase() + videoOrientation.slice(1)}</p>
                   <p className="text-foreground">Features: {selectedFeatures.length > 0 ? selectedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).join(', ') : 'AI Edit'}</p>
                 </div>
               </div>
