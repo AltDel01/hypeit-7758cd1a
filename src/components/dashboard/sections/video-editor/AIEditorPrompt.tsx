@@ -379,22 +379,27 @@ const AIEditorPrompt: React.FC = () => {
       {/* Prompt Box */}
       <div className="w-full max-w-4xl">
         <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
-          {/* Video Preview */}
+          {/* Video Preview - Small thumbnails like multimodal LLMs */}
           {uploadedVideos.length > 0 && (
-            <div className="mb-4">
+            <div className="flex flex-wrap gap-2 mb-3">
               {uploadedVideos.map((file, index) => (
-                <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-                  <video 
-                    src={URL.createObjectURL(file)}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
+                <div key={index} className="relative group">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700/50">
+                    <video 
+                      src={URL.createObjectURL(file)}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <Video className="w-6 h-6 text-white/80" />
+                    </div>
+                  </div>
                   <button 
                     onClick={() => removeVideo(index)}
-                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
+                    className="absolute -top-1.5 -right-1.5 p-1 bg-slate-700 rounded-full text-white hover:bg-slate-600 transition-colors shadow-sm"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
                   </button>
+                  <p className="text-[10px] text-slate-400 mt-1 max-w-20 truncate text-center">{file.name}</p>
                 </div>
               ))}
             </div>
