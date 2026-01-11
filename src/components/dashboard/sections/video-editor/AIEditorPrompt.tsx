@@ -270,6 +270,7 @@ const AIEditorPrompt: React.FC = () => {
                       src={demoVideo}
                       controls
                       autoPlay
+                      muted
                       className="w-full h-full object-contain"
                     />
                   </div>
