@@ -96,6 +96,7 @@ const AIEditorPrompt: React.FC = () => {
   const [isGenerated, setIsGenerated] = useState(false);
   const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
   const [videoOrientation, setVideoOrientation] = useState<'landscape' | 'portrait' | 'square'>('landscape');
+  const [videosReady, setVideosReady] = useState({ original: false, result: false });
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const originalVideoRef = useRef<HTMLVideoElement>(null);
@@ -190,6 +191,28 @@ const AIEditorPrompt: React.FC = () => {
 
   const handleBackToEditor = () => {
     setIsGenerated(false);
+    setVideosReady({ original: false, result: false });
+  };
+
+  // Handle video ready state and sync playback
+  const handleVideoCanPlay = (video: 'original' | 'result') => {
+    setVideosReady(prev => {
+      const newState = { ...prev, [video]: true };
+      
+      // If both videos are ready, play them together
+      if (newState.original && newState.result) {
+        setTimeout(() => {
+          if (originalVideoRef.current && resultVideoRef.current) {
+            originalVideoRef.current.currentTime = 0;
+            resultVideoRef.current.currentTime = 0;
+            originalVideoRef.current.play();
+            resultVideoRef.current.play();
+          }
+        }, 100);
+      }
+      
+      return newState;
+    });
   };
 
   const handleExampleClick = (example: string) => {
@@ -254,8 +277,8 @@ const AIEditorPrompt: React.FC = () => {
                       ref={originalVideoRef}
                       src={originalVideoUrl || demoVideo}
                       controls
-                      autoPlay
                       muted
+                      onCanPlay={() => handleVideoCanPlay('original')}
                       className="w-full h-full object-contain"
                     />
                   </div>
@@ -269,8 +292,7 @@ const AIEditorPrompt: React.FC = () => {
                       ref={resultVideoRef}
                       src={demoVideo}
                       controls
-                      autoPlay
-                      muted
+                      onCanPlay={() => handleVideoCanPlay('result')}
                       className="w-full h-full object-contain"
                     />
                   </div>
