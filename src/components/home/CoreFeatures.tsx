@@ -38,6 +38,18 @@ const features = [
     description: 'Upscale and enhance your footage to match the quality standards of top creators.',
     gradient: 'from-violet-500 to-purple-500',
   },
+  {
+    icon: Zap,
+    title: 'Censor Word',
+    description: 'Automatically detect and censor profanity or sensitive words from your audio with a single click.',
+    gradient: 'from-yellow-500 to-orange-500',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Change Language',
+    description: 'Translate your audio to any language with AI-powered voice cloning that maintains your original tone.',
+    gradient: 'from-teal-500 to-cyan-500',
+  },
 ];
 
 const CoreFeatures: React.FC = () => {
@@ -89,17 +101,6 @@ const CoreFeatures: React.FC = () => {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </div>
           ))}
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <a
-            href="/features"
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-medium transition-colors"
-          >
-            <TrendingUp className="w-4 h-4" />
-            See all features
-          </a>
         </div>
       </div>
     </section>

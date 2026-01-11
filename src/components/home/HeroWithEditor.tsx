@@ -14,7 +14,9 @@ import {
   AudioLines,
   Plus,
   ChevronDown,
-  Timer
+  Timer,
+  VolumeX,
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -67,6 +69,8 @@ const editingFeatures = [
   { id: 'effects', label: 'Effects', icon: Wand2, description: 'Apply visual effects' },
   { id: 'zoom', label: 'Zoom', icon: ZoomIn, description: 'Add dynamic zoom effects' },
   { id: 'thumbnail', label: 'Thumbnail Generator', icon: Image, description: 'Create eye-catching thumbnails' },
+  { id: 'censor-word', label: 'Censor Word', icon: VolumeX, description: 'Automatically censor profanity' },
+  { id: 'change-language', label: 'Change Language', icon: Languages, description: 'Translate audio to any language' },
 ];
 
 const examplePrompts = [
@@ -155,12 +159,12 @@ const HeroWithEditor: React.FC = () => {
       
       <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto">
         {/* Hero Title */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-4 leading-tight">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-3 leading-tight">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-            Create Stop Scrolling Video
+            Create Stop Scrolling Content
           </span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-400 text-center mb-8 max-w-2xl">
+        <p className="text-lg md:text-xl text-gray-400 text-center mb-6">
           Transform your raw footage into viral-worthy content with AI-powered editing
         </p>
 
