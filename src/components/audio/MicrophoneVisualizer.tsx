@@ -15,53 +15,24 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   onClose,
   containerRef
 }) => {
-  const [layout, setLayout] = useState({ size: 220, left: 0, top: 0 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { isListening, analyser, dataArray } = useAudioVisualization(isActive, onClose);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    let raf = 0;
-
-    const updateLayout = () => {
-      const el = containerRef.current;
-      if (!el) return;
-
-      const baseSize = el.offsetWidth || 112;
-      const size = Math.min(baseSize * 2.2, 220);
-
-      const rect = el.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const min = 8;
-      const maxLeft = Math.max(min, window.innerWidth - size - min);
-      const maxTop = Math.max(min, window.innerHeight - size - min);
-
-      const left = Math.min(Math.max(min, centerX - size / 2), maxLeft);
-      const top = Math.min(Math.max(min, centerY - size / 2), maxTop);
-
-      setLayout({ size, left, top });
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const size = Math.min(containerRef.current.offsetWidth * 2.2, 220);
+        setDimensions({ width: size, height: size });
+      }
     };
-
-    const scheduleUpdate = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(updateLayout);
-    };
-
-    // Run once immediately (and when toggling active) to keep it glued to the button.
-    scheduleUpdate();
-
-    window.addEventListener("resize", scheduleUpdate);
-    // Capture scroll events from nested scroll containers too.
-    window.addEventListener("scroll", scheduleUpdate, true);
-
+    
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", scheduleUpdate);
-      window.removeEventListener("scroll", scheduleUpdate, true);
+      window.removeEventListener('resize', updateDimensions);
     };
-  }, [containerRef, isActive]);
+  }, [containerRef]);
 
   if (!isActive) {
     return null;
@@ -72,10 +43,11 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
       className="fixed z-50"
       onClick={onClose}
       style={{ 
-        width: `${layout.size}px`, 
-        height: `${layout.size}px`,
-        left: `${layout.left}px`,
-        top: `${layout.top}px`,
+        width: `${dimensions.width}px`, 
+        height: `${dimensions.height}px`,
+        right: '50%',
+        bottom: '-1rem',
+        transform: 'translateX(50%)',
         pointerEvents: 'all'
       }}
     >
@@ -83,8 +55,8 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         <AudioVisualizer
           analyser={analyser}
           dataArray={dataArray}
-          width={layout.size}
-          height={layout.size}
+          width={dimensions.width}
+          height={dimensions.height}
         />
       )}
       
