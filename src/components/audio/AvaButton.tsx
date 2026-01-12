@@ -88,7 +88,7 @@ const AvaButton: React.FC = () => {
   };
 
   return (
-    <div ref={buttonRef} className="fixed bottom-10 right-1/2 translate-x-1/2 z-50">
+    <div ref={buttonRef} className="fixed bottom-6 right-6 z-50">
       {/* Only show button animations when not listening */}
       {!isVisualizerActive && (
         <>
