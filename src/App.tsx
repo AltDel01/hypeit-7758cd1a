@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import CustomErrorBoundary from "./components/error/ErrorBoundary";
+import AvaButton from "./components/audio/AvaButton";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
@@ -80,6 +81,7 @@ const App = () => (
         <TooltipProvider>
           <CustomErrorBoundary>
             <AppRoutes />
+            <AvaButton />
             <Toaster />
             <Sonner />
           </CustomErrorBoundary>
