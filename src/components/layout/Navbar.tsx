@@ -57,7 +57,6 @@ const MobileTopBar = () => {
               {user ? (
                 <>
                   <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    <User size={18} />
                     Dashboard
                   </Link>
                   <div className="border-t border-gray-700 my-2"></div>
@@ -162,8 +161,7 @@ const Navbar = () => {
     <>
       {user ? (
         <>
-          <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white">
-            <User size={18} />
+          <Link to="/dashboard" className="px-3 py-2 text-gray-300 hover:text-white">
             <span className="hidden md:inline">Dashboard</span>
           </Link>
           <DropdownMenu>
