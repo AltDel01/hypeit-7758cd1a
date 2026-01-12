@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
+import Pricing from "./pages/Pricing";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -48,6 +49,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
+      <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
