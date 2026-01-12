@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, ChevronDown, Menu, X } from 'lucide-react';
+import { LogOut, User, ChevronDown, Menu, X, Sparkles, Settings, HelpCircle, CircleUser } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 const MobileTopBar = () => {
@@ -57,7 +58,33 @@ const MobileTopBar = () => {
                 <>
                   <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <User size={18} />
-                    Profile
+                    Dashboard
+                  </Link>
+                  <div className="border-t border-gray-700 my-2"></div>
+                  <div className="px-4 py-2 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
+                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
+                    </div>
+                  </div>
+                  <Link to="/pricing" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <Sparkles size={18} />
+                    Upgrade plan
+                  </Link>
+                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <CircleUser size={18} />
+                    Personalization
+                  </Link>
+                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <Settings size={18} />
+                    Settings
+                  </Link>
+                  <Link to="/help" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <HelpCircle size={18} />
+                    Help
                   </Link>
                   <button 
                     onClick={() => { signOut(); setIsMenuOpen(false); }}
@@ -137,16 +164,63 @@ const Navbar = () => {
         <>
           <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white">
             <User size={18} />
-            <span className="hidden md:inline">Profile</span>
+            <span className="hidden md:inline">Dashboard</span>
           </Link>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:bg-gray-800"
-            onClick={() => signOut()}
-          >
-            <LogOut size={18} className="mr-2" />
-            <span className="hidden md:inline">Log out</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-gray-800 flex items-center gap-1"
+              >
+                <span className="hidden md:inline">My Account</span>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-gray-900/95 backdrop-blur-lg border-gray-800">
+              <div className="px-3 py-3 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
+                  {user.email?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div>
+                  <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                  <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
+                </div>
+              </div>
+              <DropdownMenuSeparator className="bg-gray-700" />
+              <DropdownMenuItem asChild>
+                <Link to="/pricing" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <Sparkles size={16} className="text-gray-400" />
+                  <span className="text-white">Upgrade plan</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <CircleUser size={16} className="text-gray-400" />
+                  <span className="text-white">Personalization</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <Settings size={16} className="text-gray-400" />
+                  <span className="text-white">Settings</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-gray-700" />
+              <DropdownMenuItem asChild>
+                <Link to="/help" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <HelpCircle size={16} className="text-gray-400" />
+                  <span className="text-white">Help</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => signOut()}
+                className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50"
+              >
+                <LogOut size={16} className="text-gray-400" />
+                <span className="text-white">Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </>
       ) : (
         <>
