@@ -20,7 +20,9 @@ import {
   ChevronDown,
   Square,
   Clock,
-  Timer
+  Timer,
+  Ban,
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -76,6 +78,8 @@ const editingFeatures = [
   { id: 'effects', label: 'Effects', icon: Wand2, description: 'Apply visual effects' },
   { id: 'zoom', label: 'Zoom', icon: ZoomIn, description: 'Add dynamic zoom effects' },
   { id: 'thumbnail', label: 'Thumbnail Generator', icon: Image, description: 'Create eye-catching thumbnails' },
+  { id: 'censor-word', label: 'Censor Word', icon: Ban, description: 'Automatically bleep or mute profanity' },
+  { id: 'language-dubbing', label: 'Language Dubbing', icon: Languages, description: 'Translate and dub audio in other languages' },
 ];
 
 const examplePrompts = [
