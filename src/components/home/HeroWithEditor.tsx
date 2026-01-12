@@ -15,7 +15,7 @@ import {
   Plus,
   ChevronDown,
   Timer,
-  VolumeX,
+  MessageCircleOff,
   Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -69,8 +69,8 @@ const editingFeatures = [
   { id: 'effects', label: 'Effects', icon: Wand2, description: 'Apply visual effects' },
   { id: 'zoom', label: 'Zoom', icon: ZoomIn, description: 'Add dynamic zoom effects' },
   { id: 'thumbnail', label: 'Thumbnail Generator', icon: Image, description: 'Create eye-catching thumbnails' },
-  { id: 'censor-word', label: 'Censor Word', icon: VolumeX, description: 'Automatically censor profanity' },
-  { id: 'change-language', label: 'Change Language', icon: Languages, description: 'Translate audio to any language' },
+  { id: 'censor-word', label: 'Censor Word', icon: MessageCircleOff, description: 'Automatically censor profanity' },
+  { id: 'change-language', label: 'Language Dubbing', icon: Languages, description: 'Translate audio to any language' },
 ];
 
 const examplePrompts = [
