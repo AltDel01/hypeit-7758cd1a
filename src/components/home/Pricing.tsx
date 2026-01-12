@@ -63,6 +63,7 @@ const Pricing = () => {
         { name: "Analitik tren media sosial AI", included: true },
       ],
       popular: false,
+      isVibe: true,
       buttonText: "Upgrade ke Specialist"
     }
   ];
@@ -98,17 +99,16 @@ const Pricing = () => {
                 description={plan.description}
                 features={plan.features}
                 popular={plan.popular}
+                isVibe={(plan as any).isVibe}
                 buttonText={
                   plan.title === "Gratis"
-                    ? "Mulai Sekarang"
-                    : plan.title === "Specialist"
-                      ? "Upgrade ke Specialist"
-                      : "Mulai Uji Coba Gratis"}
-                className={
-                  (plan.popular
-                    ? "md:scale-105 md:shadow-lg z-10"
-                    : "") + " duration-300"
-                }
+                    ? "Paket Saat Ini"
+                    : plan.title === "Starter"
+                      ? "Upgrade ke Starter"
+                      : plan.title === "Pro"
+                        ? "Upgrade ke Pro"
+                        : "Upgrade ke Specialist"}
+                className="duration-300"
               />
             </div>
           ))}
