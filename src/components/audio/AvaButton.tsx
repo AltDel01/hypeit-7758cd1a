@@ -81,7 +81,7 @@ const AvaButton: React.FC = () => {
     } else if (status === "connecting") {
       return "Connecting...";
     } else if (!hasPermission) {
-      return "Enable Mic";
+      return "Turn Me On!";
     } else {
       return "Activate Ava";
     }
