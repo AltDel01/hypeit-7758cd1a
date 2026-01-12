@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Captions, Film, Layers, Wand2, Smartphone, Zap, TrendingUp } from 'lucide-react';
+import { Sparkles, Captions, Film, Layers, Wand2, Smartphone, Zap, TrendingUp, MessageCircleOff } from 'lucide-react';
 
 const features = [
   {
@@ -39,14 +39,14 @@ const features = [
     gradient: 'from-violet-500 to-purple-500',
   },
   {
-    icon: Zap,
+    icon: MessageCircleOff,
     title: 'Censor Word',
     description: 'Automatically detect and censor profanity or sensitive words from your audio with a single click.',
     gradient: 'from-yellow-500 to-orange-500',
   },
   {
     icon: TrendingUp,
-    title: 'Change Language',
+    title: 'Language Dubbing',
     description: 'Translate your audio to any language with AI-powered voice cloning that maintains your original tone.',
     gradient: 'from-teal-500 to-cyan-500',
   },
