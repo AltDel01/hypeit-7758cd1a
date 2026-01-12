@@ -21,7 +21,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const size = Math.min(containerRef.current.offsetWidth * 2.2, 220);
+        const size = Math.min(containerRef.current.offsetWidth * 1.8, 160);
         setDimensions({ width: size, height: size });
       }
     };
@@ -46,7 +46,7 @@ const MicrophoneVisualizer: React.FC<MicrophoneVisualizerProps> = ({
         width: `${dimensions.width}px`, 
         height: `${dimensions.height}px`,
         right: '50%',
-        bottom: '2rem',
+        bottom: '0.5rem',
         transform: 'translateX(50%)',
         pointerEvents: 'all'
       }}
