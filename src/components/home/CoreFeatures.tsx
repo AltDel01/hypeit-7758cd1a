@@ -5,36 +5,44 @@ import aiVideoDemo from '@/assets/ai-video-editing-demo.mp4';
 
 const features = [
   {
+    id: 'ai-video-editor',
     badge: 'AI Video Editor',
     icon: Clapperboard,
-    title: 'Magical Editing, Instantly.',
+    title: <>Magical Editing,<br />Instantly.</>,
+    altText: 'Magical Editing, Instantly.',
     description: 'Transform raw footage into scroll-stopping content. Our AI adds visual hooks, cinematic transitions, and perfectly-timed motion graphics—automatically.',
     gradient: 'from-purple-500 to-pink-500',
     video: aiVideoDemo,
     overlayText: 'Adding cinematic transitions...',
   },
   {
+    id: 'viral-clips',
     badge: 'Viral Clips',
     icon: Flame,
-    title: 'Turn Long Videos Into Viral Moments.',
+    title: <>Turn Long Videos Into<br />Viral Moments.</>,
+    altText: 'Turn Long Videos Into Viral Moments.',
     description: 'Drop your long-form content and let AI find the golden moments. Get perfectly-cut clips optimized for TikTok, Reels, and Shorts in seconds.',
     gradient: 'from-blue-500 to-cyan-500',
     image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
     overlayText: 'Extracting viral moments...',
   },
   {
+    id: 'ai-avatars',
     badge: 'AI Avatars',
     icon: CircleUserRound,
-    title: 'Your Brand Speaks. You Don\'t Have To.',
+    title: <>Your Brand Speaks.<br />You Don't Have To.</>,
+    altText: 'Your Brand Speaks. You Don\'t Have To.',
     description: 'Turn any photo into a photorealistic AI avatar that speaks for your brand. Create unlimited UGC and promotional content—no camera, no crew, no problem.',
     gradient: 'from-amber-500 to-orange-500',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=500&fit=crop',
     overlayText: 'Generating avatar voice...',
   },
   {
+    id: 'content-generation',
     badge: 'Content Generation',
     icon: ShoppingBag,
-    title: 'Product Visuals That Sell.',
+    title: <>Product Visuals<br />That Sell.</>,
+    altText: 'Product Visuals That Sell.',
     description: 'Generate stunning product images and videos that convert. Perfect for e-commerce, affiliates, and anyone who needs professional content at scale.',
     gradient: 'from-green-500 to-emerald-500',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=500&fit=crop',
@@ -62,15 +70,15 @@ const CoreFeatures: React.FC = () => {
         </div>
         {features.map((feature, index) => (
           <div
-            key={feature.title}
+            key={feature.id}
             className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 md:gap-8 lg:gap-16 mb-12 md:mb-24 last:mb-0`}
           >
             {/* Text Content */}
             <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 mb-3 md:mb-4">
-                <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
-                <span className="text-purple-400 text-sm md:text-base font-medium">{feature.badge}</span>
+              <div className="inline-flex items-center gap-2.5 mb-4 md:mb-5">
+                <feature.icon className="w-6 h-6 md:w-7 md:h-7 text-purple-400" />
+                <span className="text-purple-400 text-base md:text-lg font-semibold">{feature.badge}</span>
               </div>
               
               {/* Title */}
@@ -107,7 +115,7 @@ const CoreFeatures: React.FC = () => {
                 ) : (
                   <img 
                     src={feature.image} 
-                    alt={feature.title}
+                    alt={feature.altText}
                     className="w-full h-48 sm:h-56 md:h-80 object-cover"
                   />
                 )}
