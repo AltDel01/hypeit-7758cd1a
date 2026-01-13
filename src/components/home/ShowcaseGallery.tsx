@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Eye, Heart, MessageCircle } from 'lucide-react';
+import { Play, Eye, Heart, MessageCircle, Sparkles } from 'lucide-react';
 
 const showcaseItems = [
   {
@@ -55,6 +55,10 @@ const ShowcaseGallery: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4 md:mb-6">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium text-purple-300">Showcase</span>
+          </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             Made with{' '}
             <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
