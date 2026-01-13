@@ -151,67 +151,68 @@ const HeroWithEditor: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+    <section className="relative min-h-screen md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center px-3 md:px-4 pt-20 pb-8 md:py-16 overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]" />
+      <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-600/20 rounded-full blur-[100px] md:blur-[120px]" />
       
-      <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto w-full">
         {/* Hero Title */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-3 leading-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center mb-2 md:mb-3 leading-tight px-2">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
             Create Stop Scrolling Content
           </span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-400 text-center mb-6">
+        <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">
           Transform your raw footage into viral-worthy content with AI-powered editing
         </p>
 
-        {/* Editing Feature Buttons */}
-        <div className="flex flex-col items-center gap-2 mb-6 w-full max-w-4xl">
-          <div className="flex flex-wrap justify-center gap-2">
-            {editingFeatures.slice(0, 5).map((feature) => (
+        {/* Editing Feature Buttons - Scrollable on mobile */}
+        <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
+          <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
+            {editingFeatures.slice(0, 6).map((feature) => (
               <button
                 key={feature.id}
                 onClick={() => handleFeatureClick(feature.id)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap",
                   selectedFeatures.includes(feature.id)
                     ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
                     : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
                 )}
               >
-                <feature.icon className="w-4 h-4" />
-                {feature.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            {editingFeatures.slice(5).map((feature) => (
-              <button
-                key={feature.id}
-                onClick={() => handleFeatureClick(feature.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-                  selectedFeatures.includes(feature.id)
-                    ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
-                    : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
-                )}
-              >
-                <feature.icon className="w-4 h-4" />
+                <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
               </button>
             ))}
           </div>
         </div>
+        {/* Second row - Hidden on mobile for cleaner look */}
+        <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
+          {editingFeatures.slice(6).map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => handleFeatureClick(feature.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                selectedFeatures.includes(feature.id)
+                  ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
+                  : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
+              )}
+            >
+              <feature.icon className="w-4 h-4" />
+              {feature.label}
+            </button>
+          ))}
+        </div>
 
         {/* Prompt Box */}
-        <div className="w-full max-w-4xl">
-          <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-2xl p-5 backdrop-blur-sm">
+        <div className="w-full max-w-4xl px-1 md:px-0">
+          <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
             {/* Video Preview */}
             {uploadedVideos.length > 0 && (
-              <div className="mb-4">
+              <div className="mb-3 md:mb-4">
                 {uploadedVideos.map((file, index) => (
                   <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
                     <video 
@@ -232,19 +233,19 @@ const HeroWithEditor: React.FC = () => {
 
             {/* Audio Files Tags */}
             {uploadedAudio.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
                 {uploadedAudio.map((file, index) => (
                   <div 
                     key={index}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg text-sm"
+                    className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm"
                   >
-                    <AudioLines className="w-4 h-4 text-purple-500" />
-                    <span className="text-gray-300 max-w-[150px] truncate">{file.name}</span>
+                    <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
+                    <span className="text-gray-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
                     <button 
                       onClick={() => removeAudio(index)}
                       className="text-gray-500 hover:text-white transition-colors"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                   </div>
                 ))}
@@ -256,24 +257,36 @@ const HeroWithEditor: React.FC = () => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Describe what you want to create, generate, or edit..."
-              className="min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+              className="min-h-[80px] md:min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
             />
 
-            {/* Example Prompts */}
-            <div className="flex flex-wrap gap-2 mb-4 mt-2">
-              {examplePrompts.map((example, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleExampleClick(example)}
-                  className="px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200"
-                >
-                  {example}
-                </button>
-              ))}
+            {/* Example Prompts - Scrollable on mobile */}
+            <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 mt-2 mb-3 md:mb-4">
+              <div className="flex md:flex-wrap gap-2 min-w-max md:min-w-0">
+                {examplePrompts.slice(0, 3).map((example, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleExampleClick(example)}
+                    className="px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200 whitespace-nowrap"
+                  >
+                    {example}
+                  </button>
+                ))}
+                {/* Show remaining prompts on desktop only */}
+                {examplePrompts.slice(3).map((example, index) => (
+                  <button
+                    key={index + 3}
+                    onClick={() => handleExampleClick(example)}
+                    className="hidden md:block px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Timestamp Selection */}
-            <div className="flex items-center gap-4 py-3 border-t border-gray-700/50">
+            {/* Timestamp Selection - Hidden on mobile */}
+            <div className="hidden md:flex items-center gap-4 py-3 border-t border-gray-700/50">
               <div className="flex items-center gap-2">
                 <Timer className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-400">Timeline:</span>
@@ -304,8 +317,8 @@ const HeroWithEditor: React.FC = () => {
             </div>
 
             {/* Bottom Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between pt-3 md:pt-4 border-t border-gray-700/50 gap-3 md:gap-0">
+              <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
                 {/* Video Upload */}
                 <input
                   type="file"
@@ -317,13 +330,13 @@ const HeroWithEditor: React.FC = () => {
                 />
                 <button
                   onClick={() => videoInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group"
+                  className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0"
                 >
                   <div className="flex items-center gap-0.5">
-                    <Plus className="w-3 h-3 text-gray-400 group-hover:text-white" />
-                    <Video className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
+                    <Video className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
                   </div>
-                  <span className="text-[10px] text-gray-400 group-hover:text-white">Video</span>
+                  <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Video</span>
                 </button>
 
                 {/* Audio Upload */}
@@ -337,54 +350,29 @@ const HeroWithEditor: React.FC = () => {
                 />
                 <button
                   onClick={() => audioInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group"
+                  className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0"
                 >
                   <div className="flex items-center gap-0.5">
-                    <Plus className="w-3 h-3 text-gray-400 group-hover:text-white" />
-                    <AudioLines className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
+                    <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
                   </div>
-                  <span className="text-[10px] text-gray-400 group-hover:text-white">Voice</span>
+                  <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Voice</span>
                 </button>
 
-                <div className="w-px h-10 bg-gray-700/50 mx-1" />
+                <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
 
-                {/* Frame Options */}
+                {/* Aspect Ratio - Simplified for mobile */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-sm text-gray-300">
-                      <Film className="w-4 h-4 text-gray-400" />
-                      <span className="max-w-[120px] truncate">{frameOptions.find(f => f.value === selectedFrames)?.label}</span>
-                      <ChevronDown className="w-3 h-3 text-gray-500" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                    {frameOptions.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => setSelectedFrames(option.value)}
-                        className={cn(
-                          "cursor-pointer",
-                          selectedFrames === option.value && "bg-purple-500/20"
-                        )}
-                      >
-                        <span className="text-gray-200">{option.label}</span>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Aspect Ratio */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-sm text-gray-300">
+                    <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                       <div 
                         className="border border-gray-500 rounded-sm"
                         style={{ 
-                          width: aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width,
-                          height: aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height
+                          width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7,
+                          height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7
                         }}
                       />
-                      <span>{selectedAspectRatio}</span>
+                      <span className="hidden sm:inline">{selectedAspectRatio}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
@@ -408,10 +396,10 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Resolution */}
+                {/* Resolution - Hidden on small mobile */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-sm text-gray-300">
+                    <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                       <span>{selectedResolution}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
@@ -431,45 +419,21 @@ const HeroWithEditor: React.FC = () => {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                {/* Duration */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-sm text-gray-300">
-                      <span>{selectedDuration}</span>
-                      <ChevronDown className="w-3 h-3 text-gray-500" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                    {durationOptions.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => setSelectedDuration(option.value)}
-                        className={cn(
-                          "cursor-pointer",
-                          selectedDuration === option.value && "bg-purple-500/20"
-                        )}
-                      >
-                        <span className="text-gray-200">{option.label}</span>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
 
-              {/* Create Button */}
+              {/* Create Button - Full width on mobile */}
               <Button
                 onClick={handleCreate}
                 disabled={isProcessing}
-                className="px-8 py-3 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30"
+                className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-sm md:text-base"
               >
                 {isProcessing ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Processing...
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" />
                     Generate Content
                   </div>
