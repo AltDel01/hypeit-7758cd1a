@@ -159,9 +159,10 @@ const HeroWithEditor: React.FC = () => {
       
       <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto w-full">
         {/* Hero Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center mb-2 md:mb-3 leading-tight px-2">
+        <h1 className="text-3xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center mb-2 md:mb-3 leading-tight px-2">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-            Create Stop Scrolling Content
+            <span className="block md:inline">Create Stop</span>{' '}
+            <span className="block md:inline">Scrolling Content</span>
           </span>
         </h1>
         <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">
