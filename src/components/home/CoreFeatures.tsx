@@ -55,7 +55,7 @@ const CoreFeatures: React.FC = () => {
     <section className="relative py-6 md:py-24 px-3 md:px-4 overflow-hidden bg-black">
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-8 md:mb-20">
+        <div className="text-center mb-12 md:mb-20">
           <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-3 md:mb-6">
             <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
             <span className="text-xs md:text-sm font-medium text-purple-300">Powerful Features</span>
