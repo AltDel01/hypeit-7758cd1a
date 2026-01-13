@@ -24,7 +24,7 @@ const steps = [
 
 const HowItWorks: React.FC = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
+    <section className="relative py-12 md:py-16 px-4 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-black to-gray-900" />
       

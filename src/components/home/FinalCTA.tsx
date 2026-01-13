@@ -11,7 +11,7 @@ const features = [
 
 const FinalCTA: React.FC = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
+    <section className="relative py-12 md:py-16 px-4 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px]" />
