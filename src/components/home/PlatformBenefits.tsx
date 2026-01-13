@@ -27,7 +27,7 @@ const benefits = [
 
 const PlatformBenefits: React.FC = () => {
   return (
-    <section className="relative py-6 md:py-12 px-3 md:px-4 overflow-hidden">
+    <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-black to-gray-900" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />

@@ -48,7 +48,7 @@ const showcaseItems = [
 
 const ShowcaseGallery: React.FC = () => {
   return (
-    <section className="relative py-6 md:py-12 px-3 md:px-4 overflow-hidden">
+    <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black" />
       
