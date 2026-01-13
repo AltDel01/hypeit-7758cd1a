@@ -1,107 +1,107 @@
 import React from 'react';
-import { Sparkles, Captions, Film, Layers, Wand2, Smartphone, Zap, TrendingUp, MessageCircleOff } from 'lucide-react';
+import { Sparkles, Scissors, UserCircle, ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const features = [
   {
+    badge: 'AI Video Editor',
     icon: Sparkles,
-    title: 'AI-Powered Editing',
-    description: 'Let AI handle the heavy lifting. Describe what you want, and watch as your vision comes to life automatically.',
+    title: 'Magical Editing, Instantly.',
+    description: 'Transform raw footage into scroll-stopping content. Our AI adds visual hooks, cinematic transitions, and perfectly-timed motion graphics—automatically.',
     gradient: 'from-purple-500 to-pink-500',
+    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
+    overlayText: 'Adding cinematic transitions...',
   },
   {
-    icon: Captions,
-    title: 'Auto Captions',
-    description: 'Generate trending-style captions that grab attention. Perfect for TikTok, Reels, and Shorts.',
+    badge: 'Viral Clips',
+    icon: Scissors,
+    title: 'Turn Long Videos Into Viral Moments.',
+    description: 'Drop your long-form content and let AI find the golden moments. Get perfectly-cut clips optimized for TikTok, Reels, and Shorts in seconds.',
     gradient: 'from-blue-500 to-cyan-500',
+    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=500&fit=crop',
+    overlayText: 'Extracting viral moments...',
   },
   {
-    icon: Film,
-    title: 'Smart B-Roll',
-    description: 'Automatically insert relevant stock footage that matches your content and keeps viewers engaged.',
+    badge: 'AI Avatars',
+    icon: UserCircle,
+    title: 'Your Brand Speaks. You Don\'t Have To.',
+    description: 'Turn any photo into a photorealistic AI avatar that speaks for your brand. Create unlimited UGC and promotional content—no camera, no crew, no problem.',
+    gradient: 'from-amber-500 to-orange-500',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=500&fit=crop',
+    overlayText: 'Generating avatar voice...',
+  },
+  {
+    badge: 'Content Generation',
+    icon: ImageIcon,
+    title: 'Product Visuals That Sell.',
+    description: 'Generate stunning product images and videos that convert. Perfect for e-commerce, affiliates, and anyone who needs professional content at scale.',
     gradient: 'from-green-500 to-emerald-500',
-  },
-  {
-    icon: Layers,
-    title: 'Pro Transitions',
-    description: 'Add smooth, professional transitions between clips with a single click. No editing skills required.',
-    gradient: 'from-orange-500 to-amber-500',
-  },
-  {
-    icon: Wand2,
-    title: 'Cinematic Effects',
-    description: 'Apply stunning visual effects and color grading to make your content look professionally produced.',
-    gradient: 'from-red-500 to-rose-500',
-  },
-  {
-    icon: Smartphone,
-    title: 'iPhone Quality',
-    description: 'Upscale and enhance your footage to match the quality standards of top creators.',
-    gradient: 'from-violet-500 to-purple-500',
-  },
-  {
-    icon: MessageCircleOff,
-    title: 'Censor Word',
-    description: 'Automatically detect and censor profanity or sensitive words from your audio with a single click.',
-    gradient: 'from-yellow-500 to-orange-500',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Language Dubbing',
-    description: 'Translate your audio to any language with AI-powered voice cloning that maintains your original tone.',
-    gradient: 'from-teal-500 to-cyan-500',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=500&fit=crop',
+    overlayText: 'Creating product showcase...',
   },
 ];
 
 const CoreFeatures: React.FC = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/50 to-black" />
-      
+    <section className="relative py-24 px-4 overflow-hidden bg-black">
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4">
-            <Zap className="w-4 h-4" />
-            Powerful Features
-          </span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Everything you need to go{' '}
-            <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-              viral
-            </span>
-          </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Create professional-quality videos in minutes, not hours. Our AI handles the editing so you can focus on creating.
-          </p>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={feature.title}
-              className="group relative p-6 rounded-2xl bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-all duration-300 hover:-translate-y-1"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Icon */}
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.gradient} mb-4`}>
-                <feature.icon className="w-6 h-6 text-white" />
+        {features.map((feature, index) => (
+          <div
+            key={feature.title}
+            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 mb-24 last:mb-0`}
+          >
+            {/* Text Content */}
+            <div className="flex-1 max-w-md">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span className="text-purple-400 text-sm font-medium">{feature.badge}</span>
               </div>
               
-              {/* Content */}
-              <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-purple-400 transition-colors">
+              {/* Title */}
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
                 {feature.title}
-              </h3>
-              <p className="text-gray-400 leading-relaxed">
+              </h2>
+              
+              {/* Description */}
+              <p className="text-gray-400 text-base leading-relaxed mb-6">
                 {feature.description}
               </p>
               
-              {/* Hover glow effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              {/* CTA Button */}
+              <Button 
+                className={`bg-gradient-to-r ${feature.gradient} hover:opacity-90 text-white font-medium px-6 py-3 rounded-lg transition-all`}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Try for Free
+              </Button>
             </div>
-          ))}
-        </div>
+            
+            {/* Image/Preview */}
+            <div className="flex-1 w-full max-w-xl">
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
+                <img 
+                  src={feature.image} 
+                  alt={feature.title}
+                  className="w-full h-64 md:h-80 object-cover"
+                />
+                
+                {/* Overlay UI Element */}
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="bg-black/70 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10">
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center`}>
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-gray-300 text-sm flex-1">{feature.overlayText}</span>
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-4">
+                      Generate
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
