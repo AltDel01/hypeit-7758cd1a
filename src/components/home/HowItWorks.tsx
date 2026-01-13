@@ -1,5 +1,5 @@
 import React from 'react';
-import { Upload, Wand2, Download } from 'lucide-react';
+import { Upload, Wand2, Download, Sparkles } from 'lucide-react';
 
 const steps = [
   {
@@ -31,9 +31,10 @@ const HowItWorks: React.FC = () => {
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 rounded-full bg-gray-800 text-gray-300 text-sm font-medium mb-4">
-            Simple Process
-          </span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4 md:mb-6">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium text-purple-300">Simple Process</span>
+          </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             How it{' '}
             <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
