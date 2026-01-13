@@ -12,7 +12,7 @@ const steps = [
     number: '02',
     icon: Wand2,
     title: 'Customize with AI',
-    description: 'Select the editing features you want — captions, transitions, effects, B-roll. Tell AI how you want it styled.',
+    description: 'Select the editing features you want: captions, transitions, effects, B-roll. Tell AI how you want it styled.',
   },
   {
     number: '03',
