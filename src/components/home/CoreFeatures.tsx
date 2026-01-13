@@ -1,12 +1,12 @@
 import React from 'react';
-import { Sparkles, Scissors, UserCircle, ImageIcon } from 'lucide-react';
+import { Sparkles, Clapperboard, Flame, Bot, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import aiVideoDemo from '@/assets/ai-video-editing-demo.mp4';
 
 const features = [
   {
     badge: 'AI Video Editor',
-    icon: Sparkles,
+    icon: Clapperboard,
     title: 'Magical Editing, Instantly.',
     description: 'Transform raw footage into scroll-stopping content. Our AI adds visual hooks, cinematic transitions, and perfectly-timed motion graphics—automatically.',
     gradient: 'from-purple-500 to-pink-500',
@@ -15,7 +15,7 @@ const features = [
   },
   {
     badge: 'Viral Clips',
-    icon: Scissors,
+    icon: Flame,
     title: 'Turn Long Videos Into Viral Moments.',
     description: 'Drop your long-form content and let AI find the golden moments. Get perfectly-cut clips optimized for TikTok, Reels, and Shorts in seconds.',
     gradient: 'from-blue-500 to-cyan-500',
@@ -24,7 +24,7 @@ const features = [
   },
   {
     badge: 'AI Avatars',
-    icon: UserCircle,
+    icon: Bot,
     title: 'Your Brand Speaks. You Don\'t Have To.',
     description: 'Turn any photo into a photorealistic AI avatar that speaks for your brand. Create unlimited UGC and promotional content—no camera, no crew, no problem.',
     gradient: 'from-amber-500 to-orange-500',
@@ -33,7 +33,7 @@ const features = [
   },
   {
     badge: 'Content Generation',
-    icon: ImageIcon,
+    icon: ShoppingBag,
     title: 'Product Visuals That Sell.',
     description: 'Generate stunning product images and videos that convert. Perfect for e-commerce, affiliates, and anyone who needs professional content at scale.',
     gradient: 'from-green-500 to-emerald-500',
