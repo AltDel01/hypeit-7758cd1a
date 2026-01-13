@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "./config.ts";
+import { corsHeaders, validateVideoInput } from "./config.ts";
 import { handleVideoPollingRequest } from "./polling.ts";
 import { handleVideoGenerationRequest } from "./generation.ts";
 
@@ -14,34 +14,46 @@ serve(async (req) => {
 
   try {
     // Parse the request body
-    const requestData = await req.json();
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ 
+          status: "error",
+          error: "Invalid JSON in request body"
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Check if this is a polling request
     if (requestData.requestId) {
       return await handleVideoPollingRequest(requestData);
     }
     
+    // Validate input for video generation
+    const validation = validateVideoInput(requestData);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ 
+          status: "error",
+          error: validation.error
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     // Otherwise, handle initial video generation request
     return await handleVideoGenerationRequest(requestData);
   } catch (error) {
     // Handle any unexpected errors
-    console.error('General error in generate-video function:', error);
-    
-    // Create fallback response
-    let promptFromError = "video";
-    try {
-      const requestBody = await req.json();
-      if (requestBody.prompt || requestBody.enhanced_prompt) {
-        promptFromError = requestBody.prompt || requestBody.enhanced_prompt;
-      }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+    console.error('General error in generate-video function');
     
     return new Response(
       JSON.stringify({ 
         status: "error",
-        error: error instanceof Error ? error.message : String(error),
+        error: "Video generation failed due to server error",
         message: "Video generation failed due to server error"
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

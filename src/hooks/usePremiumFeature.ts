@@ -1,16 +1,13 @@
-
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminRole } from '@/hooks/useAdminRole';
 
 export const usePremiumFeature = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState('');
-  const { user } = useAuth();
+  const { isAdmin } = useAdminRole();
 
   const checkPremiumFeature = (feature: string) => {
-    // Always allow access for the specific email
-    const isAdmin = user?.email === 'putra.ekadarma@gmail.com';
-    
+    // Use server-side verified admin role check
     if (isAdmin) {
       return true;
     }

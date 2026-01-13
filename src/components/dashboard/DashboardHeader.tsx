@@ -1,13 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminRole } from '@/hooks/useAdminRole';
 
 const DashboardHeader = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.email === 'putra.ekadarma@gmail.com';
+  const { isAdmin, isLoading } = useAdminRole();
   
   return (
     <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
@@ -24,7 +22,7 @@ const DashboardHeader = () => {
           <Plus className="mr-2 h-4 w-4" />
           New Creation
         </Button>
-        {isAdmin && (
+        {!isLoading && isAdmin && (
           <Link to="/admin">
             <Button variant="outline" className="flex-1 md:flex-none border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800">
               <LayoutDashboard className="mr-2 h-4 w-4" />
