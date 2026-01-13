@@ -189,7 +189,11 @@ const HeroWithEditor: React.FC = () => {
             ))}
           </div>
         </div>
-        {/* Second row - Hidden on mobile for cleaner look */}
+        {/* Second row - More editing features */}
+        <div className="hidden md:block text-center mb-3 w-full">
+          <h3 className="text-lg font-semibold text-white mb-1">More Editing Tools</h3>
+          <p className="text-sm text-gray-400">Advanced features to perfect your content</p>
+        </div>
         <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
           {editingFeatures.slice(6).map((feature) => (
             <button
