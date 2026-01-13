@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Scissors, UserCircle, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import aiVideoDemo from '@/assets/ai-video-editing-demo.mp4';
 
 const features = [
   {
@@ -9,7 +10,7 @@ const features = [
     title: 'Magical Editing, Instantly.',
     description: 'Transform raw footage into scroll-stopping content. Our AI adds visual hooks, cinematic transitions, and perfectly-timed motion graphics—automatically.',
     gradient: 'from-purple-500 to-pink-500',
-    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
+    video: aiVideoDemo,
     overlayText: 'Adding cinematic transitions...',
   },
   {
@@ -18,7 +19,7 @@ const features = [
     title: 'Turn Long Videos Into Viral Moments.',
     description: 'Drop your long-form content and let AI find the golden moments. Get perfectly-cut clips optimized for TikTok, Reels, and Shorts in seconds.',
     gradient: 'from-blue-500 to-cyan-500',
-    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=500&fit=crop',
+    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
     overlayText: 'Extracting viral moments...',
   },
   {
@@ -77,14 +78,25 @@ const CoreFeatures: React.FC = () => {
               </Button>
             </div>
             
-            {/* Image/Preview */}
+            {/* Image/Video Preview */}
             <div className="flex-1 w-full max-w-xl">
               <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
-                <img 
-                  src={feature.image} 
-                  alt={feature.title}
-                  className="w-full h-64 md:h-80 object-cover"
-                />
+                {'video' in feature && feature.video ? (
+                  <video 
+                    src={feature.video} 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-64 md:h-80 object-cover"
+                  />
+                ) : (
+                  <img 
+                    src={feature.image} 
+                    alt={feature.title}
+                    className="w-full h-64 md:h-80 object-cover"
+                  />
+                )}
                 
                 {/* Overlay UI Element */}
                 <div className="absolute bottom-4 left-4 right-4">
