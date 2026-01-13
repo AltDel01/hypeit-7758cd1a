@@ -121,7 +121,7 @@ const ShowcaseGallery: React.FC = () => {
 
         {/* View more link */}
         <div className="text-center mt-8">
-          <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gray-800 text-white font-medium hover:bg-gray-700 transition-colors">
+          <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#25D366] text-white font-medium hover:bg-[#1fb855] transition-colors">
             <MessageCircle className="w-4 h-4" />
             Join our community
           </button>
