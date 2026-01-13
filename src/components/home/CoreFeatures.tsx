@@ -44,43 +44,43 @@ const features = [
 
 const CoreFeatures: React.FC = () => {
   return (
-    <section className="relative py-24 px-4 overflow-hidden bg-black">
+    <section className="relative py-12 md:py-24 px-3 md:px-4 overflow-hidden bg-black">
       <div className="relative z-10 max-w-7xl mx-auto">
         {features.map((feature, index) => (
           <div
             key={feature.title}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16 mb-24 last:mb-0`}
+            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 md:gap-8 lg:gap-16 mb-12 md:mb-24 last:mb-0`}
           >
             {/* Text Content */}
-            <div className="flex-1 max-w-md">
+            <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span className="text-purple-400 text-sm font-medium">{feature.badge}</span>
+              <div className="inline-flex items-center gap-2 mb-3 md:mb-4">
+                <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
+                <span className="text-purple-400 text-xs md:text-sm font-medium">{feature.badge}</span>
               </div>
               
               {/* Title */}
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 md:mb-4 leading-tight">
                 {feature.title}
               </h2>
               
               {/* Description */}
-              <p className="text-gray-400 text-base leading-relaxed mb-6">
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-4 md:mb-6">
                 {feature.description}
               </p>
               
               {/* CTA Button */}
               <Button 
-                className={`bg-gradient-to-r ${feature.gradient} hover:opacity-90 text-white font-medium px-6 py-3 rounded-lg transition-all`}
+                className={`bg-gradient-to-r ${feature.gradient} hover:opacity-90 text-white font-medium px-5 md:px-6 py-2.5 md:py-3 rounded-lg transition-all text-sm md:text-base`}
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2" />
                 Try for Free
               </Button>
             </div>
             
             {/* Image/Video Preview */}
-            <div className="flex-1 w-full max-w-xl">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
+            <div className="flex-1 w-full max-w-xl px-2 md:px-0">
+              <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
                 {'video' in feature && feature.video ? (
                   <video 
                     src={feature.video} 
@@ -88,24 +88,24 @@ const CoreFeatures: React.FC = () => {
                     loop 
                     muted 
                     playsInline
-                    className="w-full h-64 md:h-80 object-cover"
+                    className="w-full h-48 sm:h-56 md:h-80 object-cover"
                   />
                 ) : (
                   <img 
                     src={feature.image} 
                     alt={feature.title}
-                    className="w-full h-64 md:h-80 object-cover"
+                    className="w-full h-48 sm:h-56 md:h-80 object-cover"
                   />
                 )}
                 
                 {/* Overlay UI Element */}
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="bg-black/70 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center`}>
-                      <Sparkles className="w-4 h-4 text-white" />
+                <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4">
+                  <div className="bg-black/70 backdrop-blur-sm rounded-lg md:rounded-xl px-2.5 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 border border-white/10">
+                    <div className={`w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center flex-shrink-0`}>
+                      <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-white" />
                     </div>
-                    <span className="text-gray-300 text-sm flex-1">{feature.overlayText}</span>
-                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-4">
+                    <span className="text-gray-300 text-xs md:text-sm flex-1 truncate">{feature.overlayText}</span>
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-[10px] md:text-xs px-2.5 md:px-4 h-7 md:h-8 flex-shrink-0">
                       Generate
                     </Button>
                   </div>
