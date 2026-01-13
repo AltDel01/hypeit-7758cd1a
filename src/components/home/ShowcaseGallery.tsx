@@ -3,35 +3,35 @@ import { Play, Eye, Heart, MessageCircle } from 'lucide-react';
 
 const showcaseItems = [
   {
-    thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=600&fit=crop',
     title: 'Product Launch Video',
     views: '2.4M',
     likes: '184K',
     category: 'E-commerce',
   },
   {
-    thumbnail: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=400&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=400&h=600&fit=crop',
     title: 'Travel Vlog Edit',
     views: '1.8M',
     likes: '156K',
     category: 'Travel',
   },
   {
-    thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=600&fit=crop',
     title: 'Fitness Tutorial',
     views: '3.2M',
     likes: '245K',
     category: 'Fitness',
   },
   {
-    thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=600&fit=crop',
     title: 'Tech Review',
     views: '890K',
     likes: '67K',
     category: 'Tech',
   },
   {
-    thumbnail: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=400&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=600&fit=crop',
     title: 'Recipe Short',
     views: '4.1M',
     likes: '312K',
