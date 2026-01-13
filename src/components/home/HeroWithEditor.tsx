@@ -190,9 +190,18 @@ const HeroWithEditor: React.FC = () => {
           </div>
         </div>
         {/* Second row - More editing features */}
-        <div className="hidden md:block text-center mb-3 w-full">
-          <h3 className="text-lg font-semibold text-white mb-1">More Editing Tools</h3>
-          <p className="text-sm text-gray-400">Advanced features to perfect your content</p>
+        <div className="hidden md:block text-center mb-6 w-full">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium text-purple-300">Powerful Features</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+            Everything you need to go{' '}
+            <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">viral</span>
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Create professional-quality videos in minutes, not hours. Our AI handles the editing so you can focus on creating.
+          </p>
         </div>
         <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
           {editingFeatures.slice(6).map((feature) => (
