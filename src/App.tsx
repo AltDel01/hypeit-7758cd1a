@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import CustomErrorBoundary from "./components/error/ErrorBoundary";
 import AvaButton from "./components/audio/AvaButton";
+import AdminRoute from "./components/routes/AdminRoute";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
@@ -60,7 +61,7 @@ const AppRoutes = () => {
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
       <Route 
         path="/admin" 
-        element={<ProtectedRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></ProtectedRoute>} 
+        element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>} 
       />
       <Route 
         path="/login" 

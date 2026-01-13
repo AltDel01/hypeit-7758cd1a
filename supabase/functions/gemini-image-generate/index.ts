@@ -1,9 +1,61 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Input validation constants
+const MAX_PROMPT_LENGTH = 2000;
+const VALID_ASPECT_RATIOS = ['1:1', '3:4', '4:3', '9:16', '16:9'];
+const MAX_IMAGE_SIZE = 10000000; // ~7.5MB in base64
+
+// Input validation function
+const validateInput = (data: any): { valid: boolean; error?: string } => {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid request body' };
+  }
+
+  const { prompt, product_image, aspect_ratio } = data;
+
+  // Validate prompt
+  if (!prompt || typeof prompt !== 'string') {
+    return { valid: false, error: 'Prompt is required and must be a string' };
+  }
+
+  if (prompt.trim().length === 0) {
+    return { valid: false, error: 'Prompt cannot be empty' };
+  }
+
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    return { valid: false, error: `Prompt must be less than ${MAX_PROMPT_LENGTH} characters` };
+  }
+
+  // Validate aspect ratio
+  if (aspect_ratio && !VALID_ASPECT_RATIOS.includes(aspect_ratio)) {
+    return { valid: false, error: `Invalid aspect ratio. Must be one of: ${VALID_ASPECT_RATIOS.join(', ')}` };
+  }
+
+  // Validate product image if provided
+  if (product_image) {
+    if (typeof product_image !== 'string') {
+      return { valid: false, error: 'Product image must be a string (base64 or data URL)' };
+    }
+
+    if (product_image.length > MAX_IMAGE_SIZE) {
+      return { valid: false, error: 'Product image is too large (max ~7.5MB)' };
+    }
+
+    // Basic validation for base64/data URL format
+    const isDataUrl = product_image.startsWith('data:image/');
+    const isBase64 = /^[A-Za-z0-9+/=]+$/.test(product_image.substring(0, 100));
+    
+    if (!isDataUrl && !isBase64) {
+      return { valid: false, error: 'Product image must be a valid base64 string or data URL' };
+    }
+  }
+
+  return { valid: true };
 };
 
 serve(async (req) => {
@@ -17,23 +69,36 @@ serve(async (req) => {
 
     if (!GEMINI_API_KEY) {
       console.error("GEMINI_API_KEY environment variable not set");
-      throw new Error("GEMINI_API_KEY environment variable not set");
+      throw new Error("API key not configured");
     }
 
-    const requestData = await req.json();
+    // Parse and validate input
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validation = validateInput(requestData);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const {
       prompt,
       product_image,
       aspect_ratio = "1:1",
     } = requestData;
 
-    if (!prompt) {
-      console.error("Prompt is required");
-      throw new Error("Prompt is required");
-    }
-
     console.log(
-      `Image generation request received. Prompt: "${prompt?.substring(0, 30)}...", Has product image: ${!!product_image}, Aspect ratio: ${aspect_ratio}`,
+      `Image generation request received. Prompt length: ${prompt.length}, Has product image: ${!!product_image}, Aspect ratio: ${aspect_ratio}`,
     );
 
     const requestId = crypto.randomUUID();
@@ -84,7 +149,6 @@ serve(async (req) => {
 
     console.log("Sending request to Gemini 2.5 Flash Image");
     console.log(`Using aspect ratio: ${aspect_ratio}`);
-    console.log("Request body (truncated):", JSON.stringify(requestBody, null, 2).substring(0, 800));
     
     let imageData: string | null = null;
     let imageMime: string | null = null;
@@ -103,17 +167,10 @@ serve(async (req) => {
   
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Gemini API error:", response.status, errorText);
+        console.error("Gemini API error:", response.status);
         
-        // Try to parse the error response as JSON
-        try {
-          const errorData = JSON.parse(errorText);
-          errorResponse = `Gemini API error: ${errorData.error?.message || response.statusText}`;
-        } catch (_e) {
-          // If parsing fails, use the raw error text
-          errorResponse = `Gemini API error: Status ${response.status} - ${errorText || response.statusText}`;
-        }
-        
+        // Generic error message for clients
+        errorResponse = "Image generation service temporarily unavailable";
         throw new Error(errorResponse);
       }
   
@@ -121,9 +178,6 @@ serve(async (req) => {
       console.log("Received response from Gemini 2.5 Flash Image");
       
       // ========= 3) Extract the generated image (inline_data) =========
-      // Shape: { candidates: [ { content: { parts: [ {inline_data: {...}}, {text: ...} ] } } ] }
-      console.log("Response data (truncated):", JSON.stringify(responseData, null, 2).substring(0, 800));
-      
       const candidates = responseData.candidates || [];
       if (candidates.length > 0) {
         const content = candidates[0].content || {};
@@ -137,18 +191,16 @@ serve(async (req) => {
           imageData = imagePart.inline_data.data;
           imageMime = imagePart.inline_data.mime_type || "image/png";
           console.log("Found generated image in inline_data");
-          console.log("MIME type:", imageMime);
         }
       }
     } catch (apiError) {
-      console.error("API call error:", apiError);
-      errorResponse = (apiError as Error).message || "Error calling Gemini API";
+      console.error("API call error");
+      errorResponse = "Image generation service error";
     }
 
     // ========= 4) Fallback logic if no image returned =========
     if (!imageData) {
       console.warn("No image data in Gemini API response, using fallback");
-      console.warn("Error details:", errorResponse);
       
       const seed = Math.abs(
         prompt.split("").reduce((a: number, b: string) => {
@@ -159,16 +211,15 @@ serve(async (req) => {
 
       const fallbackUrl = `https://picsum.photos/seed/${seed}/800/800.jpg`;
 
-      console.log("Fallback image URL:", fallbackUrl);
+      console.log("Fallback image URL generated");
 
       return new Response(
         JSON.stringify({
           status: "completed",
           imageUrl: fallbackUrl,
           requestId,
-          message: "Using fallback image (Gemini API unavailable or no image)",
+          message: "Using fallback image",
           usedFallback: true,
-          originalError: errorResponse || "No image data in Gemini API response",
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -178,7 +229,6 @@ serve(async (req) => {
 
     // ========= 5) Success response =========
     console.log("Successfully generated image with Gemini 2.5 Flash Image");
-    console.log("Image data length:", imageData.length, "characters");
 
     const mime = imageMime || "image/png";
 
@@ -187,7 +237,7 @@ serve(async (req) => {
         status: "completed",
         imageUrl: `data:${mime};base64,${imageData}`,
         requestId,
-        message: "Image generated successfully with Gemini 2.5 Flash Image",
+        message: "Image generated successfully",
         usedFallback: false,
       }),
       {
@@ -196,17 +246,13 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Error in gemini-image-generate function:", error);
-    console.error(
-      "Error stack:",
-      error instanceof Error ? error.stack : "No stack trace",
-    );
+    console.error("Error in gemini-image-generate function");
 
     let promptForFallback = "product";
     try {
       const errorRequestData = await req.clone().json();
       if (errorRequestData.prompt) {
-        promptForFallback = errorRequestData.prompt;
+        promptForFallback = errorRequestData.prompt.substring(0, 100);
       }
     } catch (_e) {
       // ignore
@@ -220,16 +266,15 @@ serve(async (req) => {
     );
     const fallbackImageUrl = `https://picsum.photos/seed/${seed}/800/800.jpg`;
 
-    console.log("Returning fallback image due to error:", fallbackImageUrl);
+    console.log("Returning fallback image due to error");
 
     return new Response(
       JSON.stringify({
         status: "completed",
         imageUrl: fallbackImageUrl,
         requestId: crypto.randomUUID(),
-        message: "Using fallback image due to error",
+        message: "Using fallback image",
         usedFallback: true,
-        originalError: error instanceof Error ? error.message : String(error),
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
