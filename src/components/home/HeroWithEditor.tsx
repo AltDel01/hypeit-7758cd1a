@@ -472,21 +472,21 @@ const HeroWithEditor: React.FC = () => {
                 </DropdownMenu>
               </div>
 
-              {/* Create Button - Full width on mobile */}
+              {/* Create Button */}
               <Button
                 onClick={handleCreate}
                 disabled={isProcessing}
-                className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-sm md:text-base"
+                className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-xs md:text-sm flex-shrink-0"
               >
                 {isProcessing ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Processing...
+                  <div className="flex items-center justify-center gap-1.5">
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="hidden sm:inline">Processing...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Generate Content
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Generate</span>
                   </div>
                 )}
               </Button>
