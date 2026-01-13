@@ -52,7 +52,7 @@ const features = [
 
 const CoreFeatures: React.FC = () => {
   return (
-    <section className="relative py-6 md:py-24 px-3 md:px-4 overflow-hidden bg-black">
+    <section className="relative py-12 md:py-24 px-3 md:px-4 overflow-hidden bg-black">
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-20">

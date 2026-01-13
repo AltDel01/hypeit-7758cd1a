@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
-    <section className="relative pt-28 pb-20 overflow-hidden">
+    <section className="relative pt-20 pb-12 md:pt-28 md:pb-20 overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-brand-blue/10 rounded-full blur-3xl" />
