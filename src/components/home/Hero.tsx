@@ -21,7 +21,7 @@ const Hero = () => {
               Launching soon • Join the waitlist
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <h1 className="text-5xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               AI-Powered <span className="text-gradient">Branding</span> for Small Businesses
             </h1>
             
