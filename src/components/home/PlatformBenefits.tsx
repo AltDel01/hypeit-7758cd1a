@@ -62,15 +62,15 @@ const PlatformBenefits: React.FC = () => {
                 <benefit.icon className="w-6 h-6 md:w-8 md:h-8 text-purple-400" />
               </div>
               
-              {/* Value */}
-              <div className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent mb-1 md:mb-2">
-                {benefit.value}
+              {/* Value + Title (one line on mobile) */}
+              <div className="flex items-baseline justify-center gap-2 mb-1 md:mb-2 md:flex-col md:gap-0">
+                <span className="text-3xl md:text-6xl font-bold bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
+                  {benefit.value}
+                </span>
+                <h3 className="text-lg md:text-xl font-semibold text-white">
+                  {benefit.title}
+                </h3>
               </div>
-              
-              {/* Title & Description */}
-              <h3 className="text-lg md:text-xl font-semibold text-white mb-1 md:mb-2">
-                {benefit.title}
-              </h3>
               <p className="text-purple-400 text-xs md:text-sm mb-3 md:mb-4">
                 {benefit.description}
               </p>
