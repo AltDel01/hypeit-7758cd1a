@@ -76,9 +76,9 @@ const CoreFeatures: React.FC = () => {
             {/* Text Content */}
             <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 mb-4 md:mb-5">
-                <feature.icon className="w-6 h-6 md:w-7 md:h-7 text-purple-400" />
-                <span className="text-purple-400 text-base md:text-lg font-semibold">{feature.badge}</span>
+              <div className="inline-flex items-center gap-3 mb-4 md:mb-5">
+                <feature.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400" />
+                <span className="text-purple-400 text-lg md:text-xl font-bold">{feature.badge}</span>
               </div>
               
               {/* Title */}
