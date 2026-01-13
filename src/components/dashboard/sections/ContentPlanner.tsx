@@ -21,7 +21,7 @@ const dummyCalendarContent = [
     title: "Welcome Post", 
     pillar: "Branding",
     prompt: "Create a warm, inviting photo of De'karrel Popcorn bags (Caramele and Barbeque flavors) arranged on a rustic wooden table with scattered popcorn kernels and golden lighting. Add tagline: \"Enjoy the Taste of Happiness.\"",
-    caption: "🍿 Welcome to De'karrel Popcorn!\nPremium mushroom popcorn made in Indonesia since 2000 — crunchy, sweet, and irresistibly delicious!\n#DekarrelPopcorn #PremiumPopcorn #MadeInIndonesia"
+    caption: "🍿 Welcome to De'karrel Popcorn!\nPremium mushroom popcorn made in Indonesia since 2000. Crunchy, sweet, and irresistibly delicious!\n#DekarrelPopcorn #PremiumPopcorn #MadeInIndonesia"
   },
   { 
     day: 2, 
@@ -49,7 +49,7 @@ const dummyCalendarContent = [
     title: "Educational Content", 
     pillar: "Education",
     prompt: "Infographic-style visual showing mushroom popcorn kernels, \"Non GMO Corn\", \"No MSG\", \"No Coloring\" badges with De'karrel branding.",
-    caption: "Did you know? 🌿\nDe'karrel uses premium mushroom corn — rounder, crunchier, and perfect for coating!\n#FunFactDekarrel #HealthySnack"
+    caption: "Did you know? 🌿\nDe'karrel uses premium mushroom corn. Rounder, crunchier, and perfect for coating!\n#FunFactDekarrel #HealthySnack"
   },
   { 
     day: 6, 
@@ -63,7 +63,7 @@ const dummyCalendarContent = [
     title: "Weekend Special", 
     pillar: "Promotion",
     prompt: "Dynamic visual showing both De'karrel Caramele and Barbeque bags with \"Weekend Snack Deal\" glowing text.",
-    caption: "Weekend's here! 🎉\nGrab both flavors — Caramele AND Barbeque — perfect for movie marathon!\n#WeekendTreat #DekarrelPromo"
+    caption: "Weekend's here! 🎉\nGrab both flavors, Caramele AND Barbeque, perfect for movie marathon!\n#WeekendTreat #DekarrelPromo"
   },
   { 
     day: 8, 
@@ -77,7 +77,7 @@ const dummyCalendarContent = [
     title: "Product Tutorial", 
     pillar: "Education",
     prompt: "Flat lay showing De'karrel Popcorn as perfect pairing with hot chocolate, coffee, or as movie snack setup.",
-    caption: "💡 De'karrel Hack:\nPair our Caramele with hot chocolate or Barbeque with cold drinks — perfect combo!\n#SnackHack #DekarrelStyle"
+    caption: "💡 De'karrel Hack:\nPair our Caramele with hot chocolate or Barbeque with cold drinks. Perfect combo!\n#SnackHack #DekarrelStyle"
   },
   { 
     day: 10, 
@@ -91,14 +91,14 @@ const dummyCalendarContent = [
     title: "Industry News", 
     pillar: "Education / Awareness",
     prompt: "Clean graphic showing \"Indonesian Premium Snacks\" trend with De'karrel packaging featured prominently.",
-    caption: "Proudly local, made with love 🇮🇩\nIndonesian snacks are winning hearts — and we're popping up the flavor!\n#SupportLocalBrand #DekarrelPride"
+    caption: "Proudly local, made with love 🇮🇩\nIndonesian snacks are winning hearts and we're popping up the flavor!\n#SupportLocalBrand #DekarrelPride"
   },
   { 
     day: 12, 
     title: "Throwback Thursday", 
     pillar: "Storytelling",
     prompt: "Vintage-style visual showing De'karrel heritage since EST. 2000 with nostalgic Indonesian snack vibes.",
-    caption: "Throwback to when it all started 🏭✨\nFrom 2000 to now — thank you for growing with us!\n#TBTDekarrel #Since2000"
+    caption: "Throwback to when it all started 🏭✨\nFrom 2000 to now, thank you for growing with us!\n#TBTDekarrel #Since2000"
   },
   { 
     day: 13, 
@@ -112,14 +112,14 @@ const dummyCalendarContent = [
     title: "Flash Sale Alert", 
     pillar: "Promotion",
     prompt: "Eye-catching visual with golden popcorn background, timer icon, and text \"24-Hour Popcorn Deal!\"",
-    caption: "FLASH SALE ⚡\nGrab your favorite De'karrel flavors before they're gone — 24 hours only!\n#DekarrelFlashSale #PopcornDeal"
+    caption: "FLASH SALE ⚡\nGrab your favorite De'karrel flavors before they're gone. 24 hours only!\n#DekarrelFlashSale #PopcornDeal"
   },
   { 
     day: 15, 
     title: "Thank You Post", 
     pillar: "Community",
     prompt: "Heartwarming visual of De'karrel bags with \"Thank You\" message and happy customer montage.",
-    caption: "You make De'karrel what it is ❤️\nFrom our hearts to yours — thank you for enjoying the taste of happiness!\n#ThankYouDekarrel #PopcornPride"
+    caption: "You make De'karrel what it is ❤️\nFrom our hearts to yours, thank you for enjoying the taste of happiness!\n#ThankYouDekarrel #PopcornPride"
   },
 ];
 

@@ -468,7 +468,7 @@ const AIEditorPrompt: React.FC = () => {
                   className="w-16 px-2 py-1 text-sm text-center bg-slate-800/80 border border-slate-700/50 rounded-md text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-purple-500/50"
                 />
               </div>
-              <span className="text-slate-500">—</span>
+              <span className="text-slate-500">to</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-slate-500">End</span>
                 <input
@@ -653,7 +653,7 @@ const AIEditorPrompt: React.FC = () => {
 
       {/* Helper Text */}
       <p className="text-slate-500 text-sm mt-4 text-center">
-        Upload your media and describe your vision — our AI handles the rest
+        Upload your media and describe your vision. Our AI handles the rest
       </p>
     </div>
   );

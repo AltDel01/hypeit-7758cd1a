@@ -26,7 +26,7 @@ const Hero = () => {
             </h1>
             
             <p className="text-lg text-brand-slate-600 md:text-xl max-w-xl animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              Generate stunning social media content, build your brand identity, and create marketing strategies—all with the power of AI.
+              Generate stunning social media content, build your brand identity, and create marketing strategies, all with the power of AI.
             </p>
             
             <div className="pt-4 flex flex-wrap gap-4 items-center animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
