@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Clapperboard, Flame, Bot, ShoppingBag } from 'lucide-react';
+import { Sparkles, Clapperboard, Flame, CircleUserRound, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import aiVideoDemo from '@/assets/ai-video-editing-demo.mp4';
 
@@ -24,7 +24,7 @@ const features = [
   },
   {
     badge: 'AI Avatars',
-    icon: Bot,
+    icon: CircleUserRound,
     title: 'Your Brand Speaks. You Don\'t Have To.',
     description: 'Turn any photo into a photorealistic AI avatar that speaks for your brand. Create unlimited UGC and promotional content—no camera, no crew, no problem.',
     gradient: 'from-amber-500 to-orange-500',
@@ -69,8 +69,8 @@ const CoreFeatures: React.FC = () => {
             <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 mb-3 md:mb-4">
-                <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
-                <span className="text-purple-400 text-xs md:text-sm font-medium">{feature.badge}</span>
+                <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
+                <span className="text-purple-400 text-sm md:text-base font-medium">{feature.badge}</span>
               </div>
               
               {/* Title */}
