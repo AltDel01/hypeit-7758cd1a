@@ -151,7 +151,7 @@ const HeroWithEditor: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-0 md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center px-3 md:px-4 pt-20 pb-4 md:py-16 overflow-hidden">
+    <section className="relative min-h-0 md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center px-3 md:px-4 pt-14 pb-4 md:py-16 overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
       <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px]" />
@@ -159,7 +159,7 @@ const HeroWithEditor: React.FC = () => {
       
       <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto w-full">
         {/* Hero Title */}
-        <h1 className="text-3xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center mb-2 md:mb-3 leading-tight px-2">
+        <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-1 md:mb-3 leading-tight px-2">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
             Create Stop<br className="md:hidden" />
             <span className="hidden md:inline"> </span>Scrolling Content
