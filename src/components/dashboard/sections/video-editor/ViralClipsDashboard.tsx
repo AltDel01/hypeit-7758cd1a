@@ -458,30 +458,30 @@ const ViralClipsDashboard: React.FC = () => {
       )}
 
       {/* Caption Template Selection */}
-      <div className="space-y-4">
-        <h3 className="text-white font-semibold">Select caption template</h3>
+      <div className="space-y-3 md:space-y-4">
+        <h3 className="text-white font-semibold text-sm md:text-base">Select caption template</h3>
         <div className="relative">
           <div 
             ref={captionScrollRef}
-            className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+            className="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
           >
             {captionTemplates.map((template) => (
               <button
                 key={template.id}
                 onClick={() => setSelectedCaption(template.id)}
                 className={cn(
-                  "shrink-0 w-28 h-20 rounded-lg bg-slate-900 border-2 transition-all flex items-center justify-center p-2 relative",
+                  "shrink-0 w-20 h-14 md:w-28 md:h-20 rounded-lg bg-slate-900 border-2 transition-all flex items-center justify-center p-1.5 md:p-2 relative",
                   selectedCaption === template.id 
                     ? "border-[#b616d6] shadow-lg shadow-[#b616d6]/20" 
                     : "border-slate-700 hover:border-slate-600"
                 )}
               >
                 {selectedCaption === template.id && (
-                  <div className="absolute top-1 right-1">
-                    <Sparkles className="w-3 h-3 text-[#b616d6]" />
+                  <div className="absolute top-0.5 right-0.5 md:top-1 md:right-1">
+                    <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#b616d6]" />
                   </div>
                 )}
-                <span className={cn("text-center text-xs leading-tight", template.style)}>
+                <span className={cn("text-center text-[10px] md:text-xs leading-tight line-clamp-2", template.style)}>
                   {template.name}
                 </span>
               </button>
@@ -489,9 +489,9 @@ const ViralClipsDashboard: React.FC = () => {
           </div>
           <button 
             onClick={() => scrollCaptions('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-slate-800/90 rounded-full flex items-center justify-center border border-slate-700 hover:bg-slate-700"
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-slate-800/90 rounded-full flex items-center justify-center border border-slate-700 hover:bg-slate-700"
           >
-            <ChevronRight className="w-4 h-4 text-white" />
+            <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-white" />
           </button>
         </div>
       </div>
@@ -517,27 +517,27 @@ const ViralClipsDashboard: React.FC = () => {
       </div>
 
       {/* Duration of Shorts */}
-      <div className="space-y-4">
-        <h3 className="text-white font-semibold">Duration of shorts</h3>
-        <div className="flex flex-wrap gap-3">
+      <div className="space-y-3 md:space-y-4">
+        <h3 className="text-white font-semibold text-sm md:text-base">Duration of shorts</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2 md:gap-3">
           {durationOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => setSelectedDuration(option.id)}
               className={cn(
-                "px-5 py-3 rounded-lg border-2 transition-all flex items-center gap-2",
+                "px-3 md:px-5 py-2 md:py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-1.5 md:gap-2",
                 selectedDuration === option.id 
                   ? "bg-slate-800 border-[#b616d6] text-white" 
                   : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-600"
               )}
             >
-              {option.icon && <option.icon className="w-4 h-4 text-[#b616d6]" />}
-              <span className="font-medium">{option.label}</span>
+              {option.icon && <option.icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#b616d6]" />}
+              <span className="font-medium text-xs md:text-sm">{option.label}</span>
             </button>
           ))}
         </div>
         {selectedDuration === 'auto' && (
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-400 text-xs md:text-sm">
             Our AI model will determine the optimal number and duration of the shorts for maximum viral potential.
           </p>
         )}
