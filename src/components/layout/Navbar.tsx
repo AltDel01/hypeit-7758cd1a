@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, CircleUser } from 'lucide-react';
+import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, Globe } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
 import {
@@ -73,9 +73,9 @@ const MobileTopBar = () => {
                     <Sparkles size={18} />
                     Upgrade plan
                   </Link>
-                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    <CircleUser size={18} />
-                    Personalization
+                  <Link to="/language" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <Globe size={18} />
+                    Language
                   </Link>
                   <Link to="/credit-usage" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <CreditCard size={18} />
@@ -197,9 +197,9 @@ const Navbar = () => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
-                  <CircleUser size={16} className="text-gray-400" />
-                  <span className="text-white">Personalization</span>
+                <Link to="/language" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <Globe size={16} className="text-gray-400" />
+                  <span className="text-white">Language</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
