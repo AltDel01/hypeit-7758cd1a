@@ -19,6 +19,7 @@ import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
 import Pricing from "./pages/Pricing";
 import Settings from "./pages/Settings";
+import CreditUsage from "./pages/CreditUsage";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -63,6 +64,10 @@ const AppRoutes = () => {
       <Route 
         path="/settings" 
         element={<ProtectedRoute><CustomErrorBoundary><Settings /></CustomErrorBoundary></ProtectedRoute>} 
+      />
+      <Route 
+        path="/credit-usage" 
+        element={<ProtectedRoute><CustomErrorBoundary><CreditUsage /></CustomErrorBoundary></ProtectedRoute>} 
       />
       <Route 
         path="/admin" 

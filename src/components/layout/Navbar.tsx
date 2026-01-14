@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, ChevronDown, Menu, X, Sparkles, Settings, HelpCircle, CircleUser } from 'lucide-react';
+import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, CircleUser } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
 import {
@@ -77,9 +77,9 @@ const MobileTopBar = () => {
                     <CircleUser size={18} />
                     Personalization
                   </Link>
-                  <Link to="/settings" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    <Settings size={18} />
-                    Settings
+                  <Link to="/credit-usage" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <CreditCard size={18} />
+                    Credit Usage
                   </Link>
                   <Link to="/help" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <HelpCircle size={18} />
@@ -203,9 +203,9 @@ const Navbar = () => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
-                  <Settings size={16} className="text-gray-400" />
-                  <span className="text-white">Settings</span>
+                <Link to="/credit-usage" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                  <CreditCard size={16} className="text-gray-400" />
+                  <span className="text-white">Credit Usage</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-700" />
