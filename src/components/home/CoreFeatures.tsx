@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles, Clapperboard, Flame, CircleUserRound, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import aiVideoDemo from '@/assets/ai-video-editing-demo.mp4';
-
+import aiAvatarsVideo from '@/assets/hero-video.mp4';
 const features = [
   {
     id: 'ai-video-editor',
@@ -34,7 +34,7 @@ const features = [
     altText: 'Your Brand Speaks. You Don\'t Have To.',
     description: 'Turn any photo into a photorealistic AI avatar that speaks for your brand. Create unlimited UGC and promotional content. No camera, no crew, no problem.',
     gradient: 'from-amber-500 to-orange-500',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=500&fit=crop',
+    video: aiAvatarsVideo,
     overlayText: 'Generating avatar voice...',
   },
   {
