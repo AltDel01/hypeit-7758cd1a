@@ -161,9 +161,11 @@ const Navbar = () => {
     <>
       {user ? (
         <>
-          <Link to="/dashboard" className="relative px-3 py-2 text-gray-300 hover:text-white group">
-            <span className="hidden md:inline">Dashboard</span>
-            <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] rounded-full"></span>
+          <Link 
+            to="/dashboard" 
+            className="relative px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-all duration-200 before:absolute before:inset-0 before:rounded-lg before:p-[1.5px] before:bg-gradient-to-r before:from-[#8c52ff] before:to-[#b616d6] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:-z-10 before:content-[''] after:absolute after:inset-[1.5px] after:rounded-[6px] after:bg-black/80 after:-z-10 after:opacity-0 hover:after:opacity-100 after:transition-opacity"
+          >
+            <span className="hidden md:inline relative z-10">Dashboard</span>
           </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
