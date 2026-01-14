@@ -208,9 +208,14 @@ export type Database = {
           email: string
           generations_this_month: number | null
           id: string
+          instagram_handle: string | null
+          linkedin_url: string | null
           monthly_generation_limit: number | null
+          phone: string | null
           subscription_tier: string | null
+          twitter_handle: string | null
           updated_at: string | null
+          website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -219,9 +224,14 @@ export type Database = {
           email: string
           generations_this_month?: number | null
           id: string
+          instagram_handle?: string | null
+          linkedin_url?: string | null
           monthly_generation_limit?: number | null
+          phone?: string | null
           subscription_tier?: string | null
+          twitter_handle?: string | null
           updated_at?: string | null
+          website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -230,9 +240,14 @@ export type Database = {
           email?: string
           generations_this_month?: number | null
           id?: string
+          instagram_handle?: string | null
+          linkedin_url?: string | null
           monthly_generation_limit?: number | null
+          phone?: string | null
           subscription_tier?: string | null
+          twitter_handle?: string | null
           updated_at?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
