@@ -77,7 +77,7 @@ const MobileTopBar = () => {
                     <CircleUser size={18} />
                     Personalization
                   </Link>
-                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/settings" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <Settings size={18} />
                     Settings
                   </Link>
@@ -201,7 +201,7 @@ const Navbar = () => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
+                <Link to="/settings" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
                   <Settings size={16} className="text-gray-400" />
                   <span className="text-white">Settings</span>
                 </Link>
