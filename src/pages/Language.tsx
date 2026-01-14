@@ -43,65 +43,65 @@ const Language = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-black pb-20 md:pb-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/">
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <Link to="/settings">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white h-10 w-10">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">Language Settings</h1>
-            <p className="text-gray-400 text-sm">Choose your preferred language</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Language Settings</h1>
+            <p className="text-gray-400 text-xs sm:text-sm">Choose your preferred language</p>
           </div>
         </div>
 
         <Card className="bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
               <Globe className="w-5 h-5 text-purple-400" />
               Select Language
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-gray-400 text-sm">
               Choose the language you'd like to use throughout the app
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
             <RadioGroup
               value={selectedLanguage}
               onValueChange={setSelectedLanguage}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3"
             >
               {languages.map((lang) => (
                 <Label
                   key={lang.code}
                   htmlFor={lang.code}
-                  className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
+                  className={`flex items-center gap-3 p-3 sm:p-4 rounded-lg border cursor-pointer transition-all active:scale-[0.98] ${
                     selectedLanguage === lang.code
                       ? 'border-purple-500 bg-purple-500/10'
                       : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                   }`}
                 >
                   <RadioGroupItem value={lang.code} id={lang.code} className="sr-only" />
-                  <span className="text-2xl">{lang.flag}</span>
-                  <div className="flex-1">
-                    <p className="text-white font-medium">{lang.name}</p>
-                    <p className="text-gray-400 text-sm">{lang.nativeName}</p>
+                  <span className="text-xl sm:text-2xl">{lang.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium text-sm sm:text-base">{lang.name}</p>
+                    <p className="text-gray-400 text-xs sm:text-sm truncate">{lang.nativeName}</p>
                   </div>
                   {selectedLanguage === lang.code && (
-                    <Check className="w-5 h-5 text-purple-400" />
+                    <Check className="w-5 h-5 text-purple-400 flex-shrink-0" />
                   )}
                 </Label>
               ))}
             </RadioGroup>
 
-            <div className="mt-6 pt-6 border-t border-gray-800">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-800">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-11 sm:h-10 text-sm sm:text-base"
               >
                 {saving ? 'Saving...' : 'Save Language Preference'}
               </Button>
@@ -109,7 +109,7 @@ const Language = () => {
           </CardContent>
         </Card>
 
-        <p className="text-gray-500 text-sm text-center mt-6">
+        <p className="text-gray-500 text-xs sm:text-sm text-center mt-4 sm:mt-6 px-2">
           Note: Some content may still appear in English while we work on translations.
         </p>
       </div>
