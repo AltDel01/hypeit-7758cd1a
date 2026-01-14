@@ -208,56 +208,59 @@ Highlight key selling points: Non GMO Corn, No MSG, No Coloring, and HALAL certi
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2 animate-gradient-text">
+          <h1 className="text-2xl md:text-4xl font-black text-white mb-1 md:mb-2 animate-gradient-text">
             Content Planner
           </h1>
-          <p className="text-muted-foreground">
-            Plan your 15-day content calendar with AI-powered caption enhancement
+          <p className="text-sm md:text-base text-muted-foreground">
+            Plan your 15-day content calendar with AI
           </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2 w-full sm:w-auto">
           <Download className="w-4 h-4" />
           Export PDF
         </Button>
       </div>
 
       {/* Business Information Form */}
-      <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-400" />
+      <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+        <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
           Business Information
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4 mb-4 md:mb-6">
           <div>
-            <Label htmlFor="business">Business Name</Label>
+            <Label htmlFor="business" className="text-sm">Business Name</Label>
             <Input
               id="business"
               placeholder="e.g., Coffee Shop"
               value={businessInfo.business}
               onChange={(e) => setBusinessInfo({...businessInfo, business: e.target.value})}
+              className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="industry">Industry</Label>
+            <Label htmlFor="industry" className="text-sm">Industry</Label>
             <Input
               id="industry"
               placeholder="e.g., Food & Beverage"
               value={businessInfo.industry}
               onChange={(e) => setBusinessInfo({...businessInfo, industry: e.target.value})}
+              className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="segment">Market Segment</Label>
+            <Label htmlFor="segment" className="text-sm">Market Segment</Label>
             <Input
               id="segment"
               placeholder="e.g., Young Professionals"
               value={businessInfo.marketSegment}
               onChange={(e) => setBusinessInfo({...businessInfo, marketSegment: e.target.value})}
+              className="mt-1"
             />
           </div>
         </div>
@@ -304,23 +307,23 @@ Highlight key selling points: Non GMO Corn, No MSG, No Coloring, and HALAL certi
 
       {/* Calendar View */}
       {showCalendar && (
-        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-cyan-400" />
+        <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+          <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+            <Calendar className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
             15-Day Content Calendar
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
             {dummyCalendarContent.map((day) => (
               <Card 
                 key={day.day} 
-                className="p-4 bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors cursor-pointer flex flex-col"
+                className="p-3 md:p-4 bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors cursor-pointer flex flex-col"
                 onClick={() => setSelectedDay(day)}
               >
-                <p className="text-sm font-medium text-white mb-2">Day {day.day}</p>
-                <p className="text-xs font-semibold text-purple-300 mb-1">{day.title}</p>
-                <span className="text-xs px-2 py-1 rounded-full bg-cyan-600/20 text-cyan-300 mb-2 inline-block w-fit">{day.pillar}</span>
-                <p className="text-xs text-muted-foreground mb-2 line-clamp-3">{day.prompt}</p>
-                <p className="text-xs text-slate-400 mt-auto line-clamp-2">{day.caption}</p>
+                <p className="text-xs md:text-sm font-medium text-white mb-1 md:mb-2">Day {day.day}</p>
+                <p className="text-xs font-semibold text-purple-300 mb-1 line-clamp-1">{day.title}</p>
+                <span className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-cyan-600/20 text-cyan-300 mb-1 md:mb-2 inline-block w-fit">{day.pillar}</span>
+                <p className="text-[10px] md:text-xs text-muted-foreground mb-1 md:mb-2 line-clamp-2 md:line-clamp-3 hidden sm:block">{day.prompt}</p>
+                <p className="text-[10px] md:text-xs text-slate-400 mt-auto line-clamp-1 md:line-clamp-2">{day.caption}</p>
               </Card>
             ))}
           </div>

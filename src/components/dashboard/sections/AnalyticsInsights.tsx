@@ -131,14 +131,14 @@ const AnalyticsInsights = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-3xl md:text-4xl font-black text-white mb-2 animate-gradient-text">
+        <h1 className="text-2xl md:text-4xl font-black text-white mb-1 md:mb-2 animate-gradient-text">
           Analytics & Insights
         </h1>
-        <p className="text-muted-foreground">
-          Track performance with AI-powered insights from Meta, TikTok, YouTube, and Instagram
+        <p className="text-sm md:text-base text-muted-foreground">
+          Track performance with AI-powered insights
         </p>
       </div>
 
@@ -182,28 +182,28 @@ const AnalyticsInsights = () => {
       </div>
 
       {/* Platform Selection Tabs - Border Bottom Style */}
-      <div className="space-y-6">
-        <div className="flex justify-start border-b border-gray-700 pb-2">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex justify-start border-b border-gray-700 pb-2 overflow-x-auto scrollbar-hide">
           {['instagram', 'tiktok', 'youtube'].map((platformType) => (
             <button
               key={platformType}
-              className={`flex items-center space-x-3 pb-3 px-10 first:pl-0 font-medium text-lg transition-colors ${
+              className={`flex items-center space-x-2 md:space-x-3 pb-3 px-4 md:px-10 first:pl-0 font-medium text-sm md:text-lg transition-colors whitespace-nowrap ${
                 platform === platformType 
                   ? 'text-purple-400 border-b-2 border-purple-400' 
                   : 'text-gray-400 hover:text-gray-200'
               }`}
               onClick={() => setPlatform(platformType as 'instagram' | 'tiktok' | 'youtube')}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 {renderPlatformIcon(platformType as 'instagram' | 'tiktok' | 'youtube')}
-                <span>{platformType.charAt(0).toUpperCase() + platformType.slice(1)}</span>
+                <span className="hidden sm:inline">{platformType.charAt(0).toUpperCase() + platformType.slice(1)}</span>
               </div>
             </button>
           ))}
         </div>
 
         {/* Username Input Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
           {[1, 2, 3].map((index) => (
             <div key={`${platform}-${index}`} className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

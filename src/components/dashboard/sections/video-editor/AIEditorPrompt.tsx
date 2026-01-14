@@ -334,47 +334,49 @@ const AIEditorPrompt: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
+    <div className="flex flex-col items-center justify-center min-h-[50vh] md:min-h-[60vh] px-3 md:px-6">
       {/* Title */}
-      <h1 className="relative z-10 inline-block text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 leading-tight py-1 px-4 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent shadow-glow">
+      <h1 className="relative z-10 inline-block text-2xl md:text-4xl lg:text-5xl font-bold text-center mb-4 md:mb-8 leading-tight py-1 px-2 md:px-4 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent shadow-glow">
         Create Stop Scrolling Video
       </h1>
 
       {/* Editing Feature Buttons */}
-      <div className="flex flex-col items-center gap-2 mb-6 max-w-4xl">
-        {/* First row - 5 buttons */}
-        <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-col items-center gap-2 mb-4 md:mb-6 max-w-4xl w-full">
+        {/* First row - scrollable on mobile */}
+        <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 w-full">
           {editingFeatures.slice(0, 5).map((feature) => (
             <button
               key={feature.id}
               onClick={() => handleFeatureClick(feature.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                "flex items-center gap-1 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200",
                 selectedFeatures.includes(feature.id)
                   ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
                   : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
               )}
             >
-              <feature.icon className="w-4 h-4" />
-              {feature.label}
+              <feature.icon className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden sm:inline">{feature.label}</span>
+              <span className="sm:hidden">{feature.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
-        {/* Second row - 4 buttons */}
-        <div className="flex flex-wrap justify-center gap-2">
+        {/* Second row */}
+        <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 w-full">
           {editingFeatures.slice(5).map((feature) => (
             <button
               key={feature.id}
               onClick={() => handleFeatureClick(feature.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                "flex items-center gap-1 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200",
                 selectedFeatures.includes(feature.id)
                   ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-[#b616d6]/30"
                   : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50"
               )}
             >
-              <feature.icon className="w-4 h-4" />
-              {feature.label}
+              <feature.icon className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden sm:inline">{feature.label}</span>
+              <span className="sm:hidden">{feature.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -382,19 +384,19 @@ const AIEditorPrompt: React.FC = () => {
 
       {/* Prompt Box */}
       <div className="w-full max-w-4xl">
-        <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
+        <div className="relative bg-slate-900/80 border border-slate-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
           {/* Video Preview - Small thumbnails like multimodal LLMs */}
           {uploadedVideos.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {uploadedVideos.map((file, index) => (
                 <div key={index} className="relative group">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700/50">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700/50">
                     <video 
                       src={URL.createObjectURL(file)}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <Video className="w-6 h-6 text-white/80" />
+                      <Video className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
                     </div>
                   </div>
                   <button 
@@ -403,7 +405,7 @@ const AIEditorPrompt: React.FC = () => {
                   >
                     <X className="w-3 h-3" />
                   </button>
-                  <p className="text-[10px] text-slate-400 mt-1 max-w-20 truncate text-center">{file.name}</p>
+                  <p className="text-[8px] md:text-[10px] text-slate-400 mt-1 max-w-16 md:max-w-20 truncate text-center">{file.name}</p>
                 </div>
               ))}
             </div>
@@ -415,15 +417,15 @@ const AIEditorPrompt: React.FC = () => {
               {uploadedAudio.map((file, index) => (
                 <div 
                   key={index}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg text-sm"
+                  className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-slate-800 rounded-lg text-xs md:text-sm"
                 >
-                  <AudioLines className="w-4 h-4 text-[#b616d6]" />
-                  <span className="text-slate-300 max-w-[150px] truncate">{file.name}</span>
+                  <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#b616d6]" />
+                  <span className="text-slate-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
                   <button 
                     onClick={() => removeAudio(index)}
                     className="text-slate-500 hover:text-white transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                 </div>
               ))}
@@ -434,17 +436,17 @@ const AIEditorPrompt: React.FC = () => {
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe how you want to edit your video, or what video you want to create..."
-            className="min-h-[160px] bg-transparent border-none text-white placeholder:text-slate-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+            placeholder="Describe how you want to edit your video..."
+            className="min-h-[120px] md:min-h-[160px] bg-transparent border-none text-white placeholder:text-slate-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
           />
 
           {/* Example Prompts inside box */}
-          <div className="flex flex-wrap gap-2 mb-4 mt-2">
-            {examplePrompts.map((example, index) => (
+          <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4 mt-2">
+            {examplePrompts.slice(0, window.innerWidth < 640 ? 3 : 6).map((example, index) => (
               <button
                 key={index}
                 onClick={() => handleExampleClick(example)}
-                className="px-4 py-2 rounded-full text-sm bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all duration-200"
+                className="px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50 transition-all duration-200"
               >
                 {example}
               </button>

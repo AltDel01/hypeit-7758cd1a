@@ -305,27 +305,27 @@ const VideoGenerator = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       {/* Left Column - Input */}
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Image Upload - Optional */}
-        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Video className="w-5 h-5 text-cyan-400" />
-            Product Image <span className="text-xs font-normal text-gray-400 ml-2">(Optional)</span>
+        <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+          <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+            <Video className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
+            Product Image <span className="text-[10px] md:text-xs font-normal text-gray-400 ml-1 md:ml-2">(Optional)</span>
           </h2>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <Label 
               htmlFor="video-image-upload"
-              className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-purple-500 transition-colors"
+              className="flex flex-col items-center justify-center h-40 md:h-48 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-purple-500 transition-colors"
             >
               {uploadedImage ? (
                 <img src={uploadedImage} alt="Uploaded" className="h-full w-full object-contain rounded-lg" />
               ) : (
-                <div className="text-center">
-                  <Upload className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to upload product image (optional)</p>
+                <div className="text-center p-4">
+                  <Upload className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-xs md:text-sm text-muted-foreground">Click to upload (optional)</p>
                 </div>
               )}
             </Label>
@@ -336,24 +336,24 @@ const VideoGenerator = () => {
               className="hidden"
               onChange={handleImageUpload}
             />
-            <p className="text-xs text-gray-500">Note: Image upload is currently optional. The video will be generated based on your prompt.</p>
+            <p className="text-[10px] md:text-xs text-gray-500">Note: Image upload is optional. Video will be generated based on your prompt.</p>
           </div>
         </Card>
 
         {/* Prompt Input */}
-        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Wand2 className="w-5 h-5 text-purple-400" />
+        <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+          <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+            <Wand2 className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
             Generation Prompt
           </h2>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <div>
-              <Label htmlFor="video-prompt">Your Prompt</Label>
+              <Label htmlFor="video-prompt" className="text-sm">Your Prompt</Label>
               <Textarea
                 id="video-prompt"
                 placeholder="Describe the video you want to create..."
-                className="min-h-[100px]"
+                className="min-h-[80px] md:min-h-[100px] mt-1"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
               />
@@ -363,16 +363,16 @@ const VideoGenerator = () => {
               onClick={handleEnhancePrompt}
               disabled={isEnhancing}
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 text-sm"
             >
               <Sparkles className={`w-4 h-4 ${isEnhancing ? 'animate-pulse' : ''}`} />
-              {isEnhancing ? 'Enhancing...' : 'Enhance Prompt with AI'}
+              {isEnhancing ? 'Enhancing...' : 'Enhance with AI'}
             </Button>
 
             {enhancedPrompt && (
-              <Card className="p-4 bg-purple-600/10 border-purple-500/50 animate-fade-in">
-                <p className="text-sm font-medium text-purple-300 mb-2">Enhanced Prompt:</p>
-                <p className="text-white text-sm">{enhancedPrompt}</p>
+              <Card className="p-3 md:p-4 bg-purple-600/10 border-purple-500/50 animate-fade-in">
+                <p className="text-xs md:text-sm font-medium text-purple-300 mb-1 md:mb-2">Enhanced Prompt:</p>
+                <p className="text-white text-xs md:text-sm">{enhancedPrompt}</p>
               </Card>
             )}
           </div>
@@ -385,7 +385,7 @@ const VideoGenerator = () => {
         />
 
         {/* Generate Button */}
-        <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+        <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
           <Button 
             onClick={handleGenerate}
             disabled={isGenerating}
@@ -398,18 +398,18 @@ const VideoGenerator = () => {
       </div>
 
       {/* Right Column - Results */}
-      <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-        <h2 className="text-xl font-semibold text-white mb-4">Result Video</h2>
-        <div className="flex items-center justify-center h-[500px] border-2 border-dashed border-slate-600 rounded-lg overflow-hidden">
+      <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+        <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4">Result Video</h2>
+        <div className="flex items-center justify-center h-[300px] md:h-[500px] border-2 border-dashed border-slate-600 rounded-lg overflow-hidden">
           {isGenerating ? (
-            <span className="flex flex-col items-center gap-2">
-              <Wand2 className="w-8 h-8 animate-spin text-purple-400" />
-              <p className="text-muted-foreground">Generating your video...</p>
+            <span className="flex flex-col items-center gap-2 p-4">
+              <Wand2 className="w-6 h-6 md:w-8 md:h-8 animate-spin text-purple-400" />
+              <p className="text-sm md:text-base text-muted-foreground text-center">Generating your video...</p>
             </span>
           ) : generatedVideo ? (
             <video src={generatedVideo} controls className="h-full w-full object-contain" />
           ) : (
-            <p className="text-muted-foreground text-center">Generated video will appear here</p>
+            <p className="text-sm md:text-base text-muted-foreground text-center px-4">Generated video will appear here</p>
           )}
         </div>
       </Card>
