@@ -41,7 +41,7 @@ const HowItWorks: React.FC = () => {
               works
             </span>
           </h2>
-          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-2">
+          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-2 mb-4 md:mb-0">
             From raw footage to viral content in three simple steps
           </p>
         </div>
