@@ -163,7 +163,7 @@ const Navbar = () => {
         <>
           <Link 
             to="/dashboard" 
-            className="relative px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-all duration-200 before:absolute before:inset-0 before:rounded-lg before:p-[1.5px] before:bg-gradient-to-r before:from-[#8c52ff] before:to-[#b616d6] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:-z-10 before:content-[''] after:absolute after:inset-[1.5px] after:rounded-[6px] after:bg-black/80 after:-z-10 after:opacity-0 hover:after:opacity-100 after:transition-opacity"
+            className="relative px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-all duration-300 before:absolute before:inset-0 before:rounded-lg before:p-[1.5px] before:bg-gradient-to-r before:from-[#8c52ff] before:to-[#b616d6] before:transition-all before:duration-300 before:-z-10 before:content-[''] after:absolute after:inset-[1.5px] after:rounded-[6px] after:bg-black/80 after:-z-10 hover:before:shadow-[0_0_12px_rgba(140,82,255,0.6)] hover:before:brightness-125"
           >
             <span className="hidden md:inline relative z-10">Dashboard</span>
           </Link>
