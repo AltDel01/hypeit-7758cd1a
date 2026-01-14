@@ -63,7 +63,7 @@ const PlatformBenefits: React.FC = () => {
               </div>
               
               {/* Value + Title (one line on mobile) */}
-              <div className="flex items-baseline justify-center gap-2 mb-1 md:mb-2 md:flex-col md:gap-0">
+              <div className="flex items-baseline justify-center gap-2 mb-1 md:mb-2 md:flex-col md:gap-0 md:items-center">
                 <span className="text-3xl md:text-6xl font-bold bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   {benefit.value}
                 </span>
