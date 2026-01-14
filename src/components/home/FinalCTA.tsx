@@ -51,16 +51,6 @@ const FinalCTA: React.FC = () => {
             </Link>
           </Button>
           
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="px-6 md:px-8 py-5 md:py-6 text-sm md:text-lg border-gray-700 text-white hover:bg-gray-800"
-          >
-            <Link to="/pricing">
-              View Pricing
-            </Link>
-          </Button>
         </div>
         
         {/* Features list */}
