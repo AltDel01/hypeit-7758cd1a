@@ -207,7 +207,7 @@ const Settings = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/dashboard">
+          <Link to="/">
             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <ArrowLeft className="w-5 h-5" />
             </Button>
