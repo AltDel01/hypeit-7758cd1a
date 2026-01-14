@@ -20,15 +20,15 @@ const AspectRatioSelector: React.FC<AspectRatioSelectorProps> = ({
   onRatioChange,
 }) => {
   return (
-    <Card className="p-6 bg-background/60 backdrop-blur-sm border-slate-700">
-      <Label className="text-white font-semibold mb-4 block">Aspect Ratio</Label>
-      <div className="flex gap-4">
+    <Card className="p-4 md:p-6 bg-background/60 backdrop-blur-sm border-slate-700">
+      <Label className="text-white font-semibold mb-3 md:mb-4 block text-sm md:text-base">Aspect Ratio</Label>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4">
         {ratioOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => onRatioChange(option.value)}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all",
+              "flex items-center justify-center gap-2 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg border-2 transition-all",
               selectedRatio === option.value
                 ? "border-cyan-500 bg-cyan-500/10"
                 : "border-slate-600 hover:border-slate-500 bg-slate-800/50"
@@ -36,15 +36,18 @@ const AspectRatioSelector: React.FC<AspectRatioSelectorProps> = ({
           >
             <div
               className={cn(
-                "border-2 rounded-sm",
+                "border-2 rounded-sm shrink-0",
                 selectedRatio === option.value
                   ? "border-cyan-400 bg-cyan-900/30"
                   : "border-slate-500 bg-slate-700/50"
               )}
-              style={{ width: option.width, height: option.height }}
+              style={{ 
+                width: Math.max(option.width * 0.6, 16), 
+                height: Math.max(option.height * 0.6, 16) 
+              }}
             />
             <span className={cn(
-              "text-sm font-medium",
+              "text-xs md:text-sm font-medium",
               selectedRatio === option.value ? "text-cyan-300" : "text-slate-400"
             )}>
               {option.label}

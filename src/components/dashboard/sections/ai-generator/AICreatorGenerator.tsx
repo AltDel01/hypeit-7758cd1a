@@ -220,10 +220,10 @@ const AICreatorGenerator = () => {
       />
 
       {/* Left Panel - Avatar Selection */}
-      <Card className="p-8 bg-background/60 backdrop-blur-sm border-dashed border-2 border-muted-foreground/30">
-        <div className="flex flex-col items-center justify-center space-y-6">
+      <Card className="p-4 md:p-8 bg-background/60 backdrop-blur-sm border-dashed border-2 border-muted-foreground/30">
+        <div className="flex flex-col items-center justify-center space-y-4 md:space-y-6">
           {/* Upload Icon or Uploaded Photo */}
-          <div className="w-32 h-32 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-20 h-20 md:w-32 md:h-32 flex items-center justify-center rounded-lg overflow-hidden">
             {uploadedPhoto ? (
               <img 
                 src={uploadedPhoto} 
@@ -231,35 +231,37 @@ const AICreatorGenerator = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <ImagePlus className="w-12 h-12 text-muted-foreground" />
+              <ImagePlus className="w-8 h-8 md:w-12 md:h-12 text-muted-foreground" />
             )}
           </div>
 
           {/* Title with Tips */}
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-foreground font-medium">Upload a photo or select an avatar</span>
-              <span className="flex items-center gap-1 text-yellow-500 text-sm">
-                <Lightbulb className="w-4 h-4" />
+          <div className="text-center space-y-1 md:space-y-2">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <span className="text-foreground font-medium text-sm md:text-base">Upload a photo or select an avatar</span>
+              <span className="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
+                <Lightbulb className="w-3 h-3 md:w-4 md:h-4" />
                 Tips
               </span>
             </div>
-            <p className="text-muted-foreground text-sm">Max 50MB for uploaded photo</p>
+            <p className="text-muted-foreground text-xs md:text-sm">Max 50MB for uploaded photo</p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-2 md:gap-3">
             <Button 
               variant="outline" 
-              className="bg-muted/50 border-muted-foreground/30 hover:bg-muted gap-2"
+              size="sm"
+              className="bg-muted/50 border-muted-foreground/30 hover:bg-muted gap-1 md:gap-2 text-xs md:text-sm"
               onClick={handleUploadClick}
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="w-3 h-3 md:w-4 md:h-4" />
               Upload photo
             </Button>
             <Button 
               variant="outline" 
-              className={`bg-muted/50 border-muted-foreground/30 hover:bg-muted ${showAvatarSelection ? 'ring-2 ring-purple-500' : ''}`}
+              size="sm"
+              className={`bg-muted/50 border-muted-foreground/30 hover:bg-muted text-xs md:text-sm ${showAvatarSelection ? 'ring-2 ring-purple-500' : ''}`}
               onClick={handleSelectAvatar}
             >
               Select avatar
@@ -268,9 +270,9 @@ const AICreatorGenerator = () => {
 
           {/* Avatar Selection Grid */}
           {showAvatarSelection && (
-            <div className="w-full p-4 bg-muted/30 rounded-lg border border-muted-foreground/20">
-              <p className="text-sm text-muted-foreground mb-3">Choose an avatar</p>
-              <div className="grid grid-cols-4 gap-3">
+            <div className="w-full p-3 md:p-4 bg-muted/30 rounded-lg border border-muted-foreground/20">
+              <p className="text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">Choose an avatar</p>
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
                 {avatarSelectionGrid.map((avatar, index) => (
                   <button
                     key={index}
@@ -289,14 +291,14 @@ const AICreatorGenerator = () => {
           )}
 
           {/* Divider */}
-          <div className="w-full flex items-center gap-4 py-4">
+          <div className="w-full flex items-center gap-2 md:gap-4 py-2 md:py-4">
             <div className="flex-1 h-px bg-muted-foreground/20" />
-            <span className="text-muted-foreground text-sm">Try these</span>
+            <span className="text-muted-foreground text-xs md:text-sm whitespace-nowrap">Try these</span>
             <div className="flex-1 h-px bg-muted-foreground/20" />
           </div>
 
           {/* Sample Avatars */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 overflow-x-auto w-full justify-center pb-1">
             {sampleAvatars.map((avatar, index) => (
               <button
                 key={index}
@@ -305,7 +307,7 @@ const AICreatorGenerator = () => {
                   setUploadedPhoto(avatar);
                   setShowAvatarSelection(false);
                 }}
-                className={`w-16 h-16 rounded-lg overflow-hidden transition-all ${
+                className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden transition-all shrink-0 ${
                   selectedAvatar === index 
                     ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-background' 
                     : 'hover:opacity-80'
@@ -321,9 +323,9 @@ const AICreatorGenerator = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="w-16 h-16 bg-muted/30 border-muted-foreground/30 hover:bg-muted"
+              className="w-12 h-12 md:w-16 md:h-16 bg-muted/30 border-muted-foreground/30 hover:bg-muted shrink-0"
             >
-              <RefreshCw className="w-5 h-5 text-muted-foreground" />
+              <RefreshCw className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
             </Button>
           </div>
 
@@ -503,32 +505,33 @@ const AICreatorGenerator = () => {
         </div>
 
         {/* Aspect Ratio Selection */}
-        <div className="space-y-3">
-          <span className="text-foreground font-medium">Aspect Ratio</span>
-          <div className="grid grid-cols-4 gap-2">
+        <div className="space-y-2 md:space-y-3">
+          <span className="text-foreground font-medium text-sm md:text-base">Aspect Ratio</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {(['16:9', '9:16', '1:1', '4:5'] as const).map((ratio) => {
               const getShape = () => {
                 switch (ratio) {
-                  case '16:9': return 'w-10 h-6';
-                  case '9:16': return 'w-5 h-8';
-                  case '1:1': return 'w-7 h-7';
-                  case '4:5': return 'w-6 h-8';
+                  case '16:9': return { mobile: 'w-7 h-4', desktop: 'w-10 h-6' };
+                  case '9:16': return { mobile: 'w-3 h-5', desktop: 'w-5 h-8' };
+                  case '1:1': return { mobile: 'w-5 h-5', desktop: 'w-7 h-7' };
+                  case '4:5': return { mobile: 'w-4 h-5', desktop: 'w-6 h-8' };
                 }
               };
+              const shape = getShape();
               return (
                 <button
                   key={ratio}
                   onClick={() => setAspectRatio(ratio)}
-                  className={`p-3 rounded-lg border-2 flex items-center gap-2 transition-all ${
+                  className={`p-2 md:p-3 rounded-lg border-2 flex items-center justify-center gap-1.5 md:gap-2 transition-all ${
                     aspectRatio === ratio
                       ? 'border-cyan-400 bg-cyan-400/10'
                       : 'border-muted-foreground/30 hover:border-muted-foreground/50'
                   }`}
                 >
-                  <div className={`${getShape()} border-2 rounded-sm ${
+                  <div className={`${shape.mobile} md:${shape.desktop} border-2 rounded-sm shrink-0 ${
                     aspectRatio === ratio ? 'border-cyan-400' : 'border-muted-foreground/50'
                   }`} />
-                  <span className={`text-sm ${aspectRatio === ratio ? 'text-cyan-400' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs md:text-sm ${aspectRatio === ratio ? 'text-cyan-400' : 'text-muted-foreground'}`}>
                     {ratio}
                   </span>
                 </button>
