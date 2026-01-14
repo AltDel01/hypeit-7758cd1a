@@ -60,7 +60,7 @@ const MobileTopBar = () => {
                     Dashboard
                   </Link>
                   <div className="border-t border-gray-700 my-2"></div>
-                  <div className="px-4 py-2 flex items-center gap-3">
+                  <Link to="/settings" className="px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
                       {user.email?.charAt(0).toUpperCase() || 'U'}
                     </div>
@@ -68,7 +68,7 @@ const MobileTopBar = () => {
                       <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
                       <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
                     </div>
-                  </div>
+                  </Link>
                   <Link to="/pricing" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <Sparkles size={18} />
                     Upgrade plan
@@ -178,15 +178,17 @@ const Navbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-gray-900/95 backdrop-blur-lg border-gray-800">
-              <div className="px-3 py-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
-                  {user.email?.charAt(0).toUpperCase() || 'U'}
+              <Link to="/settings" className="block px-3 py-3 hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                    <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
-                  <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
-                </div>
-              </div>
+              </Link>
               <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuItem asChild>
                 <Link to="/pricing" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
