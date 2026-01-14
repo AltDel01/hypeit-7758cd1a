@@ -194,45 +194,45 @@ const ViralClipsDashboard: React.FC = () => {
   // Results View
   if (showResults) {
     return (
-      <div className="space-y-6 pb-8">
+      <div className="space-y-4 md:space-y-6 pb-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 md:gap-4">
             <button 
               onClick={handleBackToEditor}
               className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </button>
-            <h2 className="text-lg text-white">
+            <h2 className="text-base md:text-lg text-white">
               <span className="text-cyan-400 font-semibold">{generatedClips.length} clips</span>
-              {' '}are created from your video
+              {' '}created from your video
             </h2>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+          <button className="flex items-center gap-2 px-3 md:px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors text-sm">
             <span className="text-white font-medium">Recommended</span>
             <ChevronDown className="w-4 h-4 text-slate-400" />
           </button>
         </div>
 
         {/* Clips Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
           {generatedClips.map((clip) => (
             <div key={clip.id} className="group">
               {/* Video Player */}
-              <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900 mb-3">
+              <div className="relative aspect-[9/16] rounded-lg md:rounded-xl overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900 mb-2 md:mb-3">
                 {/* Badge */}
                 <div className={cn(
-                  "absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-white z-10",
+                  "absolute top-2 md:top-3 left-2 md:left-3 flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-md text-[10px] md:text-xs font-medium text-white z-10",
                   clip.badge.color
                 )}>
-                  <clip.badge.icon className="w-3 h-3" />
-                  {clip.badge.label}
+                  <clip.badge.icon className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                  <span className="hidden sm:inline">{clip.badge.label}</span>
                 </div>
 
                 {/* Download Button */}
-                <button className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10">
-                  <Download className="w-4 h-4 text-white" />
+                <button className="absolute top-2 md:top-3 right-2 md:right-3 p-1.5 md:p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10">
+                  <Download className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                 </button>
 
                 {/* Actual video player */}
@@ -243,17 +243,17 @@ const ViralClipsDashboard: React.FC = () => {
                 />
 
                 {/* Duration badge */}
-                <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium z-10">
+                <div className="absolute bottom-2 md:bottom-3 left-2 md:left-3 px-1.5 md:px-2 py-0.5 md:py-1 bg-black/70 rounded text-[10px] md:text-xs text-white font-medium z-10">
                   {clip.duration}
                 </div>
               </div>
 
               {/* Clip Info */}
-              <h3 className="text-white text-sm font-medium line-clamp-2 mb-1.5">
+              <h3 className="text-white text-xs md:text-sm font-medium line-clamp-2 mb-1 md:mb-1.5">
                 {clip.title}
               </h3>
-              <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                <Clock className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1 md:gap-1.5 text-slate-400 text-[10px] md:text-xs">
+                <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 <span>{clip.startTime} - {clip.endTime}</span>
               </div>
             </div>
@@ -264,16 +264,16 @@ const ViralClipsDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-6 md:space-y-8 pb-8">
       {/* Video Source Selection */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2 bg-slate-800/50">
-          <TabsTrigger value="upload" className="data-[state=active]:bg-[#b616d6]">
-            <Upload className="w-4 h-4 mr-2" />
+          <TabsTrigger value="upload" className="data-[state=active]:bg-[#b616d6] text-xs md:text-sm">
+            <Upload className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2" />
             Upload Video
           </TabsTrigger>
-          <TabsTrigger value="youtube" className="data-[state=active]:bg-[#b616d6]">
-            <Youtube className="w-4 h-4 mr-2" />
+          <TabsTrigger value="youtube" className="data-[state=active]:bg-[#b616d6] text-xs md:text-sm">
+            <Youtube className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2" />
             YouTube Link
           </TabsTrigger>
         </TabsList>
