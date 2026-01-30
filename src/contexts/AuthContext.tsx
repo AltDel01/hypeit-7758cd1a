@@ -1,10 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
+import { sendNotificationEmail } from '@/services/generationRequestService';
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -79,6 +78,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       if (error) throw error;
+      
+      // Send signup notification email (fire and forget)
+      sendNotificationEmail({
+        type: 'signup',
+        userName: name || email.split('@')[0],
+        userEmail: email,
+        timestamp: new Date().toISOString(),
+      }).catch(console.error);
+      
       toast.success('Account created successfully!');
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');

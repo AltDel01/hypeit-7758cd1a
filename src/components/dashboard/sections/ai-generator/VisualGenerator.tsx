@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import demoResult from '@/assets/barbeque-bliss-result.jpg';
 import AspectRatioSelector from './AspectRatioSelector';
+import { createGenerationRequest } from '@/services/generationRequestService';
 
 // AI API is handled securely via Edge Functions - no client-side keys needed
 
@@ -78,6 +79,14 @@ const VisualGenerator = () => {
     setIsGenerating(true);
     setGeneratedImage(null);
     try {
+      // Log the generation request to database
+      createGenerationRequest({
+        requestType: 'image',
+        prompt: enhancedPrompt || prompt,
+        aspectRatio: aspectRatio,
+        referenceImageUrl: uploadedImage || undefined,
+      }).catch(console.error);
+
       await new Promise(resolve => setTimeout(resolve, 3000));
       setGeneratedImage(demoResult);
       

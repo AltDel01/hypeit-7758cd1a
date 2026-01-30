@@ -159,6 +159,54 @@ export type Database = {
           },
         ]
       }
+      generation_requests: {
+        Row: {
+          aspect_ratio: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          prompt: string
+          reference_image_url: string | null
+          request_type: string
+          result_url: string | null
+          status: string | null
+          updated_at: string | null
+          user_email: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          aspect_ratio?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          prompt: string
+          reference_image_url?: string | null
+          request_type: string
+          result_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_email: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          aspect_ratio?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          prompt?: string
+          reference_image_url?: string | null
+          request_type?: string
+          result_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_email?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string | null

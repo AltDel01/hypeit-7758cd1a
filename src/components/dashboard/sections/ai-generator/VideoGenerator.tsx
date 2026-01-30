@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AspectRatioSelector from './AspectRatioSelector';
-
+import { createGenerationRequest } from '@/services/generationRequestService';
 const VideoGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [enhancedPrompt, setEnhancedPrompt] = useState('');
@@ -162,6 +162,14 @@ const VideoGenerator = () => {
     }
 
     try {
+      // Log the generation request to database
+      createGenerationRequest({
+        requestType: 'video',
+        prompt: finalPrompt,
+        aspectRatio: aspectRatio,
+        referenceImageUrl: uploadedImage || undefined,
+      }).catch(console.error);
+
       // Convert image to base64 only if image exists
       let imageBase64: string | undefined = undefined;
       let imageName: string | undefined = undefined;

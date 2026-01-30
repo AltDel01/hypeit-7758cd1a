@@ -1,14 +1,13 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, CheckCircle, Clock } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
-import type { ImageRequest } from '@/services/requests';
+import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestDetailsProps {
-  request: ImageRequest;
+  request: GenerationRequest;
   isUploading: boolean;
   uploadProgress: number;
   resultImage: File | null;
@@ -36,13 +35,19 @@ export const RequestDetails = ({
       <h2 className="text-xl font-bold mb-2 text-white">Request Details</h2>
       <div className="mb-4">
         <StatusBadge status={request.status} />
-        <p className="mt-2 text-sm text-gray-400">Last updated: {formatDate(request.updatedAt)}</p>
+        <p className="mt-2 text-sm text-gray-400">Last updated: {formatDate(request.updated_at)}</p>
       </div>
       
       <div className="space-y-4">
         <div>
           <h3 className="text-sm font-medium text-gray-400">User</h3>
-          <p className="text-white">{request.userName}</p>
+          <p className="text-white">{request.user_name || request.user_email}</p>
+          <p className="text-xs text-gray-500">{request.user_email}</p>
+        </div>
+        
+        <div>
+          <h3 className="text-sm font-medium text-gray-400">Type</h3>
+          <p className="text-white capitalize">{request.request_type}</p>
         </div>
         
         <div>
@@ -52,15 +57,15 @@ export const RequestDetails = ({
         
         <div>
           <h3 className="text-sm font-medium text-gray-400">Aspect Ratio</h3>
-          <p className="text-white">{request.aspectRatio}</p>
+          <p className="text-white">{request.aspect_ratio || '-'}</p>
         </div>
         
-        {request.productImage && (
+        {request.reference_image_url && (
           <div>
             <h3 className="text-sm font-medium text-gray-400">Reference Image</h3>
             <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
               <img 
-                src={request.productImage} 
+                src={request.reference_image_url} 
                 alt="Reference" 
                 className="w-full h-full object-contain"
               />
@@ -114,17 +119,21 @@ export const RequestDetails = ({
           </div>
         ) : (
           <div>
-            <h3 className="text-sm font-medium text-gray-400">Result Image</h3>
-            <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
-              <img 
-                src={request.resultImage || ''} 
-                alt="Result" 
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <h3 className="text-sm font-medium text-gray-400">Result</h3>
+            {request.result_url ? (
+              <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
+                <img 
+                  src={request.result_url} 
+                  alt="Result" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">No result uploaded</p>
+            )}
             <p className="text-xs text-green-500 mt-1 flex items-center">
               <CheckCircle className="h-3 w-3 mr-1" />
-              Completed
+              Completed {request.completed_at && `at ${formatDate(request.completed_at)}`}
             </p>
           </div>
         )}
