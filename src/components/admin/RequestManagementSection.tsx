@@ -1,4 +1,3 @@
-
 import React, { useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -8,6 +7,7 @@ import { RequestDetails } from '@/components/admin/RequestDetails';
 import { useRequestManagement } from '@/hooks/useRequestManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { toast } from 'sonner';
+import type { GenerationRequest } from '@/services/generationRequestService';
 
 export const RequestManagementSection = () => {
   const {
@@ -22,7 +22,6 @@ export const RequestManagementSection = () => {
   const { isUploading, uploadProgress, handleUploadResult } = useImageUpload({
     selectedRequest,
     onRequestUpdated: () => {
-      // Force a refresh of the requests list after upload
       handleRefresh();
     }
   });

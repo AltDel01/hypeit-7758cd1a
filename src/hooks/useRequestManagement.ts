@@ -1,126 +1,56 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { ImageRequest, RequestStatus } from '@/services/requests';
-import { imageRequestService } from '@/services/requests';
+import { 
+  GenerationRequest, 
+  fetchAllGenerationRequests, 
+  updateGenerationRequestStatus 
+} from '@/services/generationRequestService';
+
+export type RequestStatus = 'new' | 'in-progress' | 'completed' | 'failed';
 
 export const useRequestManagement = () => {
-  const [requests, setRequests] = useState<ImageRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<ImageRequest | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [requests, setRequests] = useState<GenerationRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
 
-  // Create a memoized version of loadRequests to avoid recreating the function on each render
-  const loadRequests = useCallback(() => {
-    const allRequests = imageRequestService.getAllRequests();
-    console.log('Loaded requests from service:', allRequests);
+  const loadRequests = useCallback(async () => {
+    const allRequests = await fetchAllGenerationRequests();
+    console.log('Loaded requests from Supabase:', allRequests);
     setRequests(allRequests);
-    setDebugInfo(`Total requests: ${allRequests.length}, Storage key: ${imageRequestService.getStorageKey()}`);
   }, []);
 
-  // Add useEffect to listen for image request events
   useEffect(() => {
-    const handleRequestCreated = (event: CustomEvent) => {
-      console.log('Request created event received:', event.detail);
-      loadRequests();
-      toast.success(`New request created: ${event.detail.request.id}`);
-    };
-
-    const handleRequestUpdated = (event: CustomEvent) => {
-      console.log('Request updated event received:', event.detail);
-      loadRequests();
-      
-      // Update selected request if it was the one that changed
-      if (selectedRequest && event.detail.request && selectedRequest.id === event.detail.request.id) {
-        setSelectedRequest(event.detail.request);
-      }
-    };
-
-    const handleRequestCompleted = (event: CustomEvent) => {
-      console.log('Request completed event received:', event.detail);
-      loadRequests();
-      toast.success(`Request ${event.detail.request.id} completed`);
-      
-      // Update selected request if it was the one that changed
-      if (selectedRequest && event.detail.request && selectedRequest.id === event.detail.request.id) {
-        setSelectedRequest(event.detail.request);
-      }
-    };
-    
-    const handleRequestsUpdated = (event: CustomEvent) => {
-      console.log('Requests updated event received:', event.detail);
-      if (event.detail.requests) {
-        setRequests(event.detail.requests);
-      }
-    };
-    
-    // Setup broadcast channel for direct tab-to-tab communication
-    let broadcastChannel: BroadcastChannel | null = null;
-    try {
-      if ('BroadcastChannel' in window) {
-        broadcastChannel = new BroadcastChannel('image_requests_channel');
-        broadcastChannel.onmessage = (event) => {
-          console.log('BroadcastChannel message received in useRequestManagement:', event.data);
-          loadRequests();
-          
-          // If it's an update to the currently selected request, update that as well
-          if (selectedRequest && event.data.detail?.request && event.data.detail.request.id === selectedRequest.id) {
-            setSelectedRequest(event.data.detail.request);
-          }
-        };
-      }
-    } catch (error) {
-      console.warn('BroadcastChannel not supported:', error);
-    }
-
-    // Initial load
     loadRequests();
-    
-    // Set up event listeners
-    window.addEventListener('imageRequestCreated', handleRequestCreated as EventListener);
-    window.addEventListener('imageRequestUpdated', handleRequestUpdated as EventListener);
-    window.addEventListener('imageRequestCompleted', handleRequestCompleted as EventListener);
-    window.addEventListener('imageRequestsUpdated', handleRequestsUpdated as EventListener);
-    
-    return () => {
-      window.removeEventListener('imageRequestCreated', handleRequestCreated as EventListener);
-      window.removeEventListener('imageRequestUpdated', handleRequestUpdated as EventListener);
-      window.removeEventListener('imageRequestCompleted', handleRequestCompleted as EventListener);
-      window.removeEventListener('imageRequestsUpdated', handleRequestsUpdated as EventListener);
-      
-      if (broadcastChannel) {
-        broadcastChannel.close();
-      }
-    };
-  }, [loadRequests, selectedRequest]);
+  }, [loadRequests]);
 
-  const handleRefresh = useCallback(() => {
-    const reloaded = imageRequestService.forceReload();
-    setRequests(reloaded);
+  const handleRefresh = useCallback(async () => {
+    await loadRequests();
     toast.info("Request list refreshed");
-    setDebugInfo(`Force reloaded: ${reloaded.length} requests found`);
-  }, []);
+  }, [loadRequests]);
 
-  const handleUpdateStatus = useCallback((id: string, status: RequestStatus) => {
-    const updatedRequest = imageRequestService.updateRequestStatus(id, status);
+  const handleUpdateStatus = useCallback(async (id: string, status: RequestStatus, resultUrl?: string) => {
+    const success = await updateGenerationRequestStatus(id, status, resultUrl);
     
-    if (updatedRequest) {
-      loadRequests();
-      toast.success(`Request ${id} marked as ${status}`);
+    if (success) {
+      await loadRequests();
+      toast.success(`Request marked as ${status}`);
       
+      // Update selected request if it was the one that changed
       if (selectedRequest?.id === id) {
-        setSelectedRequest(updatedRequest);
+        const updatedRequest = requests.find(r => r.id === id);
+        if (updatedRequest) {
+          setSelectedRequest({ ...updatedRequest, status, result_url: resultUrl || updatedRequest.result_url });
+        }
       }
     } else {
-      toast.error(`Failed to update request ${id}`);
+      toast.error(`Failed to update request`);
     }
-  }, [loadRequests, selectedRequest]);
+  }, [loadRequests, selectedRequest, requests]);
 
   return {
     requests,
     setRequests,
     selectedRequest,
     setSelectedRequest,
-    debugInfo,
-    setDebugInfo,
     loadRequests,
     handleRefresh,
     handleUpdateStatus

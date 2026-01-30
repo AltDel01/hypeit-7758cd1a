@@ -1,11 +1,11 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
-import type { ImageRequest } from '@/services/requests';
-import { imageRequestService } from '@/services/requests';
+import type { GenerationRequest } from '@/services/generationRequestService';
+import { updateGenerationRequestStatus } from '@/services/generationRequestService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseImageUploadProps {
-  selectedRequest: ImageRequest | null;
+  selectedRequest: GenerationRequest | null;
   onRequestUpdated: () => void;
 }
 
@@ -29,13 +29,32 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
     }, 400);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Upload image to Supabase Storage
+      const fileExt = resultImage.name.split('.').pop();
+      const fileName = `${selectedRequest.id}-${Date.now()}.${fileExt}`;
+      const filePath = `results/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('Generated Images')
+        .upload(filePath, resultImage);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('Generated Images')
+        .getPublicUrl(filePath);
+
+      // Update request with result URL and mark as completed
+      const success = await updateGenerationRequestStatus(
+        selectedRequest.id,
+        'completed',
+        publicUrl
+      );
       
-      const imageUrl = URL.createObjectURL(resultImage);
-      
-      const updatedRequest = imageRequestService.uploadResult(selectedRequest.id, imageUrl);
-      
-      if (updatedRequest) {
+      if (success) {
         onRequestUpdated();
         clearInterval(interval);
         setUploadProgress(100);
@@ -44,9 +63,9 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
         
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
-            imageUrl,
+            imageUrl: publicUrl,
             prompt: selectedRequest.prompt,
-            aspectRatio: selectedRequest.aspectRatio,
+            aspectRatio: selectedRequest.aspect_ratio,
             requestId: selectedRequest.id
           }
         });
@@ -57,6 +76,7 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
       }
       
     } catch (error) {
+      console.error("Upload error:", error);
       toast.error("Failed to upload image");
       clearInterval(interval);
     } finally {

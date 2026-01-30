@@ -1,14 +1,13 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from './StatusBadge';
-import type { ImageRequest } from '@/services/requests';
+import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestListProps {
-  requests: ImageRequest[];
-  selectedRequest: ImageRequest | null;
-  onSelectRequest: (request: ImageRequest) => void;
+  requests: GenerationRequest[];
+  selectedRequest: GenerationRequest | null;
+  onSelectRequest: (request: GenerationRequest) => void;
   onUpdateStatus: (id: string, status: 'in-progress') => void;
 }
 
@@ -28,7 +27,7 @@ export const RequestList = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>User</TableHead>
             <TableHead>Prompt</TableHead>
             <TableHead>Aspect Ratio</TableHead>
@@ -51,12 +50,12 @@ export const RequestList = ({
                 className={`cursor-pointer ${selectedRequest?.id === request.id ? 'bg-gray-800/50' : ''}`}
                 onClick={() => onSelectRequest(request)}
               >
-                <TableCell>{request.id}</TableCell>
-                <TableCell>{request.userName}</TableCell>
+                <TableCell className="capitalize">{request.request_type}</TableCell>
+                <TableCell>{request.user_name || request.user_email}</TableCell>
                 <TableCell className="max-w-xs truncate">{request.prompt}</TableCell>
-                <TableCell>{request.aspectRatio}</TableCell>
+                <TableCell>{request.aspect_ratio || '-'}</TableCell>
                 <TableCell><StatusBadge status={request.status} /></TableCell>
-                <TableCell>{formatDate(request.createdAt)}</TableCell>
+                <TableCell>{formatDate(request.created_at)}</TableCell>
                 <TableCell>
                   <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
                     {request.status === 'new' && (
