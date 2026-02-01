@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
     let htmlContent: string;
 
     if (payload.type === "signup") {
-      subject = "🎉 New User Signup - HypeIt";
+      subject = "🎉 New User Signup - Viralin AI";
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #7c3aed;">New User Signup</h1>
@@ -52,12 +52,12 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>Email:</strong> ${payload.userEmail}</p>
             <p><strong>Signup Time:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
           </div>
-          <p style="color: #6b7280; margin-top: 20px;">This notification was sent from HypeIt.</p>
+          <p style="color: #6b7280; margin-top: 20px;">This notification was sent from Viralin AI.</p>
         </div>
       `;
     } else if (payload.type === "generation_request") {
       const requestTypeEmoji = payload.requestType === "video" ? "🎬" : "🖼️";
-      subject = `${requestTypeEmoji} New ${payload.requestType.charAt(0).toUpperCase() + payload.requestType.slice(1)} Generation Request - HypeIt`;
+      subject = `${requestTypeEmoji} New ${payload.requestType.charAt(0).toUpperCase() + payload.requestType.slice(1)} Generation Request - Viralin AI`;
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #7c3aed;">New Generation Request</h1>
@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "HypeIt <noreply@viralin.ai>",
+      from: "Viralin AI <noreply@viralin.ai>",
       to: [ADMIN_EMAIL],
       subject,
       html: htmlContent,
