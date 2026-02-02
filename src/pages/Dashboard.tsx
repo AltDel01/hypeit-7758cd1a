@@ -1,39 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calendar, Wand2, BarChart3, Video, Palette, Clapperboard, ChevronDown, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Menu, X, History } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import ContentPlanner from '@/components/dashboard/sections/ContentPlanner';
-import AIContentGenerator from '@/components/dashboard/sections/AIContentGenerator';
-import AIVideoEditor from '@/components/dashboard/sections/AIVideoEditor';
-import AnalyticsInsights from '@/components/dashboard/sections/AnalyticsInsights';
-import AIHostLiveStream from '@/components/dashboard/sections/AIHostLiveStream';
-import GenerateBrandIdentity from '@/components/dashboard/sections/GenerateBrandIdentity';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
+import SimplifiedDashboard from '@/components/dashboard/SimplifiedDashboard';
+import GenerationHistory from '@/components/dashboard/GenerationHistory';
+import RequestDetailView from '@/components/dashboard/RequestDetailView';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { useGenerationRequests } from '@/hooks/useGenerationRequests';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-
-const menuItems = [
-  { id: 'planner', label: 'Content Planner', icon: Calendar },
-  { id: 'generator', label: 'AI Content Generator', icon: Wand2 },
-  { id: 'videoeditor', label: 'AI Video Editor', icon: Clapperboard },
-  { id: 'analytics', label: 'Analytics & Insights', icon: BarChart3 },
-  { id: 'livestream', label: 'AI Host Live Stream', icon: Video },
-  { id: 'brandidentity', label: 'Generate Brand Identity', icon: Palette },
-];
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { GenerationRequest } from '@/services/generationRequestService';
 
 const Dashboard = () => {
-  const [activeSection, setActiveSection] = useState('planner');
-  const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  
+  const { requests, isLoading, refresh } = useGenerationRequests(user?.id);
 
   // Redirect if not authenticated
   React.useEffect(() => {
@@ -42,97 +28,119 @@ const Dashboard = () => {
     }
   }, [user, navigate]);
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'planner':
-        return <ContentPlanner />;
-      case 'generator':
-        return <AIContentGenerator />;
-      case 'videoeditor':
-        return <AIVideoEditor />;
-      case 'analytics':
-        return <AnalyticsInsights />;
-      case 'livestream':
-        return <AIHostLiveStream />;
-      case 'brandidentity':
-        return <GenerateBrandIdentity />;
-      default:
-        return <ContentPlanner />;
+  const handleSelectRequest = (request: GenerationRequest) => {
+    setSelectedRequest(request);
+    if (isMobile) {
+      setHistoryOpen(false);
     }
   };
 
-  const activeItem = menuItems.find(item => item.id === activeSection);
+  const handleRequestCreated = () => {
+    refresh();
+    setSelectedRequest(null);
+  };
 
   if (!user) return null;
+
+  const HistoryPanel = (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-border">
+        <h2 className="font-semibold text-foreground">History</h2>
+        <p className="text-xs text-muted-foreground mt-1">
+          {requests.length} generation{requests.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <GenerationHistory
+          requests={requests}
+          selectedId={selectedRequest?.id || null}
+          onSelect={handleSelectRequest}
+          isLoading={isLoading}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <AuroraBackground>
       <div className="flex min-h-screen w-full">
-        <SidebarProvider defaultOpen={!isMobile}>
-          {/* Desktop Sidebar */}
-          {!isMobile && (
-            <DashboardSidebar 
-              activeSection={activeSection}
-              setActiveSection={setActiveSection}
-            />
-          )}
-          
-          <main className="flex-1 overflow-auto">
-            {/* Mobile Header with Dropdown */}
-            {isMobile && (
-              <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="flex items-center gap-3">
-                  <Link to="/" className="text-gray-300 hover:text-white transition-colors">
-                    <ArrowLeft size={20} />
-                  </Link>
-                  <Link to="/" className="flex items-center">
-                    <img 
-                      src="/lovable-uploads/viralin-logo.png" 
-                      alt="Viralin Logo" 
-                      className="h-7 w-auto"
-                    />
-                  </Link>
-                </div>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2 bg-slate-800/50 border-slate-600 hover:bg-slate-700/50"
-                    >
-                      {activeItem && <activeItem.icon className="w-4 h-4" />}
-                      <span className="max-w-[120px] truncate">{activeItem?.label}</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    align="end" 
-                    className="w-56 bg-slate-800 border-slate-700"
-                  >
-                    {menuItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id)}
-                        className={`flex items-center gap-3 cursor-pointer ${
-                          activeSection === item.id 
-                            ? 'bg-purple-600/30 text-purple-300' 
-                            : 'hover:bg-slate-700'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-            
-            <div className="container mx-auto px-4 py-6 md:px-6 md:py-8">
-              {renderContent()}
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <aside className="w-72 border-r border-border bg-card/30 backdrop-blur-sm">
+            {/* Logo Header */}
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft size={20} />
+              </Link>
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/viralin-logo.png" 
+                  alt="Viralin Logo" 
+                  className="h-7 w-auto"
+                />
+              </Link>
             </div>
-          </main>
-        </SidebarProvider>
+            {HistoryPanel}
+          </aside>
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          {/* Mobile Header */}
+          {isMobile && (
+            <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="flex items-center gap-3">
+                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft size={20} />
+                </Link>
+                <Link to="/" className="flex items-center">
+                  <img 
+                    src="/lovable-uploads/viralin-logo.png" 
+                    alt="Viralin Logo" 
+                    className="h-7 w-auto"
+                  />
+                </Link>
+              </div>
+              
+              {/* History Sheet Trigger */}
+              <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="relative">
+                    <History className="h-5 w-5" />
+                    {requests.length > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
+                        {requests.length > 9 ? '9+' : requests.length}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-0">
+                  {HistoryPanel}
+                </SheetContent>
+              </Sheet>
+            </header>
+          )}
+
+          {/* Content Area */}
+          <div className="container mx-auto px-4 py-6 md:px-6 md:py-8 space-y-6">
+            {/* Show selected request detail or prompt interface */}
+            {selectedRequest ? (
+              <div className="space-y-4">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setSelectedRequest(null)}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Create
+                </Button>
+                <RequestDetailView request={selectedRequest} />
+              </div>
+            ) : (
+              <SimplifiedDashboard onRequestCreated={handleRequestCreated} />
+            )}
+          </div>
+        </main>
       </div>
     </AuroraBackground>
   );
