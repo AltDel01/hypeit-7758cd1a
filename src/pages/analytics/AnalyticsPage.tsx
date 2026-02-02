@@ -199,7 +199,7 @@ const ContentPerformance = () => {
       <div className="rounded-md border border-gray-700 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm mb-6">
         <h2 className="text-xl font-semibold text-white mb-4">Generated Content Analytics</h2>
         <p className="text-gray-400 mb-6">
-          This feature will show performance metrics for all content generated through HYPEIT.
+          This feature will show performance metrics for all content generated through Viralin AI.
         </p>
         
         <div className="text-center py-8">
