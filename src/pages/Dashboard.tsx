@@ -18,6 +18,7 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { requests, isLoading, refresh } = useGenerationRequests(user?.id);
 
@@ -64,23 +65,44 @@ const Dashboard = () => {
   return (
     <AuroraBackground>
       <div className="flex min-h-screen w-full">
-        {/* Desktop Sidebar */}
+        {/* Desktop Sidebar - Collapsible */}
         {!isMobile && (
-          <aside className="w-72 border-r border-border bg-card/30 backdrop-blur-sm">
-            {/* Logo Header */}
+          <aside className={`border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-14'}`}>
+            {/* Header with toggle */}
             <div className="p-4 border-b border-border flex items-center gap-3">
-              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                <ArrowLeft size={20} />
-              </Link>
-              <Link to="/" className="flex items-center">
-                <img 
-                  src="/lovable-uploads/viralin-logo.png" 
-                  alt="Viralin Logo" 
-                  className="h-7 w-auto"
-                />
-              </Link>
+              {sidebarOpen ? (
+                <>
+                  <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                    <ArrowLeft size={20} />
+                  </Link>
+                  <Link to="/" className="flex items-center flex-1">
+                    <img 
+                      src="/lovable-uploads/viralin-logo.png" 
+                      alt="Viralin Logo" 
+                      className="h-7 w-auto"
+                    />
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setSidebarOpen(false)}
+                    className="h-8 w-8"
+                  >
+                    <X size={18} />
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setSidebarOpen(true)}
+                  className="h-8 w-8 mx-auto"
+                >
+                  <Menu size={20} />
+                </Button>
+              )}
             </div>
-            {HistoryPanel}
+            {sidebarOpen && HistoryPanel}
           </aside>
         )}
 
