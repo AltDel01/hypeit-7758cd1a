@@ -1,5 +1,11 @@
 const EDITOR_STATE_KEY = 'viralin_editor_state';
 
+export interface UploadedFile {
+  name: string;
+  url: string;
+  type: 'video' | 'audio';
+}
+
 export interface EditorState {
   prompt: string;
   selectedFeatures: string[];
@@ -9,6 +15,8 @@ export interface EditorState {
   selectedFrames: string;
   startTimestamp: string;
   endTimestamp: string;
+  uploadedFiles: UploadedFile[];
+  autoSubmit?: boolean;
 }
 
 export const saveEditorState = (state: EditorState): void => {

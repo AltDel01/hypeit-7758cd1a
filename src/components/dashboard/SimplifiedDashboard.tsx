@@ -88,12 +88,20 @@ const examplePrompts = [
   'Generate viral short from this video',
 ];
 
+interface UploadedFileDisplay {
+  name: string;
+  url: string;
+  type: 'video' | 'audio';
+}
+
 const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
+  const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFileDisplay[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shouldAutoSubmit, setShouldAutoSubmit] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
@@ -116,10 +124,29 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setSelectedFrames(savedState.selectedFrames);
       setStartTimestamp(savedState.startTimestamp);
       setEndTimestamp(savedState.endTimestamp);
+      
+      // Load uploaded files
+      if (savedState.uploadedFiles && savedState.uploadedFiles.length > 0) {
+        setUploadedFileUrls(savedState.uploadedFiles);
+      }
+      
+      // Set auto-submit flag if needed
+      if (savedState.autoSubmit) {
+        setShouldAutoSubmit(true);
+      }
+      
       // Clear the saved state after loading
       clearEditorState();
     }
   }, []);
+
+  // Auto-submit when coming from homepage with autoSubmit flag
+  useEffect(() => {
+    if (shouldAutoSubmit && (prompt.trim() || uploadedFileUrls.length > 0)) {
+      setShouldAutoSubmit(false);
+      handleSubmitInternal();
+    }
+  }, [shouldAutoSubmit, prompt, uploadedFileUrls]);
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
@@ -177,12 +204,16 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     setUploadedAudio(prev => prev.filter((_, i) => i !== index));
   };
 
+  const removeUploadedFileUrl = (index: number) => {
+    setUploadedFileUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleExampleClick = (example: string) => {
     setPrompt(example);
   };
 
-  const handleSubmit = async () => {
-    if (!prompt.trim() && uploadedVideos.length === 0) {
+  const handleSubmitInternal = async () => {
+    if (!prompt.trim() && uploadedVideos.length === 0 && uploadedFileUrls.length === 0) {
       toast.error('Please enter a prompt or upload media');
       return;
     }
@@ -203,9 +234,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       // Add settings to prompt
       fullPrompt += ` | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration} | Timeline: ${startTimestamp}-${endTimestamp}`;
 
+      // Get reference URL from uploaded files
+      const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
+      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+
       const result = await createGenerationRequest({
         requestType: 'video',
         prompt: fullPrompt,
+        referenceImageUrl: referenceUrl,
       });
 
       if (result) {
@@ -214,6 +250,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setSelectedFeatures([]);
         setUploadedVideos([]);
         setUploadedAudio([]);
+        setUploadedFileUrls([]);
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
@@ -281,7 +318,28 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
         {/* Prompt Box */}
         <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
-          {/* Video Preview */}
+          {/* Video Preview from URLs (from homepage) */}
+          {uploadedFileUrls.filter(f => f.type === 'video').length > 0 && (
+            <div className="mb-3 md:mb-4">
+              {uploadedFileUrls.filter(f => f.type === 'video').map((file, index) => (
+                <div key={`url-video-${index}`} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
+                  <video 
+                    src={file.url}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
+                  <button 
+                    onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f => f.url === file.url))}
+                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Video Preview from local files */}
           {uploadedVideos.length > 0 && (
             <div className="mb-3 md:mb-4">
               {uploadedVideos.map((file, index) => (
@@ -302,7 +360,28 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             </div>
           )}
 
-          {/* Audio Files Tags */}
+          {/* Audio Files Tags from URLs (from homepage) */}
+          {uploadedFileUrls.filter(f => f.type === 'audio').length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
+              {uploadedFileUrls.filter(f => f.type === 'audio').map((file, index) => (
+                <div 
+                  key={`url-audio-${index}`}
+                  className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm"
+                >
+                  <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
+                  <span className="text-gray-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
+                  <button 
+                    onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f => f.url === file.url))}
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Audio Files Tags from local files */}
           {uploadedAudio.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
               {uploadedAudio.map((file, index) => (
@@ -549,7 +628,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
             {/* Generate Button */}
             <Button
-              onClick={handleSubmit}
+              onClick={handleSubmitInternal}
               disabled={isSubmitting}
               className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-xs md:text-sm flex-shrink-0"
             >
