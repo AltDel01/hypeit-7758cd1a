@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Smartphone, 
@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
 import { supabase } from '@/integrations/supabase/client';
+import { loadEditorState, clearEditorState } from '@/hooks/useEditorState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,6 +103,23 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [selectedDuration, setSelectedDuration] = useState('15s');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:15');
+
+  // Load editor state from homepage on mount
+  useEffect(() => {
+    const savedState = loadEditorState();
+    if (savedState) {
+      setPrompt(savedState.prompt);
+      setSelectedFeatures(savedState.selectedFeatures);
+      setSelectedAspectRatio(savedState.selectedAspectRatio);
+      setSelectedResolution(savedState.selectedResolution);
+      setSelectedDuration(savedState.selectedDuration);
+      setSelectedFrames(savedState.selectedFrames);
+      setStartTimestamp(savedState.startTimestamp);
+      setEndTimestamp(savedState.endTimestamp);
+      // Clear the saved state after loading
+      clearEditorState();
+    }
+  }, []);
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
