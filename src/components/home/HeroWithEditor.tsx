@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, 
   Smartphone, 
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { saveEditorState } from '@/hooks/useEditorState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,6 +84,7 @@ const examplePrompts = [
 ];
 
 const HeroWithEditor: React.FC = () => {
+  const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
@@ -132,18 +135,20 @@ const HeroWithEditor: React.FC = () => {
   };
 
   const handleCreate = () => {
-    if (!prompt.trim() && uploadedVideos.length === 0) {
-      toast.error('Please enter a prompt or upload media');
-      return;
-    }
+    // Save current editor state to localStorage
+    saveEditorState({
+      prompt,
+      selectedFeatures,
+      selectedAspectRatio,
+      selectedResolution,
+      selectedDuration,
+      selectedFrames,
+      startTimestamp,
+      endTimestamp,
+    });
     
-    setIsProcessing(true);
-    toast.loading('Processing your video...', { id: 'processing' });
-    
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast.success('Video created successfully!', { id: 'processing' });
-    }, 2000);
+    // Navigate to dashboard
+    navigate('/dashboard');
   };
 
   const handleExampleClick = (example: string) => {
