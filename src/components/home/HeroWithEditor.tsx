@@ -17,13 +17,15 @@ import {
   ChevronDown,
   Timer,
   MessageCircleOff,
-  Languages
+  Languages,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { saveEditorState } from '@/hooks/useEditorState';
+import { saveEditorState, UploadedFile } from '@/hooks/useEditorState';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,21 +136,92 @@ const HeroWithEditor: React.FC = () => {
     setUploadedAudio(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleCreate = () => {
-    // Save current editor state to localStorage
-    saveEditorState({
-      prompt,
-      selectedFeatures,
-      selectedAspectRatio,
-      selectedResolution,
-      selectedDuration,
-      selectedFrames,
-      startTimestamp,
-      endTimestamp,
-    });
-    
-    // Navigate to dashboard
-    navigate('/dashboard');
+  const handleCreate = async () => {
+    if (!prompt.trim() && uploadedVideos.length === 0 && uploadedAudio.length === 0) {
+      toast.error('Please enter a prompt or upload media');
+      return;
+    }
+
+    setIsProcessing(true);
+    toast.loading('Preparing your request...', { id: 'uploading' });
+
+    try {
+      // Get user for upload path
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const uploadedFiles: UploadedFile[] = [];
+
+      // Upload videos to storage
+      for (const file of uploadedVideos) {
+        if (user) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}-${file.name}`;
+          
+          const { error } = await supabase.storage
+            .from('Product Images')
+            .upload(fileName, file);
+
+          if (!error) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('Product Images')
+              .getPublicUrl(fileName);
+            
+            uploadedFiles.push({
+              name: file.name,
+              url: publicUrl,
+              type: 'video'
+            });
+          }
+        }
+      }
+
+      // Upload audio to storage
+      for (const file of uploadedAudio) {
+        if (user) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}-${file.name}`;
+          
+          const { error } = await supabase.storage
+            .from('Product Images')
+            .upload(fileName, file);
+
+          if (!error) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('Product Images')
+              .getPublicUrl(fileName);
+            
+            uploadedFiles.push({
+              name: file.name,
+              url: publicUrl,
+              type: 'audio'
+            });
+          }
+        }
+      }
+
+      // Save current editor state to localStorage
+      saveEditorState({
+        prompt,
+        selectedFeatures,
+        selectedAspectRatio,
+        selectedResolution,
+        selectedDuration,
+        selectedFrames,
+        startTimestamp,
+        endTimestamp,
+        uploadedFiles,
+        autoSubmit: true,
+      });
+
+      toast.dismiss('uploading');
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to prepare request. Please try again.', { id: 'uploading' });
+      setIsProcessing(false);
+    }
   };
 
   const handleExampleClick = (example: string) => {
@@ -485,8 +558,8 @@ const HeroWithEditor: React.FC = () => {
               >
                 {isProcessing ? (
                   <div className="flex items-center justify-center gap-1.5">
-                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span className="hidden sm:inline">Processing...</span>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Uploading...</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-1.5">
