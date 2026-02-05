@@ -270,21 +270,6 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
-      {/* Auto-processing overlay */}
-      {(isAutoProcessing || isSubmitting) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 text-center p-8">
-            <Loader2 className="w-12 h-12 animate-spin text-primary" />
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-foreground">Processing your request...</h3>
-              <p className="text-muted-foreground max-w-sm">
-                Your content is being prepared. This will only take a moment.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="w-full max-w-4xl space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -428,8 +413,16 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe what you want to create, generate, or edit..."
             className="min-h-[80px] md:min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isAutoProcessing}
           />
+
+          {/* Inline Processing Indicator */}
+          {(isAutoProcessing || isSubmitting) && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-primary/10 border border-primary/30 rounded-lg">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="text-sm text-primary">Processing your request...</span>
+            </div>
+          )}
 
           {/* Example Prompts - Scrollable on mobile */}
           <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 mt-2 mb-3 md:mb-4">
