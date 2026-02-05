@@ -16,7 +16,8 @@ import {
   ChevronDown,
   Timer,
   MessageCircleOff,
-  Languages
+  Languages,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -97,6 +98,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shouldAutoSubmit, setShouldAutoSubmit] = useState(false);
   const [stateLoaded, setStateLoaded] = useState(false);
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
@@ -130,6 +132,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       // Set auto-submit flag if needed
       if (savedState.autoSubmit) {
         setShouldAutoSubmit(true);
+        setIsAutoProcessing(true); // Show loading state immediately
       }
       
       // Clear the saved state after loading
@@ -143,11 +146,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     // Wait for state to be loaded and a brief delay to show the files first
     if (stateLoaded && shouldAutoSubmit && (prompt.trim() || uploadedFileUrls.length > 0)) {
       setShouldAutoSubmit(false);
-      // Small delay to let the UI render the files first
-      const timer = setTimeout(() => {
-        handleSubmitInternal();
-      }, 500);
-      return () => clearTimeout(timer);
+      // Submit immediately - the loading state is already showing
+      handleSubmitInternal();
     }
   }, [stateLoaded, shouldAutoSubmit, prompt, uploadedFileUrls]);
 
@@ -264,11 +264,27 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
+      setIsAutoProcessing(false);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
+      {/* Auto-processing overlay */}
+      {(isAutoProcessing || isSubmitting) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 text-center p-8">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-foreground">Processing your request...</h3>
+              <p className="text-muted-foreground max-w-sm">
+                Your content is being prepared. This will only take a moment.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="w-full max-w-4xl space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">

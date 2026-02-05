@@ -154,50 +154,63 @@ const HeroWithEditor: React.FC = () => {
       // Upload videos to storage
       for (const file of uploadedVideos) {
         if (user) {
-          const fileExt = file.name.split('.').pop();
           const fileName = `${user.id}/${Date.now()}-${file.name}`;
           
-          const { error } = await supabase.storage
+          const { data, error } = await supabase.storage
             .from('Product Images')
             .upload(fileName, file);
 
-          if (!error) {
+          if (error) {
+            console.error('Upload error:', error);
+            toast.error(`Failed to upload ${file.name}`);
+          } else {
             const { data: { publicUrl } } = supabase.storage
               .from('Product Images')
               .getPublicUrl(fileName);
             
+            console.log('Uploaded video, URL:', publicUrl);
             uploadedFiles.push({
               name: file.name,
               url: publicUrl,
               type: 'video'
             });
           }
+        } else {
+          // User needs to be logged in to upload files
+          console.log('User not logged in, cannot upload file');
         }
       }
 
       // Upload audio to storage
       for (const file of uploadedAudio) {
         if (user) {
-          const fileExt = file.name.split('.').pop();
           const fileName = `${user.id}/${Date.now()}-${file.name}`;
           
-          const { error } = await supabase.storage
+          const { data, error } = await supabase.storage
             .from('Product Images')
             .upload(fileName, file);
 
-          if (!error) {
+          if (error) {
+            console.error('Upload error:', error);
+            toast.error(`Failed to upload ${file.name}`);
+          } else {
             const { data: { publicUrl } } = supabase.storage
               .from('Product Images')
               .getPublicUrl(fileName);
             
+            console.log('Uploaded audio, URL:', publicUrl);
             uploadedFiles.push({
               name: file.name,
               url: publicUrl,
               type: 'audio'
             });
           }
+        } else {
+          console.log('User not logged in, cannot upload file');
         }
       }
+
+      console.log('Saving uploaded files to state:', uploadedFiles);
 
       // Save current editor state to localStorage
       saveEditorState({
