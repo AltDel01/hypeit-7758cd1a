@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
 import { supabase } from '@/integrations/supabase/client';
-import { loadEditorState, clearEditorState } from '@/hooks/useEditorState';
+import { loadEditorState, clearEditorState, UploadedFile } from '@/hooks/useEditorState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,20 +88,15 @@ const examplePrompts = [
   'Generate viral short from this video',
 ];
 
-interface UploadedFileDisplay {
-  name: string;
-  url: string;
-  type: 'video' | 'audio';
-}
-
 const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
-  const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFileDisplay[]>([]);
+  const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shouldAutoSubmit, setShouldAutoSubmit] = useState(false);
+  const [stateLoaded, setStateLoaded] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
@@ -115,6 +110,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   // Load editor state from homepage on mount
   useEffect(() => {
     const savedState = loadEditorState();
+    console.log('Loading editor state:', savedState);
     if (savedState) {
       setPrompt(savedState.prompt);
       setSelectedFeatures(savedState.selectedFeatures);
@@ -127,6 +123,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       
       // Load uploaded files
       if (savedState.uploadedFiles && savedState.uploadedFiles.length > 0) {
+        console.log('Loading uploaded files:', savedState.uploadedFiles);
         setUploadedFileUrls(savedState.uploadedFiles);
       }
       
@@ -138,15 +135,21 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       // Clear the saved state after loading
       clearEditorState();
     }
+    setStateLoaded(true);
   }, []);
 
   // Auto-submit when coming from homepage with autoSubmit flag
   useEffect(() => {
-    if (shouldAutoSubmit && (prompt.trim() || uploadedFileUrls.length > 0)) {
+    // Wait for state to be loaded and a brief delay to show the files first
+    if (stateLoaded && shouldAutoSubmit && (prompt.trim() || uploadedFileUrls.length > 0)) {
       setShouldAutoSubmit(false);
-      handleSubmitInternal();
+      // Small delay to let the UI render the files first
+      const timer = setTimeout(() => {
+        handleSubmitInternal();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [shouldAutoSubmit, prompt, uploadedFileUrls]);
+  }, [stateLoaded, shouldAutoSubmit, prompt, uploadedFileUrls]);
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
@@ -250,7 +253,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setSelectedFeatures([]);
         setUploadedVideos([]);
         setUploadedAudio([]);
-        setUploadedFileUrls([]);
+        // Keep uploaded file URLs visible for reference (don't clear them)
+        // setUploadedFileUrls([]);
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
