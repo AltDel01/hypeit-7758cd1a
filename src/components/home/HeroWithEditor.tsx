@@ -178,77 +178,63 @@ const HeroWithEditor: React.FC = () => {
       toast.error('Please enter a prompt or upload media');
       return;
     }
+
+    // Check if user is logged in when files need to be uploaded
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if ((uploadedVideos.length > 0 || uploadedAudio.length > 0) && !user) {
+      toast.error('Please sign in to upload files');
+      return;
+    }
+
     setIsProcessing(true);
     toast.loading('Preparing your request...', {
       id: 'uploading'
     });
+    
     try {
-      // Get user for upload path
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
       const uploadedFiles: UploadedFile[] = [];
 
       // Upload videos to storage
       for (const file of uploadedVideos) {
-        if (user) {
-          const fileName = `${user.id}/${Date.now()}-${file.name}`;
-          const {
-            data,
-            error
-          } = await supabase.storage.from('Product Images').upload(fileName, file);
-          if (error) {
-            console.error('Upload error:', error);
-            toast.error(`Failed to upload ${file.name}`);
-          } else {
-            const {
-              data: {
-                publicUrl
-              }
-            } = supabase.storage.from('Product Images').getPublicUrl(fileName);
-            console.log('Uploaded video, URL:', publicUrl);
-            uploadedFiles.push({
-              name: file.name,
-              url: publicUrl,
-              type: 'video'
-            });
-          }
+        const fileName = `${user!.id}/${Date.now()}-${file.name}`;
+        const { error } = await supabase.storage.from('Product Images').upload(fileName, file);
+        
+        if (error) {
+          console.error('Upload error:', error);
+          toast.error(`Failed to upload ${file.name}`);
+          throw error;
         } else {
-          // User needs to be logged in to upload files
-          console.log('User not logged in, cannot upload file');
+          const { data: { publicUrl } } = supabase.storage.from('Product Images').getPublicUrl(fileName);
+          console.log('Uploaded video, URL:', publicUrl);
+          uploadedFiles.push({
+            name: file.name,
+            url: publicUrl,
+            type: 'video'
+          });
         }
       }
 
       // Upload audio to storage
       for (const file of uploadedAudio) {
-        if (user) {
-          const fileName = `${user.id}/${Date.now()}-${file.name}`;
-          const {
-            data,
-            error
-          } = await supabase.storage.from('Product Images').upload(fileName, file);
-          if (error) {
-            console.error('Upload error:', error);
-            toast.error(`Failed to upload ${file.name}`);
-          } else {
-            const {
-              data: {
-                publicUrl
-              }
-            } = supabase.storage.from('Product Images').getPublicUrl(fileName);
-            console.log('Uploaded audio, URL:', publicUrl);
-            uploadedFiles.push({
-              name: file.name,
-              url: publicUrl,
-              type: 'audio'
-            });
-          }
+        const fileName = `${user!.id}/${Date.now()}-${file.name}`;
+        const { error } = await supabase.storage.from('Product Images').upload(fileName, file);
+        
+        if (error) {
+          console.error('Upload error:', error);
+          toast.error(`Failed to upload ${file.name}`);
+          throw error;
         } else {
-          console.log('User not logged in, cannot upload file');
+          const { data: { publicUrl } } = supabase.storage.from('Product Images').getPublicUrl(fileName);
+          console.log('Uploaded audio, URL:', publicUrl);
+          uploadedFiles.push({
+            name: file.name,
+            url: publicUrl,
+            type: 'audio'
+          });
         }
       }
+      
       console.log('Saving uploaded files to state:', uploadedFiles);
 
       // Save current editor state to localStorage
@@ -264,6 +250,7 @@ const HeroWithEditor: React.FC = () => {
         uploadedFiles,
         autoSubmit: true
       });
+      
       toast.dismiss('uploading');
 
       // Navigate to dashboard

@@ -642,12 +642,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             {/* Generate Button */}
             <Button
               onClick={handleSubmitInternal}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isAutoProcessing}
               className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-xs md:text-sm flex-shrink-0"
             >
-              {isSubmitting ? (
+              {(isSubmitting || isAutoProcessing) ? (
                 <div className="flex items-center justify-center gap-1.5">
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span className="hidden sm:inline">Processing...</span>
                 </div>
               ) : (
