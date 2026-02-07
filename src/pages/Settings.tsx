@@ -162,14 +162,14 @@ const Settings = () => {
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
-        .from('User Avatars')
+        .from('avatars')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('User Avatars')
+        .from('avatars')
         .getPublicUrl(filePath);
 
       // Update profile with new avatar URL

@@ -177,7 +177,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           const fileName = `${user.id}/${Date.now()}.${fileExt}`;
           
           await supabase.storage
-            .from('Product Images')
+            .from('product-images')
             .upload(fileName, file);
         }
         
