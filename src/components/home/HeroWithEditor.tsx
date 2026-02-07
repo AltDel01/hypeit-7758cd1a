@@ -179,60 +179,80 @@ const HeroWithEditor: React.FC = () => {
       return;
     }
 
-    // Check if user is logged in when files need to be uploaded
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if ((uploadedVideos.length > 0 || uploadedAudio.length > 0) && !user) {
-      toast.error('Please sign in to upload files');
-      return;
-    }
-
     setIsProcessing(true);
-    toast.loading('Preparing your request...', {
-      id: 'uploading'
-    });
+    const toastId = 'uploading-' + Date.now();
     
     try {
+      // Check if user is logged in when files need to be uploaded
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast.error('Authentication error. Please sign in again.');
+        setIsProcessing(false);
+        return;
+      }
+      
+      if ((uploadedVideos.length > 0 || uploadedAudio.length > 0) && !user) {
+        toast.error('Please sign in to upload files');
+        setIsProcessing(false);
+        return;
+      }
+
+      toast.loading('Preparing your request...', { id: toastId });
+
       const uploadedFiles: UploadedFile[] = [];
 
       // Upload videos to storage
       for (const file of uploadedVideos) {
         const fileName = `${user!.id}/${Date.now()}-${file.name}`;
-        const { error } = await supabase.storage.from('Product Images').upload(fileName, file);
+        console.log('Uploading video:', fileName);
+        
+        const { error, data } = await supabase.storage
+          .from('Product Images')
+          .upload(fileName, file);
         
         if (error) {
-          console.error('Upload error:', error);
-          toast.error(`Failed to upload ${file.name}`);
-          throw error;
-        } else {
-          const { data: { publicUrl } } = supabase.storage.from('Product Images').getPublicUrl(fileName);
-          console.log('Uploaded video, URL:', publicUrl);
-          uploadedFiles.push({
-            name: file.name,
-            url: publicUrl,
-            type: 'video'
-          });
+          console.error('Video upload error:', error);
+          throw new Error(`Failed to upload ${file.name}: ${error.message}`);
         }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('Product Images')
+          .getPublicUrl(fileName);
+        
+        console.log('Uploaded video, URL:', publicUrl);
+        uploadedFiles.push({
+          name: file.name,
+          url: publicUrl,
+          type: 'video'
+        });
       }
 
       // Upload audio to storage
       for (const file of uploadedAudio) {
         const fileName = `${user!.id}/${Date.now()}-${file.name}`;
-        const { error } = await supabase.storage.from('Product Images').upload(fileName, file);
+        console.log('Uploading audio:', fileName);
+        
+        const { error } = await supabase.storage
+          .from('Product Images')
+          .upload(fileName, file);
         
         if (error) {
-          console.error('Upload error:', error);
-          toast.error(`Failed to upload ${file.name}`);
-          throw error;
-        } else {
-          const { data: { publicUrl } } = supabase.storage.from('Product Images').getPublicUrl(fileName);
-          console.log('Uploaded audio, URL:', publicUrl);
-          uploadedFiles.push({
-            name: file.name,
-            url: publicUrl,
-            type: 'audio'
-          });
+          console.error('Audio upload error:', error);
+          throw new Error(`Failed to upload ${file.name}: ${error.message}`);
         }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('Product Images')
+          .getPublicUrl(fileName);
+        
+        console.log('Uploaded audio, URL:', publicUrl);
+        uploadedFiles.push({
+          name: file.name,
+          url: publicUrl,
+          type: 'audio'
+        });
       }
       
       console.log('Saving uploaded files to state:', uploadedFiles);
@@ -251,15 +271,16 @@ const HeroWithEditor: React.FC = () => {
         autoSubmit: true
       });
       
-      toast.dismiss('uploading');
+      toast.dismiss(toastId);
+      toast.success('Files uploaded! Redirecting...');
 
       // Navigate to dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Failed to prepare request. Please try again.', {
-        id: 'uploading'
-      });
+      toast.dismiss(toastId);
+      toast.error(error instanceof Error ? error.message : 'Failed to prepare request. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
   };
