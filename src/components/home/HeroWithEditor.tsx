@@ -209,7 +209,7 @@ const HeroWithEditor: React.FC = () => {
         console.log('Uploading video:', fileName);
         
         const { error, data } = await supabase.storage
-          .from('Product Images')
+          .from('product-images')
           .upload(fileName, file);
         
         if (error) {
@@ -218,7 +218,7 @@ const HeroWithEditor: React.FC = () => {
         }
         
         const { data: { publicUrl } } = supabase.storage
-          .from('Product Images')
+          .from('product-images')
           .getPublicUrl(fileName);
         
         console.log('Uploaded video, URL:', publicUrl);
@@ -235,7 +235,7 @@ const HeroWithEditor: React.FC = () => {
         console.log('Uploading audio:', fileName);
         
         const { error } = await supabase.storage
-          .from('Product Images')
+          .from('product-images')
           .upload(fileName, file);
         
         if (error) {
@@ -244,7 +244,7 @@ const HeroWithEditor: React.FC = () => {
         }
         
         const { data: { publicUrl } } = supabase.storage
-          .from('Product Images')
+          .from('product-images')
           .getPublicUrl(fileName);
         
         console.log('Uploaded audio, URL:', publicUrl);

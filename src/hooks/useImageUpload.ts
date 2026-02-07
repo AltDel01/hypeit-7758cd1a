@@ -35,7 +35,7 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
       const filePath = `results/${fileName}`;
 
       const { error: uploadError, data } = await supabase.storage
-        .from('Generated Images')
+        .from('generated-images')
         .upload(filePath, resultImage);
 
       if (uploadError) {
@@ -44,7 +44,7 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('Generated Images')
+        .from('generated-images')
         .getPublicUrl(filePath);
 
       // Update request with result URL and mark as completed
