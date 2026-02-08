@@ -96,8 +96,6 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shouldAutoSubmit, setShouldAutoSubmit] = useState(false);
-  const [stateLoaded, setStateLoaded] = useState(false);
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -109,47 +107,109 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:15');
 
-  // Load editor state from homepage on mount
+  // Load editor state from homepage on mount and auto-submit if needed
   useEffect(() => {
     const savedState = loadEditorState();
     console.log('Loading editor state:', savedState);
+    
     if (savedState) {
-      setPrompt(savedState.prompt);
-      setSelectedFeatures(savedState.selectedFeatures);
-      setSelectedAspectRatio(savedState.selectedAspectRatio);
-      setSelectedResolution(savedState.selectedResolution);
-      setSelectedDuration(savedState.selectedDuration);
-      setSelectedFrames(savedState.selectedFrames);
-      setStartTimestamp(savedState.startTimestamp);
-      setEndTimestamp(savedState.endTimestamp);
+      // Set all state from localStorage
+      const loadedPrompt = savedState.prompt || '';
+      const loadedFeatures = savedState.selectedFeatures || [];
+      const loadedFiles = savedState.uploadedFiles || [];
       
-      // Load uploaded files
-      if (savedState.uploadedFiles && savedState.uploadedFiles.length > 0) {
-        console.log('Loading uploaded files:', savedState.uploadedFiles);
-        setUploadedFileUrls(savedState.uploadedFiles);
-      }
+      setPrompt(loadedPrompt);
+      setSelectedFeatures(loadedFeatures);
+      setSelectedAspectRatio(savedState.selectedAspectRatio || '16:9');
+      setSelectedResolution(savedState.selectedResolution || '1080P');
+      setSelectedDuration(savedState.selectedDuration || '15s');
+      setSelectedFrames(savedState.selectedFrames || 'first-last');
+      setStartTimestamp(savedState.startTimestamp || '00:00');
+      setEndTimestamp(savedState.endTimestamp || '00:15');
+      setUploadedFileUrls(loadedFiles);
       
-      // Set auto-submit flag if needed
-      if (savedState.autoSubmit) {
-        setShouldAutoSubmit(true);
-        setIsAutoProcessing(true); // Show loading state immediately
-      }
+      console.log('State loaded - prompt:', loadedPrompt, 'features:', loadedFeatures, 'files:', loadedFiles);
       
       // Clear the saved state after loading
       clearEditorState();
+      
+      // Auto-submit if flag was set (from homepage Generate button)
+      if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
+        console.log('Auto-submitting request...');
+        setIsAutoProcessing(true);
+        
+        // Delay submission slightly to allow React to render the state first
+        setTimeout(() => {
+          handleAutoSubmit(loadedPrompt, loadedFeatures, savedState, loadedFiles);
+        }, 100);
+      }
     }
-    setStateLoaded(true);
   }, []);
 
-  // Auto-submit when coming from homepage with autoSubmit flag
-  useEffect(() => {
-    // Wait for state to be loaded and a brief delay to show the files first
-    if (stateLoaded && shouldAutoSubmit && (prompt.trim() || uploadedFileUrls.length > 0)) {
-      setShouldAutoSubmit(false);
-      // Submit immediately - the loading state is already showing
-      handleSubmitInternal();
+  // Handle auto-submit with the loaded values directly (not from state)
+  const handleAutoSubmit = async (
+    loadedPrompt: string,
+    loadedFeatures: string[],
+    savedState: ReturnType<typeof loadEditorState>,
+    loadedFiles: UploadedFile[]
+  ) => {
+    if (!loadedPrompt.trim() && loadedFiles.length === 0) {
+      setIsAutoProcessing(false);
+      return;
     }
-  }, [stateLoaded, shouldAutoSubmit, prompt, uploadedFileUrls]);
+
+    setIsSubmitting(true);
+
+    try {
+      // Build full prompt with selected features
+      let fullPrompt = loadedPrompt.trim();
+      if (loadedFeatures.length > 0) {
+        const featureLabels = loadedFeatures
+          .map(id => editingFeatures.find(f => f.id === id)?.label)
+          .filter(Boolean)
+          .join(', ');
+        fullPrompt = `[${featureLabels}] ${fullPrompt}`;
+      }
+      
+      // Add settings to prompt using the savedState values
+      const aspectRatio = savedState?.selectedAspectRatio || '16:9';
+      const resolution = savedState?.selectedResolution || '1080P';
+      const duration = savedState?.selectedDuration || '15s';
+      const start = savedState?.startTimestamp || '00:00';
+      const end = savedState?.endTimestamp || '00:15';
+      
+      fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
+
+      // Get reference URL from uploaded files
+      const videoFiles = loadedFiles.filter(f => f.type === 'video');
+      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+
+      console.log('Submitting request with prompt:', fullPrompt);
+
+      const result = await createGenerationRequest({
+        requestType: 'video',
+        prompt: fullPrompt,
+        referenceImageUrl: referenceUrl,
+      });
+
+      if (result) {
+        toast.success('Request submitted! We\'ll notify you when it\'s ready.');
+        setPrompt('');
+        setSelectedFeatures([]);
+        setUploadedVideos([]);
+        setUploadedAudio([]);
+        onRequestCreated?.();
+      } else {
+        toast.error('Failed to submit request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Auto-submit error:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setIsAutoProcessing(false);
+    }
+  };
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => 
