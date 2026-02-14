@@ -193,19 +193,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       });
 
       if (result) {
-        toast.success('Request submitted! We\'ll notify you when it\'s ready.');
-        setPrompt('');
-        setSelectedFeatures([]);
-        setUploadedVideos([]);
-        setUploadedAudio([]);
+        // Keep prompt, features, and files visible - don't clear them
+        // Keep processing indicator active so user waits for result
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
+        setIsSubmitting(false);
+        setIsAutoProcessing(false);
       }
     } catch (error) {
       console.error('Auto-submit error:', error);
       toast.error('Something went wrong. Please try again.');
-    } finally {
       setIsSubmitting(false);
       setIsAutoProcessing(false);
     }
@@ -308,21 +306,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       });
 
       if (result) {
-        toast.success('Request submitted! We\'ll notify you when it\'s ready.');
-        setPrompt('');
-        setSelectedFeatures([]);
-        setUploadedVideos([]);
-        setUploadedAudio([]);
-        // Keep uploaded file URLs visible for reference (don't clear them)
-        // setUploadedFileUrls([]);
+        // Keep prompt, features, and files visible - don't clear them
+        // Keep processing indicator active so user waits for result
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
+        setIsSubmitting(false);
+        setIsAutoProcessing(false);
       }
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('Something went wrong. Please try again.');
-    } finally {
       setIsSubmitting(false);
       setIsAutoProcessing(false);
     }
