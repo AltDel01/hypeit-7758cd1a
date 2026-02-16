@@ -61,7 +61,7 @@ const PricingCard = ({
 
       {/* Credits highlight box */}
       <div className="rounded-xl border border-white/10 bg-gray-800/60 p-4 mb-6">
-        <div className="flex items-baseline gap-2 mb-1">
+        <div className="flex items-baseline gap-2">
           {isVibe && <span className="text-amber-400 text-3xl md:text-4xl">👑</span>}
           {popular && <span className="text-brand-teal text-3xl md:text-4xl">👑</span>}
           <span className={cn(
@@ -70,8 +70,8 @@ const PricingCard = ({
           )}>
             {credits}
           </span>
-          <span className="text-gray-300 text-sm">Credits per month</span>
         </div>
+        <p className="text-gray-300 text-sm mt-1">Credits per month</p>
         {creditsPerPrice &&
         <p className="text-gray-400 text-xs mt-1">
             As low as <span className="text-white font-semibold">{creditsPerPrice.match(/\$[\d.]+/)?.[0]}</span> per 100 Credits
