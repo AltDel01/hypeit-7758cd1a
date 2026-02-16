@@ -27,7 +27,7 @@ const Pricing = () => {
     credits: "3,000",
     creditsPerPrice: "As low as $1.09 per 100 Credits",
     mediaInfo: "",
-    description: "For growing brands and businesses",
+    description: "For growing brands and creators",
     features: [
     { name: "Queue unlimited tasks", included: true },
     { name: "Fast-track generation", included: true },
