@@ -41,7 +41,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
           <div className="relative p-4 md:p-6 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm min-w-[85vw] md:min-w-0 snap-center">
             <div className="rounded-lg bg-gray-800/60 p-3 mb-4">
               <div className="flex items-baseline gap-2"><span className="text-2xl font-bold text-white">500</span><span className="text-gray-300 text-xs">Credits per month</span></div>
-              <p className="text-gray-400 text-xs mt-1"><span className="text-white font-semibold">3,300</span> images / <span className="text-white font-semibold">33 720p videos</span></p>
+              <p className="text-gray-400 text-xs mt-1"><span className="text-white font-semibold">TRIAL</span></p>
             </div>
             <h3 className="text-xl font-semibold text-white mb-1">Free</h3>
             <div className="text-2xl font-bold text-white mb-3">FREE</div>
@@ -60,7 +60,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
             <div className="rounded-lg bg-gray-800/60 p-3 mb-4">
               <div className="flex items-baseline gap-2"><span className="text-brand-teal">👑</span><span className="text-2xl font-bold text-brand-teal">3,000</span><span className="text-gray-300 text-xs">Credits per month</span></div>
               <p className="text-gray-400 text-xs mt-1">As low as <span className="text-white font-semibold">$1.09</span> per 100 Credits</p>
-              <p className="text-gray-400 text-xs mt-1"><span className="text-white font-semibold">15,000</span> images / <span className="text-white font-semibold">150 720p videos</span></p>
+              
             </div>
             <h3 className="text-xl font-semibold text-white mb-1">Starter</h3>
             <div className="text-2xl font-bold text-white mb-3">$15<span className="text-lg text-gray-400">/month</span></div>
@@ -78,7 +78,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
             <div className="rounded-lg bg-gray-800/60 p-3 mb-4">
               <div className="flex items-baseline gap-2"><span className="text-2xl font-bold text-white">8,000</span><span className="text-gray-300 text-xs">Credits per month</span></div>
               <p className="text-gray-400 text-xs mt-1">As low as <span className="text-white font-semibold">$1.01</span> per 100 Credits</p>
-              <p className="text-gray-400 text-xs mt-1"><span className="text-white font-semibold">40,000</span> images / <span className="text-white font-semibold">400 720p videos</span></p>
+              
             </div>
             <h3 className="text-xl font-semibold text-white mb-1">Pro</h3>
             <div className="text-2xl font-bold text-white mb-3">$25<span className="text-lg text-gray-400">/month</span></div>
@@ -97,7 +97,7 @@ const PremiumFeatureModal: React.FC<PremiumFeatureModalProps> = ({
             <div className="rounded-lg bg-gray-800/60 p-3 mb-4 mt-4 md:mt-0">
               <div className="flex items-baseline gap-2"><span className="text-amber-400">👑</span><span className="text-2xl font-bold text-amber-400">26,000</span><span className="text-gray-300 text-xs">Credits per month</span></div>
               <p className="text-gray-400 text-xs mt-1">As low as <span className="text-white font-semibold">$0.62</span> per 100 Credits</p>
-              <p className="text-gray-400 text-xs mt-1"><span className="text-white font-semibold">130,000</span> images / <span className="text-white font-semibold">1,300 720p videos</span></p>
+              
             </div>
             <h3 className="text-xl font-semibold text-white mb-1">Specialist</h3>
             <div className="text-2xl font-bold text-white mb-3">$125<span className="text-lg text-gray-400">/month</span></div>

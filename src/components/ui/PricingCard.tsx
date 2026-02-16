@@ -77,9 +77,11 @@ const PricingCard = ({
             As low as <span className="text-white font-semibold">{creditsPerPrice.match(/\$[\d.]+/)?.[0]}</span> per 100 Credits
           </p>
         )}
-        <p className="text-gray-400 text-xs mt-1">
-          <span className="text-white font-semibold">{mediaInfo.split('/')[0].trim()}</span> / <span className="text-white font-semibold">{mediaInfo.split('/')[1]?.trim()}</span>
-        </p>
+        {mediaInfo && (
+          <p className="text-gray-400 text-xs mt-1">
+            <span className="text-white font-semibold">{mediaInfo}</span>
+          </p>
+        )}
       </div>
 
       <div className="mb-4">
