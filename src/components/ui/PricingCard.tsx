@@ -61,16 +61,16 @@ const PricingCard = ({
 
       {/* Credits highlight box */}
       <div className="rounded-xl border border-white/10 bg-gray-800/60 p-4 mb-6">
-        <div className="flex items-start gap-2 mb-1">
-          {isVibe && <span className="text-amber-400 text-3xl md:text-4xl leading-tight">👑</span>}
-          {popular && <span className="text-brand-teal text-3xl md:text-4xl leading-tight">👑</span>}
+        <div className="flex items-baseline gap-2 mb-1">
+          {isVibe && <span className="text-amber-400 text-3xl md:text-4xl">👑</span>}
+          {popular && <span className="text-brand-teal text-3xl md:text-4xl">👑</span>}
           <span className={cn(
-            "text-3xl md:text-4xl font-bold leading-tight",
+            "text-3xl md:text-4xl font-bold",
             isVibe ? "text-amber-400" : popular ? "text-brand-teal" : "text-white"
           )}>
             {credits}
           </span>
-          <span className="text-gray-300 text-sm leading-tight pt-1">Credits<br />per<br />month</span>
+          <span className="text-gray-300 text-sm">Credits per month</span>
         </div>
         {creditsPerPrice &&
         <p className="text-gray-400 text-xs mt-1">
