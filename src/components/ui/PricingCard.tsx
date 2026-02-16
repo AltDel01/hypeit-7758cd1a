@@ -115,21 +115,33 @@ const PricingCard = ({
       </ul>
       
       <div className="mt-auto">
-        <Button
-          onClick={onButtonClick}
-          className={cn(
-            "w-full transition-all py-5",
-            popular ?
-            "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0" :
-            isVibe ?
-            "bg-transparent border-2 border-amber-500 text-amber-500 hover:bg-amber-500/10" :
-            title === "Gratis" ?
-            "bg-gray-700 text-gray-300 hover:bg-gray-600 border-0" :
-            "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0"
+        {(title === "Starter" || isVibe) ? (
+          <div className={cn(
+            "rounded-lg p-[2px]",
+            title === "Starter"
+              ? "bg-gradient-to-r from-blue-500 to-cyan-400"
+              : "bg-gradient-to-r from-purple-500 to-amber-400"
           )}>
-
-          {buttonText}
-        </Button>
+            <Button
+              onClick={onButtonClick}
+              className="w-full transition-all py-5 rounded-[6px] bg-gray-900 text-white hover:bg-gray-800 border-0"
+            >
+              {buttonText}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={onButtonClick}
+            className={cn(
+              "w-full transition-all py-5 rounded-lg",
+              title === "Free" || title === "Gratis"
+                ? "bg-white/10 text-white/70 hover:bg-white/15 border border-white/20"
+                : "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0"
+            )}
+          >
+            {buttonText}
+          </Button>
+        )}
       </div>
     </div>);
 
