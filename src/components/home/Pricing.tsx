@@ -98,12 +98,12 @@ const Pricing = () => {
           </p>
         </div>
         
-        {/* Mobile: horizontal scroll, Desktop: grid */}
-        <div className="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto snap-x md:overflow-visible pb-4 no-scrollbar">
+        {/* Mobile: 2-col grid, Desktop: 4-col grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {pricing.map((plan, index) =>
           <div
             key={index}
-            className="snap-start min-w-[85vw] max-w-xs sm:min-w-[60vw] md:min-w-0 md:max-w-none">
+            className="">
 
               <PricingCard
               title={plan.title}
