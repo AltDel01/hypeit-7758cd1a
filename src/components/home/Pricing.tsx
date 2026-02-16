@@ -9,7 +9,7 @@ const Pricing = () => {
     price: "FREE",
     credits: "500",
     creditsPerPrice: "",
-    mediaInfo: "3,300 images / 33 720p videos",
+    mediaInfo: "TRIAL",
     description: "Perfect to try core features",
     features: [
     { name: "Queue", included: true },
@@ -26,7 +26,7 @@ const Pricing = () => {
     price: "$15/month",
     credits: "3,000",
     creditsPerPrice: "As low as $1.09 per 100 Credits",
-    mediaInfo: "15,000 images / 150 720p videos",
+    mediaInfo: "",
     description: "For growing brands and businesses",
     features: [
     { name: "Queue unlimited tasks", included: true },
@@ -44,7 +44,7 @@ const Pricing = () => {
     price: "$25/month",
     credits: "8,000",
     creditsPerPrice: "As low as $1.01 per 100 Credits",
-    mediaInfo: "40,000 images / 400 720p videos",
+    mediaInfo: "",
     description: "For businesses needing high conversion",
     features: [
     { name: "Queue unlimited tasks", included: true },
@@ -62,7 +62,7 @@ const Pricing = () => {
     price: "$125/month",
     credits: "26,000",
     creditsPerPrice: "As low as $0.62 per 100 Credits",
-    mediaInfo: "130,000 images / 1,300 720p videos",
+    mediaInfo: "",
     description: "End-to-end AI social growth & analytics",
     features: [
     { name: "Queue unlimited tasks", included: true },
