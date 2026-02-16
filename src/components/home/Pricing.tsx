@@ -5,79 +5,79 @@ import { cn } from '@/lib/utils';
 const Pricing = () => {
   const pricing = [
     {
-      title: "Gratis",
-      price: "Rp. 0",
-      description: "Sempurna untuk mencoba fitur inti",
+      title: "Free",
+      price: "FREE",
+      credits: "500",
+      creditsPerPrice: "",
+      mediaInfo: "3,300 images / 33 720p videos",
+      description: "Perfect to try core features",
       features: [
-        { name: "30 kredit per bulan", included: true },
-        { name: "150 gambar / 1 video 720p", included: true },
-        { name: "Generasi gambar & video AI", included: true },
-        { name: "Chat AI untuk editing konten", included: true },
-        { name: "3 penggunaan gratis per hari", included: true },
-        { name: "Antrian tugas tanpa batas", included: true },
-        { name: "Resolusi 720p video", included: true },
-        { name: "Watermark pada hasil konten", included: true },
+        { name: "Queue", included: true },
+        { name: "Fast-track generation", included: true },
+        { name: "720p Video Generation", included: true, bold: "720p" },
+        { name: "Image upscaling", included: true },
+        { name: "Video extension", included: true },
+        { name: "Generated content is for commercial use", included: true },
       ],
       popular: false,
     },
     {
       title: "Starter",
-      price: "Rp. 150.000,-",
-      description: "Untuk brand dan bisnis yang berkembang",
+      price: "$15/month",
+      credits: "3,000",
+      creditsPerPrice: "As low as $1.09 per 100 Credits",
+      mediaInfo: "15,000 images / 150 720p videos",
+      description: "For growing brands and businesses",
       features: [
-        { name: "660 kredit per bulan", included: true },
-        { name: "3.300 gambar / 33 video 720p", included: true },
-        { name: "Semua fitur Gratis", included: true },
-        { name: "Generasi cepat (fast-track)", included: true },
-        { name: "Generasi video 1080p", included: true },
-        { name: "Image upscaling AI", included: true },
-        { name: "Hapus watermark brand", included: true },
-        { name: "Perpanjangan durasi video", included: true },
-        { name: "Konten untuk penggunaan komersial", included: true },
+        { name: "Queue unlimited tasks", included: true },
+        { name: "Fast-track generation", included: true },
+        { name: "1080p Video Generation", included: true, bold: "1080p" },
+        { name: "Image upscaling", included: true },
+        { name: "Video extension", included: true },
+        { name: "Priority access to new features", included: true },
+        { name: "Generated content is for commercial use", included: true },
       ],
-      popular: true
+      popular: true,
     },
     {
       title: "Pro",
-      price: "Rp. 250.000,-",
-      description: "Untuk bisnis yang membutuhkan konversi tinggi",
+      price: "$25/month",
+      credits: "8,000",
+      creditsPerPrice: "As low as $1.01 per 100 Credits",
+      mediaInfo: "40,000 images / 400 720p videos",
+      description: "For businesses needing high conversion",
       features: [
-        { name: "3.000 kredit per bulan", included: true },
-        { name: "15.000 gambar / 150 video 720p", included: true },
-        { name: "Semua fitur Starter", included: true },
-        { name: "Generasi cepat (fast-track)", included: true },
-        { name: "Generasi video 1080p", included: true },
-        { name: "Image upscaling AI", included: true },
-        { name: "Hapus watermark brand", included: true },
-        { name: "Perpanjangan durasi video", included: true },
-        { name: "Akses prioritas fitur baru", included: true },
-        { name: "Konten untuk penggunaan komersial", included: true },
+        { name: "Queue unlimited tasks", included: true },
+        { name: "Fast-track generation", included: true },
+        { name: "1080p Video Generation", included: true, bold: "1080p" },
+        { name: "Image upscaling", included: true },
+        { name: "Video extension", included: true },
+        { name: "Priority access to new features", included: true },
+        { name: "Generated content is for commercial use", included: true },
       ],
-      popular: false
+      popular: false,
     },
     {
       title: "Specialist",
-      price: "Rp. 1.250.000,-",
-      description: "Pertumbuhan sosial dan analitik end-to-end berbasis AI",
+      price: "$125/month",
+      credits: "26,000",
+      creditsPerPrice: "As low as $0.62 per 100 Credits",
+      mediaInfo: "130,000 images / 1,300 720p videos",
+      description: "End-to-end AI social growth & analytics",
       features: [
-        { name: "26.000 kredit per bulan", included: true },
-        { name: "130.000 gambar / 1.300 video 720p", included: true },
-        { name: "Semua fitur Pro", included: true },
-        { name: "Generasi cepat (fast-track)", included: true },
-        { name: "Generasi video 1080p", included: true },
-        { name: "Image upscaling AI", included: true },
-        { name: "Hapus watermark brand", included: true },
-        { name: "Perpanjangan durasi video", included: true },
-        { name: "Akses prioritas fitur baru", included: true },
-        { name: "Undangan beta test (jika tersedia)", included: true },
-        { name: "Posting otomatis AI ke media sosial", included: true },
-        { name: "Analitik & pelaporan media sosial AI", included: true },
-        { name: "Konten untuk penggunaan komersial", included: true },
+        { name: "Queue unlimited tasks", included: true },
+        { name: "Fast-track generation", included: true },
+        { name: "1080p Video Generation", included: true, bold: "1080p" },
+        { name: "Image upscaling", included: true },
+        { name: "Video extension", included: true },
+        { name: "Priority access to new features", included: true },
+        { name: "Beta test invite (if applicable)", included: true },
+        { name: "Generated content is for commercial use", included: true },
       ],
       popular: false,
       isVibe: true,
-      buttonText: "Upgrade ke Specialist"
-    }
+      buttonText: "Upgrade to Specialist",
+    },
   ];
 
   return (
@@ -91,10 +91,10 @@ const Pricing = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-10">
         <div className="text-center mb-12 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Harga yang Sederhana dan Transparan
+            Simple & Transparent Pricing
           </h2>
           <p className="text-brand-slate-600 text-md md:text-lg">
-            Pilih paket yang tepat untuk bisnis Anda. Semua paket termasuk uji coba gratis 14 hari.
+            Choose the right plan for your business. All plans include a 14-day free trial.
           </p>
         </div>
         
@@ -108,18 +108,21 @@ const Pricing = () => {
               <PricingCard
                 title={plan.title}
                 price={plan.price}
+                credits={plan.credits}
+                creditsPerPrice={plan.creditsPerPrice}
+                mediaInfo={plan.mediaInfo}
                 description={plan.description}
                 features={plan.features}
                 popular={plan.popular}
                 isVibe={(plan as any).isVibe}
                 buttonText={
-                  plan.title === "Gratis"
-                    ? "Paket Saat Ini"
+                  plan.title === "Free"
+                    ? "Current Plan"
                     : plan.title === "Starter"
-                      ? "Upgrade ke Starter"
+                      ? "Upgrade to Starter"
                       : plan.title === "Pro"
-                        ? "Upgrade ke Pro"
-                        : "Upgrade ke Specialist"}
+                        ? "Upgrade to Pro"
+                        : "Upgrade to Specialist"}
                 className="duration-300"
               />
             </div>
@@ -127,11 +130,11 @@ const Pricing = () => {
         </div>
         
         <div className="mt-10 text-center text-brand-slate-500 text-sm px-2">
-          Butuh paket khusus?{" "}
+          Need a custom plan?{" "}
           <a href="#" className="text-brand-blue hover:underline">
-            Hubungi kami
+            Contact us
           </a>{" "}
-          untuk harga enterprise.
+          for enterprise pricing.
         </div>
       </div>
     </section>
