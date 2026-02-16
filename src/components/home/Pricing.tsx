@@ -63,7 +63,7 @@ const Pricing = () => {
     credits: "26,000",
     creditsPerPrice: "As low as $0.62 per 100 Credits",
     mediaInfo: "",
-    description: "End-to-end AI social growth & analytics",
+    description: "Suitable for agency or enterprise",
     features: [
     { name: "Queue unlimited tasks", included: true },
     { name: "Fast-track generation", included: true },
