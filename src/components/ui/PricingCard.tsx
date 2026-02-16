@@ -86,7 +86,7 @@ const PricingCard = ({
       </div>
 
       <div className="mb-3 md:mb-4">
-        <h3 className="text-sm md:text-lg font-semibold text-white mb-1">{title}</h3>
+        {price !== "FREE" && <h3 className="text-sm md:text-lg font-semibold text-white mb-1">{title}</h3>}
         <div className="flex items-baseline">
           <span className="text-lg md:text-2xl font-bold text-white">{price}</span>
         </div>
