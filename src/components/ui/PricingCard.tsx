@@ -115,16 +115,21 @@ const PricingCard = ({
       </ul>
       
       <div className="mt-auto">
-        {(title === "Starter" || isVibe) ? (
+      {(title === "Starter" || isVibe) ? (
           <div className={cn(
             "rounded-lg p-[2px]",
             title === "Starter"
-              ? "bg-gradient-to-r from-blue-500 to-cyan-400"
-              : "bg-gradient-to-r from-purple-500 to-amber-400"
+              ? "bg-gradient-to-r from-cyan-300 to-blue-400"
+              : "bg-gradient-to-r from-amber-400 to-purple-500"
           )}>
             <Button
               onClick={onButtonClick}
-              className="w-full transition-all py-5 rounded-[6px] bg-gray-900 text-white hover:bg-gray-800 border-0"
+              className={cn(
+                "w-full transition-all py-5 rounded-[6px] text-white hover:opacity-90 border-0",
+                title === "Starter"
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-500"
+                  : "bg-gradient-to-r from-purple-600 to-amber-500"
+              )}
             >
               {buttonText}
             </Button>
