@@ -6,11 +6,15 @@ import { Check } from 'lucide-react';
 interface PricingFeature {
   name: string;
   included: boolean;
+  bold?: string;
 }
 
 interface PricingCardProps {
   title: string;
   price: string;
+  credits: string;
+  creditsPerPrice: string;
+  mediaInfo: string;
   description: string;
   features: PricingFeature[];
   popular?: boolean;
@@ -23,11 +27,14 @@ interface PricingCardProps {
 const PricingCard = ({
   title,
   price,
+  credits,
+  creditsPerPrice,
+  mediaInfo,
   description,
   features,
   popular = false,
   isVibe = false,
-  buttonText = "Mulai Sekarang",
+  buttonText = "Get Started",
   onButtonClick,
   className,
 }: PricingCardProps) => {
@@ -42,7 +49,7 @@ const PricingCard = ({
     >
       {popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-brand-blue to-brand-teal text-white text-xs font-semibold py-1.5 px-4 rounded-full">
-          Paling Populer
+          Most Popular
         </div>
       )}
       
@@ -51,15 +58,34 @@ const PricingCard = ({
           Vibe Marketing
         </div>
       )}
-      
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+
+      {/* Credits highlight box */}
+      <div className="rounded-xl border border-white/10 bg-gray-800/60 p-4 mb-6">
+        <div className="flex items-baseline gap-2 mb-1">
+          {isVibe && <span className="text-amber-400">👑</span>}
+          {popular && <span className="text-brand-teal">👑</span>}
+          <span className={cn(
+            "text-3xl md:text-4xl font-bold",
+            isVibe ? "text-amber-400" : popular ? "text-brand-teal" : "text-white"
+          )}>
+            {credits}
+          </span>
+          <span className="text-gray-300 text-sm">Credits per month</span>
+        </div>
+        {creditsPerPrice && (
+          <p className="text-gray-400 text-xs mt-1">
+            As low as <span className="text-white font-semibold">{creditsPerPrice.match(/\$[\d.]+/)?.[0]}</span> per 100 Credits
+          </p>
+        )}
+        <p className="text-gray-400 text-xs mt-1">
+          <span className="text-white font-semibold">{mediaInfo.split('/')[0].trim()}</span> / <span className="text-white font-semibold">{mediaInfo.split('/')[1]?.trim()}</span>
+        </p>
       </div>
-      
+
       <div className="mb-4">
+        <h3 className="text-xl font-semibold text-white mb-1">{title}</h3>
         <div className="flex items-baseline">
-          <span className="text-3xl md:text-4xl font-bold text-white">{price}</span>
-          {price !== 'Rp. 0' && <span className="text-gray-400 ml-1">/bln</span>}
+          <span className="text-2xl font-bold text-white">{price}</span>
         </div>
       </div>
       
