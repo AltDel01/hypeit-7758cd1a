@@ -36,28 +36,28 @@ const PricingCard = ({
   isVibe = false,
   buttonText = "Get Started",
   onButtonClick,
-  className,
+  className
 }: PricingCardProps) => {
   return (
-    <div 
+    <div
       className={cn(
         'relative p-6 md:p-8 flex flex-col h-full rounded-2xl border border-white/10 bg-gray-900/80 backdrop-blur-sm',
         popular ? 'border-brand-blue/40' : '',
         isVibe ? 'border-amber-500/40' : '',
         className
-      )}
-    >
-      {popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-brand-blue to-brand-teal text-white text-xs font-semibold py-1.5 px-4 rounded-full">
+      )}>
+
+      {popular &&
+      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-brand-blue to-brand-teal text-white text-xs font-semibold py-1.5 px-4 rounded-full">
           Most Popular
         </div>
-      )}
+      }
       
-      {isVibe && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-black text-xs font-semibold py-1.5 px-4 rounded-full">
+      {isVibe &&
+      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-black text-xs font-semibold py-1.5 px-4 rounded-full">
           Vibe Marketing
         </div>
-      )}
+      }
 
       {/* Credits highlight box */}
       <div className="rounded-xl border border-white/10 bg-gray-800/60 p-4 mb-6">
@@ -72,20 +72,20 @@ const PricingCard = ({
           </span>
           <span className="text-gray-300 text-sm leading-tight pt-1">Credits<br />per<br />month</span>
         </div>
-        {creditsPerPrice && (
-          <p className="text-gray-400 text-xs mt-1">
+        {creditsPerPrice &&
+        <p className="text-gray-400 text-xs mt-1">
             As low as <span className="text-white font-semibold">{creditsPerPrice.match(/\$[\d.]+/)?.[0]}</span> per 100 Credits
           </p>
-        )}
-        {mediaInfo && (
-          <p className="text-gray-400 text-xs mt-1">
+        }
+        {mediaInfo &&
+        <p className="text-gray-400 text-xs mt-1">
             <span className="text-white font-semibold">{mediaInfo}</span>
           </p>
-        )}
+        }
       </div>
 
       <div className="mb-4">
-        <h3 className="text-xl font-semibold text-white mb-1">{title}</h3>
+        
         <div className="flex items-baseline">
           <span className="text-2xl font-bold text-white">{price}</span>
         </div>
@@ -94,24 +94,24 @@ const PricingCard = ({
       <p className="text-gray-400 text-sm mb-6">{description}</p>
       
       <ul className="space-y-3 mb-8 flex-grow">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start">
+        {features.map((feature, index) =>
+        <li key={index} className="flex items-start">
             <span className={cn(
-              "mr-3 flex-shrink-0 mt-0.5",
-              feature.included 
-                ? "text-brand-teal" 
-                : "text-gray-600"
-            )}>
+            "mr-3 flex-shrink-0 mt-0.5",
+            feature.included ?
+            "text-brand-teal" :
+            "text-gray-600"
+          )}>
               <Check size={16} className="flex-shrink-0" />
             </span>
             <span className={cn(
-              "text-sm",
-              feature.included ? "text-gray-300" : "text-gray-600 line-through"
-            )}>
+            "text-sm",
+            feature.included ? "text-gray-300" : "text-gray-600 line-through"
+          )}>
               {feature.name}
             </span>
           </li>
-        ))}
+        )}
       </ul>
       
       <div className="mt-auto">
@@ -119,20 +119,20 @@ const PricingCard = ({
           onClick={onButtonClick}
           className={cn(
             "w-full transition-all py-5",
-            popular 
-              ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0" 
-              : isVibe
-                ? "bg-transparent border-2 border-amber-500 text-amber-500 hover:bg-amber-500/10"
-                : title === "Gratis"
-                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 border-0"
-                  : "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0"
-          )}
-        >
+            popular ?
+            "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0" :
+            isVibe ?
+            "bg-transparent border-2 border-amber-500 text-amber-500 hover:bg-amber-500/10" :
+            title === "Gratis" ?
+            "bg-gray-700 text-gray-300 hover:bg-gray-600 border-0" :
+            "bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:opacity-90 border-0"
+          )}>
+
           {buttonText}
         </Button>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default PricingCard;
