@@ -85,7 +85,7 @@ const PricingCard = ({
       </div>
 
       <div className="mb-4">
-        
+        <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
         <div className="flex items-baseline">
           <span className="text-2xl font-bold text-white">{price}</span>
         </div>
@@ -124,12 +124,7 @@ const PricingCard = ({
           )}>
             <Button
               onClick={onButtonClick}
-              className={cn(
-                "w-full transition-all py-5 rounded-[6px] text-white hover:opacity-90 border-0",
-                title === "Starter"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-400"
-                  : "bg-gradient-to-r from-purple-500 to-amber-400"
-              )}
+              className="w-full transition-all py-5 rounded-[6px] bg-gray-900 text-white hover:bg-gray-800 border-0"
             >
               {buttonText}
             </Button>
