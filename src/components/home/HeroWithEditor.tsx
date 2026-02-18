@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { saveEditorState, UploadedFile } from '@/hooks/useEditorState';
 import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import AiClipButton from '@/components/shared/AiClipButton';
 const frameOptions = [{
   value: 'first-last',
   label: 'First and last frames'
@@ -322,6 +323,8 @@ const HeroWithEditor: React.FC = () => {
 
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
+          {/* AI Clip Button */}
+          <AiClipButton className="mb-3" />
           <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
             {/* Video Preview */}
             {uploadedVideos.length > 0 && <div className="mb-3 md:mb-4">
