@@ -36,7 +36,7 @@ const toolButtons = [
   {
     key: 'creator',
     label: 'AI Creator',
-    description: 'Generate content',
+    description: 'Build personal brand or promote your product',
     icon: <User className="w-4 h-4 text-[#38d9f5]" />,
     gradient: 'from-[#38d9f5] to-[#4f8eff]',
     border: 'border-[#38d9f5]/50 hover:border-[#4f8eff]',
@@ -53,7 +53,7 @@ const AiClipButton: React.FC<AiClipButtonProps> = ({
   const handlers = [onAiClip, onRetentionEditing, onAiCreator];
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2 mb-3", className)}>
+    <div className={cn("flex flex-wrap items-center justify-center gap-2 mb-3", className)}>
       {toolButtons.map((btn, idx) => (
         <button
           key={btn.key}
