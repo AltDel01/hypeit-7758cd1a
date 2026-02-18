@@ -36,7 +36,7 @@ const toolButtons = [
   {
     key: 'creator',
     label: 'AI Creator',
-    description: 'Build personal brand or promote your product',
+    description: 'Promote everything',
     icon: <User className="w-4 h-4 text-[#38d9f5]" />,
     gradient: 'from-[#38d9f5] to-[#4f8eff]',
     border: 'border-[#38d9f5]/50 hover:border-[#4f8eff]',
@@ -53,13 +53,13 @@ const AiClipButton: React.FC<AiClipButtonProps> = ({
   const handlers = [onAiClip, onRetentionEditing, onAiCreator];
 
   return (
-    <div className={cn("flex items-center justify-center gap-2 mb-3 overflow-x-auto scrollbar-hide", className)}>
+    <div className={cn("flex items-center justify-center gap-2 mb-3", className)}>
       {toolButtons.map((btn, idx) => (
         <button
           key={btn.key}
           onClick={handlers[idx]}
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r border transition-all duration-200 group",
+            "flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r border transition-all duration-200 group whitespace-nowrap flex-shrink-0",
             btn.bg,
             btn.border
           )}
@@ -67,13 +67,13 @@ const AiClipButton: React.FC<AiClipButtonProps> = ({
           {btn.icon}
           <span
             className={cn(
-              "text-sm font-bold bg-gradient-to-r bg-clip-text text-transparent transition-all group-hover:brightness-125",
+              "text-sm font-bold bg-gradient-to-r bg-clip-text text-transparent transition-all group-hover:brightness-125 whitespace-nowrap",
               btn.gradient
             )}
           >
             {btn.label}
           </span>
-          <span className="text-xs text-gray-400 group-hover:text-gray-200 transition-colors hidden sm:inline">
+          <span className="text-xs text-gray-400 group-hover:text-gray-200 transition-colors whitespace-nowrap">
             — {btn.description}
           </span>
         </button>
