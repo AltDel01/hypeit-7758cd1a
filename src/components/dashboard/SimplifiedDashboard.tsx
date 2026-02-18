@@ -32,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import AiClipButton from '@/components/shared/AiClipButton';
 
 interface SimplifiedDashboardProps {
   onRequestCreated?: () => void;
@@ -374,6 +375,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             </button>
           ))}
         </div>
+
+        {/* AI Clip Button */}
+        <AiClipButton className="mb-0" />
 
         {/* Prompt Box */}
         <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
