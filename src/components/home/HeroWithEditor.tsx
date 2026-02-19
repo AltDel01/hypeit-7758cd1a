@@ -141,6 +141,7 @@ const HeroWithEditor: React.FC = () => {
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiClipMode, setAiClipMode] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('first-last');
@@ -269,7 +270,8 @@ const HeroWithEditor: React.FC = () => {
         startTimestamp,
         endTimestamp,
         uploadedFiles,
-        autoSubmit: true
+        autoSubmit: true,
+        aiClipMode,
       });
       
       toast.dismiss(toastId);
@@ -324,7 +326,7 @@ const HeroWithEditor: React.FC = () => {
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
           {/* AI Clip Button */}
-          <AiClipButton className="mb-3" />
+          <AiClipButton className="mb-3" onAiClip={() => setAiClipMode(prev => !prev)} />
           <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
             {/* Video Preview */}
             {uploadedVideos.length > 0 && <div className="mb-3 md:mb-4">
