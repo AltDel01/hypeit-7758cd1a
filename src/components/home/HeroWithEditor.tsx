@@ -434,6 +434,16 @@ const HeroWithEditor: React.FC = () => {
                   <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Media</span>
                 </button>
 
+                {/* Voice / Reference Upload (audio + video for AI avatar reference) */}
+                <input type="file" ref={audioInputRef} onChange={handleAudioUpload} accept="audio/*,video/*" multiple className="hidden" />
+                <button onClick={() => audioInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
+                  <div className="flex items-center gap-0.5">
+                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
+                    <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
+                  </div>
+                  <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Voice</span>
+                </button>
+
                 <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
 
                 {/* Aspect Ratio - Simplified for mobile */}
