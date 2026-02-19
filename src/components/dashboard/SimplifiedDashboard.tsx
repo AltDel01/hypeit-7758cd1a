@@ -16,11 +16,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
 
+// Each clip defines its own aspect ratio so the frame adapts to the actual video
 const dummyClips = [
-  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'] },
-  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'] },
-  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'] },
-  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'] },
+  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'], aspect: '9:16' },
+  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'], aspect: '16:9' },
+  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'], aspect: '9:16' },
+  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'], aspect: '16:9' },
 ];
 
 interface SimplifiedDashboardProps {
@@ -137,8 +138,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     clearEditorState();
 
     if (mode) {
-      // Special mode: show loading then inline results
+      // Special mode: show loading then inline results, AND log to DB + send email
       setIsAutoProcessing(true);
+      const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : 'AI Creator';
+      const fullPrompt = `[${modeLabel}] ${loadedPrompt.trim() || 'Generate viral content'} | Aspect: ${savedState.selectedAspectRatio || '9:16'} | Resolution: ${savedState.selectedResolution || '1080P'} | Duration: ${savedState.selectedDuration || '15s'}`;
+      const videoFiles = loadedFiles.filter(f => f.type === 'video');
+      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
+        .then(() => onRequestCreated?.())
+        .catch(console.error);
       setTimeout(() => {
         setIsAutoProcessing(false);
         setShowAiClipResult(true);
@@ -617,55 +625,70 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </button>
               </div>
 
-              {/* Adaptive grid based on selected aspect ratio */}
-              <div className={`grid gap-3 ${selectedAspectRatio === '9:16' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                {dummyClips.map((clip) => (
-                  <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900">
-                    <div className={`relative bg-black ${getAspectClass(selectedAspectRatio)}`}>
-                      {activeClipId === clip.id ? (
-                        <iframe
-                          src={`https://drive.google.com/file/d/${clip.id}/preview`}
-                          className="w-full h-full"
-                          allow="autoplay"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <>
-                          <div className="w-full h-full bg-gradient-to-br from-[#a259ff]/10 via-transparent to-[#d966ff]/10 flex items-center justify-center">
-                            <button onClick={() => setActiveClipId(clip.id)} className="flex flex-col items-center gap-1.5 group/play">
-                              <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover/play:bg-white/20 group-hover/play:scale-110 transition-all duration-200">
-                                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                              </div>
-                            </button>
-                          </div>
-                          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
-                          <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                            <Sparkles className="w-3 h-3" />{clip.score}% viral
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <div className="px-3 py-2.5 flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-semibold truncate">{clip.title}</p>
-                        <p className="text-gray-400 text-[10px] truncate">{clip.subtitle}</p>
-                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                          {clip.tags.map(tag => (
-                            <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px] border border-gray-700/50">#{tag}</span>
-                          ))}
-                          <span className="text-gray-500 text-[9px]">{clip.views} views avg</span>
-                        </div>
+              {/* Adaptive grid — mixed portrait/landscape use 2-col; all-portrait use 4-col */}
+              <div className={`grid gap-3 ${dummyClips.every(c => c.aspect === '9:16') ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'}`}>
+                {dummyClips.map((clip) => {
+                  const clipAspectClass = clip.aspect === '9:16' ? 'aspect-[9/16]' : clip.aspect === '1:1' ? 'aspect-square' : 'aspect-video';
+                  const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
+                  return (
+                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900">
+                      <div className={`relative bg-black ${clipAspectClass}`}>
+                        {activeClipId === clip.id ? (
+                          <iframe
+                            src={`https://drive.google.com/file/d/${clip.id}/preview`}
+                            className="w-full h-full"
+                            allow="autoplay"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <>
+                            {/* Thumbnail from Google Drive */}
+                            <img
+                              src={thumbnailUrl}
+                              alt={clip.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // fallback gradient if thumbnail fails to load
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                            {/* Play button overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
+                              <button onClick={() => setActiveClipId(clip.id)} className="group/play">
+                                <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
+                                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                </div>
+                              </button>
+                            </div>
+                            <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
+                            <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
+                              <Sparkles className="w-3 h-3" />{clip.score}% viral
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <button
-                        onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
-                        className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
-                        title="Open in Drive"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="px-3 py-2.5 flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-xs font-semibold truncate">{clip.title}</p>
+                          <p className="text-gray-400 text-[10px] truncate">{clip.subtitle}</p>
+                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                            {clip.tags.map(tag => (
+                              <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px] border border-gray-700/50">#{tag}</span>
+                            ))}
+                            <span className="text-gray-500 text-[9px]">{clip.views} views avg</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
+                          className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                          title="Open in Drive"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
