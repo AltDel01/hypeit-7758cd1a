@@ -160,7 +160,8 @@ const HeroWithEditor: React.FC = () => {
     if (files) {
       const newFiles = Array.from(files);
       setUploadedVideos(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} video(s) added`);
+      const count = newFiles.length;
+      toast.success(`${count} file${count > 1 ? 's' : ''} added`);
     }
   };
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +169,7 @@ const HeroWithEditor: React.FC = () => {
     if (files) {
       const newFiles = Array.from(files);
       setUploadedAudio(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} audio file(s) added`);
+      toast.success(`${newFiles.length} audio/video file(s) added`);
     }
   };
   const removeVideo = (index: number) => {
@@ -365,17 +366,34 @@ const HeroWithEditor: React.FC = () => {
                 </button>
               </div>
             )}
-            {/* Video Preview */}
-            {uploadedVideos.length > 0 && <div className="mb-3 md:mb-4">
-                {uploadedVideos.map((file, index) => <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-                    <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
-                    <button onClick={() => removeVideo(index)} className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>)}
-              </div>}
+            {/* Media Preview — shows image/video/doc previews */}
+            {uploadedVideos.length > 0 && (
+              <div className="mb-3 md:mb-4 flex flex-wrap gap-2">
+                {uploadedVideos.map((file, index) => {
+                  const isImage = file.type.startsWith('image/');
+                  const isVideo = file.type.startsWith('video/');
+                  return (
+                    <div key={index} className={`relative rounded-lg overflow-hidden bg-black mb-2 ${isImage ? 'inline-block' : 'w-full aspect-video'}`}>
+                      {isImage ? (
+                        <img src={URL.createObjectURL(file)} alt={file.name} className="max-h-40 max-w-full object-contain rounded-lg" />
+                      ) : isVideo ? (
+                        <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg text-xs text-gray-300">
+                          <Film className="w-4 h-4 text-gray-400" />
+                          <span className="truncate max-w-[180px]">{file.name}</span>
+                        </div>
+                      )}
+                      <button onClick={() => removeVideo(index)} className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-            {/* Audio Files Tags */}
+            {/* Voice/Reference Files Tags */}
             {uploadedAudio.length > 0 && <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
                 {uploadedAudio.map((file, index) => <div key={index} className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm">
                     <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
