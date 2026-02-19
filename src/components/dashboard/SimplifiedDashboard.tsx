@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
+import AiClipResultModal from '@/components/dashboard/AiClipResultModal';
 
 interface SimplifiedDashboardProps {
   onRequestCreated?: () => void;
@@ -98,6 +99,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
+  const [aiClipMode, setAiClipMode] = useState(false);
+  const [showAiClipModal, setShowAiClipModal] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
@@ -377,10 +380,25 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         </div>
 
         {/* AI Clip Button */}
-        <AiClipButton className="mb-0" />
+        <AiClipButton
+          className="mb-0"
+          onAiClip={() => setAiClipMode(prev => !prev)}
+        />
 
         {/* Prompt Box */}
-        <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
+        <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
+          aiClipMode ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10' : 'border-gray-700/50'
+        }`}>
+          {/* AI Clip Mode Banner */}
+          {aiClipMode && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
+              <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
+              <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — click "AI Clip" to generate clips from your video</span>
+              <button onClick={() => setAiClipMode(false)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           {/* Video Preview from URLs (from homepage) */}
           {uploadedFileUrls.filter(f => f.type === 'video').length > 0 && (
             <div className="mb-3 md:mb-4">
@@ -699,14 +717,23 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
             {/* Generate Button */}
             <Button
-              onClick={handleSubmitInternal}
+              onClick={aiClipMode ? () => setShowAiClipModal(true) : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
-              className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-xs md:text-sm flex-shrink-0"
+              className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
+                aiClipMode
+                  ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
+                  : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
+              }`}
             >
               {(isSubmitting || isAutoProcessing) ? (
                 <div className="flex items-center justify-center gap-1.5">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span className="hidden sm:inline">Processing...</span>
+                </div>
+              ) : aiClipMode ? (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Scissors className="w-3.5 h-3.5" />
+                  <span>AI Clip</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-1.5">
@@ -718,8 +745,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           </div>
         </div>
       </div>
+
+      {/* AI Clip Result Modal */}
+      <AiClipResultModal
+        open={showAiClipModal}
+        onClose={() => setShowAiClipModal(false)}
+      />
     </div>
   );
 };
 
 export default SimplifiedDashboard;
+
