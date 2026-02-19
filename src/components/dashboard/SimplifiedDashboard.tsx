@@ -361,9 +361,30 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         {/* AI Clip Button */}
         <AiClipButton
           className="mb-0"
-          onAiClip={() => setActiveMode(prev => prev === 'aiclip' ? null : 'aiclip')}
-          onRetentionEditing={() => setActiveMode(prev => prev === 'retention' ? null : 'retention')}
-          onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
+          onAiClip={() => setActiveMode(prev => {
+            if (prev !== 'aiclip') {
+              setShowAiClipResult(false);
+              setShowRetentionResult(false);
+              setShowAiCreatorResult(false);
+            }
+            return prev === 'aiclip' ? null : 'aiclip';
+          })}
+          onRetentionEditing={() => setActiveMode(prev => {
+            if (prev !== 'retention') {
+              setShowAiClipResult(false);
+              setShowRetentionResult(false);
+              setShowAiCreatorResult(false);
+            }
+            return prev === 'retention' ? null : 'retention';
+          })}
+          onAiCreator={() => setActiveMode(prev => {
+            if (prev !== 'creator') {
+              setShowAiClipResult(false);
+              setShowRetentionResult(false);
+              setShowAiCreatorResult(false);
+            }
+            return prev === 'creator' ? null : 'creator';
+          })}
         />
 
         {/* Prompt Box */}
@@ -410,17 +431,30 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             </div>
           )}
 
-          {/* Video Preview from local files */}
+          {/* Media Preview from local files — images, videos, docs */}
           {uploadedVideos.length > 0 && (
-            <div className="mb-3 md:mb-4">
-              {uploadedVideos.map((file, index) => (
-                <div key={index} className={`relative rounded-lg overflow-hidden bg-black ${getAspectClass(selectedAspectRatio)} mb-2`}>
-                  <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
-                  <button onClick={() => removeVideo(index)} className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+            <div className="mb-3 md:mb-4 flex flex-wrap gap-2">
+              {uploadedVideos.map((file, index) => {
+                const isImage = file.type.startsWith('image/');
+                const isVideo = file.type.startsWith('video/');
+                return (
+                  <div key={index} className={`relative rounded-lg overflow-hidden bg-black mb-2 ${isImage ? 'inline-block' : `w-full ${getAspectClass(selectedAspectRatio)}`}`}>
+                    {isImage ? (
+                      <img src={URL.createObjectURL(file)} alt={file.name} className="max-h-48 max-w-full object-contain rounded-lg" />
+                    ) : isVideo ? (
+                      <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg text-xs text-gray-300">
+                        <Film className="w-4 h-4 text-gray-400" />
+                        <span className="truncate max-w-[180px]">{file.name}</span>
+                      </div>
+                    )}
+                    <button onClick={() => removeVideo(index)} className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 

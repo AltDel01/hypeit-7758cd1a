@@ -3,7 +3,7 @@ const EDITOR_STATE_KEY = 'viralin_editor_state';
 export interface UploadedFile {
   name: string;
   url: string;
-  type: 'video' | 'audio';
+  type: 'video' | 'audio' | 'image' | 'document';
 }
 
 export interface EditorState {
