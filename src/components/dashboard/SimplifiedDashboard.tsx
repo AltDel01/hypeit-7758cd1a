@@ -632,10 +632,13 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                   const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
                   return (
                     <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
-                      {/* Video frame — aspect ratio enforced via padding-bottom trick so it's reliable */}
+                      {/* Video frame — strict aspect ratio via padding-bottom */}
                       <div
-                        className="relative bg-black w-full overflow-hidden"
-                        style={{ paddingBottom: isPortrait ? '177.78%' : '56.25%' }}
+                        className="relative w-full overflow-hidden"
+                        style={{
+                          paddingBottom: isPortrait ? '177.78%' : '56.25%',
+                          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                        }}
                       >
                         {activeClipId === clip.id ? (
                           <iframe
@@ -646,14 +649,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                           />
                         ) : (
                           <>
-                            {/* Thumbnail — always visible */}
+                            {/* Thumbnail — zoomed & cropped to fill frame regardless of source AR */}
                             <img
                               src={thumbnailUrl}
                               alt={clip.title}
-                              className="absolute inset-0 w-full h-full object-cover"
+                              className="absolute inset-0 w-full h-full"
+                              style={{ objectFit: 'cover', objectPosition: 'center', transform: isPortrait ? 'scale(1.6)' : 'scale(1)' }}
                             />
-                            {/* Subtle dark overlay so play button is readable */}
-                            <div className="absolute inset-0 bg-black/20" />
+                            {/* Subtle dark overlay */}
+                            <div className="absolute inset-0 bg-black/30" />
                             {/* Play button overlay */}
                             <div className="absolute inset-0 flex items-center justify-center">
                               <button
