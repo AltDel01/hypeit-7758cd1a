@@ -645,14 +645,22 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                       background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
                     }}
                   >
-                    {activeClipId === clip.id ? (
-                      <iframe
-                        src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
-                        className="absolute inset-0 w-full h-full"
-                        allow="autoplay"
-                        allowFullScreen
-                        style={{ border: 'none' }}
-                      />
+                  {activeClipId === clip.id ? (
+                      <div className="absolute inset-0 overflow-hidden">
+                        <iframe
+                          src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
+                          allow="autoplay"
+                          allowFullScreen
+                          style={{
+                            border: 'none',
+                            position: 'absolute',
+                            top: '-2px',
+                            left: '-2px',
+                            width: 'calc(100% + 4px)',
+                            height: 'calc(100% + 4px)',
+                          }}
+                        />
+                      </div>
                     ) : (
                       <>
                         <img
@@ -679,7 +687,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                   {/* Clip info */}
                   <div className="px-3 py-3 flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-bold leading-tight">{clip.title}</p>
+                      <p className="text-white text-base font-bold leading-tight">{clip.title}</p>
                       <p className="text-gray-400 text-xs mt-0.5 truncate">{clip.subtitle}</p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         {clip.tags.slice(0, 2).map(tag => (
