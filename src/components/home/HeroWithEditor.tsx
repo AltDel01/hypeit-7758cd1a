@@ -184,7 +184,7 @@ const HeroWithEditor: React.FC = () => {
     }
 
     setIsProcessing(true);
-    const toastId = 'uploading-' + Date.now();
+    
     
     try {
       // Check if user is logged in when files need to be uploaded
@@ -202,8 +202,6 @@ const HeroWithEditor: React.FC = () => {
         setIsProcessing(false);
         return;
       }
-
-      toast.loading('Preparing your request...', { id: toastId });
 
       const uploadedFiles: UploadedFile[] = [];
 
@@ -283,7 +281,6 @@ const HeroWithEditor: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Upload error:', error);
-      toast.dismiss(toastId);
       toast.error(error instanceof Error ? error.message : 'Failed to prepare request. Please try again.');
     } finally {
       setIsProcessing(false);

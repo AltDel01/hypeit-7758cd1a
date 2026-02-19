@@ -625,14 +625,18 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </button>
               </div>
 
-              {/* 4-col desktop, 2-col mobile — each card respects its own video aspect ratio */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+              {/* Flex row — each card width is determined by its own aspect ratio so frames are always correct */}
+              <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
                 {dummyClips.map((clip) => {
                   const isPortrait = clip.aspect === '9:16';
                   const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
+                  // Portrait cards are narrow, landscape cards are wider — both fill one line on desktop
+                  const cardStyle = isPortrait
+                    ? { flex: '0 0 auto', width: 'clamp(90px, 18%, 130px)' }
+                    : { flex: '1 1 0', minWidth: 'clamp(120px, 22%, 200px)' };
                   return (
-                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
-                      {/* Video frame — adapts to portrait or landscape */}
+                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col flex-shrink-0" style={cardStyle}>
+                      {/* Video frame — fixed aspect ratio matching actual clip */}
                       <div
                         className="relative bg-black w-full overflow-hidden"
                         style={{ aspectRatio: isPortrait ? '9/16' : '16/9' }}
