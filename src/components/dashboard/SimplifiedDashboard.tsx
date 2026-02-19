@@ -499,24 +499,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           {/* Bottom Actions */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between pt-3 md:pt-4 border-t border-gray-700/50 gap-3 md:gap-0">
             <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
-              {/* Video Upload */}
-              <input type="file" ref={videoInputRef} onChange={handleVideoUpload} accept="video/*" multiple className="hidden" />
+              {/* Media Upload */}
+              <input type="file" ref={videoInputRef} onChange={handleVideoUpload} accept="video/*,audio/*,image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" multiple className="hidden" />
               <button onClick={() => videoInputRef.current?.click()} disabled={isSubmitting} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
                 <div className="flex items-center gap-0.5">
                   <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
-                  <Video className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
+                  <Image className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
                 </div>
-                <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Video</span>
-              </button>
-
-              {/* Audio Upload */}
-              <input type="file" ref={audioInputRef} onChange={handleAudioUpload} accept="audio/*" multiple className="hidden" />
-              <button onClick={() => audioInputRef.current?.click()} disabled={isSubmitting} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
-                <div className="flex items-center gap-0.5">
-                  <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
-                  <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
-                </div>
-                <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Voice</span>
+                <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Media</span>
               </button>
 
               <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
