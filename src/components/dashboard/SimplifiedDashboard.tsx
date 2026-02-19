@@ -646,7 +646,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                     }}
                   >
                   {activeClipId === clip.id ? (
-                      <div className="absolute inset-0 overflow-hidden">
+                      <div className="absolute overflow-hidden" style={{ inset: 0 }}>
                         <iframe
                           src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
                           allow="autoplay"
@@ -654,10 +654,10 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                           style={{
                             border: 'none',
                             position: 'absolute',
-                            top: '-2px',
-                            left: '-2px',
-                            width: 'calc(100% + 4px)',
-                            height: 'calc(100% + 4px)',
+                            top: '-8px',
+                            left: '-40px',
+                            width: 'calc(100% + 80px)',
+                            height: 'calc(100% + 16px)',
                           }}
                         />
                       </div>
@@ -688,12 +688,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                   <div className="px-3 py-3 flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-base font-bold leading-tight">{clip.title}</p>
-                      <p className="text-gray-400 text-xs mt-0.5 truncate">{clip.subtitle}</p>
-                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        {clip.tags.slice(0, 2).map(tag => (
-                          <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[10px] border border-gray-700/50">#{tag}</span>
-                        ))}
-                        <span className="text-gray-500 text-[10px]">{clip.views} views avg</span>
+                       <p className="text-gray-300 text-sm mt-0.5 truncate">{clip.subtitle}</p>
+                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                         {clip.tags.slice(0, 2).map(tag => (
+                           <span key={tag} className="px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 text-xs border border-gray-700/50">#{tag}</span>
+                         ))}
+                         <span className="text-gray-400 text-xs">{clip.views} views avg</span>
                       </div>
                     </div>
                     <button
