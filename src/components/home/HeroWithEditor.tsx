@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image, Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff, Languages, Loader2 } from 'lucide-react';
+import { Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image, Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff, Languages, Loader2, Play, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,13 @@ import { saveEditorState, UploadedFile } from '@/hooks/useEditorState';
 import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
+
+const dummyClips = [
+  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'] },
+  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'] },
+  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'] },
+  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'] },
+];
 const frameOptions = [{
   value: 'first-last',
   label: 'First and last frames'
@@ -142,6 +149,8 @@ const HeroWithEditor: React.FC = () => {
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeMode, setActiveMode] = useState<string | null>(null);
+  const [showAiClipResult, setShowAiClipResult] = useState(false);
+  const [activeClipId, setActiveClipId] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('first-last');
@@ -518,17 +527,118 @@ const HeroWithEditor: React.FC = () => {
                 </DropdownMenu>
               </div>
 
-              {/* Create Button */}
-              <Button onClick={handleCreate} disabled={isProcessing} className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/30 text-xs md:text-sm flex-shrink-0">
-                {isProcessing ? <div className="flex items-center justify-center gap-1.5">
+              {/* Create / AI Clip Button */}
+              <Button
+                onClick={activeMode === 'aiclip' ? () => setShowAiClipResult(true) : handleCreate}
+                disabled={isProcessing}
+                className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
+                  activeMode === 'aiclip'
+                    ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
+                    : activeMode === 'retention'
+                    ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
+                    : activeMode === 'creator'
+                    ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
+                    : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
+                }`}
+              >
+                {isProcessing ? (
+                  <div className="flex items-center justify-center gap-1.5">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span className="hidden sm:inline">Uploading...</span>
-                  </div> : <div className="flex items-center justify-center gap-1.5">
+                  </div>
+                ) : activeMode === 'aiclip' ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Scissors className="w-3.5 h-3.5" />
+                    <span>AI Clip</span>
+                  </div>
+                ) : activeMode === 'retention' ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Retention Edit</span>
+                  </div>
+                ) : activeMode === 'creator' ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>AI Creator</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Generate</span>
-                  </div>}
+                  </div>
+                )}
               </Button>
             </div>
+
+            {/* AI Clip Results — inline chat-style */}
+            {showAiClipResult && (
+              <div className="mt-4 border-t border-[#a259ff]/20 pt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#a259ff] to-[#d966ff] flex items-center justify-center">
+                      <Scissors className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-white">AI Clip</span>
+                    <span className="text-xs text-gray-400">— 4 viral clips extracted</span>
+                  </div>
+                  <button
+                    onClick={() => setShowAiClipResult(false)}
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {dummyClips.map((clip) => (
+                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900">
+                      <div className="relative bg-black aspect-video">
+                        {activeClipId === clip.id ? (
+                          <iframe
+                            src={`https://drive.google.com/file/d/${clip.id}/preview`}
+                            className="w-full h-full"
+                            allow="autoplay"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <>
+                            <div className="w-full h-full bg-gradient-to-br from-[#a259ff]/10 via-transparent to-[#d966ff]/10 flex items-center justify-center">
+                              <button onClick={() => setActiveClipId(clip.id)} className="flex flex-col items-center gap-1.5 group/play">
+                                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover/play:bg-white/20 group-hover/play:scale-110 transition-all duration-200">
+                                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                </div>
+                              </button>
+                            </div>
+                            <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
+                            <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
+                              <Sparkles className="w-3 h-3" />{clip.score}% viral
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <div className="px-3 py-2.5 flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-xs font-semibold truncate">{clip.title}</p>
+                          <p className="text-gray-400 text-[10px] truncate">{clip.subtitle}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {clip.tags.map(tag => (
+                              <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px] border border-gray-700/50">#{tag}</span>
+                            ))}
+                            <span className="text-gray-500 text-[9px]">{clip.views} views avg</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
+                          className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                          title="Open in Drive"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
