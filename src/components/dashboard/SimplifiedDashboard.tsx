@@ -294,7 +294,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
-      <div className="w-full max-w-4xl space-y-6">
+      <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -605,104 +605,106 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
         </div>
 
-        {/* AI Clip Results — separate card BELOW the prompt box */}
-        {showAiClipResult && (
-          <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Results header */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                  activeMode === 'aiclip' ? 'bg-gradient-to-br from-[#a259ff] to-[#d966ff]'
-                  : activeMode === 'retention' ? 'bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]'
-                  : 'bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]'
-                }`}>
-                  {activeMode === 'aiclip' ? <Scissors className="w-3.5 h-3.5 text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
-                </div>
-                <span className="text-base font-bold text-white">
-                  {activeMode === 'aiclip' ? 'AI Clip Results' : activeMode === 'retention' ? 'Retention Edit Results' : 'AI Creator Results'}
-                </span>
-                <span className="text-sm text-gray-400">— 4 viral clips extracted</span>
-              </div>
-              <button onClick={() => setShowAiClipResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 2-col desktop, 1-col mobile grid — wider cards, more room */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {dummyClips.map((clip) => {
-                const isPortrait = clip.aspect === '9:16';
-                const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
-                return (
-                  <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
-                    {/* Video frame */}
-                    <div
-                      className="relative w-full overflow-hidden"
-                      style={{
-                        paddingBottom: isPortrait ? '177.78%' : '56.25%',
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                      }}
-                    >
-                      {activeClipId === clip.id ? (
-                        <iframe
-                          src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
-                          className="absolute inset-0 w-full h-full"
-                          allow="autoplay"
-                          allowFullScreen
-                          style={{ border: 'none' }}
-                        />
-                      ) : (
-                        <>
-                          <img
-                            src={thumbnailUrl}
-                            alt={clip.title}
-                            className="absolute inset-0 w-full h-full"
-                            style={{ objectFit: 'cover', objectPosition: 'center top', transform: isPortrait ? 'scale(1.2)' : 'scale(1)' }}
-                          />
-                          <div className="absolute inset-0 bg-black/25" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <button onClick={() => setActiveClipId(clip.id)} className="group/play">
-                              <div className="w-14 h-14 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
-                                <Play className="w-6 h-6 text-white fill-white ml-1" />
-                              </div>
-                            </button>
-                          </div>
-                          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
-                          <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                            <Sparkles className="w-3 h-3" />{clip.score}% viral
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {/* Clip info — bigger title */}
-                    <div className="px-3 py-3 flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-bold leading-tight truncate">{clip.title}</p>
-                        <p className="text-gray-400 text-xs mt-0.5 truncate">{clip.subtitle}</p>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          {clip.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[10px] border border-gray-700/50">#{tag}</span>
-                          ))}
-                          <span className="text-gray-500 text-[10px]">{clip.views} views avg</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
-                        className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
-                        title="Open in Drive"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* AI Clip Results — full-width section outside max-w-4xl, 4 columns */}
+      {showAiClipResult && (
+        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Results header */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                activeMode === 'aiclip' ? 'bg-gradient-to-br from-[#a259ff] to-[#d966ff]'
+                : activeMode === 'retention' ? 'bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]'
+                : 'bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]'
+              }`}>
+                {activeMode === 'aiclip' ? <Scissors className="w-3.5 h-3.5 text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <span className="text-base font-bold text-white">
+                {activeMode === 'aiclip' ? 'AI Clip Results' : activeMode === 'retention' ? 'Retention Edit Results' : 'AI Creator Results'}
+              </span>
+              <span className="text-sm text-gray-400">— 4 viral clips extracted</span>
+            </div>
+            <button onClick={() => setShowAiClipResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 4-column grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {dummyClips.map((clip) => {
+              const isPortrait = clip.aspect === '9:16';
+              const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
+              return (
+                <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
+                  {/* Video frame */}
+                  <div
+                    className="relative w-full overflow-hidden"
+                    style={{
+                      paddingBottom: isPortrait ? '177.78%' : '56.25%',
+                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                    }}
+                  >
+                    {activeClipId === clip.id ? (
+                      <iframe
+                        src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
+                        className="absolute inset-0 w-full h-full"
+                        allow="autoplay"
+                        allowFullScreen
+                        style={{ border: 'none' }}
+                      />
+                    ) : (
+                      <>
+                        <img
+                          src={thumbnailUrl}
+                          alt={clip.title}
+                          className="absolute inset-0 w-full h-full"
+                          style={{ objectFit: 'cover', objectPosition: 'center top', transform: isPortrait ? 'scale(1.2)' : 'scale(1)' }}
+                        />
+                        <div className="absolute inset-0 bg-black/25" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <button onClick={() => setActiveClipId(clip.id)} className="group/play">
+                            <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
+                              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                            </div>
+                          </button>
+                        </div>
+                        <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
+                        <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
+                          <Sparkles className="w-3 h-3" />{clip.score}% viral
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {/* Clip info */}
+                  <div className="px-3 py-3 flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-bold leading-tight">{clip.title}</p>
+                      <p className="text-gray-400 text-xs mt-0.5 truncate">{clip.subtitle}</p>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        {clip.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[10px] border border-gray-700/50">#{tag}</span>
+                        ))}
+                        <span className="text-gray-500 text-[10px]">{clip.views} views avg</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
+                      className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                      title="Open in Drive"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default SimplifiedDashboard;
+
