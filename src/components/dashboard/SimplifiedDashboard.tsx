@@ -5,6 +5,7 @@ import {
   Languages, Loader2, Play, ExternalLink, TrendingUp, Download
 } from 'lucide-react';
 import retentionDemoVideo from '@/assets/retention-demo.mp4';
+import aiCreatorDemoVideo from '@/assets/ai-creator-demo.mp4';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -100,6 +101,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [showAiClipResult, setShowAiClipResult] = useState(false);
   const [showRetentionResult, setShowRetentionResult] = useState(false);
+  const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -153,6 +155,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setIsAutoProcessing(false);
         if (mode === 'retention') {
           setShowRetentionResult(true);
+        } else if (mode === 'creator') {
+          setShowAiCreatorResult(true);
         } else {
           setShowAiClipResult(true);
         }
@@ -263,6 +267,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setIsAutoProcessing(false);
       if (activeMode === 'retention') {
         setShowRetentionResult(true);
+      } else if (activeMode === 'creator') {
+        setShowAiCreatorResult(true);
       } else {
         setShowAiClipResult(true);
       }
@@ -796,6 +802,93 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               >
                 <Download className="w-4 h-4" />
                 Download Edited Video
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Creator Result — single video, wider layout */}
+      {showAiCreatorResult && (
+        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="text-base font-bold text-white">AI Creator Result</span>
+              <span className="text-sm text-gray-400">— AI-generated promotional content</span>
+            </div>
+            <button onClick={() => setShowAiCreatorResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Video + Info side by side */}
+          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#38d9f5]/30 rounded-2xl overflow-hidden">
+            {/* Video player */}
+            <div className="lg:w-2/3 relative bg-black flex items-center justify-center">
+              <video
+                src={aiCreatorDemoVideo}
+                controls
+                className="w-full h-full object-contain"
+                style={{ maxHeight: '520px' }}
+              />
+            </div>
+
+            {/* Stats panel */}
+            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
+              <div>
+                <h2 className="text-xl font-bold text-white leading-snug">AI Creator: Talking Character Ad</h2>
+                <p className="text-gray-400 text-sm mt-1">AI-generated promotional video with lip-synced avatar & branded overlay</p>
+              </div>
+
+              {/* Creator score */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-[#38d9f5]/10 to-[#4f8eff]/10 border border-[#38d9f5]/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300 font-medium">Engagement Score</span>
+                  <span className="text-2xl font-black text-[#38d9f5]">97%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-gray-700">
+                  <div className="h-2 rounded-full bg-gradient-to-r from-[#38d9f5] to-[#4f8eff]" style={{ width: '97%' }} />
+                </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Click Rate', value: '+52%', icon: '🎯' },
+                  { label: 'Avg Watch', value: '95%', icon: '👁' },
+                  { label: 'AI Voice', value: 'Cloned', icon: '🎙' },
+                  { label: 'Lip Sync', value: '98/100', icon: '🤖' },
+                ].map(stat => (
+                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <div className="text-lg mb-0.5">{stat.icon}</div>
+                    <div className="text-white font-bold text-sm">{stat.value}</div>
+                    <div className="text-gray-500 text-xs">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Features applied */}
+              <div>
+                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">AI Features Used</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Talking avatar', 'Voice clone', 'Auto-caption', 'Brand overlay', 'Lip sync'].map(tag => (
+                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#38d9f5]/10 border border-[#38d9f5]/30 text-[#38d9f5] text-xs font-medium">{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Download */}
+              <a
+                href={aiCreatorDemoVideo}
+                download="ai-creator-result.mp4"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
+              >
+                <Download className="w-4 h-4" />
+                Download Creator Video
               </a>
             </div>
           </div>
