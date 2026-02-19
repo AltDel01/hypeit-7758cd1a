@@ -1,26 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Sparkles, 
-  Smartphone, 
-  Scissors, 
-  Captions, 
-  Film, 
-  Layers, 
-  Wand2, 
-  Image,
-  Video,
-  X,
-  ZoomIn,
-  AudioLines,
-  Plus,
-  ChevronDown,
-  Timer,
-  MessageCircleOff,
-  Languages,
-  Loader2,
-  Play,
-  CheckCircle,
-  ExternalLink
+  Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
+  Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
+  Languages, Loader2, Play, ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,50 +12,15 @@ import { createGenerationRequest } from '@/services/generationRequestService';
 import { supabase } from '@/integrations/supabase/client';
 import { loadEditorState, clearEditorState, UploadedFile } from '@/hooks/useEditorState';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
 
 const dummyClips = [
-  {
-    id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh',
-    title: '9-to-9 Startup Life vs. 9-to-5 Jobs',
-    subtitle: 'The REAL Difference',
-    duration: '1:24',
-    views: '24.3K',
-    score: 98,
-    tags: ['viral', 'trending'],
-  },
-  {
-    id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle',
-    title: 'Startup Frustration',
-    subtitle: 'Turn Anger into Lasting Impulse',
-    duration: '0:58',
-    views: '18.1K',
-    score: 94,
-    tags: ['emotional', 'motivational'],
-  },
-  {
-    id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG',
-    title: 'Startup Grind',
-    subtitle: 'Mastering Essential Skills Quickly',
-    duration: '1:12',
-    views: '31.7K',
-    score: 96,
-    tags: ['educational', 'trending'],
-  },
-  {
-    id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP',
-    title: 'Startup Longevity',
-    subtitle: 'Can You Stay Fun Through Hard Times?',
-    duration: '1:05',
-    views: '15.8K',
-    score: 91,
-    tags: ['mindset', 'resilience'],
-  },
+  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'] },
+  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'] },
+  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'] },
+  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'] },
 ];
 
 interface SimplifiedDashboardProps {
@@ -132,6 +79,14 @@ const examplePrompts = [
   'Generate viral short from this video',
 ];
 
+const getAspectClass = (ratio: string) => {
+  if (ratio === '9:16') return 'aspect-[9/16]';
+  if (ratio === '1:1') return 'aspect-square';
+  if (ratio === '4:3') return 'aspect-[4/3]';
+  if (ratio === '21:9') return 'aspect-[21/9]';
+  return 'aspect-video';
+};
+
 const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
@@ -156,54 +111,46 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   // Load editor state from homepage on mount and auto-submit if needed
   useEffect(() => {
     const savedState = loadEditorState();
-    console.log('Loading editor state:', savedState);
-    
-    if (savedState) {
-      // Set all state from localStorage
-      const loadedPrompt = savedState.prompt || '';
-      const loadedFeatures = savedState.selectedFeatures || [];
-      const loadedFiles = savedState.uploadedFiles || [];
-      
-      setPrompt(loadedPrompt);
-      setSelectedFeatures(loadedFeatures);
-      setSelectedAspectRatio(savedState.selectedAspectRatio || '16:9');
-      setSelectedResolution(savedState.selectedResolution || '1080P');
-      setSelectedDuration(savedState.selectedDuration || '15s');
-      setSelectedFrames(savedState.selectedFrames || 'first-last');
-      setStartTimestamp(savedState.startTimestamp || '00:00');
-      setEndTimestamp(savedState.endTimestamp || '00:15');
-      setUploadedFileUrls(loadedFiles);
+    if (!savedState) return;
 
-      // Restore active mode from homepage
-      if (savedState.aiClipMode) {
-        setActiveMode('aiclip');
-      }
-      
-      console.log('State loaded - prompt:', loadedPrompt, 'features:', loadedFeatures, 'files:', loadedFiles, 'aiClipMode:', savedState.aiClipMode);
-      
-      // Clear the saved state after loading
-      clearEditorState();
-      
-      // Auto-submit if flag was set (from homepage Generate button)
-      // Skip auto-submit if aiClipMode is active — user sees the modal instead
-      if (savedState.autoSubmit && !savedState.aiClipMode && (loadedPrompt.trim() || loadedFiles.length > 0)) {
-        console.log('Auto-submitting request...');
-        setIsAutoProcessing(true);
-        
-        // Delay submission slightly to allow React to render the state first
-        setTimeout(() => {
-          handleAutoSubmit(loadedPrompt, loadedFeatures, savedState, loadedFiles);
-        }, 100);
-      } else if (savedState.aiClipMode) {
-        // If AI Clip mode was active, show results inline after a short delay
-        setTimeout(() => {
-          setShowAiClipResult(true);
-        }, 400);
-      }
+    const loadedPrompt = savedState.prompt || '';
+    const loadedFeatures = savedState.selectedFeatures || [];
+    const loadedFiles = savedState.uploadedFiles || [];
+
+    setPrompt(loadedPrompt);
+    setSelectedFeatures(loadedFeatures);
+    setSelectedAspectRatio(savedState.selectedAspectRatio || '16:9');
+    setSelectedResolution(savedState.selectedResolution || '1080P');
+    setSelectedDuration(savedState.selectedDuration || '15s');
+    setSelectedFrames(savedState.selectedFrames || 'first-last');
+    setStartTimestamp(savedState.startTimestamp || '00:00');
+    setEndTimestamp(savedState.endTimestamp || '00:15');
+    setUploadedFileUrls(loadedFiles);
+
+    // Restore active mode
+    let mode: string | null = null;
+    if (savedState.aiClipMode) mode = 'aiclip';
+    else if (savedState.retentionMode) mode = 'retention';
+    else if (savedState.creatorMode) mode = 'creator';
+    if (mode) setActiveMode(mode);
+
+    clearEditorState();
+
+    if (mode) {
+      // Special mode: show loading then inline results
+      setIsAutoProcessing(true);
+      setTimeout(() => {
+        setIsAutoProcessing(false);
+        setShowAiClipResult(true);
+      }, 1800);
+    } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
+      setIsAutoProcessing(true);
+      setTimeout(() => {
+        handleAutoSubmit(loadedPrompt, loadedFeatures, savedState, loadedFiles);
+      }, 100);
     }
   }, []);
 
-  // Handle auto-submit with the loaded values directly (not from state)
   const handleAutoSubmit = async (
     loadedPrompt: string,
     loadedFeatures: string[],
@@ -214,44 +161,23 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setIsAutoProcessing(false);
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      // Build full prompt with selected features
       let fullPrompt = loadedPrompt.trim();
       if (loadedFeatures.length > 0) {
-        const featureLabels = loadedFeatures
-          .map(id => editingFeatures.find(f => f.id === id)?.label)
-          .filter(Boolean)
-          .join(', ');
+        const featureLabels = loadedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).filter(Boolean).join(', ');
         fullPrompt = `[${featureLabels}] ${fullPrompt}`;
       }
-      
-      // Add settings to prompt using the savedState values
       const aspectRatio = savedState?.selectedAspectRatio || '16:9';
       const resolution = savedState?.selectedResolution || '1080P';
       const duration = savedState?.selectedDuration || '15s';
       const start = savedState?.startTimestamp || '00:00';
       const end = savedState?.endTimestamp || '00:15';
-      
       fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
-
-      // Get reference URL from uploaded files
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-
-      console.log('Submitting request with prompt:', fullPrompt);
-
-      const result = await createGenerationRequest({
-        requestType: 'video',
-        prompt: fullPrompt,
-        referenceImageUrl: referenceUrl,
-      });
-
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       if (result) {
-        // Keep prompt, features, and files visible - don't clear them
-        // Keep processing indicator active so user waits for result
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
@@ -267,67 +193,62 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    setSelectedFeatures(prev => 
-      prev.includes(featureId) 
-        ? prev.filter(id => id !== featureId)
-        : [...prev, featureId]
-    );
+    setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
   };
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      
-      // Upload to Supabase storage
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          toast.error('Please sign in to upload videos');
-          return;
-        }
-
-        for (const file of newFiles) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-          
-          await supabase.storage
-            .from('product-images')
-            .upload(fileName, file);
-        }
-        
-        setUploadedVideos(prev => [...prev, ...newFiles]);
-        toast.success(`${newFiles.length} video(s) added`);
-      } catch (error) {
-        console.error('Upload error:', error);
-        toast.error('Failed to upload video');
+    if (!files) return;
+    const newFiles = Array.from(files);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error('Please sign in to upload videos'); return; }
+      for (const file of newFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        await supabase.storage.from('product-images').upload(fileName, file);
       }
+      setUploadedVideos(prev => [...prev, ...newFiles]);
+      toast.success(`${newFiles.length} video(s) added`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload video');
     }
   };
 
   const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setUploadedAudio(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} audio file(s) added`);
+    if (!files) return;
+    setUploadedAudio(prev => [...prev, ...Array.from(files)]);
+    toast.success(`${files.length} audio file(s) added`);
+  };
+
+  const removeVideo = (index: number) => setUploadedVideos(prev => prev.filter((_, i) => i !== index));
+  const removeAudio = (index: number) => setUploadedAudio(prev => prev.filter((_, i) => i !== index));
+  const removeUploadedFileUrl = (index: number) => setUploadedFileUrls(prev => prev.filter((_, i) => i !== index));
+  const handleExampleClick = (example: string) => setPrompt(example);
+
+  // Special mode submit: logs to DB for history, then shows inline results
+  const handleSpecialModeSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const modeLabel = activeMode === 'aiclip' ? 'AI Clip' : activeMode === 'retention' ? 'Retention Editing' : 'AI Creator';
+      let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
+      fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
+      const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
+      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      onRequestCreated?.();
+    } catch (error) {
+      console.error('Special mode submit error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const removeVideo = (index: number) => {
-    setUploadedVideos(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeAudio = (index: number) => {
-    setUploadedAudio(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeUploadedFileUrl = (index: number) => {
-    setUploadedFileUrls(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleExampleClick = (example: string) => {
-    setPrompt(example);
+    setIsAutoProcessing(true);
+    setTimeout(() => {
+      setIsAutoProcessing(false);
+      setShowAiClipResult(true);
+    }, 1800);
   };
 
   const handleSubmitInternal = async () => {
@@ -335,36 +256,18 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       toast.error('Please enter a prompt or upload media');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      // Build full prompt with selected features
       let fullPrompt = prompt.trim();
       if (selectedFeatures.length > 0) {
-        const featureLabels = selectedFeatures
-          .map(id => editingFeatures.find(f => f.id === id)?.label)
-          .filter(Boolean)
-          .join(', ');
+        const featureLabels = selectedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).filter(Boolean).join(', ');
         fullPrompt = `[${featureLabels}] ${fullPrompt}`;
       }
-      
-      // Add settings to prompt
       fullPrompt += ` | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration} | Timeline: ${startTimestamp}-${endTimestamp}`;
-
-      // Get reference URL from uploaded files
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-
-      const result = await createGenerationRequest({
-        requestType: 'video',
-        prompt: fullPrompt,
-        referenceImageUrl: referenceUrl,
-      });
-
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       if (result) {
-        // Keep prompt, features, and files visible - don't clear them
-        // Keep processing indicator active so user waits for result
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
@@ -379,6 +282,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
   };
 
+  const isSpecialMode = ['aiclip', 'retention', 'creator'].includes(activeMode || '');
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6">
@@ -387,12 +292,10 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             What do you want to create?
           </h1>
-          <p className="text-muted-foreground">
-            Describe your vision and we'll bring it to life
-          </p>
+          <p className="text-muted-foreground">Describe your vision and we'll bring it to life</p>
         </div>
 
-        {/* Editing Feature Buttons - Scrollable on mobile */}
+        {/* Editing Feature Buttons */}
         <div className="w-full overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
             {editingFeatures.slice(0, 6).map((feature) => (
@@ -412,8 +315,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             ))}
           </div>
         </div>
-        
-        {/* Second row - Hidden on mobile for cleaner look */}
+
         <div className="hidden md:flex flex-wrap justify-center gap-2 w-full">
           {editingFeatures.slice(6).map((feature) => (
             <button
@@ -452,43 +354,31 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
               <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
               <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
-              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                <X className="w-3.5 h-3.5" />
-              </button>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
           {activeMode === 'retention' && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
               <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
               <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
-              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                <X className="w-3.5 h-3.5" />
-              </button>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
           {activeMode === 'creator' && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
               <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
               <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
-              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                <X className="w-3.5 h-3.5" />
-              </button>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
+
           {/* Video Preview from URLs (from homepage) */}
           {uploadedFileUrls.filter(f => f.type === 'video').length > 0 && (
             <div className="mb-3 md:mb-4">
               {uploadedFileUrls.filter(f => f.type === 'video').map((file, index) => (
-                <div key={`url-video-${index}`} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-                  <video 
-                    src={file.url}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
-                  <button 
-                    onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f => f.url === file.url))}
-                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                  >
+                <div key={`url-video-${index}`} className={`relative rounded-lg overflow-hidden bg-black ${getAspectClass(selectedAspectRatio)} mb-2`}>
+                  <video src={file.url} controls className="w-full h-full object-contain" />
+                  <button onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f2 => f2.url === file.url))} className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -500,16 +390,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           {uploadedVideos.length > 0 && (
             <div className="mb-3 md:mb-4">
               {uploadedVideos.map((file, index) => (
-                <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-                  <video 
-                    src={URL.createObjectURL(file)}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
-                  <button 
-                    onClick={() => removeVideo(index)}
-                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                  >
+                <div key={index} className={`relative rounded-lg overflow-hidden bg-black ${getAspectClass(selectedAspectRatio)} mb-2`}>
+                  <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
+                  <button onClick={() => removeVideo(index)} className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -517,43 +400,21 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             </div>
           )}
 
-          {/* Audio Files Tags from URLs (from homepage) */}
-          {uploadedFileUrls.filter(f => f.type === 'audio').length > 0 && (
+          {/* Audio Files */}
+          {(uploadedFileUrls.filter(f => f.type === 'audio').length > 0 || uploadedAudio.length > 0) && (
             <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
               {uploadedFileUrls.filter(f => f.type === 'audio').map((file, index) => (
-                <div 
-                  key={`url-audio-${index}`}
-                  className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm"
-                >
-                  <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
-                  <span className="text-gray-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
-                  <button 
-                    onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f => f.url === file.url))}
-                    className="text-gray-500 hover:text-white transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  </button>
+                <div key={`url-audio-${index}`} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm">
+                  <AudioLines className="w-3.5 h-3.5 text-purple-500" />
+                  <span className="text-gray-300 max-w-[150px] truncate">{file.name}</span>
+                  <button onClick={() => removeUploadedFileUrl(uploadedFileUrls.findIndex(f2 => f2.url === file.url))} className="text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Audio Files Tags from local files */}
-          {uploadedAudio.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
               {uploadedAudio.map((file, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm"
-                >
-                  <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
-                  <span className="text-gray-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
-                  <button 
-                    onClick={() => removeAudio(index)}
-                    className="text-gray-500 hover:text-white transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  </button>
+                <div key={index} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm">
+                  <AudioLines className="w-3.5 h-3.5 text-purple-500" />
+                  <span className="text-gray-300 max-w-[150px] truncate">{file.name}</span>
+                  <button onClick={() => removeAudio(index)} className="text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
                 </div>
               ))}
             </div>
@@ -576,34 +437,23 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             </div>
           )}
 
-          {/* Example Prompts - Scrollable on mobile */}
+          {/* Example Prompts */}
           <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 mt-2 mb-3 md:mb-4">
             <div className="flex md:flex-wrap gap-2 min-w-max md:min-w-0">
               {examplePrompts.slice(0, 3).map((example, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleExampleClick(example)}
-                  className="px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200 whitespace-nowrap"
-                  disabled={isSubmitting}
-                >
+                <button key={index} onClick={() => handleExampleClick(example)} className="px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200 whitespace-nowrap" disabled={isSubmitting}>
                   {example}
                 </button>
               ))}
-              {/* Show remaining prompts on desktop only */}
               {examplePrompts.slice(3).map((example, index) => (
-                <button
-                  key={index + 3}
-                  onClick={() => handleExampleClick(example)}
-                  className="hidden md:block px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200"
-                  disabled={isSubmitting}
-                >
+                <button key={index + 3} onClick={() => handleExampleClick(example)} className="hidden md:block px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200" disabled={isSubmitting}>
                   {example}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Timestamp Selection - Hidden on mobile */}
+          {/* Timestamp Selection */}
           <div className="hidden md:flex items-center gap-4 py-3 border-t border-gray-700/50">
             <div className="flex items-center gap-2">
               <Timer className="w-4 h-4 text-gray-400" />
@@ -612,24 +462,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-gray-500">Start</span>
-                <input
-                  type="text"
-                  value={startTimestamp}
-                  onChange={(e) => setStartTimestamp(e.target.value)}
-                  placeholder="00:00"
-                  className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50"
-                />
+                <input type="text" value={startTimestamp} onChange={(e) => setStartTimestamp(e.target.value)} placeholder="00:00" className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50" />
               </div>
               <span className="text-gray-500">—</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-gray-500">End</span>
-                <input
-                  type="text"
-                  value={endTimestamp}
-                  onChange={(e) => setEndTimestamp(e.target.value)}
-                  placeholder="00:15"
-                  className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50"
-                />
+                <input type="text" value={endTimestamp} onChange={(e) => setEndTimestamp(e.target.value)} placeholder="00:15" className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50" />
               </div>
             </div>
           </div>
@@ -638,19 +476,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between pt-3 md:pt-4 border-t border-gray-700/50 gap-3 md:gap-0">
             <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
               {/* Video Upload */}
-              <input
-                type="file"
-                ref={videoInputRef}
-                onChange={handleVideoUpload}
-                accept="video/*"
-                multiple
-                className="hidden"
-              />
-              <button
-                onClick={() => videoInputRef.current?.click()}
-                disabled={isSubmitting}
-                className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0"
-              >
+              <input type="file" ref={videoInputRef} onChange={handleVideoUpload} accept="video/*" multiple className="hidden" />
+              <button onClick={() => videoInputRef.current?.click()} disabled={isSubmitting} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
                 <div className="flex items-center gap-0.5">
                   <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
                   <Video className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
@@ -659,19 +486,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               </button>
 
               {/* Audio Upload */}
-              <input
-                type="file"
-                ref={audioInputRef}
-                onChange={handleAudioUpload}
-                accept="audio/*"
-                multiple
-                className="hidden"
-              />
-              <button
-                onClick={() => audioInputRef.current?.click()}
-                disabled={isSubmitting}
-                className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0"
-              >
+              <input type="file" ref={audioInputRef} onChange={handleAudioUpload} accept="audio/*" multiple className="hidden" />
+              <button onClick={() => audioInputRef.current?.click()} disabled={isSubmitting} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
                 <div className="flex items-center gap-0.5">
                   <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
                   <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
@@ -685,31 +501,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
-                    <div 
-                      className="border border-gray-500 rounded-sm"
-                      style={{ 
-                        width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7,
-                        height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7
-                      }}
-                    />
+                    <div className="border border-gray-500 rounded-sm" style={{ width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7, height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7 }} />
                     <span className="hidden sm:inline">{selectedAspectRatio}</span>
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                   {aspectRatioOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => setSelectedAspectRatio(option.value)}
-                      className={cn(
-                        "flex items-center gap-3 cursor-pointer",
-                        selectedAspectRatio === option.value && "bg-purple-500/20"
-                      )}
-                    >
-                      <div 
-                        className="border border-gray-400 rounded-sm"
-                        style={{ width: option.width, height: option.height }}
-                      />
+                    <DropdownMenuItem key={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
+                      <div className="border border-gray-400 rounded-sm" style={{ width: option.width, height: option.height }} />
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
@@ -726,14 +526,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                   {resolutionOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => setSelectedResolution(option.value)}
-                      className={cn(
-                        "cursor-pointer",
-                        selectedResolution === option.value && "bg-purple-500/20"
-                      )}
-                    >
+                    <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn("cursor-pointer", selectedResolution === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
@@ -751,21 +544,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                   {frameOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => setSelectedFrames(option.value)}
-                      className={cn(
-                        "cursor-pointer",
-                        selectedFrames === option.value && "bg-purple-500/20"
-                      )}
-                    >
+                    <DropdownMenuItem key={option.value} onClick={() => setSelectedFrames(option.value)} className={cn("cursor-pointer", selectedFrames === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Duration Selection */}
+              {/* Duration */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
@@ -776,14 +562,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                   {durationOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => setSelectedDuration(option.value)}
-                      className={cn(
-                        "cursor-pointer",
-                        selectedDuration === option.value && "bg-purple-500/20"
-                      )}
-                    >
+                    <DropdownMenuItem key={option.value} onClick={() => setSelectedDuration(option.value)} className={cn("cursor-pointer", selectedDuration === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
                   ))}
@@ -793,72 +572,56 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
             {/* Generate Button */}
             <Button
-              onClick={activeMode === 'aiclip' ? () => setShowAiClipResult(true) : handleSubmitInternal}
+              onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
               className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
-                activeMode === 'aiclip'
-                  ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
-                  : activeMode === 'retention'
-                  ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
-                  : activeMode === 'creator'
-                  ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
-                  : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
+                activeMode === 'aiclip' ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
+                : activeMode === 'retention' ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
+                : activeMode === 'creator' ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
+                : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
               }`}
             >
               {(isSubmitting || isAutoProcessing) ? (
-                <div className="flex items-center justify-center gap-1.5">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span className="hidden sm:inline">Processing...</span>
-                </div>
+                <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
               ) : activeMode === 'aiclip' ? (
-                <div className="flex items-center justify-center gap-1.5">
-                  <Scissors className="w-3.5 h-3.5" />
-                  <span>AI Clip</span>
-                </div>
+                <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>
               ) : activeMode === 'retention' ? (
-                <div className="flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Retention Edit</span>
-                </div>
+                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>
               ) : activeMode === 'creator' ? (
-                <div className="flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>AI Creator</span>
-                </div>
+                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>
               ) : (
-                <div className="flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Generate</span>
-                </div>
+                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>
               )}
             </Button>
           </div>
 
-          {/* AI Clip Results — inline chat-style */}
+          {/* Inline Chat-style Results — shown in dashboard after processing */}
           {showAiClipResult && (
-            <div className="mt-4 border-t border-[#a259ff]/20 pt-4 space-y-3">
+            <div className="mt-4 border-t border-[#a259ff]/20 pt-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#a259ff] to-[#d966ff] flex items-center justify-center">
-                    <Scissors className="w-3 h-3 text-white" />
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    activeMode === 'aiclip' ? 'bg-gradient-to-br from-[#a259ff] to-[#d966ff]'
+                    : activeMode === 'retention' ? 'bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]'
+                    : 'bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]'
+                  }`}>
+                    {activeMode === 'aiclip' ? <Scissors className="w-3 h-3 text-white" /> : <Sparkles className="w-3 h-3 text-white" />}
                   </div>
-                  <span className="text-sm font-semibold text-white">AI Clip</span>
+                  <span className="text-sm font-semibold text-white">
+                    {activeMode === 'aiclip' ? 'AI Clip' : activeMode === 'retention' ? 'Retention Editing' : 'AI Creator'}
+                  </span>
                   <span className="text-xs text-gray-400">— 4 viral clips extracted</span>
                 </div>
-                <button
-                  onClick={() => setShowAiClipResult(false)}
-                  className="text-gray-500 hover:text-white transition-colors"
-                >
+                <button onClick={() => setShowAiClipResult(false)} className="text-gray-500 hover:text-white transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+              {/* Adaptive grid based on selected aspect ratio */}
+              <div className={`grid gap-3 ${selectedAspectRatio === '9:16' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 {dummyClips.map((clip) => (
-                  <div
-                    key={clip.id}
-                    className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900"
-                  >
-                    <div className="relative bg-black aspect-video">
+                  <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900">
+                    <div className={`relative bg-black ${getAspectClass(selectedAspectRatio)}`}>
                       {activeClipId === clip.id ? (
                         <iframe
                           src={`https://drive.google.com/file/d/${clip.id}/preview`}
@@ -869,21 +632,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                       ) : (
                         <>
                           <div className="w-full h-full bg-gradient-to-br from-[#a259ff]/10 via-transparent to-[#d966ff]/10 flex items-center justify-center">
-                            <button
-                              onClick={() => setActiveClipId(clip.id)}
-                              className="flex flex-col items-center gap-1.5 group/play"
-                            >
+                            <button onClick={() => setActiveClipId(clip.id)} className="flex flex-col items-center gap-1.5 group/play">
                               <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover/play:bg-white/20 group-hover/play:scale-110 transition-all duration-200">
                                 <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                               </div>
                             </button>
                           </div>
-                          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">
-                            {clip.duration}
-                          </div>
+                          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
                           <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                            <Sparkles className="w-3 h-3" />
-                            {clip.score}% viral
+                            <Sparkles className="w-3 h-3" />{clip.score}% viral
                           </div>
                         </>
                       )}
@@ -892,7 +649,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-semibold truncate">{clip.title}</p>
                         <p className="text-gray-400 text-[10px] truncate">{clip.subtitle}</p>
-                        <div className="flex items-center gap-1.5 mt-1">
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                           {clip.tags.map(tag => (
                             <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px] border border-gray-700/50">#{tag}</span>
                           ))}
@@ -919,4 +676,3 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 };
 
 export default SimplifiedDashboard;
-
