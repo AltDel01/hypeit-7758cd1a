@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
-  Languages, Loader2, Play, ExternalLink
+  Languages, Loader2, Play, ExternalLink, TrendingUp, Download
 } from 'lucide-react';
+import retentionDemoVideo from '@/assets/retention-demo.mp4';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -98,6 +99,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [showAiClipResult, setShowAiClipResult] = useState(false);
+  const [showRetentionResult, setShowRetentionResult] = useState(false);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -149,7 +151,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         .catch(console.error);
       setTimeout(() => {
         setIsAutoProcessing(false);
-        setShowAiClipResult(true);
+        if (mode === 'retention') {
+          setShowRetentionResult(true);
+        } else {
+          setShowAiClipResult(true);
+        }
       }, 15000);
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
       setIsAutoProcessing(true);
@@ -255,7 +261,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     setIsAutoProcessing(true);
     setTimeout(() => {
       setIsAutoProcessing(false);
-      setShowAiClipResult(true);
+      if (activeMode === 'retention') {
+        setShowRetentionResult(true);
+      } else {
+        setShowAiClipResult(true);
+      }
     }, 15000);
   };
 
@@ -613,16 +623,10 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           {/* Results header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                activeMode === 'aiclip' ? 'bg-gradient-to-br from-[#a259ff] to-[#d966ff]'
-                : activeMode === 'retention' ? 'bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]'
-                : 'bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]'
-              }`}>
-                {activeMode === 'aiclip' ? <Scissors className="w-3.5 h-3.5 text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#a259ff] to-[#d966ff]">
+                <Scissors className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-base font-bold text-white">
-                {activeMode === 'aiclip' ? 'AI Clip Results' : activeMode === 'retention' ? 'Retention Edit Results' : 'AI Creator Results'}
-              </span>
+              <span className="text-base font-bold text-white">AI Clip Results</span>
               <span className="text-sm text-gray-400">— 4 viral clips extracted</span>
             </div>
             <button onClick={() => setShowAiClipResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
@@ -707,6 +711,93 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Retention Editing Result — single video, wider layout */}
+      {showRetentionResult && (
+        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]">
+                <TrendingUp className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="text-base font-bold text-white">Retention Edit Result</span>
+              <span className="text-sm text-gray-400">— optimized for maximum watch time</span>
+            </div>
+            <button onClick={() => setShowRetentionResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Video + Info side by side */}
+          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#ff6b6b]/30 rounded-2xl overflow-hidden">
+            {/* Video player */}
+            <div className="lg:w-2/3 relative bg-black">
+              <video
+                src={retentionDemoVideo}
+                controls
+                className="w-full h-full object-contain"
+                style={{ maxHeight: '520px' }}
+              />
+            </div>
+
+            {/* Stats panel */}
+            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
+              <div>
+                <h2 className="text-xl font-bold text-white leading-snug">Startup Founder: Why The CEO Journey Is So Steep</h2>
+                <p className="text-gray-400 text-sm mt-1">Retention-optimized edit — smart cuts, dynamic pacing & hook reinforcement</p>
+              </div>
+
+              {/* Retention score */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-[#ff6b6b]/10 to-[#ff9a3c]/10 border border-[#ff6b6b]/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300 font-medium">Retention Score</span>
+                  <span className="text-2xl font-black text-[#ff9a3c]">94%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-gray-700">
+                  <div className="h-2 rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c]" style={{ width: '94%' }} />
+                </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Watch Time', value: '+38%', icon: '⏱' },
+                  { label: 'Avg Duration', value: '4:12', icon: '🎬' },
+                  { label: 'Hook Strength', value: 'High', icon: '🎯' },
+                  { label: 'Pacing Score', value: '96/100', icon: '⚡' },
+                ].map(stat => (
+                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <div className="text-lg mb-0.5">{stat.icon}</div>
+                    <div className="text-white font-bold text-sm">{stat.value}</div>
+                    <div className="text-gray-500 text-xs">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Edits applied */}
+              <div>
+                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">Edits Applied</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Smart cuts', 'Hook boost', 'Pacing fix', 'B-roll insert', 'Audio sync'].map(tag => (
+                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#ff6b6b]/10 border border-[#ff6b6b]/30 text-[#ff9a3c] text-xs font-medium">{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Download */}
+              <a
+                href={retentionDemoVideo}
+                download="retention-edit.mp4"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
+              >
+                <Download className="w-4 h-4" />
+                Download Edited Video
+              </a>
+            </div>
           </div>
         </div>
       )}
