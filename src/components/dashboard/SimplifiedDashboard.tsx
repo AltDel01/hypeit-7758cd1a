@@ -131,14 +131,20 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setStartTimestamp(savedState.startTimestamp || '00:00');
       setEndTimestamp(savedState.endTimestamp || '00:15');
       setUploadedFileUrls(loadedFiles);
+
+      // Restore AI Clip mode if it was active on homepage
+      if (savedState.aiClipMode) {
+        setAiClipMode(true);
+      }
       
-      console.log('State loaded - prompt:', loadedPrompt, 'features:', loadedFeatures, 'files:', loadedFiles);
+      console.log('State loaded - prompt:', loadedPrompt, 'features:', loadedFeatures, 'files:', loadedFiles, 'aiClipMode:', savedState.aiClipMode);
       
       // Clear the saved state after loading
       clearEditorState();
       
       // Auto-submit if flag was set (from homepage Generate button)
-      if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
+      // Skip auto-submit if aiClipMode is active — user sees the modal instead
+      if (savedState.autoSubmit && !savedState.aiClipMode && (loadedPrompt.trim() || loadedFiles.length > 0)) {
         console.log('Auto-submitting request...');
         setIsAutoProcessing(true);
         
@@ -146,6 +152,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setTimeout(() => {
           handleAutoSubmit(loadedPrompt, loadedFeatures, savedState, loadedFiles);
         }, 100);
+      } else if (savedState.aiClipMode) {
+        // If AI Clip mode was active, open the modal automatically after a short delay
+        setTimeout(() => {
+          setShowAiClipModal(true);
+        }, 400);
       }
     }
   }, []);

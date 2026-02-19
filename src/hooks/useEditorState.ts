@@ -17,6 +17,7 @@ export interface EditorState {
   endTimestamp: string;
   uploadedFiles: UploadedFile[];
   autoSubmit?: boolean;
+  aiClipMode?: boolean;
 }
 
 export const saveEditorState = (state: EditorState): void => {
