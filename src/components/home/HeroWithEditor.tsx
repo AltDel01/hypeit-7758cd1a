@@ -141,7 +141,7 @@ const HeroWithEditor: React.FC = () => {
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [aiClipMode, setAiClipMode] = useState(false);
+  const [activeMode, setActiveMode] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('first-last');
@@ -271,7 +271,7 @@ const HeroWithEditor: React.FC = () => {
         endTimestamp,
         uploadedFiles,
         autoSubmit: true,
-        aiClipMode,
+        aiClipMode: activeMode === 'aiclip',
       });
       
       toast.dismiss(toastId);
@@ -326,8 +326,46 @@ const HeroWithEditor: React.FC = () => {
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
           {/* AI Clip Button */}
-          <AiClipButton className="mb-3" onAiClip={() => setAiClipMode(prev => !prev)} />
-          <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
+          <AiClipButton
+            className="mb-3"
+            onAiClip={() => setActiveMode(prev => prev === 'aiclip' ? null : 'aiclip')}
+            onRetentionEditing={() => setActiveMode(prev => prev === 'retention' ? null : 'retention')}
+            onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
+          />
+          <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
+            activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
+            : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
+            : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
+            : 'border-gray-700/50'
+          }`}>
+            {/* Active Mode Banner */}
+            {activeMode === 'aiclip' && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
+                <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
+                <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            {activeMode === 'retention' && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
+                <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
+                <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            {activeMode === 'creator' && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
+                <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
+                <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
             {/* Video Preview */}
             {uploadedVideos.length > 0 && <div className="mb-3 md:mb-4">
                 {uploadedVideos.map((file, index) => <div key={index} className="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">

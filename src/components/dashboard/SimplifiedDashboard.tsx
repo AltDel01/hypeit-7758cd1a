@@ -99,7 +99,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [uploadedFileUrls, setUploadedFileUrls] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
-  const [aiClipMode, setAiClipMode] = useState(false);
+  const [activeMode, setActiveMode] = useState<string | null>(null);
   const [showAiClipModal, setShowAiClipModal] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -132,9 +132,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setEndTimestamp(savedState.endTimestamp || '00:15');
       setUploadedFileUrls(loadedFiles);
 
-      // Restore AI Clip mode if it was active on homepage
+      // Restore active mode from homepage
       if (savedState.aiClipMode) {
-        setAiClipMode(true);
+        setActiveMode('aiclip');
       }
       
       console.log('State loaded - prompt:', loadedPrompt, 'features:', loadedFeatures, 'files:', loadedFiles, 'aiClipMode:', savedState.aiClipMode);
@@ -393,19 +393,42 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         {/* AI Clip Button */}
         <AiClipButton
           className="mb-0"
-          onAiClip={() => setAiClipMode(prev => !prev)}
+          onAiClip={() => setActiveMode(prev => prev === 'aiclip' ? null : 'aiclip')}
+          onRetentionEditing={() => setActiveMode(prev => prev === 'retention' ? null : 'retention')}
+          onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
         />
 
         {/* Prompt Box */}
         <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
-          aiClipMode ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10' : 'border-gray-700/50'
+          activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
+          : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
+          : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
+          : 'border-gray-700/50'
         }`}>
-          {/* AI Clip Mode Banner */}
-          {aiClipMode && (
+          {/* Active Mode Banner */}
+          {activeMode === 'aiclip' && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
               <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
-              <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — click "AI Clip" to generate clips from your video</span>
-              <button onClick={() => setAiClipMode(false)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+              <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {activeMode === 'retention' && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
+              <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
+              <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {activeMode === 'creator' && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
+              <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
+              <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -728,11 +751,15 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
             {/* Generate Button */}
             <Button
-              onClick={aiClipMode ? () => setShowAiClipModal(true) : handleSubmitInternal}
+              onClick={activeMode === 'aiclip' ? () => setShowAiClipModal(true) : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
               className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
-                aiClipMode
+                activeMode === 'aiclip'
                   ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
+                  : activeMode === 'retention'
+                  ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
+                  : activeMode === 'creator'
+                  ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
                   : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
               }`}
             >
@@ -741,10 +768,20 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span className="hidden sm:inline">Processing...</span>
                 </div>
-              ) : aiClipMode ? (
+              ) : activeMode === 'aiclip' ? (
                 <div className="flex items-center justify-center gap-1.5">
                   <Scissors className="w-3.5 h-3.5" />
                   <span>AI Clip</span>
+                </div>
+              ) : activeMode === 'retention' ? (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Retention Edit</span>
+                </div>
+              ) : activeMode === 'creator' ? (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>AI Creator</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-1.5">
