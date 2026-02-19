@@ -278,8 +278,8 @@ const HeroWithEditor: React.FC = () => {
         creatorMode: activeMode === 'creator',
       });
       
-      toast.dismiss(toastId);
-      // Navigate to dashboard — no extra success toast to avoid persistent notification
+      // Dismiss ALL toasts before navigating so nothing persists on dashboard
+      toast.dismiss();
       navigate('/dashboard');
     } catch (error) {
       console.error('Upload error:', error);

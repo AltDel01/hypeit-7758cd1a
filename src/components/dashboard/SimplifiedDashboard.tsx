@@ -150,7 +150,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setTimeout(() => {
         setIsAutoProcessing(false);
         setShowAiClipResult(true);
-      }, 1800);
+      }, 15000);
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
       setIsAutoProcessing(true);
       setTimeout(() => {
@@ -256,7 +256,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     setTimeout(() => {
       setIsAutoProcessing(false);
       setShowAiClipResult(true);
-    }, 1800);
+    }, 15000);
   };
 
   const handleSubmitInternal = async () => {
@@ -625,65 +625,71 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 </button>
               </div>
 
-              {/* Adaptive grid — mixed portrait/landscape use 2-col; all-portrait use 4-col */}
-              <div className={`grid gap-3 ${dummyClips.every(c => c.aspect === '9:16') ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'}`}>
+              {/* 4-col desktop, 2-col mobile — each card respects its own video aspect ratio */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                 {dummyClips.map((clip) => {
-                  const clipAspectClass = clip.aspect === '9:16' ? 'aspect-[9/16]' : clip.aspect === '1:1' ? 'aspect-square' : 'aspect-video';
+                  const isPortrait = clip.aspect === '9:16';
                   const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
                   return (
-                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900">
-                      <div className={`relative bg-black ${clipAspectClass}`}>
+                    <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
+                      {/* Video frame — adapts to portrait or landscape */}
+                      <div
+                        className="relative bg-black w-full overflow-hidden"
+                        style={{ aspectRatio: isPortrait ? '9/16' : '16/9' }}
+                      >
                         {activeClipId === clip.id ? (
                           <iframe
                             src={`https://drive.google.com/file/d/${clip.id}/preview`}
-                            className="w-full h-full"
+                            className="absolute inset-0 w-full h-full"
                             allow="autoplay"
                             allowFullScreen
                           />
                         ) : (
                           <>
-                            {/* Thumbnail from Google Drive */}
+                            {/* Thumbnail — always visible */}
                             <img
                               src={thumbnailUrl}
                               alt={clip.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                // fallback gradient if thumbnail fails to load
-                                (e.currentTarget as HTMLImageElement).style.display = 'none';
-                              }}
+                              className="absolute inset-0 w-full h-full object-cover"
                             />
+                            {/* Subtle dark overlay so play button is readable */}
+                            <div className="absolute inset-0 bg-black/20" />
                             {/* Play button overlay */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
-                              <button onClick={() => setActiveClipId(clip.id)} className="group/play">
-                                <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
-                                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <button
+                                onClick={() => setActiveClipId(clip.id)}
+                                className="group/play"
+                              >
+                                <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
+                                  <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                                 </div>
                               </button>
                             </div>
-                            <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
-                            <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                              <Sparkles className="w-3 h-3" />{clip.score}% viral
+                            <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 bg-black/70 rounded text-[10px] text-white font-mono">{clip.duration}</div>
+                            <div className="absolute top-1.5 left-1.5 flex items-center gap-1 px-1.5 py-0.5 bg-[#a259ff]/80 rounded-full text-[10px] text-white font-semibold">
+                              <Sparkles className="w-2.5 h-2.5" />{clip.score}%
                             </div>
                           </>
                         )}
                       </div>
-                      <div className="px-3 py-2.5 flex items-start justify-between gap-2">
+                      {/* Clip info */}
+                      <div className="px-2 py-2 flex items-start justify-between gap-1">
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-xs font-semibold truncate">{clip.title}</p>
-                          <p className="text-gray-400 text-[10px] truncate">{clip.subtitle}</p>
-                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            {clip.tags.map(tag => (
-                              <span key={tag} className="px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px] border border-gray-700/50">#{tag}</span>
+                          <p className="text-white text-[10px] font-semibold leading-tight truncate">{clip.title}</p>
+                          <p className="text-gray-400 text-[9px] truncate">{clip.subtitle}</p>
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {clip.tags.slice(0, 1).map(tag => (
+                              <span key={tag} className="px-1 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[8px] border border-gray-700/50">#{tag}</span>
                             ))}
-                            <span className="text-gray-500 text-[9px]">{clip.views} views avg</span>
+                            <span className="text-gray-500 text-[8px]">{clip.views}</span>
                           </div>
                         </div>
                         <button
                           onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
-                          className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                          className="p-1 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
                           title="Open in Drive"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <ExternalLink className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
