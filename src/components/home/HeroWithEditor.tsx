@@ -279,9 +279,7 @@ const HeroWithEditor: React.FC = () => {
       });
       
       toast.dismiss(toastId);
-      toast.success('Files uploaded! Redirecting...');
-
-      // Navigate to dashboard
+      // Navigate to dashboard — no extra success toast to avoid persistent notification
       navigate('/dashboard');
     } catch (error) {
       console.error('Upload error:', error);
