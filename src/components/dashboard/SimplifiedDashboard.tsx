@@ -21,10 +21,10 @@ import AiClipButton from '@/components/shared/AiClipButton';
 
 // All clips are portrait 9:16 — these are viral short clips (TikTok/Reels/Shorts format)
 const dummyClips = [
-  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'], aspect: '9:16' },
-  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'], aspect: '9:16' },
-  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'], aspect: '9:16' },
-  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'], aspect: '9:16' },
+  { id: '1766sBFizaRZQfnMK7VA1egWIxhnMgaLS', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'], aspect: '9:16' },
+  { id: '1TpRW3QkeVfy1Pq8Z1_scUSJxxSXpImXP', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'], aspect: '9:16' },
+  { id: '19mMJ5jATcgG0dIyk9Kj6wfkOnm7mdBVd', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'], aspect: '9:16' },
+  { id: '1FjrS0TRyIJwATeTpsMRxsSM7uYa2SZoB', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'], aspect: '9:16' },
 ];
 
 interface SimplifiedDashboardProps {
