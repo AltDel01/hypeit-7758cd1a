@@ -213,19 +213,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    // AI Edit: immediately triggers processing and shows dummy result
+    // AI Edit: works like AI Clip/Retention/Creator — sets activeMode so Generate button triggers it
     if (featureId === 'ai-edit') {
-      setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
-      setShowAiClipResult(false);
-      setShowRetentionResult(false);
-      setShowAiCreatorResult(false);
-      setShowAiEditResult(false);
-      setActiveMode(null);
-      setIsAutoProcessing(true);
-      setTimeout(() => {
-        setIsAutoProcessing(false);
-        setShowAiEditResult(true);
-      }, 15000);
+      setActiveMode(prev => {
+        if (prev !== 'aiedit') {
+          setShowAiClipResult(false);
+          setShowRetentionResult(false);
+          setShowAiCreatorResult(false);
+          setShowAiEditResult(false);
+        }
+        return prev === 'aiedit' ? null : 'aiedit';
+      });
       return;
     }
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
@@ -267,7 +265,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const handleSpecialModeSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const modeLabel = activeMode === 'aiclip' ? 'AI Clip' : activeMode === 'retention' ? 'Retention Editing' : 'AI Creator';
+      const modeLabel = activeMode === 'aiclip' ? 'AI Clip' : activeMode === 'retention' ? 'Retention Editing' : activeMode === 'aiedit' ? 'AI Edit' : 'AI Creator';
       let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
       fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
@@ -286,6 +284,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setShowRetentionResult(true);
       } else if (activeMode === 'creator') {
         setShowAiCreatorResult(true);
+      } else if (activeMode === 'aiedit') {
+        setShowAiEditResult(true);
       } else {
         setShowAiClipResult(true);
       }
@@ -342,7 +342,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
   };
 
-  const isSpecialMode = ['aiclip', 'retention', 'creator'].includes(activeMode || '');
+  const isSpecialMode = ['aiclip', 'retention', 'creator', 'aiedit'].includes(activeMode || '');
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
@@ -431,6 +431,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
           : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
           : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
+          : activeMode === 'aiedit' ? 'border-[#f9a825]/60 shadow-lg shadow-[#f9a825]/10'
           : 'border-gray-700/50'
         }`}>
           {/* Active Mode Banner */}
@@ -452,6 +453,13 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
               <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
               <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
+              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          )}
+          {activeMode === 'aiedit' && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#f9a825]/10 border border-[#f9a825]/30">
+              <Wand2 className="w-3.5 h-3.5 text-[#f9a825]" />
+              <span className="text-xs text-[#f9a825] font-medium">AI Edit mode active — smart auto-edit with effects & transitions</span>
               <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
@@ -671,10 +679,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
-              className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
+            className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
                 activeMode === 'aiclip' ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
                 : activeMode === 'retention' ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
                 : activeMode === 'creator' ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
+                : activeMode === 'aiedit' ? 'bg-gradient-to-r from-[#f9a825] to-[#ff6f00] shadow-lg shadow-amber-500/30'
                 : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
               }`}
             >
@@ -686,6 +695,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>
               ) : activeMode === 'creator' ? (
                 <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>
+              ) : activeMode === 'aiedit' ? (
+                <div className="flex items-center justify-center gap-1.5"><Wand2 className="w-3.5 h-3.5" /><span>AI Edit</span></div>
               ) : (
                 <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>
               )}
