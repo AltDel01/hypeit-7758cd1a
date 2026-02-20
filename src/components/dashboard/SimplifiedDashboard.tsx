@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import retentionDemoVideo from '@/assets/retention-demo.mp4';
 import aiCreatorDemoVideo from '@/assets/ai-creator-demo.mp4';
+import aiEditDemoVideo from '@/assets/dummy-ai-edit.mp4';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -102,6 +103,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [showAiClipResult, setShowAiClipResult] = useState(false);
   const [showRetentionResult, setShowRetentionResult] = useState(false);
   const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
+  const [showAiEditResult, setShowAiEditResult] = useState(false);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -212,6 +214,13 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
   const handleFeatureClick = (featureId: string) => {
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
+    // Selecting AI Edit clears any previous special results (new order)
+    if (featureId === 'ai-edit') {
+      setShowAiClipResult(false);
+      setShowRetentionResult(false);
+      setShowAiCreatorResult(false);
+      setShowAiEditResult(false);
+    }
   };
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +289,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       toast.error('Please enter a prompt or upload media');
       return;
     }
+
+    const isAiEditMode = selectedFeatures.includes('ai-edit');
+
     setIsSubmitting(true);
     try {
       let fullPrompt = prompt.trim();
@@ -297,12 +309,28 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         toast.error('Failed to submit request. Please try again.');
         setIsSubmitting(false);
         setIsAutoProcessing(false);
+        return;
       }
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('Something went wrong. Please try again.');
       setIsSubmitting(false);
       setIsAutoProcessing(false);
+      return;
+    }
+
+    // AI Edit dummy: show result after processing timer
+    if (isAiEditMode) {
+      setIsAutoProcessing(true);
+      setIsSubmitting(false);
+      setShowAiClipResult(false);
+      setShowRetentionResult(false);
+      setShowAiCreatorResult(false);
+      setShowAiEditResult(false);
+      setTimeout(() => {
+        setIsAutoProcessing(false);
+        setShowAiEditResult(true);
+      }, 15000);
     }
   };
 
@@ -366,6 +394,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               setShowAiClipResult(false);
               setShowRetentionResult(false);
               setShowAiCreatorResult(false);
+              setShowAiEditResult(false);
             }
             return prev === 'aiclip' ? null : 'aiclip';
           })}
@@ -374,6 +403,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               setShowAiClipResult(false);
               setShowRetentionResult(false);
               setShowAiCreatorResult(false);
+              setShowAiEditResult(false);
             }
             return prev === 'retention' ? null : 'retention';
           })}
@@ -382,6 +412,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               setShowAiClipResult(false);
               setShowRetentionResult(false);
               setShowAiCreatorResult(false);
+              setShowAiEditResult(false);
             }
             return prev === 'creator' ? null : 'creator';
           })}
@@ -923,6 +954,93 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               >
                 <Download className="w-4 h-4" />
                 Download Creator Video
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Edit Result — single video, wider layout */}
+      {showAiEditResult && (
+        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#8c52ff] to-[#b616d6]">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="text-base font-bold text-white">AI Edit Result</span>
+              <span className="text-sm text-gray-400">— smart auto-edit applied</span>
+            </div>
+            <button onClick={() => setShowAiEditResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Video + Info side by side */}
+          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#8c52ff]/30 rounded-2xl overflow-hidden">
+            {/* Video player */}
+            <div className="lg:w-2/3 relative bg-black flex items-center justify-center">
+              <video
+                src={aiEditDemoVideo}
+                controls
+                className="w-full h-full object-contain"
+                style={{ maxHeight: '520px' }}
+              />
+            </div>
+
+            {/* Stats panel */}
+            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
+              <div>
+                <h2 className="text-xl font-bold text-white leading-snug">AI Edited: Auto-Enhanced Video</h2>
+                <p className="text-gray-400 text-sm mt-1">Smart cuts, effects, transitions & color grading applied automatically</p>
+              </div>
+
+              {/* Edit score */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-[#8c52ff]/10 to-[#b616d6]/10 border border-[#8c52ff]/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300 font-medium">Edit Quality Score</span>
+                  <span className="text-2xl font-black text-[#b616d6]">96%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-gray-700">
+                  <div className="h-2 rounded-full bg-gradient-to-r from-[#8c52ff] to-[#b616d6]" style={{ width: '96%' }} />
+                </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Cuts Made', value: '24', icon: '✂️' },
+                  { label: 'Color Grade', value: 'Cinema', icon: '🎨' },
+                  { label: 'Transitions', value: '12', icon: '🎬' },
+                  { label: 'Effects', value: '8 FX', icon: '⚡' },
+                ].map(stat => (
+                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <div className="text-lg mb-0.5">{stat.icon}</div>
+                    <div className="text-white font-bold text-sm">{stat.value}</div>
+                    <div className="text-gray-500 text-xs">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Edits applied */}
+              <div>
+                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">Edits Applied</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Smart cuts', 'Color grade', 'Transitions', 'Sound mix', 'Effects'].map(tag => (
+                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#8c52ff]/10 border border-[#8c52ff]/30 text-[#b616d6] text-xs font-medium">{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Download */}
+              <a
+                href={aiEditDemoVideo}
+                download="ai-edit-result.mp4"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
+              >
+                <Download className="w-4 h-4" />
+                Download Edited Video
               </a>
             </div>
           </div>
