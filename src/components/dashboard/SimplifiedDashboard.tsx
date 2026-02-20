@@ -285,12 +285,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleSubmitInternal = async () => {
-    if (!prompt.trim() && uploadedVideos.length === 0 && uploadedFileUrls.length === 0) {
+    const isAiEditMode = selectedFeatures.includes('ai-edit');
+
+    if (!isAiEditMode && !prompt.trim() && uploadedVideos.length === 0 && uploadedFileUrls.length === 0) {
       toast.error('Please enter a prompt or upload media');
       return;
     }
-
-    const isAiEditMode = selectedFeatures.includes('ai-edit');
 
     setIsSubmitting(true);
     try {
