@@ -213,13 +213,20 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
-    // Selecting AI Edit clears any previous special results (new order)
-    if (featureId === 'ai-edit') {
+    const isAlreadySelected = selectedFeatures.includes(featureId);
+    setSelectedFeatures(prev => isAlreadySelected ? prev.filter(id => id !== featureId) : [...prev, featureId]);
+
+    // Clicking AI Edit immediately starts the dummy processing flow
+    if (featureId === 'ai-edit' && !isAlreadySelected && !isAutoProcessing) {
       setShowAiClipResult(false);
       setShowRetentionResult(false);
       setShowAiCreatorResult(false);
       setShowAiEditResult(false);
+      setIsAutoProcessing(true);
+      setTimeout(() => {
+        setIsAutoProcessing(false);
+        setShowAiEditResult(true);
+      }, 15000);
     }
   };
 
