@@ -1,11 +1,12 @@
 import React from 'react';
-import { Scissors, Sparkles, TrendingUp, User } from 'lucide-react';
+import { Scissors, Sparkles, TrendingUp, User, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AiClipButtonProps {
   onAiClip?: () => void;
   onRetentionEditing?: () => void;
   onAiCreator?: () => void;
+  onAiEdit?: () => void;
   className?: string;
 }
 
@@ -42,15 +43,25 @@ const toolButtons = [
     border: 'border-[#38d9f5]/50 hover:border-[#4f8eff]',
     bg: 'from-[#38d9f5]/20 to-[#4f8eff]/20 hover:from-[#38d9f5]/35 hover:to-[#4f8eff]/35',
   },
+  {
+    key: 'aiedit',
+    label: 'AI Edit',
+    description: 'Smart auto-edit',
+    icon: <Wand2 className="w-4 h-4 text-[#f9a825]" />,
+    gradient: 'from-[#f9a825] to-[#ff6f00]',
+    border: 'border-[#f9a825]/50 hover:border-[#ff6f00]',
+    bg: 'from-[#f9a825]/20 to-[#ff6f00]/20 hover:from-[#f9a825]/35 hover:to-[#ff6f00]/35',
+  },
 ];
 
 const AiClipButton: React.FC<AiClipButtonProps> = ({
   onAiClip,
   onRetentionEditing,
   onAiCreator,
+  onAiEdit,
   className,
 }) => {
-  const handlers = [onAiClip, onRetentionEditing, onAiCreator];
+  const handlers = [onAiClip, onRetentionEditing, onAiCreator, onAiEdit];
 
   return (
     <div className={cn("flex items-center justify-center gap-2 mb-3", className)}>

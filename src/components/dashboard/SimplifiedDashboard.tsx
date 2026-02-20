@@ -213,21 +213,6 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    if (featureId === 'ai-edit') {
-      // Always trigger the dummy flow when clicking AI Edit (not a toggle)
-      setSelectedFeatures(prev => prev.includes(featureId) ? prev : [...prev, featureId]);
-      setShowAiClipResult(false);
-      setShowRetentionResult(false);
-      setShowAiCreatorResult(false);
-      setShowAiEditResult(false);
-      setActiveMode(null);
-      setIsAutoProcessing(true);
-      setTimeout(() => {
-        setIsAutoProcessing(false);
-        setShowAiEditResult(true);
-      }, 15000);
-      return;
-    }
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
   };
 
@@ -424,6 +409,18 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             }
             return prev === 'creator' ? null : 'creator';
           })}
+          onAiEdit={() => {
+            setShowAiClipResult(false);
+            setShowRetentionResult(false);
+            setShowAiCreatorResult(false);
+            setShowAiEditResult(false);
+            setActiveMode(null);
+            setIsAutoProcessing(true);
+            setTimeout(() => {
+              setIsAutoProcessing(false);
+              setShowAiEditResult(true);
+            }, 15000);
+          }}
         />
 
         {/* Prompt Box */}
