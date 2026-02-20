@@ -10,7 +10,7 @@ interface AiClipResultModalProps {
 
 const dummyClips = [
   {
-    id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh',
+    id: '1766sBFizaRZQfnMK7VA1egWIxhnMgaLS',
     title: '9-to-9 Startup Life vs. 9-to-5 Jobs',
     subtitle: 'The REAL Difference',
     duration: '1:24',
@@ -19,7 +19,7 @@ const dummyClips = [
     tags: ['viral', 'trending'],
   },
   {
-    id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle',
+    id: '1TpRW3QkeVfy1Pq8Z1_scUSJxxSXpImXP',
     title: 'Startup Frustration',
     subtitle: 'Turn Anger into Lasting Impulse',
     duration: '0:58',
@@ -28,7 +28,7 @@ const dummyClips = [
     tags: ['emotional', 'motivational'],
   },
   {
-    id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG',
+    id: '19mMJ5jATcgG0dIyk9Kj6wfkOnm7mdBVd',
     title: 'Startup Grind',
     subtitle: 'Mastering Essential Skills Quickly',
     duration: '1:12',
@@ -37,7 +37,7 @@ const dummyClips = [
     tags: ['educational', 'trending'],
   },
   {
-    id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP',
+    id: '1FjrS0TRyIJwATeTpsMRxsSM7uYa2SZoB',
     title: 'Startup Longevity',
     subtitle: 'Can You Stay Fun Through Hard Times?',
     duration: '1:05',
