@@ -263,6 +263,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
   // Special mode submit: logs to DB for history, then shows inline results
   const handleSpecialModeSubmit = async () => {
+    console.log('[SpecialMode] handleSpecialModeSubmit called, activeMode:', activeMode);
     setIsSubmitting(false);
     setIsAutoProcessing(true);
     setShowAiClipResult(false);
@@ -272,20 +273,24 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
     // Capture current mode before any async work
     const currentMode = activeMode;
+    console.log('[SpecialMode] currentMode captured:', currentMode);
 
     // Start the 15-second dummy timer IMMEDIATELY (don't wait for DB)
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
+      console.log('[SpecialMode] Timer fired! currentMode:', currentMode);
       setIsAutoProcessing(false);
       if (currentMode === 'retention') {
         setShowRetentionResult(true);
       } else if (currentMode === 'creator') {
         setShowAiCreatorResult(true);
       } else if (currentMode === 'aiedit') {
+        console.log('[SpecialMode] Setting showAiEditResult to TRUE');
         setShowAiEditResult(true);
       } else {
         setShowAiClipResult(true);
       }
     }, 15000);
+    console.log('[SpecialMode] Timer started with id:', timerId);
 
     // Fire-and-forget DB logging (don't block the UI)
     try {
@@ -302,9 +307,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleSubmitInternal = async () => {
-    const isAiEditMode = selectedFeatures.includes('ai-edit');
-
-    if (!isAiEditMode && !prompt.trim() && uploadedVideos.length === 0 && uploadedFileUrls.length === 0) {
+    if (!prompt.trim() && uploadedVideos.length === 0 && uploadedFileUrls.length === 0) {
       toast.error('Please enter a prompt or upload media');
       return;
     }
@@ -335,20 +338,6 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setIsAutoProcessing(false);
       return;
     }
-
-    // AI Edit dummy: show result after processing timer
-    if (isAiEditMode) {
-      setIsAutoProcessing(true);
-      setIsSubmitting(false);
-      setShowAiClipResult(false);
-      setShowRetentionResult(false);
-      setShowAiCreatorResult(false);
-      setShowAiEditResult(false);
-      setTimeout(() => {
-        setIsAutoProcessing(false);
-        setShowAiEditResult(true);
-      }, 15000);
-    }
   };
 
   const isSpecialMode = ['aiclip', 'retention', 'creator', 'aiedit'].includes(activeMode || '');
@@ -367,21 +356,28 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         {/* Editing Feature Buttons */}
         <div className="w-full overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
-            {editingFeatures.slice(0, 6).map((feature) => (
+            {editingFeatures.slice(0, 6).map((feature) => {
+              const isActive = feature.id === 'ai-edit' 
+                ? activeMode === 'aiedit' 
+                : selectedFeatures.includes(feature.id);
+              return (
               <button
                 key={feature.id}
                 onClick={() => handleFeatureClick(feature.id)}
                 className={cn(
                   "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                  selectedFeatures.includes(feature.id)
-                    ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
+                  isActive
+                    ? feature.id === 'ai-edit' 
+                      ? "bg-gradient-to-r from-[#f9a825] to-[#ff6f00] text-white shadow-lg shadow-amber-500/30"
+                      : "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
                     : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
                 )}
               >
                 <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
