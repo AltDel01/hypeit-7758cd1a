@@ -263,9 +263,33 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
   // Special mode submit: logs to DB for history, then shows inline results
   const handleSpecialModeSubmit = async () => {
-    setIsSubmitting(true);
+    setIsSubmitting(false);
+    setIsAutoProcessing(true);
+    setShowAiClipResult(false);
+    setShowRetentionResult(false);
+    setShowAiCreatorResult(false);
+    setShowAiEditResult(false);
+
+    // Capture current mode before any async work
+    const currentMode = activeMode;
+
+    // Start the 15-second dummy timer IMMEDIATELY (don't wait for DB)
+    setTimeout(() => {
+      setIsAutoProcessing(false);
+      if (currentMode === 'retention') {
+        setShowRetentionResult(true);
+      } else if (currentMode === 'creator') {
+        setShowAiCreatorResult(true);
+      } else if (currentMode === 'aiedit') {
+        setShowAiEditResult(true);
+      } else {
+        setShowAiClipResult(true);
+      }
+    }, 15000);
+
+    // Fire-and-forget DB logging (don't block the UI)
     try {
-      const modeLabel = activeMode === 'aiclip' ? 'AI Clip' : activeMode === 'retention' ? 'Retention Editing' : activeMode === 'aiedit' ? 'AI Edit' : 'AI Creator';
+      const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : currentMode === 'aiedit' ? 'AI Edit' : 'AI Creator';
       let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
       fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
@@ -274,22 +298,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       onRequestCreated?.();
     } catch (error) {
       console.error('Special mode submit error:', error);
-    } finally {
-      setIsSubmitting(false);
     }
-    setIsAutoProcessing(true);
-    setTimeout(() => {
-      setIsAutoProcessing(false);
-      if (activeMode === 'retention') {
-        setShowRetentionResult(true);
-      } else if (activeMode === 'creator') {
-        setShowAiCreatorResult(true);
-      } else if (activeMode === 'aiedit') {
-        setShowAiEditResult(true);
-      } else {
-        setShowAiClipResult(true);
-      }
-    }, 15000);
   };
 
   const handleSubmitInternal = async () => {
