@@ -153,6 +153,10 @@ const HeroWithEditor: React.FC = () => {
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:15');
   const handleFeatureClick = (featureId: string) => {
+    if (featureId === 'ai-edit') {
+      setActiveMode(prev => prev === 'aiedit' ? null : 'aiedit');
+      return;
+    }
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
   };
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,10 +275,11 @@ const HeroWithEditor: React.FC = () => {
         startTimestamp,
         endTimestamp,
         uploadedFiles,
-        autoSubmit: activeMode !== 'aiclip' && activeMode !== 'retention' && activeMode !== 'creator',
+        autoSubmit: activeMode !== 'aiclip' && activeMode !== 'retention' && activeMode !== 'creator' && activeMode !== 'aiedit',
         aiClipMode: activeMode === 'aiclip',
         retentionMode: activeMode === 'retention',
         creatorMode: activeMode === 'creator',
+        aiEditMode: activeMode === 'aiedit',
       });
       
       // Dismiss ALL toasts before navigating so nothing persists on dashboard
@@ -309,7 +314,7 @@ const HeroWithEditor: React.FC = () => {
         {/* Editing Feature Buttons - Scrollable on mobile */}
         <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
-            {editingFeatures.slice(0, 6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
+            {editingFeatures.slice(0, 6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", feature.id === 'ai-edit' ? (activeMode === 'aiedit' ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50") : selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
                 <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
               </button>)}
@@ -336,6 +341,7 @@ const HeroWithEditor: React.FC = () => {
             activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
             : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
             : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
+            : activeMode === 'aiedit' ? 'border-amber-500/60 shadow-lg shadow-amber-500/10'
             : 'border-gray-700/50'
           }`}>
             {/* Active Mode Banner */}
@@ -361,6 +367,15 @@ const HeroWithEditor: React.FC = () => {
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
                 <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
                 <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            {activeMode === 'aiedit' && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs text-amber-400 font-medium">AI Edit mode active — smart auto-edit with effects & transitions</span>
                 <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -544,8 +559,10 @@ const HeroWithEditor: React.FC = () => {
                     ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
                     : activeMode === 'retention'
                     ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
-                    : activeMode === 'creator'
+                     : activeMode === 'creator'
                     ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
+                    : activeMode === 'aiedit'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30'
                     : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
                 }`}
               >
@@ -568,6 +585,11 @@ const HeroWithEditor: React.FC = () => {
                   <div className="flex items-center justify-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>AI Creator</span>
+                  </div>
+                ) : activeMode === 'aiedit' ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>AI Edit</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-1.5">

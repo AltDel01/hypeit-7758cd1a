@@ -20,6 +20,7 @@ export interface EditorState {
   aiClipMode?: boolean;
   retentionMode?: boolean;
   creatorMode?: boolean;
+  aiEditMode?: boolean;
 }
 
 export const saveEditorState = (state: EditorState): void => {

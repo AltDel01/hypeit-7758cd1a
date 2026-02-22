@@ -139,6 +139,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     if (savedState.aiClipMode) mode = 'aiclip';
     else if (savedState.retentionMode) mode = 'retention';
     else if (savedState.creatorMode) mode = 'creator';
+    else if (savedState.aiEditMode) mode = 'aiedit';
     if (mode) setActiveMode(mode);
 
     clearEditorState();
@@ -146,7 +147,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     if (mode) {
       // Special mode: show loading then inline results, AND log to DB + send email
       setIsAutoProcessing(true);
-      const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : 'AI Creator';
+      const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mode === 'aiedit' ? 'AI Edit' : 'AI Creator';
       const fullPrompt = `[${modeLabel}] ${loadedPrompt.trim() || 'Generate viral content'} | Aspect: ${savedState.selectedAspectRatio || '9:16'} | Resolution: ${savedState.selectedResolution || '1080P'} | Duration: ${savedState.selectedDuration || '15s'}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
@@ -159,6 +160,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           setShowRetentionResult(true);
         } else if (mode === 'creator') {
           setShowAiCreatorResult(true);
+        } else if (mode === 'aiedit') {
+          setShowAiEditResult(true);
         } else {
           setShowAiClipResult(true);
         }
