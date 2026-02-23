@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Scissors, Sparkles, Download, ExternalLink, Play, CheckCircle } from 'lucide-react';
+import { X, Scissors, Sparkles, Download, Play, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -10,7 +10,7 @@ interface AiClipResultModalProps {
 
 const dummyClips = [
   {
-    id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh',
+    id: 'clip-1',
     title: '9-to-9 Startup Life vs. 9-to-5 Jobs',
     subtitle: 'The REAL Difference',
     duration: '1:24',
@@ -19,7 +19,7 @@ const dummyClips = [
     tags: ['viral', 'trending'],
   },
   {
-    id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle',
+    id: 'clip-2',
     title: 'Startup Frustration',
     subtitle: 'Turn Anger into Lasting Impulse',
     duration: '0:58',
@@ -28,7 +28,7 @@ const dummyClips = [
     tags: ['emotional', 'motivational'],
   },
   {
-    id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG',
+    id: 'clip-3',
     title: 'Startup Grind',
     subtitle: 'Mastering Essential Skills Quickly',
     duration: '1:12',
@@ -37,7 +37,7 @@ const dummyClips = [
     tags: ['educational', 'trending'],
   },
   {
-    id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP',
+    id: 'clip-4',
     title: 'Startup Longevity',
     subtitle: 'Can You Stay Fun Through Hard Times?',
     duration: '1:05',
@@ -48,7 +48,6 @@ const dummyClips = [
 ];
 
 const AiClipResultModal: React.FC<AiClipResultModalProps> = ({ open, onClose }) => {
-  const [activeClip, setActiveClip] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
 
   if (!open) return null;
@@ -59,11 +58,7 @@ const AiClipResultModal: React.FC<AiClipResultModalProps> = ({ open, onClose }) 
     );
   };
 
-  const getEmbedUrl = (id: string) =>
-    `https://drive.google.com/file/d/${id}/preview`;
-
-  const getViewUrl = (id: string) =>
-    `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+  // Video URLs removed - no dummy files
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -113,45 +108,26 @@ const AiClipResultModal: React.FC<AiClipResultModalProps> = ({ open, onClose }) 
               >
                 {/* Video / Thumbnail area */}
                 <div className="relative bg-black aspect-video">
-                  {activeClip === clip.id ? (
-                    <iframe
-                      src={getEmbedUrl(clip.id)}
-                      className="w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <>
-                      {/* Placeholder thumbnail */}
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-full bg-gradient-to-br from-[#a259ff]/10 via-transparent to-[#d966ff]/10" />
-                        </div>
-                        <button
-                          onClick={() => setActiveClip(clip.id)}
-                          className="relative z-10 flex flex-col items-center gap-2 group/play"
-                        >
-                          <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center group-hover/play:bg-white/20 group-hover/play:scale-110 transition-all duration-200">
-                            <Play className="w-6 h-6 text-white fill-white ml-1" />
-                          </div>
-                          <span className="text-xs text-gray-300 opacity-0 group-hover/play:opacity-100 transition-opacity">
-                            Click to play
-                          </span>
-                        </button>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#a259ff]/10 via-transparent to-[#d966ff]/10" />
+                    <div className="relative z-10 flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Play className="w-6 h-6 text-white fill-white ml-1" />
                       </div>
+                      <span className="text-xs text-gray-400">No video available</span>
+                    </div>
+                  </div>
 
-                      {/* Duration badge */}
-                      <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">
-                        {clip.duration}
-                      </div>
+                  {/* Duration badge */}
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">
+                    {clip.duration}
+                  </div>
 
-                      {/* Viral score badge */}
-                      <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                        <Sparkles className="w-3 h-3" />
-                        {clip.score}% viral
-                      </div>
-                    </>
-                  )}
+                  {/* Viral score badge */}
+                  <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
+                    <Sparkles className="w-3 h-3" />
+                    {clip.score}% viral
+                  </div>
                 </div>
 
                 {/* Info row */}
@@ -173,13 +149,6 @@ const AiClipResultModal: React.FC<AiClipResultModalProps> = ({ open, onClose }) 
                   </div>
 
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button
-                      onClick={() => window.open(getViewUrl(clip.id), '_blank')}
-                      className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
-                      title="Open in Drive"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
                     <button
                       onClick={() => toggleSelect(clip.id)}
                       className={cn(
