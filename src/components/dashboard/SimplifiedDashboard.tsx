@@ -4,9 +4,10 @@ import {
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
   Languages, Loader2, Play, ExternalLink, TrendingUp, Download
 } from 'lucide-react';
-import retentionDemoVideo from '@/assets/retention-demo.mp4';
-import aiCreatorDemoVideo from '@/assets/ai-creator-demo.mp4';
-import aiEditDemoVideo from '@/assets/dummy-ai-edit.mp4';
+// Dummy video placeholders (files removed)
+const retentionDemoVideo = '';
+const aiCreatorDemoVideo = '';
+const aiEditDemoVideo = '';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
