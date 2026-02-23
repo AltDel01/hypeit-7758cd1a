@@ -20,12 +20,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
 
-// All clips are portrait 9:16 — these are viral short clips (TikTok/Reels/Shorts format)
+// Dummy clips (video files removed)
 const dummyClips = [
-  { id: '1PmzQse11xv4HV1O4iEUh02OMvoOJ7IPh', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'], aspect: '9:16' },
-  { id: '1B4mBNaUUtC1-LaAU4ERGXKF3SW2hUQle', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'], aspect: '9:16' },
-  { id: '12Tz8beJ6mM3ubO3DasR2RLqKX7m4qFLG', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'], aspect: '9:16' },
-  { id: '1nCKqOnNr9jqYf1FdQFiljSquHF-es-zP', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'], aspect: '9:16' },
+  { id: 'clip-1', title: '9-to-9 Startup Life vs. 9-to-5 Jobs', subtitle: 'The REAL Difference', duration: '1:24', views: '24.3K', score: 98, tags: ['viral', 'trending'], aspect: '9:16' },
+  { id: 'clip-2', title: 'Startup Frustration', subtitle: 'Turn Anger into Lasting Impulse', duration: '0:58', views: '18.1K', score: 94, tags: ['emotional', 'motivational'], aspect: '9:16' },
+  { id: 'clip-3', title: 'Startup Grind', subtitle: 'Mastering Essential Skills Quickly', duration: '1:12', views: '31.7K', score: 96, tags: ['educational', 'trending'], aspect: '9:16' },
+  { id: 'clip-4', title: 'Startup Longevity', subtitle: 'Can You Stay Fun Through Hard Times?', duration: '1:05', views: '15.8K', score: 91, tags: ['mindset', 'resilience'], aspect: '9:16' },
 ];
 
 interface SimplifiedDashboardProps {
@@ -105,7 +105,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [showRetentionResult, setShowRetentionResult] = useState(false);
   const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
   const [showAiEditResult, setShowAiEditResult] = useState(false);
-  const [activeClipId, setActiveClipId] = useState<string | null>(null);
+  
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
@@ -737,10 +737,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {dummyClips.map((clip) => {
               const isPortrait = clip.aspect === '9:16';
-              const thumbnailUrl = `https://drive.google.com/thumbnail?id=${clip.id}&sz=w400`;
               return (
                 <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
-                  {/* Video frame */}
+                  {/* Video frame placeholder */}
                   <div
                     className="relative w-full overflow-hidden"
                     style={{
@@ -748,44 +747,18 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                       background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
                     }}
                   >
-                  {activeClipId === clip.id ? (
-                      <div className="absolute overflow-hidden" style={{ inset: 0 }}>
-                        <iframe
-                          src={`https://drive.google.com/file/d/${clip.id}/preview?rm=minimal`}
-                          allow="autoplay"
-                          allowFullScreen
-                          style={{
-                            border: 'none',
-                            position: 'absolute',
-                            top: '-8px',
-                            left: '-40px',
-                            width: 'calc(100% + 80px)',
-                            height: 'calc(100% + 16px)',
-                          }}
-                        />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+                          <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                        </div>
+                        <span className="text-xs text-gray-400">No video available</span>
                       </div>
-                    ) : (
-                      <>
-                        <img
-                          src={thumbnailUrl}
-                          alt={clip.title}
-                          className="absolute inset-0 w-full h-full"
-                          style={{ objectFit: 'cover', objectPosition: 'center top', transform: isPortrait ? 'scale(1.2)' : 'scale(1)' }}
-                        />
-                        <div className="absolute inset-0 bg-black/25" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <button onClick={() => setActiveClipId(clip.id)} className="group/play">
-                            <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover/play:bg-white/30 group-hover/play:scale-110 transition-all duration-200 backdrop-blur-sm">
-                              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                            </div>
-                          </button>
-                        </div>
-                        <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
-                        <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                          <Sparkles className="w-3 h-3" />{clip.score}% viral
-                        </div>
-                      </>
-                    )}
+                    </div>
+                    <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
+                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
+                      <Sparkles className="w-3 h-3" />{clip.score}% viral
+                    </div>
                   </div>
                   {/* Clip info */}
                   <div className="px-3 py-3 flex items-start justify-between gap-2">
@@ -799,13 +772,6 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                          <span className="text-gray-400 text-xs">{clip.views} views avg</span>
                       </div>
                     </div>
-                    <button
-                      onClick={() => window.open(`https://drive.google.com/file/d/${clip.id}/view?usp=sharing`, '_blank')}
-                      className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors flex-shrink-0"
-                      title="Open in Drive"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
               );
