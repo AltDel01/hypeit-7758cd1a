@@ -71,7 +71,7 @@ const GenerationHistory = ({
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2 min-w-0">
         {requests.map((request) => {
           const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
           const StatusIcon = status.icon;
