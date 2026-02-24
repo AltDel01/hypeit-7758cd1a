@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BlogPostFormProps {
   onGeneratePost: (text: string) => void;
@@ -22,20 +23,19 @@ const BlogPostForm = ({ onGeneratePost }: BlogPostFormProps) => {
 
     setIsGenerating(true);
     try {
-      const response = await fetch(`${process.env.SUPABASE_URL}/functions/generate-post`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('generate-post', {
+        body: {
           prompt: topic,
           platform: 'blog',
           tone: 'professional',
           length: 'long'
-        }),
+        },
       });
 
-      const data = await response.json();
+      if (error) {
+        throw new Error(error.message);
+      }
+
       if (data.error) {
         throw new Error(data.error);
       }
