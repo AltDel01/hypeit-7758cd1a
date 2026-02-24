@@ -51,7 +51,7 @@ export async function handleVideoGenerationRequest(requestData: VideoGenerationR
       return new Response(
         JSON.stringify({ 
           status: "error",
-          error: "VEO_API_KEY environment variable not set"
+          error: "Video generation service unavailable"
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -129,32 +129,27 @@ async function generateWithGemini(
       console.error("Request URL:", veoUrl);
       console.error("Request body:", JSON.stringify(requestBody).substring(0, 200));
       
-      // Try to parse the error response as JSON
-      let errorMessage = `Veo API error: Status ${response.status}`;
-      let errorDetails = errorText;
+      // Log details server-side, return generic message to client
+      let errorMessage = "Video generation failed";
       try {
         const errorData = JSON.parse(errorText);
-        errorMessage = `Veo API error: ${errorData.error?.message || response.statusText}`;
-        errorDetails = JSON.stringify(errorData, null, 2);
+        console.error("Veo API error details:", JSON.stringify(errorData));
         
-        // Check if it's a subscription/access issue
         if (errorData.error?.message?.includes("subscription") || 
             errorData.error?.message?.includes("access") ||
             response.status === 403) {
-          errorMessage = "Video generation requires Google AI Pro or Ultra subscription. Please upgrade your plan to use Veo 3.1.";
+          errorMessage = "Video generation service is not available for your account";
         }
       } catch (e) {
-        errorMessage = `Veo API error: Status ${response.status} - ${errorText || response.statusText}`;
+        console.error("Veo API raw error:", errorText);
       }
       
-      // Return error response instead of processing status
+      // Return generic error response
       return new Response(
         JSON.stringify({ 
           status: "error",
           requestId: requestId,
-          prompt: prompt,
           error: errorMessage,
-          errorDetails: errorDetails,
           message: "Video generation failed"
         }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -222,7 +217,7 @@ async function generateWithGemini(
         requestId: requestId,
         prompt: prompt,
         estimatedTime: 30,
-        error: error instanceof Error ? error.message : String(error),
+        error: "Video generation encountered an issue",
         message: "Video generation started (checking status)"
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -239,7 +234,7 @@ function handleVideoGenerationError(error: unknown, prompt: string): Response {
   return new Response(
     JSON.stringify({ 
       status: "error", 
-      error: error instanceof Error ? error.message : String(error),
+      error: "Video generation failed. Please try again.",
       message: "Video generation failed. Please try again."
     }),
     { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

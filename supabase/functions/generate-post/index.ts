@@ -114,8 +114,8 @@ serve(async (req) => {
     if (!openaiApiKey) {
       console.error('OPENAI_API_KEY is not set in environment variables');
       return new Response(
-        JSON.stringify({ error: 'API key not configured on the server' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Post generation service unavailable' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -123,8 +123,8 @@ serve(async (req) => {
     if (!openaiApiKey.startsWith('sk-')) {
       console.error('API key does not appear to be a valid OpenAI key format');
       return new Response(
-        JSON.stringify({ error: 'API key does not appear to be a valid OpenAI key' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Post generation service unavailable' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -213,20 +213,21 @@ serve(async (req) => {
         let errorMessage = 'Failed to generate post with OpenAI API';
         let useFallbackContent = false;
         
-        // Extract more specific error information if available
+        // Extract more specific error information for logging only
         if (errorData && errorData.error) {
+          console.error('OpenAI error type:', errorData.error.type, 'code:', errorData.error.code);
           // Special handling for quota exceeded error
           if (errorData.error.type === 'insufficient_quota' || 
               errorData.error.code === 'insufficient_quota' ||
               (errorData.error.message && errorData.error.message.includes('quota'))) {
-            errorMessage = 'API quota exceeded. Using fallback content.';
+            errorMessage = 'Post generation temporarily unavailable';
             useFallbackContent = true;
           }
           else if (errorData.error.type === 'invalid_request_error' && 
               errorData.error.code === 'invalid_api_key') {
-            errorMessage = 'Invalid API key';
+            errorMessage = 'Post generation service unavailable';
           } else {
-            errorMessage = 'API error occurred';
+            errorMessage = 'Post generation failed';
           }
         }
         

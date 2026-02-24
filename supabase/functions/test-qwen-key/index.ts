@@ -19,22 +19,19 @@ serve(async (req) => {
     // Just check if the key is configured
     if (action === 'check') {
       if (!openaiApiKey) {
-        console.log('OPENAI_API_KEY is not set in environment variables');
+        console.error('OPENAI_API_KEY is not set in environment variables');
         return new Response(
-          JSON.stringify({ success: false, error: 'API key not configured' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: 'Service not configured' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       // Basic format validation
       if (!openaiApiKey.startsWith('sk-')) {
-        console.log('OPENAI_API_KEY does not appear to be a valid OpenAI key format');
+        console.error('OPENAI_API_KEY does not appear to be a valid OpenAI key format');
         return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'API key does not appear to be a valid OpenAI key format. OpenAI keys typically start with "sk-"' 
-          }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: 'Service not configured' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -49,12 +46,9 @@ serve(async (req) => {
       try {
         // Validate format
         if (!key.startsWith('sk-')) {
-          console.error('Provided key does not appear to be a valid OpenAI key format');
+          console.error('Provided key does not appear to be a valid key format');
           return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Key does not appear to be a valid OpenAI key format. OpenAI keys typically start with "sk-"' 
-            }),
+            JSON.stringify({ success: false, error: 'Invalid API key format' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
@@ -96,9 +90,9 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in test-openai-key function:', error);
+    console.error('Error in test-key function:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ success: false, error: 'Service error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
