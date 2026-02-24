@@ -82,7 +82,7 @@ const GenerationHistory = ({
               key={request.id}
               onClick={() => onSelect(request)}
               className={cn(
-                "w-full text-left p-3 rounded-lg border transition-all",
+                "w-full text-left p-3 rounded-lg border transition-all overflow-hidden",
                 "hover:bg-accent/50",
                 isSelected
                   ? "bg-accent border-primary/50"
@@ -112,7 +112,7 @@ const GenerationHistory = ({
               </div>
 
               {/* Prompt Preview */}
-              <p className="text-sm text-foreground line-clamp-2 mb-2">
+              <p className="text-sm text-foreground line-clamp-2 mb-2 break-words overflow-hidden">
                 {request.prompt}
               </p>
 
