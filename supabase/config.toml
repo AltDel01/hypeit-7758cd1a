@@ -10,8 +10,13 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = false
 
+[functions.test-gemini-key]
+verify_jwt = false
+
+[functions.test-qwen-key]
+verify_jwt = false
+
 [auth]
 # Allow users to sign in without email verification
 disable_signup = false
 enable_signup = true
-

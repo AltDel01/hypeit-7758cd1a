@@ -1,22 +1,44 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Authenticate the request
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+  if (claimsError || !claimsData?.claims) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     const { key, action } = await req.json();
     
-    // Just check if the key is configured
     if (action === 'check') {
       if (!openaiApiKey) {
         console.error('OPENAI_API_KEY is not set in environment variables');
@@ -26,7 +48,6 @@ serve(async (req) => {
         );
       }
       
-      // Basic format validation
       if (!openaiApiKey.startsWith('sk-')) {
         console.error('OPENAI_API_KEY does not appear to be a valid OpenAI key format');
         return new Response(
@@ -41,19 +62,15 @@ serve(async (req) => {
       );
     }
     
-    // Test a provided key
     if (key) {
       try {
-        // Validate format
         if (!key.startsWith('sk-')) {
-          console.error('Provided key does not appear to be a valid key format');
           return new Response(
             JSON.stringify({ success: false, error: 'Invalid API key format' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
         
-        // Test the key with a simple request to OpenAI API
         const response = await fetch('https://api.openai.com/v1/models', {
           method: 'GET',
           headers: {
@@ -62,8 +79,7 @@ serve(async (req) => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Invalid OpenAI API key provided:', errorData);
+          console.error('Invalid OpenAI API key provided');
           return new Response(
             JSON.stringify({ success: false, error: 'Invalid API key' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -77,7 +93,7 @@ serve(async (req) => {
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } catch (error) {
-        console.error('Error testing OpenAI API key:', error);
+        console.error('Error testing OpenAI API key');
         return new Response(
           JSON.stringify({ success: false, error: 'Error testing API key' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -90,7 +106,7 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in test-key function:', error);
+    console.error('Error in test-key function');
     return new Response(
       JSON.stringify({ success: false, error: 'Service error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
