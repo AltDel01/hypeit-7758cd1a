@@ -224,14 +224,18 @@ const HeroWithEditor: React.FC = () => {
           throw new Error(`Failed to upload ${file.name}: ${error.message}`);
         }
         
-        const { data: { publicUrl } } = supabase.storage
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('product-images')
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 3600);
         
-        console.log('Uploaded video, URL:', publicUrl);
+        if (signedUrlError || !signedUrlData?.signedUrl) {
+          throw new Error(`Failed to get signed URL for ${file.name}`);
+        }
+        
+        console.log('Uploaded video, signed URL obtained');
         uploadedFiles.push({
           name: file.name,
-          url: publicUrl,
+          url: signedUrlData.signedUrl,
           type: 'video'
         });
       }
@@ -250,14 +254,18 @@ const HeroWithEditor: React.FC = () => {
           throw new Error(`Failed to upload ${file.name}: ${error.message}`);
         }
         
-        const { data: { publicUrl } } = supabase.storage
+        const { data: audioSignedUrlData, error: audioSignedUrlError } = await supabase.storage
           .from('product-images')
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 3600);
         
-        console.log('Uploaded audio, URL:', publicUrl);
+        if (audioSignedUrlError || !audioSignedUrlData?.signedUrl) {
+          throw new Error(`Failed to get signed URL for ${file.name}`);
+        }
+        
+        console.log('Uploaded audio, signed URL obtained');
         uploadedFiles.push({
           name: file.name,
-          url: publicUrl,
+          url: audioSignedUrlData.signedUrl,
           type: 'audio'
         });
       }
