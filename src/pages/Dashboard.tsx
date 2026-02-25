@@ -67,7 +67,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full">
         {/* Desktop Sidebar - Collapsible */}
         {!isMobile && (
-          <aside className={`border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300 flex-shrink-0 ${sidebarOpen ? 'w-80 overflow-y-auto overflow-x-hidden' : 'w-14 overflow-hidden'}`}>
+          <aside className={`border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300 flex-shrink-0 ${sidebarOpen ? 'w-96' : 'w-14 overflow-hidden'}`}>
             {/* Header with toggle */}
             <div className="p-4 border-b border-border flex items-center gap-3">
               {sidebarOpen ? (
