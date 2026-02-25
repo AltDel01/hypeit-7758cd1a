@@ -53,7 +53,7 @@ const AiClipButton: React.FC<AiClipButtonProps> = ({
   const handlers = [onAiClip, onRetentionEditing, onAiCreator];
 
   return (
-    <div className={cn("flex items-center justify-center gap-2 mb-3", className)}>
+    <div className={cn("flex items-center justify-start md:justify-center gap-2 mb-3 overflow-x-auto scrollbar-hide px-1", className)}>
       {toolButtons.map((btn, idx) => (
         <button
           key={btn.key}
