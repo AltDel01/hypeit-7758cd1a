@@ -112,7 +112,7 @@ const GenerationHistory = ({
               </div>
 
               {/* Prompt Preview */}
-              <p className="text-sm text-foreground line-clamp-2 mb-2 break-words overflow-hidden">
+              <p className="text-sm text-foreground mb-2 break-all whitespace-normal overflow-wrap-anywhere" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
                 {request.prompt}
               </p>
 
