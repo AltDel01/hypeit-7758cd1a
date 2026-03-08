@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import CreditUsage from "./pages/CreditUsage";
 import Language from "./pages/Language";
 import Enterprise from "./pages/Enterprise";
+import Features from "./pages/Features";
 import React from "react";
 
 // Create a new query client outside of component rendering
