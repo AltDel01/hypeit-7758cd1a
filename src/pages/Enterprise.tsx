@@ -53,6 +53,7 @@ const caseStudies = [
   company: 'Top Digital Agency',
   gradient: 'from-fuchsia-500 to-purple-600',
   bgGlow: 'bg-fuchsia-500/15',
+  bgImage: caseAgency,
   problem: 'Managing 50+ brand clients with hundreds of raw footage files monthly. Manual editing bottlenecks limited output to 20–30 videos per editor per month.',
   solution: 'Viralin enables batch processing of raw footage into scroll-stopping social content. AI identifies viral moments, adds hooks, captions, and brand elements at scale.',
   results: [
