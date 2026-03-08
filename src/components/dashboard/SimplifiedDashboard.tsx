@@ -349,7 +349,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
   };
 
-  const isSpecialMode = ['aiclip', 'retention', 'creator', 'aiedit'].includes(activeMode || '');
+  const isSpecialMode = activeMode === 'aiclip' || activeMode === 'retention' || activeMode === 'creator' || isFeatureMode(activeMode);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
