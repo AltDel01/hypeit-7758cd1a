@@ -85,16 +85,17 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
   return (
     <div className="group relative rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-border transition-all duration-500">
       {/* Header */}
-      <div className={`relative p-6 md:p-8 bg-gradient-to-br ${study.gradient} bg-opacity-10`}>
-        <div className={`absolute inset-0 ${study.bgGlow} opacity-30`} />
+      <div className="relative p-6 md:p-8 overflow-hidden">
+        <img src={study.bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${study.gradient} flex items-center justify-center`}>
               <Icon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{study.industry}</p>
-              <p className="text-sm font-semibold text-foreground">{study.company}</p>
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wider">{study.industry}</p>
+              <p className="text-sm font-semibold text-white">{study.company}</p>
             </div>
           </div>
         </div>
