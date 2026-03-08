@@ -238,7 +238,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         <section id="case-studies" className="py-16 md:py-24 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-5xl font-bold text-foreground mb-4">
+              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
                 Real Results, Real{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Impact
@@ -281,41 +281,39 @@ Viralin empowers your teams to create studio-quality video content from raw foot
           </div>
         </section>
 
-        {/* CTA Header */}
-        <section className="py-16 md:py-20 px-4 border-t border-border/40">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
-              <Star className="w-3.5 h-3.5" />
-              Get Started
-            </div>
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1]">
-              Ready to Transform Your{' '}
-              <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-                Content Production
-              </span>
-              ?
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-              Book a personalized demo to see how Viralin can reduce your production costs by up to 85% while 10x-ing your content output.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
-              {[
-                'Custom pricing for your team',
-                'Live product walkthrough',
-                'ROI analysis for your use case',
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                  <span className="text-sm text-muted-foreground">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Book a Demo CTA */}
         <section id="book-demo" className="py-16 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
           <div className="max-w-6xl mx-auto">
+            {/* Section Header */}
+            <div className="text-center mb-12 md:mb-16 space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
+                <Star className="w-3.5 h-3.5" />
+                Get Started
+              </div>
+              <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1]">
+                Ready to Transform Your{' '}
+                <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
+                  Content Production
+                </span>
+                ?
+              </h2>
+              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                Book a personalized demo to see how Viralin can reduce your production costs by up to 85% while 10x-ing your content output.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
+                {[
+                  'Custom pricing for your team',
+                  'Live product walkthrough',
+                  'ROI analysis for your use case',
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
               {/* Left side - Copy */}
               <div className="space-y-6">
