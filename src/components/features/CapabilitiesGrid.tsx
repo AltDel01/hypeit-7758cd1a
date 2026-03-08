@@ -5,7 +5,7 @@ const capabilities = [
   {
     icon: Scissors,
     title: 'Trimming & Cutting',
-    description: 'Intelligent auto-trim that detects pauses, dead air, and low-engagement moments — cutting them instantly for tight, punchy edits.',
+    description: 'Intelligent auto-trim that detects pauses, dead air, and low-engagement moments, cutting them instantly for tight, punchy edits.',
     gradient: 'from-rose-500 to-orange-500',
     featured: true,
   },
