@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroBackground from '@/components/enterprise/HeroBackground';
+import caseTravel from '@/assets/enterprise/case-travel.jpg';
+import caseCpg from '@/assets/enterprise/case-cpg.jpg';
+import caseAgency from '@/assets/enterprise/case-agency.jpg';
 import { Button } from '@/components/ui/button';
 import {
   Building2, Plane, ShoppingBag, Users, ArrowRight, CheckCircle,
@@ -16,6 +19,7 @@ const caseStudies = [
   company: 'Global Travel Brand',
   gradient: 'from-sky-500 to-blue-600',
   bgGlow: 'bg-sky-500/15',
+  bgImage: caseTravel,
   problem: 'Shooting promotional videos across 30+ destinations worldwide cost $500K+ per campaign with crews, logistics, and post-production delays of 8–12 weeks.',
   solution: 'With Viralin, their in-house team captures raw footage on-location using smartphones. AI handles editing, color grading, transitions, and format optimization for every platform — instantly.',
   results: [
@@ -32,6 +36,7 @@ const caseStudies = [
   company: 'Leading FMCG Brand',
   gradient: 'from-amber-500 to-orange-600',
   bgGlow: 'bg-amber-500/15',
+  bgImage: caseCpg,
   problem: 'Professional product shoots with studio rentals, photographers, videographers, and editors cost $50K–$200K per product launch. Seasonal campaigns multiplied this 4x annually.',
   solution: 'Teams now shoot product footage in simple setups. Viralin\'s AI transforms raw clips into studio-quality ads with branded overlays, motion graphics, and platform-specific formats.',
   results: [
@@ -48,6 +53,7 @@ const caseStudies = [
   company: 'Top Digital Agency',
   gradient: 'from-fuchsia-500 to-purple-600',
   bgGlow: 'bg-fuchsia-500/15',
+  bgImage: caseAgency,
   problem: 'Managing 50+ brand clients with hundreds of raw footage files monthly. Manual editing bottlenecks limited output to 20–30 videos per editor per month.',
   solution: 'Viralin enables batch processing of raw footage into scroll-stopping social content. AI identifies viral moments, adds hooks, captions, and brand elements at scale.',
   results: [
@@ -79,16 +85,17 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
   return (
     <div className="group relative rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-border transition-all duration-500">
       {/* Header */}
-      <div className={`relative p-6 md:p-8 bg-gradient-to-br ${study.gradient} bg-opacity-10`}>
-        <div className={`absolute inset-0 ${study.bgGlow} opacity-30`} />
+      <div className="relative p-6 md:p-8 overflow-hidden">
+        <img src={study.bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${study.gradient} flex items-center justify-center`}>
               <Icon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{study.industry}</p>
-              <p className="text-sm font-semibold text-foreground">{study.company}</p>
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wider">{study.industry}</p>
+              <p className="text-sm font-semibold text-white">{study.company}</p>
             </div>
           </div>
         </div>
