@@ -2,6 +2,7 @@ import React from 'react';
 import { Film, VolumeX, Languages, Sparkles, Captions, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import brollImage from '@/assets/broll-insertion.png';
+import smartResizeImage from '@/assets/smart-resize.png';
 
 const tools = [
   {
