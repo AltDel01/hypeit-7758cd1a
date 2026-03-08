@@ -142,6 +142,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     else if (savedState.retentionMode) mode = 'retention';
     else if (savedState.creatorMode) mode = 'creator';
     else if (savedState.aiEditMode) mode = 'aiedit';
+    else if (savedState.featureMode) mode = savedState.featureMode;
     if (mode) setActiveMode(mode);
 
     clearEditorState();
