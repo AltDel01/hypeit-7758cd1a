@@ -149,7 +149,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     clearEditorState();
 
     if (mode) {
-      // Special mode: show loading then inline results, AND log to DB + send email
+      // Submit to DB and show confirmation
       setIsAutoProcessing(true);
       const mc = getConfigByMode(mode);
       const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
@@ -157,21 +157,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
-        .then(() => onRequestCreated?.())
-        .catch(console.error);
-      setTimeout(() => {
-        setIsAutoProcessing(false);
-        if (mode === 'retention') {
-          setShowRetentionResult(true);
-        } else if (mode === 'creator') {
-          setShowAiCreatorResult(true);
-        } else if (mode === 'aiclip') {
-          setShowAiClipResult(true);
-        } else {
-          // All feature modes (aiedit, trim, caption, etc.) show AI Edit result
-          setShowAiEditResult(true);
-        }
-      }, 15000);
+        .then(() => {
+          onRequestCreated?.();
+          setIsAutoProcessing(false);
+          setShowSubmittedConfirmation(true);
+          toast.success('Request submitted! Check your history for updates.');
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsAutoProcessing(false);
+          toast.error('Failed to submit request.');
+        });
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
       setIsAutoProcessing(true);
       setTimeout(() => {
