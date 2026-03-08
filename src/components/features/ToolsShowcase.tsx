@@ -29,7 +29,7 @@ const tools = [
     title: 'Go Global in One Click.',
     description: 'Translate and dub your content in 30+ languages with natural-sounding AI voices. Advanced lip-sync ensures the dubbed version looks as natural as the original.',
     gradient: 'from-emerald-500 to-teal-500',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=500&fit=crop',
+    image: languageDubbingImage,
   },
   {
     icon: Sparkles,
