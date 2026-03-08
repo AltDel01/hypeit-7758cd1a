@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useEditorRole } from '@/hooks/useEditorRole';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -25,7 +26,8 @@ const formSchema = z.object({
 
 const AdminLogin = () => {
   const { user, signIn } = useAuth();
-  const { isAdmin, isLoading: roleLoading } = useAdminRole();
+  const { isAdmin, isLoading: adminLoading } = useAdminRole();
+  const { isEditor, isLoading: editorLoading } = useEditorRole();
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,6 +53,8 @@ const AdminLogin = () => {
     }
   }
 
+  const roleLoading = adminLoading || editorLoading;
+
   if (roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -66,7 +70,11 @@ const AdminLogin = () => {
     return <Navigate to="/admin" replace />;
   }
 
-  if (user && !isAdmin) {
+  if (user && isEditor) {
+    return <Navigate to="/editor" replace />;
+  }
+
+  if (user && !isAdmin && !isEditor) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -76,7 +84,7 @@ const AdminLogin = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-8 bg-card/80 backdrop-blur-sm border border-border rounded-xl shadow-lg">
-            <h1 className="text-2xl font-bold text-foreground mb-6 text-center">Administrator Login</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-6 text-center">Team Login</h1>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -88,7 +96,7 @@ const AdminLogin = () => {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="admin@example.com"
+                          placeholder="team@example.com"
                           {...field}
                           type="email"
                           disabled={isSubmitting}
@@ -119,7 +127,7 @@ const AdminLogin = () => {
                 />
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? 'Signing in...' : 'Sign in as admin'}
+                  {isSubmitting ? 'Signing in...' : 'Sign in'}
                 </Button>
               </form>
             </Form>
