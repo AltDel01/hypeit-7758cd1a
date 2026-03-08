@@ -87,7 +87,7 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
       {/* Header */}
       <div className="relative p-6 md:p-8 overflow-hidden">
         <img src={study.bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className={`absolute inset-0 ${study.id === 'travel' ? 'bg-black/50' : 'bg-black/65'}`} />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${study.gradient} flex items-center justify-center`}>
