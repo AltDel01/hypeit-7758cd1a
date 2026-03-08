@@ -274,53 +274,58 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Book a Demo CTA */}
-        <section id="book-demo" className="py-16 md:py-24 px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium mb-6">
-                <Star className="w-3.5 h-3.5" />
-                Get Started
-              </div>
-              <h2 className="text-2xl md:text-5xl font-bold text-foreground mb-4">
-                Ready to Transform Your{' '}
-                <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-                  Content Production
-                </span>
-                ?
-              </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Book a personalized demo to see how Viralin can reduce your production costs 
-                by up to 85% while 10x-ing your content output.
-              </p>
-              
-              <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-                {['Custom pricing for your team', 'Live product walkthrough', 'ROI analysis for your use case'].map((item, i) =>
-                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    {item}
-                  </div>
-                )}
-              </div>
-            </div>
+        <section id="book-demo" className="py-16 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+              {/* Left side - Copy */}
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
+                  <Star className="w-3.5 h-3.5" />
+                  Book a Demo
+                </div>
+                
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground leading-[1.1]">
+                  Book your{' '}
+                  <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
+                    30-minute
+                  </span>
+                  {' '}Viralin demo
+                </h2>
 
-            {/* Calendly Embed */}
-            <div className="rounded-2xl border border-border/60 overflow-hidden bg-card/30 backdrop-blur-sm">
-              <iframe
-                src="https://calendly.com/d/YOUR_CALENDLY_LINK"
-                width="100%"
-                height="700"
-                frameBorder="0"
-                title="Book a Demo"
-                className="w-full min-h-[600px] md:min-h-[700px]" />
-              
+                <p className="text-sm text-muted-foreground/70">What to expect:</p>
+
+                <div className="space-y-4">
+                  {[
+                    { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
+                    { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
+                    { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                      <p className="text-sm md:text-base text-muted-foreground">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-xs text-muted-foreground pt-4">
+                  Prefer email? Reach us at{' '}
+                  <a href="mailto:enterprise@viralin.co" className="text-purple-400 hover:underline">
+                    enterprise@viralin.co
+                  </a>
+                </p>
+              </div>
+
+              {/* Right side - Calendly */}
+              <div className="rounded-2xl border border-border/60 overflow-hidden bg-card/30 backdrop-blur-sm">
+                <iframe
+                  src="https://calendly.com/d/YOUR_CALENDLY_LINK"
+                  width="100%"
+                  height="650"
+                  frameBorder="0"
+                  title="Book a Demo"
+                  className="w-full min-h-[550px] md:min-h-[650px]" />
+              </div>
             </div>
-            
-            <p className="text-center text-xs text-muted-foreground mt-4">
-              Prefer email? Reach us at{' '}
-              <a href="mailto:enterprise@viralin.co" className="text-purple-400 hover:underline">
-                enterprise@viralin.co
-              </a>
-            </p>
           </div>
         </section>
       </main>
