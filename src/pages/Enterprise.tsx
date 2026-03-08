@@ -238,7 +238,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         <section id="case-studies" className="py-16 md:py-24 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-5xl font-bold text-foreground mb-4">
+              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
                 Real Results, Real{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Impact
