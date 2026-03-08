@@ -120,11 +120,11 @@ const CapabilitiesGrid: React.FC = () => {
               key={cap.title}
               className="group relative rounded-xl overflow-hidden border border-white/10 bg-gray-900/50 hover:border-white/20 transition-all duration-300 p-4 md:p-6"
             >
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${cap.gradient} flex items-center justify-center mb-4`}>
-                <cap.icon className="w-5 h-5 text-white" />
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-r ${cap.gradient} flex items-center justify-center mb-3 md:mb-4`}>
+                <cap.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{cap.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{cap.description}</p>
+              <h3 className="text-sm md:text-lg font-semibold text-white mb-1 md:mb-2">{cap.title}</h3>
+              <p className="text-gray-400 text-xs md:text-sm leading-relaxed">{cap.description}</p>
             </div>
           ))}
         </div>

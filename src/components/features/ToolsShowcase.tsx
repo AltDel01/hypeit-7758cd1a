@@ -99,7 +99,7 @@ const ToolsShowcase: React.FC = () => {
               </Button>
             </div>
 
-            <div className="flex-1 w-full max-w-xl px-2 md:px-0">
+            <div className="flex-1 w-full max-w-xl px-0 md:px-0">
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
                 <img
                   src={tool.image}

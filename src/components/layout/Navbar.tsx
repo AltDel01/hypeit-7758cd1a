@@ -153,17 +153,6 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
 
-  const solutionsItems = [
-    { label: 'Viral Ready Short-Form Content', href: '/dashboard', description: 'AI-optimized clips for TikTok, Reels & Shorts' },
-    { label: 'Promotional Video', href: '/dashboard', description: 'Brand ads, product launches & campaigns' },
-    { label: 'Explainer Video', href: '/dashboard', description: 'Tutorials & walkthroughs with AI avatars' },
-    { label: 'Podcast Video', href: '/dashboard', description: 'AI-generated podcast episodes' },
-    { label: 'Edit Existing Video', href: '/dashboard', description: 'Upload & enhance your own footage' },
-    { label: 'Audio Ad', href: '/dashboard', description: 'Professional audio advertisements' },
-    { label: 'Audio Podcast', href: '/dashboard', description: 'Generate podcast audio content' },
-    { label: 'API-Generated Content', href: '/dashboard', description: 'Automate content via API' },
-    { label: 'Meditation', href: '/dashboard', description: 'Calming meditation audio & video' },
-  ];
 
   const NavLinks = () => (
     <>
