@@ -154,8 +154,9 @@ const HeroWithEditor: React.FC = () => {
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:15');
   const handleFeatureClick = (featureId: string) => {
-    if (featureId === 'ai-edit') {
-      setActiveMode(prev => prev === 'aiedit' ? null : 'aiedit');
+    const config = FEATURE_MODE_MAP[featureId];
+    if (config) {
+      setActiveMode(prev => prev === config.mode ? null : config.mode);
       return;
     }
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
