@@ -324,7 +324,8 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   {[
                   { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
                   { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
-                  { bold: 'pricing', text: 'Learn about pricing and features for your use case' }].
+                  { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
+                  { bold: 'roi', text: 'ROI analysis for your use case' }].
                   map((item, i) =>
                   <div key={i} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
