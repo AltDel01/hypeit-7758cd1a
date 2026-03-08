@@ -99,7 +99,7 @@ const CapabilitiesGrid: React.FC = () => {
                   {capabilities[0].description}
                 </p>
               </div>
-              <div className="flex-1 relative min-h-[200px] md:min-h-[300px]">
+              <div className="flex-1 relative min-h-[180px] md:min-h-[300px]">
                 <img
                   src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&h=400&fit=crop"
                   alt={capabilities[0].title}
