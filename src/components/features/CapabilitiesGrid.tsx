@@ -60,7 +60,7 @@ const capabilities = [
   {
     icon: User,
     title: 'AI Avatar',
-    description: 'Generate realistic AI avatars that present your content — perfect for explainers, tutorials, and brand messaging without being on camera.',
+    description: 'Generate realistic AI avatars that present your content. Perfect for explainers, tutorials, and brand messaging without being on camera.',
     gradient: 'from-indigo-500 to-violet-500',
   },
 ];
