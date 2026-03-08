@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX } from 'lucide-react';
-import ImageUploader from '@/components/tabs/ImageUploader';
+import FileUploader from '@/components/admin/FileUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
 import { parsePromptString } from '@/utils/promptParser';
