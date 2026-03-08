@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX } from 'lucide-react';
-import ImageUploader from '@/components/tabs/ImageUploader';
+import FileUploader from '@/components/admin/FileUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
 import { parsePromptString } from '@/utils/promptParser';
@@ -188,10 +188,10 @@ export const RequestDetails = ({
             {isClaimedByMe ? (
               <>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Upload Result</h3>
-                <ImageUploader 
-                  productImage={resultImage} 
-                  setProductImage={setResultImage} 
-                  className="h-40"
+                <FileUploader 
+                  file={resultImage} 
+                  setFile={setResultImage} 
+                  className="min-h-[160px]"
                 />
                 <div className="flex space-x-2 mt-4">
                   {isUploading ? (
