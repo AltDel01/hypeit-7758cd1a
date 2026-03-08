@@ -266,38 +266,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const removeUploadedFileUrl = (index: number) => setUploadedFileUrls(prev => prev.filter((_, i) => i !== index));
   const handleExampleClick = (example: string) => setPrompt(example);
 
-  // Special mode submit: logs to DB for history, then shows inline results
+  // Special mode submit: logs to DB, shows confirmation
   const handleSpecialModeSubmit = async () => {
-    console.log('[SpecialMode] handleSpecialModeSubmit called, activeMode:', activeMode);
     setIsSubmitting(false);
     setIsAutoProcessing(true);
-    setShowAiClipResult(false);
-    setShowRetentionResult(false);
-    setShowAiCreatorResult(false);
-    setShowAiEditResult(false);
+    setShowSubmittedConfirmation(false);
 
-    // Capture current mode before any async work
     const currentMode = activeMode;
-    console.log('[SpecialMode] currentMode captured:', currentMode);
 
-    // Start the 15-second dummy timer IMMEDIATELY (don't wait for DB)
-    const timerId = setTimeout(() => {
-      console.log('[SpecialMode] Timer fired! currentMode:', currentMode);
-      setIsAutoProcessing(false);
-      if (currentMode === 'retention') {
-        setShowRetentionResult(true);
-      } else if (currentMode === 'creator') {
-        setShowAiCreatorResult(true);
-      } else if (currentMode === 'aiclip') {
-        setShowAiClipResult(true);
-      } else {
-        // All feature modes show AI Edit result
-        setShowAiEditResult(true);
-      }
-    }, 15000);
-    console.log('[SpecialMode] Timer started with id:', timerId);
-
-    // Fire-and-forget DB logging (don't block the UI)
     try {
       const mc = getConfigByMode(currentMode || '');
       const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
@@ -307,8 +283,13 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       onRequestCreated?.();
+      setIsAutoProcessing(false);
+      setShowSubmittedConfirmation(true);
+      toast.success('Request submitted! Check your history for updates.');
     } catch (error) {
       console.error('Special mode submit error:', error);
+      setIsAutoProcessing(false);
+      toast.error('Failed to submit request.');
     }
   };
 
