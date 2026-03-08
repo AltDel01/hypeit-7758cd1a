@@ -58,6 +58,7 @@ const AppRoutes = () => {
       <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/enterprise" element={<CustomErrorBoundary><Enterprise /></CustomErrorBoundary>} />
+      <Route path="/features" element={<CustomErrorBoundary><Features /></CustomErrorBoundary>} />
       <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
       <Route 
