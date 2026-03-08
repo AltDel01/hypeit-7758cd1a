@@ -141,14 +141,14 @@ const Navbar = () => {
             <ChevronDown className="w-4 h-4" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64 bg-gray-900/95 backdrop-blur-lg border-gray-800">
+        <DropdownMenuContent align="start" className="w-72 bg-gray-900/95 backdrop-blur-lg border-gray-800">
           {solutionsItems.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link 
                 to={item.href} 
-                className="flex flex-col items-start gap-1 px-4 py-3 cursor-pointer hover:bg-gray-800/50"
+                className="flex flex-col items-start text-left gap-1 px-4 py-3 cursor-pointer hover:bg-gray-800/50 w-full"
               >
-                <span className="text-white font-medium">{item.label}</span>
+                <span className="text-white font-bold text-sm">{item.label}</span>
                 <span className="text-xs text-gray-400">{item.description}</span>
               </Link>
             </DropdownMenuItem>
