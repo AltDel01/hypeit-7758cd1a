@@ -81,8 +81,10 @@ export const RequestDetails = ({
 
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">User</h3>
-          <p className="text-foreground">{request.user_name || request.user_email}</p>
-          <p className="text-xs text-muted-foreground">{request.user_email}</p>
+          <p className="text-foreground font-mono text-sm">
+            USR-{request.user_id.substring(0, 8).toUpperCase()}
+          </p>
+          <p className="text-xs text-muted-foreground">User #{request.user_id.substring(0, 6).toUpperCase()}</p>
         </div>
         
         <div>

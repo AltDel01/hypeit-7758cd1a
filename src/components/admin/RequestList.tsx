@@ -77,8 +77,8 @@ export const RequestList = ({
                 >
                   <TableCell>
                     <div>
-                      <p className="text-sm font-medium">{request.user_name || 'Unknown'}</p>
-                      <p className="text-xs text-muted-foreground">{request.user_email}</p>
+                      <p className="text-sm font-medium font-mono">USR-{request.user_id.substring(0, 8).toUpperCase()}</p>
+                      <p className="text-xs text-muted-foreground">User #{request.user_id.substring(0, 6).toUpperCase()}</p>
                     </div>
                   </TableCell>
                   <TableCell>
