@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 import Pricing from "./pages/Pricing";
 import Settings from "./pages/Settings";
 import CreditUsage from "./pages/CreditUsage";
@@ -81,6 +82,10 @@ const AppRoutes = () => {
       <Route 
         path="/admin" 
         element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>} 
+      />
+      <Route 
+        path="/admin-login" 
+        element={<CustomErrorBoundary><AdminLogin /></CustomErrorBoundary>} 
       />
       <Route 
         path="/login" 

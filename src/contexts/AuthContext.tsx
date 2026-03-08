@@ -33,8 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Only navigate on actual sign-in, not session refresh
           const isActualSignIn = !session && currentSession;
           if (isActualSignIn) {
+            const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
+            sessionStorage.removeItem('postLoginRedirect');
             toast.success('Successfully signed in');
-            navigate('/');
+            navigate(redirectPath);
           }
         } else if (event === 'SIGNED_OUT') {
           toast.info('You have been signed out');
