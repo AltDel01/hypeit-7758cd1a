@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, Globe } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
@@ -30,6 +31,13 @@ const MobileTopBar = () => {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSolutionsOpen, setIsSolutionsOpen] = useState(false);
+  const [mobileProfileName, setMobileProfileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) { setMobileProfileName(null); return; }
+    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+      .then(({ data }) => { if (data?.display_name) setMobileProfileName(data.display_name); });
+  }, [user]);
   
   return (
     <div className="flex flex-col w-full">
@@ -96,10 +104,10 @@ const MobileTopBar = () => {
                   <div className="border-t border-gray-700 my-2"></div>
                   <Link to="/settings" className="px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
-                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                      {(mobileProfileName || user.email)?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-white text-sm font-medium">{mobileProfileName || user.email?.split('@')[0] || 'User'}</p>
                       <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
                     </div>
                   </Link>
@@ -152,7 +160,22 @@ const MobileTopBar = () => {
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
+  const [profileName, setProfileName] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!user) {
+      setProfileName(null);
+      return;
+    }
+    supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.display_name) setProfileName(data.display_name);
+      });
+  }, [user]);
 
   const NavLinks = () => (
     <>
@@ -209,10 +232,10 @@ const Navbar = () => {
               <Link to="/settings" className="block px-3 py-3 hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                    {(profileName || user.email)?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                    <p className="text-white text-sm font-medium">{profileName || user.email?.split('@')[0] || 'User'}</p>
                     <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
                   </div>
                 </div>
