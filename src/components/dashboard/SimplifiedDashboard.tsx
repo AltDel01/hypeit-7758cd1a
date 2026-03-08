@@ -19,6 +19,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
+import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
 
 // Dummy clips (video files removed)
 const dummyClips = [
