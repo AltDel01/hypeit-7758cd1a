@@ -1,55 +1,55 @@
 import React from 'react';
-import { Clapperboard, Flame, Captions, Languages, Maximize, Palette, Sparkles } from 'lucide-react';
+import { Film, VolumeX, Languages, Sparkles, Captions, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const tools = [
   {
-    icon: Clapperboard,
-    badge: 'AI Video Editor',
-    title: 'Edit Like a Pro, Automatically.',
-    description: 'Cinematic transitions, motion graphics, and visual effects — all applied by AI. No timeline scrubbing, no manual keyframing.',
+    icon: Film,
+    badge: 'B-Roll Insertion',
+    title: 'Context-Aware Footage, Instantly.',
+    description: 'AI reads your script or voiceover and auto-inserts perfectly-timed stock footage, relevant cutaways, and visual context — no manual searching required.',
     gradient: 'from-purple-500 to-pink-500',
-    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
+    image: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&h=500&fit=crop',
   },
   {
-    icon: Flame,
-    badge: 'Viral Clip Extractor',
-    title: 'Find the Gold in Your Content.',
-    description: 'Drop long-form videos and let AI identify the most engaging moments. Get perfectly-cut clips optimized for every platform.',
+    icon: VolumeX,
+    badge: 'Silence & Censor Words',
+    title: 'Keep It Brand-Safe, Automatically.',
+    description: 'Set a word list and AI will detect, mute, or bleep every instance across your video. Perfect for compliance, brand safety, and repurposing content for different audiences.',
     gradient: 'from-orange-500 to-red-500',
-    image: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800&h=500&fit=crop',
-  },
-  {
-    icon: Captions,
-    badge: 'AI Captions & Subtitles',
-    title: 'Words That Pop.',
-    description: 'Auto-generated captions with trendy styles, animations, and perfect timing. Boost engagement and accessibility in one click.',
-    gradient: 'from-cyan-500 to-blue-500',
-    image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=500&fit=crop',
+    image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&h=500&fit=crop',
   },
   {
     icon: Languages,
-    badge: 'Multi-Language Dubbing',
-    title: 'Go Global Instantly.',
-    description: 'Translate and dub your content in 30+ languages with natural-sounding AI voices. Lip-sync included.',
+    badge: 'Language Dubbing',
+    title: 'Go Global in One Click.',
+    description: 'Translate and dub your content in 30+ languages with natural-sounding AI voices. Advanced lip-sync ensures the dubbed version looks as natural as the original.',
     gradient: 'from-emerald-500 to-teal-500',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=500&fit=crop',
+  },
+  {
+    icon: Sparkles,
+    badge: 'Transitions & Effects',
+    title: 'Cinematic Quality, Zero Effort.',
+    description: 'From smooth cuts to dramatic zooms, glitch effects to light leaks — AI applies the perfect transitions and visual effects based on your content\'s mood and pacing.',
+    gradient: 'from-pink-500 to-rose-500',
+    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
+  },
+  {
+    icon: Captions,
+    badge: 'AI Captions',
+    title: 'Words That Pop Off Screen.',
+    description: 'Auto-generated captions with word-by-word highlighting, trendy animations, and customizable styles. Boost engagement by 40% and make every video accessible.',
+    gradient: 'from-cyan-500 to-blue-500',
+    image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=500&fit=crop',
   },
   {
     icon: Maximize,
     badge: 'Smart Resize',
     title: 'One Video, Every Platform.',
-    description: 'Automatically adapt your content for TikTok, Reels, Shorts, Stories, and Feed — with intelligent reframing that keeps the action centered.',
-    gradient: 'from-pink-500 to-rose-500',
-    image: 'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=500&fit=crop',
-  },
-  {
-    icon: Palette,
-    badge: 'Brand Kit',
-    title: 'Your Brand, Every Frame.',
-    description: 'Upload your logo, colors, and fonts once. Every piece of content automatically matches your brand identity.',
+    description: 'Automatically adapt your content for TikTok, Reels, Shorts, Stories, and Feed — with intelligent subject reframing that keeps the action centered.',
     gradient: 'from-violet-500 to-indigo-500',
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=500&fit=crop',
+    image: 'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=500&fit=crop',
   },
 ];
 
@@ -57,30 +57,27 @@ const ToolsShowcase: React.FC = () => {
   return (
     <section className="relative py-16 md:py-24 px-3 md:px-4 bg-black">
       <div className="max-w-7xl mx-auto">
-        {/* Section header */}
         <div className="text-center mb-12 md:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-6">
             <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-medium text-purple-300">Platform Tools</span>
+            <span className="text-sm font-medium text-purple-300">Deep Dive</span>
           </div>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Powered by{' '}
+            See each tool{' '}
             <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-              intelligent tools
+              in action
             </span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
-            Every feature is designed to save you hours while producing studio-quality results.
+            Every AI capability is designed to save you hours while producing studio-quality results.
           </p>
         </div>
 
-        {/* Alternating layout */}
         {tools.map((tool, index) => (
           <div
             key={tool.badge}
             className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 md:gap-8 lg:gap-16 mb-12 md:mb-24 last:mb-0`}
           >
-            {/* Text */}
             <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               <div className="inline-flex items-center gap-3 mb-4 md:mb-5">
                 <tool.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400" />
@@ -98,7 +95,6 @@ const ToolsShowcase: React.FC = () => {
               </Button>
             </div>
 
-            {/* Image */}
             <div className="flex-1 w-full max-w-xl px-2 md:px-0">
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
                 <img
