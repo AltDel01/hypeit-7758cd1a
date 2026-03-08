@@ -158,16 +158,16 @@ const Enterprise = () => {
       <Navbar />
       <main>
         {/* Hero */}
-        <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 px-4 overflow-hidden">
+        <section className="relative pt-16 pb-12 md:pt-32 md:pb-24 px-4 overflow-hidden">
           <HeroBackground />
           
           <div className="relative z-10 max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-muted-foreground text-xs font-medium mb-6">
-              <Building2 className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-secondary border border-border text-muted-foreground text-[11px] md:text-xs font-medium mb-4 md:mb-6">
+              <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
               Enterprise Solutions
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
+            <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 leading-[1.15] tracking-tight">
               Video Production at{' '}
               <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                 Enterprise Scale
@@ -177,38 +177,35 @@ const Enterprise = () => {
               Without Enterprise Cost
             </h1>
             
-            <p className="text-base md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-2 md:px-0">
               Replace expensive content production cost and months-long timelines. 
 Viralin empowers your teams to create studio-quality video content from raw footage in minutes, not months without needing technical content editing skills and complicated SaaS tools.
-            
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
               <Button
                 size="lg"
-                className="px-8 py-6 text-base bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold hover:opacity-90 shadow-lg shadow-purple-500/25"
+                className="w-full sm:w-auto px-6 md:px-8 py-5 md:py-6 text-sm md:text-base bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold hover:opacity-90 shadow-lg shadow-purple-500/25"
                 onClick={() => document.getElementById('book-demo')?.scrollIntoView({ behavior: 'smooth' })}>
-                
                 Book a Demo
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="px-8 py-6 text-base border-border text-foreground hover:bg-secondary"
+                className="w-full sm:w-auto px-6 md:px-8 py-5 md:py-6 text-sm md:text-base border-border text-foreground hover:bg-secondary"
                 onClick={() => document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' })}>
-                
                 <Play className="w-4 h-4 mr-2" />
                 See Case Studies
               </Button>
             </div>
 
             {/* Trust bar */}
-            <div className="mt-16 pt-8 border-t border-border/50">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest mb-6">Trusted by industry leaders</p>
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+            <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-border/50">
+              <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-4 md:mb-6">Trusted by industry leaders</p>
+              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-12">
                 {trustedLogos.map((logo, i) =>
-                <span key={i} className="text-sm font-medium text-muted-foreground/50">{logo}</span>
+                <span key={i} className="text-xs md:text-sm font-medium text-muted-foreground/50">{logo}</span>
                 )}
               </div>
             </div>
