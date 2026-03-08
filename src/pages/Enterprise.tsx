@@ -315,20 +315,14 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   ))}
                 </div>
 
-                <p className="text-xs text-muted-foreground pt-4">
-                  Prefer email? Reach us at{' '}
-                  <a href="mailto:enterprise@viralin.co" className="text-purple-400 hover:underline">
-                    enterprise@viralin.co
-                  </a>
-                </p>
               </div>
 
               {/* Right side - Calendly */}
               <div className="rounded-2xl border border-border/60 overflow-hidden bg-card/30 backdrop-blur-sm">
                 <div
                   className="calendly-inline-widget w-full"
-                  data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6"
-                  style={{ minWidth: '320px', height: '700px' }}
+                  data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6&hide_event_type_details=1&hide_gdpr_banner=1"
+                  style={{ minWidth: '320px', height: '580px' }}
                 />
               </div>
             </div>
