@@ -1,54 +1,54 @@
 
+## Why You Can't Upload to Supabase Storage
 
-# Features Page Plan
+The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
 
-## Overview
-Build a new `/features` page combining **product capabilities** (what users can create) at the top and **platform tools/features** below. Dark theme consistent with homepage and enterprise page.
+- avatars bucket: has an INSERT policy for authenticated users
+- product-images bucket: has an INSERT policy for authenticated users  
+- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
 
-## Page Structure
+This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
 
-### 1. Hero Section
-- Minimal hero with heading: "Create Content That Goes Viral"
-- Subheading about the platform's AI-powered capabilities
-- CTA buttons: "Get Started Free" + "Watch Demo"
+---
 
-### 2. Product Capabilities Grid (top section)
-Card grid showcasing what users can create, in this order:
+## What Will Be Fixed
 
-1. **Viral Ready Short-Form Content** — AI-optimized clips for TikTok, Reels, Shorts
-2. **Promotional Videos** — Brand ads, product launches, campaigns
-3. **Explainer Videos** — How-to content, tutorials, walkthroughs
-4. **Podcasts** — AI-generated podcast content with avatars
-5. **AI Avatars / UGC** — Photorealistic talking avatars for brand content
-6. **Product Visuals** — E-commerce images and videos that convert
+### 1. Add an INSERT policy to `generated-images` bucket
+A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
 
-Each card: icon, title, short description, gradient accent, and a relevant image/visual. Style similar to the reference image (dark cards with imagery).
+```sql
+CREATE POLICY "Authenticated users can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-### 3. Platform Tools/Features Section
-Alternating left-right layout (reusing CoreFeatures pattern) showcasing the underlying tools:
+We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
 
-- **AI Video Editor** — Cinematic transitions, motion graphics, auto-editing
-- **Viral Clip Extractor** — Find golden moments from long-form content
-- **AI Captions & Subtitles** — Auto-generated, styled captions
-- **Multi-Language Dubbing** — Translate and dub in 30+ languages
-- **Smart Resize** — One-click format adaptation for all platforms
-- **Brand Kit** — Consistent branding across all generated content
+```sql
+CREATE POLICY "Service role can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO service_role
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-### 4. Bottom CTA
-"Ready to create?" section with signup button.
+### 2. Update the dashboard code to use Supabase video URLs
+Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
 
-## Technical Details
+- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
+- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
+- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
+- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
 
-### Files to create/modify:
-- **`src/pages/Features.tsx`** — Main features page
-- **`src/components/features/CapabilitiesGrid.tsx`** — Product capabilities card grid
-- **`src/components/features/ToolsShowcase.tsx`** — Platform tools alternating layout
-- **`src/App.tsx`** — Add `/features` route
+### Upload Steps (after policy fix)
 
-### Design approach:
-- Dark background (`bg-black`) matching homepage
-- Purple gradient accents consistent with brand
-- Responsive: 1-col mobile, 2-col tablet, 3-col desktop for capabilities grid
-- Reuse existing UI components (`Button`, gradients, badge pills)
-- Navbar already has `/features` link wired up
+1. Go to Supabase Storage → `generated-images` bucket
+2. Create a folder called `demo-clips`
+3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
+4. Tell me when done — I'll update the code
 
+### Files to Change
+- **SQL migration** — add INSERT policy on `generated-images` bucket
+- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs

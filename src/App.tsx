@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import CreditUsage from "./pages/CreditUsage";
 import Language from "./pages/Language";
 import Enterprise from "./pages/Enterprise";
+import Features from "./pages/Features";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -57,6 +58,7 @@ const AppRoutes = () => {
       <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/enterprise" element={<CustomErrorBoundary><Enterprise /></CustomErrorBoundary>} />
+      <Route path="/features" element={<CustomErrorBoundary><Features /></CustomErrorBoundary>} />
       <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
       <Route 
