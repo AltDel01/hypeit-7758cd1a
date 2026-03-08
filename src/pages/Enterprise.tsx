@@ -258,7 +258,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Enterprise Features */}
-        <section className="py-16 md:py-24 px-4 bg-secondary/20 border-y border-border/40">
+        <section className="py-16 md:py-24 px-4 bg-secondary/40 border-y border-border/40">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
