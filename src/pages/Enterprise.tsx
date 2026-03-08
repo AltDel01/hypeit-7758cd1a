@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import HeroBackground from '@/components/enterprise/HeroBackground';
 import { Button } from '@/components/ui/button';
 import {
   Building2, Plane, ShoppingBag, Users, ArrowRight, CheckCircle,
@@ -143,9 +144,7 @@ const Enterprise = () => {
       <main>
         {/* Hero */}
         <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 px-4 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
-          <div className="absolute top-20 left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[180px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[150px]" />
+          <HeroBackground />
           
           <div className="relative z-10 max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-muted-foreground text-xs font-medium mb-6">
