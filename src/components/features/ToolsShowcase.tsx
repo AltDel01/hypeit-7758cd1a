@@ -11,7 +11,7 @@ const tools = [
     title: 'Context-Aware Footage, Instantly.',
     description: 'AI reads your script or voiceover and auto-inserts perfectly-timed stock footage, relevant cutaways, and visual context. No manual searching required.',
     gradient: 'from-purple-500 to-pink-500',
-    image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&h=500&fit=crop',
+    image: brollImage,
   },
   {
     icon: VolumeX,
