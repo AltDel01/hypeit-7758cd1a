@@ -232,21 +232,21 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Case Studies */}
-        <section id="case-studies" className="py-16 md:py-24 px-4 bg-background">
+        <section id="case-studies" className="py-12 md:py-24 px-4 bg-background">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-8 md:mb-16">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
                 Real Results, Real{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Impact
                 </span>
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 See how enterprises across industries are transforming their content production with Viralin.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6">
               {caseStudies.map((study, index) =>
               <CaseStudyCard key={study.id} study={study} index={index} />
               )}
