@@ -164,10 +164,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           setShowRetentionResult(true);
         } else if (mode === 'creator') {
           setShowAiCreatorResult(true);
-        } else if (mode === 'aiedit') {
-          setShowAiEditResult(true);
-        } else {
+        } else if (mode === 'aiclip') {
           setShowAiClipResult(true);
+        } else {
+          // All feature modes (aiedit, trim, caption, etc.) show AI Edit result
+          setShowAiEditResult(true);
         }
       }, 15000);
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
