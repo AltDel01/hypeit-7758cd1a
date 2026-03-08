@@ -59,7 +59,7 @@ const tools = [
 
 const ToolsShowcase: React.FC = () => {
   return (
-    <section className="relative py-16 md:py-24 px-3 md:px-4 bg-black">
+    <section className="relative py-12 md:py-24 px-4 md:px-4 bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12 md:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-6">
@@ -80,9 +80,9 @@ const ToolsShowcase: React.FC = () => {
         {tools.map((tool, index) => (
           <div
             key={tool.badge}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 md:gap-8 lg:gap-16 mb-12 md:mb-24 last:mb-0`}
+            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-5 md:gap-8 lg:gap-16 mb-10 md:mb-24 last:mb-0`}
           >
-            <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
+            <div className="flex-1 max-w-md text-center lg:text-left px-1 md:px-0">
               <div className="inline-flex items-center gap-3 mb-4 md:mb-5">
                 <tool.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400" />
                 <span className="text-purple-400 text-lg md:text-xl font-bold">{tool.badge}</span>
@@ -99,7 +99,7 @@ const ToolsShowcase: React.FC = () => {
               </Button>
             </div>
 
-            <div className="flex-1 w-full max-w-xl px-2 md:px-0">
+            <div className="flex-1 w-full max-w-xl px-0 md:px-0">
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-gray-900/50">
                 <img
                   src={tool.image}

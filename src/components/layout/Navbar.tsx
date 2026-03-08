@@ -14,9 +14,22 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
+const solutionsItems = [
+  { label: 'Viral Ready Short-Form Content', href: '/dashboard', description: 'AI-optimized clips for TikTok, Reels & Shorts' },
+  { label: 'Promotional Video', href: '/dashboard', description: 'Brand ads, product launches & campaigns' },
+  { label: 'Explainer Video', href: '/dashboard', description: 'Tutorials & walkthroughs with AI avatars' },
+  { label: 'Podcast Video', href: '/dashboard', description: 'AI-generated podcast episodes' },
+  { label: 'Edit Existing Video', href: '/dashboard', description: 'Upload & enhance your own footage' },
+  { label: 'Audio Ad', href: '/dashboard', description: 'Professional audio advertisements' },
+  { label: 'Audio Podcast', href: '/dashboard', description: 'Generate podcast audio content' },
+  { label: 'API-Generated Content', href: '/dashboard', description: 'Automate content via API' },
+  { label: 'Meditation', href: '/dashboard', description: 'Calming meditation audio & video' },
+];
+
 const MobileTopBar = () => {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSolutionsOpen, setIsSolutionsOpen] = useState(false);
   
   return (
     <div className="flex flex-col w-full">
@@ -39,11 +52,32 @@ const MobileTopBar = () => {
       
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-gray-800 z-50 animate-fade-in">
-          <div className="flex flex-col p-4 space-y-2">
-            <Link to="/" className="px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-              Solutions
-            </Link>
+        <div className="absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-gray-800 z-50 animate-fade-in max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="flex flex-col p-4 space-y-1">
+            {/* Solutions Expandable */}
+            <button
+              onClick={() => setIsSolutionsOpen(!isSolutionsOpen)}
+              className="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors"
+            >
+              <span>Solutions</span>
+              <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isSolutionsOpen && "rotate-180")} />
+            </button>
+            {isSolutionsOpen && (
+              <div className="ml-2 pl-3 border-l border-gray-700 space-y-0.5">
+                {solutionsItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    className="block px-3 py-2.5 rounded-lg hover:bg-gray-800/50 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="text-white text-sm font-medium block">{item.label}</span>
+                    <span className="text-gray-500 text-xs">{item.description}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <Link to="/features" className="px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
               Features
             </Link>
@@ -119,17 +153,6 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
 
-  const solutionsItems = [
-    { label: 'Viral Ready Short-Form Content', href: '/dashboard', description: 'AI-optimized clips for TikTok, Reels & Shorts' },
-    { label: 'Promotional Video', href: '/dashboard', description: 'Brand ads, product launches & campaigns' },
-    { label: 'Explainer Video', href: '/dashboard', description: 'Tutorials & walkthroughs with AI avatars' },
-    { label: 'Podcast Video', href: '/dashboard', description: 'AI-generated podcast episodes' },
-    { label: 'Edit Existing Video', href: '/dashboard', description: 'Upload & enhance your own footage' },
-    { label: 'Audio Ad', href: '/dashboard', description: 'Professional audio advertisements' },
-    { label: 'Audio Podcast', href: '/dashboard', description: 'Generate podcast audio content' },
-    { label: 'API-Generated Content', href: '/dashboard', description: 'Automate content via API' },
-    { label: 'Meditation', href: '/dashboard', description: 'Calming meditation audio & video' },
-  ];
 
   const NavLinks = () => (
     <>

@@ -67,7 +67,7 @@ const capabilities = [
 
 const CapabilitiesGrid: React.FC = () => {
   return (
-    <section className="relative py-16 md:py-24 px-3 md:px-4 bg-black">
+    <section className="relative py-12 md:py-24 px-4 md:px-4 bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
@@ -99,7 +99,7 @@ const CapabilitiesGrid: React.FC = () => {
                   {capabilities[0].description}
                 </p>
               </div>
-              <div className="flex-1 relative min-h-[200px] md:min-h-[300px]">
+              <div className="flex-1 relative min-h-[180px] md:min-h-[300px]">
                 <img
                   src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&h=400&fit=crop"
                   alt={capabilities[0].title}
@@ -114,17 +114,17 @@ const CapabilitiesGrid: React.FC = () => {
         </div>
 
         {/* Rest of capabilities */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {capabilities.slice(1).map((cap) => (
             <div
               key={cap.title}
-              className="group relative rounded-xl overflow-hidden border border-white/10 bg-gray-900/50 hover:border-white/20 transition-all duration-300 p-5 md:p-6"
+              className="group relative rounded-xl overflow-hidden border border-white/10 bg-gray-900/50 hover:border-white/20 transition-all duration-300 p-4 md:p-6"
             >
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${cap.gradient} flex items-center justify-center mb-4`}>
-                <cap.icon className="w-5 h-5 text-white" />
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-r ${cap.gradient} flex items-center justify-center mb-3 md:mb-4`}>
+                <cap.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{cap.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{cap.description}</p>
+              <h3 className="text-sm md:text-lg font-semibold text-white mb-1 md:mb-2">{cap.title}</h3>
+              <p className="text-gray-400 text-xs md:text-sm leading-relaxed">{cap.description}</p>
             </div>
           ))}
         </div>
