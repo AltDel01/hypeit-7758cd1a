@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
-  Languages, Loader2, Play, ExternalLink, TrendingUp, Download
+  Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
 } from 'lucide-react';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
