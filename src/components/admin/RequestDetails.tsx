@@ -30,6 +30,7 @@ export const RequestDetails = ({
   onUploadResult,
   setResultImage,
   onUnassign,
+  onClaimRequest,
   currentUserId
 }: RequestDetailsProps) => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
