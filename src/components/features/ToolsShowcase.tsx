@@ -44,7 +44,7 @@ const tools = [
     title: 'Words That Pop Off Screen.',
     description: 'Auto-generated captions with word-by-word highlighting, trendy animations, and customizable styles. Boost engagement by 40% and make every video accessible.',
     gradient: 'from-cyan-500 to-blue-500',
-    image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=500&fit=crop',
+    image: aiCaptionsImage,
   },
   {
     icon: Maximize,
