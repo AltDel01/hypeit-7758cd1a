@@ -315,12 +315,6 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   ))}
                 </div>
 
-                <p className="text-xs text-muted-foreground pt-4">
-                  Prefer email? Reach us at{' '}
-                  <a href="mailto:enterprise@viralin.co" className="text-purple-400 hover:underline">
-                    enterprise@viralin.co
-                  </a>
-                </p>
               </div>
 
               {/* Right side - Calendly */}
