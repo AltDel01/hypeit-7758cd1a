@@ -83,19 +83,19 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
   const Icon = study.icon;
 
   return (
-    <div className="group relative rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-border transition-all duration-500">
+    <div className="group relative rounded-xl md:rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-border transition-all duration-500">
       {/* Header */}
-      <div className="relative p-6 md:p-8 overflow-hidden">
+      <div className="relative p-4 md:p-8 overflow-hidden">
         <img src={study.bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className={`absolute inset-0 ${study.id === 'travel' ? 'bg-black/50' : 'bg-black/65'}`} />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${study.gradient} flex items-center justify-center`}>
-              <Icon className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2.5 md:gap-3">
+            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br ${study.gradient} flex items-center justify-center`}>
+              <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-white/70 uppercase tracking-wider">{study.industry}</p>
-              <p className="text-sm font-semibold text-white">{study.company}</p>
+              <p className="text-[10px] md:text-xs font-medium text-white/70 uppercase tracking-wider">{study.industry}</p>
+              <p className="text-xs md:text-sm font-semibold text-white">{study.company}</p>
             </div>
           </div>
         </div>
@@ -158,16 +158,16 @@ const Enterprise = () => {
       <Navbar />
       <main>
         {/* Hero */}
-        <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 px-4 overflow-hidden">
+        <section className="relative pt-16 pb-12 md:pt-32 md:pb-24 px-4 overflow-hidden">
           <HeroBackground />
           
           <div className="relative z-10 max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-muted-foreground text-xs font-medium mb-6">
-              <Building2 className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-secondary border border-border text-muted-foreground text-[11px] md:text-xs font-medium mb-4 md:mb-6">
+              <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
               Enterprise Solutions
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
+            <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 leading-[1.15] tracking-tight">
               Video Production at{' '}
               <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                 Enterprise Scale
@@ -177,38 +177,35 @@ const Enterprise = () => {
               Without Enterprise Cost
             </h1>
             
-            <p className="text-base md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-2 md:px-0">
               Replace expensive content production cost and months-long timelines. 
 Viralin empowers your teams to create studio-quality video content from raw footage in minutes, not months without needing technical content editing skills and complicated SaaS tools.
-            
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
               <Button
                 size="lg"
-                className="px-8 py-6 text-base bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold hover:opacity-90 shadow-lg shadow-purple-500/25"
+                className="w-full sm:w-auto px-6 md:px-8 py-5 md:py-6 text-sm md:text-base bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold hover:opacity-90 shadow-lg shadow-purple-500/25"
                 onClick={() => document.getElementById('book-demo')?.scrollIntoView({ behavior: 'smooth' })}>
-                
                 Book a Demo
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="px-8 py-6 text-base border-border text-foreground hover:bg-secondary"
+                className="w-full sm:w-auto px-6 md:px-8 py-5 md:py-6 text-sm md:text-base border-border text-foreground hover:bg-secondary"
                 onClick={() => document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' })}>
-                
                 <Play className="w-4 h-4 mr-2" />
                 See Case Studies
               </Button>
             </div>
 
             {/* Trust bar */}
-            <div className="mt-16 pt-8 border-t border-border/50">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest mb-6">Trusted by industry leaders</p>
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+            <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-border/50">
+              <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-4 md:mb-6">Trusted by industry leaders</p>
+              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-12">
                 {trustedLogos.map((logo, i) =>
-                <span key={i} className="text-sm font-medium text-muted-foreground/50">{logo}</span>
+                <span key={i} className="text-xs md:text-sm font-medium text-muted-foreground/50">{logo}</span>
                 )}
               </div>
             </div>
@@ -216,18 +213,18 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Pain Point Stats */}
-        <section className="py-12 md:py-20 px-4 border-y border-border/40 bg-secondary/40">
+        <section className="py-10 md:py-20 px-4 border-y border-border/40 bg-secondary/40">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
               {[
               { stat: '$500K+', label: 'Avg. enterprise video production cost per campaign' },
               { stat: '8–12 Weeks', label: 'Traditional post-production turnaround' },
               { stat: '70%', label: 'Of content never gets repurposed' },
               { stat: '5x', label: 'More content needed YoY for social' }].
               map((item, i) =>
-              <div key={i}>
-                  <p className="text-2xl md:text-4xl font-bold text-foreground mb-2">{item.stat}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground">{item.label}</p>
+              <div key={i} className="py-2">
+                  <p className="text-xl md:text-4xl font-bold text-foreground mb-1 md:mb-2">{item.stat}</p>
+                  <p className="text-[10px] md:text-sm text-muted-foreground leading-tight">{item.label}</p>
                 </div>
               )}
             </div>
@@ -235,21 +232,21 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Case Studies */}
-        <section id="case-studies" className="py-16 md:py-24 px-4 bg-background">
+        <section id="case-studies" className="py-12 md:py-24 px-4 bg-background">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-8 md:mb-16">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
                 Real Results, Real{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Impact
                 </span>
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 See how enterprises across industries are transforming their content production with Viralin.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6">
               {caseStudies.map((study, index) =>
               <CaseStudyCard key={study.id} study={study} index={index} />
               )}
@@ -258,23 +255,23 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Enterprise Features */}
-        <section className="py-16 md:py-24 px-4 bg-secondary/40 border-y border-border/40">
+        <section className="py-12 md:py-24 px-4 bg-secondary/40 border-y border-border/40">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
                 Built for Enterprise
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Everything your organization needs to scale content production securely.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
               {enterpriseFeatures.map((feature, i) =>
-              <div key={i} className="p-6 rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300">
-                  <feature.icon className="w-8 h-8 text-purple-400 mb-4" />
-                  <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <div key={i} className="p-4 md:p-6 rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300">
+                  <feature.icon className="w-6 h-6 md:w-8 md:h-8 text-purple-400 mb-3 md:mb-4" />
+                  <h3 className="text-sm md:text-base font-semibold text-foreground mb-1 md:mb-2">{feature.title}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
                 </div>
               )}
             </div>
@@ -282,32 +279,32 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Book a Demo CTA */}
-        <section id="book-demo" className="py-16 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
+        <section id="book-demo" className="py-12 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
           <div className="max-w-6xl mx-auto">
             {/* Section Header */}
-            <div className="text-center mb-12 md:mb-16 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
-                <Star className="w-3.5 h-3.5" />
+            <div className="text-center mb-8 md:mb-16 space-y-4 md:space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[11px] md:text-xs font-medium">
+                <Star className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 Get Started
               </div>
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1]">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground leading-[1.1]">
                 Ready to Transform Your{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Content Production
                 </span>
                 ?
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Book a personalized demo to see how Viralin can reduce your production costs by up to 85% while 10x-ing your content output.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-start">
               {/* Left side - Copy */}
-              <div className="space-y-6">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Book a Demo</p>
+              <div className="space-y-4 md:space-y-6">
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-widest">Book a Demo</p>
                 
-                <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
+                <h2 className="text-xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
                   Book your{' '}
                   <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                     30-minute
@@ -315,18 +312,18 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   {' '}Viralin demo
                 </h2>
 
-                <p className="text-sm text-muted-foreground/70">What to expect:</p>
+                <p className="text-xs md:text-sm text-muted-foreground/70">What to expect:</p>
 
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {[
                   { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
                   { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
                   { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
                   { bold: 'roi', text: 'ROI analysis for your use case' }].
                   map((item, i) =>
-                  <div key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                      <p className="text-sm md:text-base text-muted-foreground">{item.text}</p>
+                  <div key={i} className="flex items-start gap-2.5 md:gap-3">
+                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 shrink-0" />
+                      <p className="text-xs md:text-base text-muted-foreground">{item.text}</p>
                     </div>
                   )}
                 </div>
@@ -338,7 +335,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                 <div
                   className="calendly-inline-widget w-full"
                   data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6&hide_event_type_details=1&hide_gdpr_banner=1"
-                  style={{ minWidth: '320px', height: '480px' }} />
+                  style={{ minWidth: '280px', height: '420px' }} />
                 
               </div>
             </div>
