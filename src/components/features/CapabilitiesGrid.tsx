@@ -51,6 +51,18 @@ const capabilities = [
     description: 'One-click format adaptation for TikTok, Reels, Shorts, Stories, and Feed with intelligent subject reframing.',
     gradient: 'from-cyan-500 to-blue-500',
   },
+  {
+    icon: Scissors,
+    title: 'AI Clipping',
+    description: 'Automatically detect the most engaging moments in your content and extract them as standalone clips ready to publish.',
+    gradient: 'from-fuchsia-500 to-pink-500',
+  },
+  {
+    icon: Film,
+    title: 'Long-Form to Short-Form',
+    description: 'Transform lengthy videos into bite-sized knowledge feeds — perfect for repurposing webinars, podcasts, and tutorials into snackable social content.',
+    gradient: 'from-indigo-500 to-violet-500',
+  },
 ];
 
 const CapabilitiesGrid: React.FC = () => {
