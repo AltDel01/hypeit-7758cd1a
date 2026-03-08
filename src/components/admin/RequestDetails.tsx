@@ -17,6 +17,7 @@ interface RequestDetailsProps {
   onUploadResult: () => void;
   setResultImage: (file: File | null) => void;
   onUnassign?: (id: string) => void;
+  onClaimRequest?: (id: string) => void;
   currentUserId?: string;
 }
 
