@@ -279,32 +279,32 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Book a Demo CTA */}
-        <section id="book-demo" className="py-16 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
+        <section id="book-demo" className="py-12 md:py-24 px-4 bg-secondary/20 border-t border-border/40">
           <div className="max-w-6xl mx-auto">
             {/* Section Header */}
-            <div className="text-center mb-12 md:mb-16 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
-                <Star className="w-3.5 h-3.5" />
+            <div className="text-center mb-8 md:mb-16 space-y-4 md:space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[11px] md:text-xs font-medium">
+                <Star className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 Get Started
               </div>
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1]">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground leading-[1.1]">
                 Ready to Transform Your{' '}
                 <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                   Content Production
                 </span>
                 ?
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Book a personalized demo to see how Viralin can reduce your production costs by up to 85% while 10x-ing your content output.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-start">
               {/* Left side - Copy */}
-              <div className="space-y-6">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Book a Demo</p>
+              <div className="space-y-4 md:space-y-6">
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-widest">Book a Demo</p>
                 
-                <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
+                <h2 className="text-xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
                   Book your{' '}
                   <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                     30-minute
@@ -312,18 +312,18 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   {' '}Viralin demo
                 </h2>
 
-                <p className="text-sm text-muted-foreground/70">What to expect:</p>
+                <p className="text-xs md:text-sm text-muted-foreground/70">What to expect:</p>
 
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {[
                   { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
                   { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
                   { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
                   { bold: 'roi', text: 'ROI analysis for your use case' }].
                   map((item, i) =>
-                  <div key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                      <p className="text-sm md:text-base text-muted-foreground">{item.text}</p>
+                  <div key={i} className="flex items-start gap-2.5 md:gap-3">
+                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 shrink-0" />
+                      <p className="text-xs md:text-base text-muted-foreground">{item.text}</p>
                     </div>
                   )}
                 </div>
@@ -335,7 +335,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                 <div
                   className="calendly-inline-widget w-full"
                   data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6&hide_event_type_details=1&hide_gdpr_banner=1"
-                  style={{ minWidth: '320px', height: '480px' }} />
+                  style={{ minWidth: '280px', height: '420px' }} />
                 
               </div>
             </div>
