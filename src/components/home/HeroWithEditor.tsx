@@ -356,49 +356,55 @@ const HeroWithEditor: React.FC = () => {
             onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
           />
           <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
-            activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
-            : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
-            : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
-            : activeMode === 'aiedit' ? 'border-amber-500/60 shadow-lg shadow-amber-500/10'
-            : 'border-gray-700/50'
-          }`}>
-            {/* Active Mode Banner */}
+            (() => {
+              if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
+              if (activeMode === 'retention') return 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10';
+              if (activeMode === 'creator') return 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10';
+              const mc = getConfigByMode(activeMode || '');
+              if (mc) return `border-[${mc.color}]/60 shadow-lg`;
+              return 'border-gray-700/50';
+            })()
+          }`} style={(() => {
+            if (['aiclip', 'retention', 'creator'].includes(activeMode || '')) return undefined;
+            const mc = getConfigByMode(activeMode || '');
+            if (mc) return { borderColor: `${mc.color}66`, boxShadow: `0 10px 15px -3px ${mc.color}1a` };
+            return undefined;
+          })()}>
+            {/* Active Mode Banner — AI Clip / Retention / Creator */}
             {activeMode === 'aiclip' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
                 <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
                 <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
             {activeMode === 'retention' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
                 <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
                 <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
             {activeMode === 'creator' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
                 <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
                 <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
-            {activeMode === 'aiedit' && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs text-amber-400 font-medium">AI Edit mode active — smart auto-edit with effects & transitions</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+            {/* Dynamic Feature Mode Banner */}
+            {activeMode && !['aiclip', 'retention', 'creator'].includes(activeMode) && (() => {
+              const mc = getConfigByMode(activeMode);
+              if (!mc) return null;
+              const IconComp = mc.icon;
+              return (
+                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg border" style={{ backgroundColor: `${mc.color}1a`, borderColor: `${mc.color}4d` }}>
+                  <IconComp className="w-3.5 h-3.5" style={{ color: mc.color }} />
+                  <span className="text-xs font-medium" style={{ color: mc.color }}>{mc.label} mode active — {mc.description}</span>
+                  <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
+                </div>
+              );
+            })()}
             {/* Media Preview — shows image/video/doc previews */}
             {uploadedVideos.length > 0 && (
               <div className="mb-3 md:mb-4 flex flex-wrap gap-2">
