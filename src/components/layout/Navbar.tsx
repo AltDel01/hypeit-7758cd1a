@@ -225,10 +225,10 @@ const Navbar = () => {
               <Link to="/settings" className="block px-3 py-3 hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                    {(profileName || user.email)?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                    <p className="text-white text-sm font-medium">{profileName || user.email?.split('@')[0] || 'User'}</p>
                     <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
                   </div>
                 </div>
