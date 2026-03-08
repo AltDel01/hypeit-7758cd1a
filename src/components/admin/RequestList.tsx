@@ -36,8 +36,8 @@ export const RequestList = ({
   };
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
+    <div className="overflow-x-auto w-full">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
