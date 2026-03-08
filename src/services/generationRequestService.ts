@@ -195,6 +195,7 @@ export async function claimGenerationRequest(
         assigned_to: user.id,
         assigned_to_name: displayName,
         status: "in-progress",
+        assigned_at: new Date().toISOString(),
       })
       .eq("id", requestId);
 
@@ -222,6 +223,7 @@ export async function unassignGenerationRequest(
       .update({
         assigned_to: null,
         assigned_to_name: null,
+        assigned_at: null,
         status: "new",
       })
       .eq("id", requestId);

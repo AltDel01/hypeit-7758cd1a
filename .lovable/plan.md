@@ -1,62 +1,54 @@
 
+## Why You Can't Upload to Supabase Storage
 
-## Master Admin Dashboard — Plan
+The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
 
-Yes, creating a separate **Master Admin** dashboard is a strong idea. Right now, the single `admin` role serves both the person managing the business and the video editors doing the work. Separating them gives you proper oversight and control.
+- avatars bucket: has an INSERT policy for authenticated users
+- product-images bucket: has an INSERT policy for authenticated users  
+- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
 
-### Current vs. Proposed Role Structure
+This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
 
-```text
-Current:
-  admin ──► can see all requests, claim, upload results
+---
 
-Proposed:
-  admin (master) ──► manage editors, assign jobs, view stats
-  editor (new role) ──► claim/receive assigned jobs, upload results
+## What Will Be Fixed
+
+### 1. Add an INSERT policy to `generated-images` bucket
+A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
+
+```sql
+CREATE POLICY "Authenticated users can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'generated-images');
 ```
 
-### What the Master Admin Dashboard Would Include
+We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
 
-1. **Editor Management** — Register new editor accounts (invite by email), activate/deactivate editors, view editor list
-2. **Job Assignment** — Assign specific requests to specific editors (not just self-claim), reassign if needed
-3. **Job Tracking** — See which editor is working on what, time spent per request, completion timestamps
-4. **Editor Performance Stats** — Requests completed per editor, average turnaround time, completion rate, active vs idle editors
+```sql
+CREATE POLICY "Service role can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO service_role
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-### Technical Changes Required
+### 2. Update the dashboard code to use Supabase video URLs
+Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
 
-**Database:**
-- Add `editor` to the `app_role` enum
-- Create an `editor_profiles` or reuse `profiles` table with editor-specific metadata (e.g., `is_active`, `specialization`)
-- Add tracking columns to `generation_requests`: `assigned_at` timestamp (to calculate turnaround time)
-- Possibly a new `editor_stats` view or materialized view for aggregated performance data
+- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
+- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
+- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
+- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
 
-**Backend (RLS & Functions):**
-- New RLS policies so `editor` role users can only see/update requests assigned to them
-- New `has_role` checks distinguishing `admin` from `editor`
-- Edge function or DB function to create editor accounts (admin-only)
+### Upload Steps (after policy fix)
 
-**Frontend:**
-- New `/admin/editors` page — list, register, manage editors
-- New `/admin/stats` page — performance dashboard with charts (recharts already installed)
-- Update existing `/admin` to be master-admin-only
-- New `/editor` dashboard — simplified view showing only assigned tasks
-- Update `AdminRoute` to differentiate admin vs editor access
+1. Go to Supabase Storage → `generated-images` bucket
+2. Create a folder called `demo-clips`
+3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
+4. Tell me when done — I'll update the code
 
-**Auth Flow:**
-- Master admin registers editor accounts via Supabase `auth.admin.createUser()` (requires service role key, so this must go through an edge function)
-- Editor gets credentials and logs in via `/admin-login`
-
-### Estimated Scope
-
-This is a significant feature set. Recommended build order:
-1. Add `editor` role to enum + RLS policies
-2. Build edge function for admin to create editor accounts
-3. Build editor management page (`/admin/editors`)
-4. Update request assignment to support admin-assigns-editor flow
-5. Build editor-only dashboard (`/editor`)
-6. Add performance tracking columns and stats page
-
-### Decision Point
-
-Before building, we should confirm the role naming and whether editors should still be able to self-claim jobs or only work on admin-assigned tasks.
-
+### Files to Change
+- **SQL migration** — add INSERT policy on `generated-images` bucket
+- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
