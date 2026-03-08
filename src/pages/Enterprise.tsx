@@ -36,6 +36,7 @@ const caseStudies = [
   company: 'Leading FMCG Brand',
   gradient: 'from-amber-500 to-orange-600',
   bgGlow: 'bg-amber-500/15',
+  bgImage: caseCpg,
   problem: 'Professional product shoots with studio rentals, photographers, videographers, and editors cost $50K–$200K per product launch. Seasonal campaigns multiplied this 4x annually.',
   solution: 'Teams now shoot product footage in simple setups. Viralin\'s AI transforms raw clips into studio-quality ads with branded overlays, motion graphics, and platform-specific formats.',
   results: [
