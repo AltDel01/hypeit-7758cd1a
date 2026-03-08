@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
-  Languages, Loader2, Play, ExternalLink, TrendingUp, Download
+  Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
 } from 'lucide-react';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
@@ -106,6 +106,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [showRetentionResult, setShowRetentionResult] = useState(false);
   const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
   const [showAiEditResult, setShowAiEditResult] = useState(false);
+  const [showSubmittedConfirmation, setShowSubmittedConfirmation] = useState(false);
   
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +149,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     clearEditorState();
 
     if (mode) {
-      // Special mode: show loading then inline results, AND log to DB + send email
+      // Submit to DB and show confirmation
       setIsAutoProcessing(true);
       const mc = getConfigByMode(mode);
       const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
@@ -156,21 +157,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
-        .then(() => onRequestCreated?.())
-        .catch(console.error);
-      setTimeout(() => {
-        setIsAutoProcessing(false);
-        if (mode === 'retention') {
-          setShowRetentionResult(true);
-        } else if (mode === 'creator') {
-          setShowAiCreatorResult(true);
-        } else if (mode === 'aiclip') {
-          setShowAiClipResult(true);
-        } else {
-          // All feature modes (aiedit, trim, caption, etc.) show AI Edit result
-          setShowAiEditResult(true);
-        }
-      }, 15000);
+        .then(() => {
+          onRequestCreated?.();
+          setIsAutoProcessing(false);
+          setShowSubmittedConfirmation(true);
+          toast.success('Request submitted! Check your history for updates.');
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsAutoProcessing(false);
+          toast.error('Failed to submit request.');
+        });
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
       setIsAutoProcessing(true);
       setTimeout(() => {
@@ -269,38 +266,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const removeUploadedFileUrl = (index: number) => setUploadedFileUrls(prev => prev.filter((_, i) => i !== index));
   const handleExampleClick = (example: string) => setPrompt(example);
 
-  // Special mode submit: logs to DB for history, then shows inline results
+  // Special mode submit: logs to DB, shows confirmation
   const handleSpecialModeSubmit = async () => {
-    console.log('[SpecialMode] handleSpecialModeSubmit called, activeMode:', activeMode);
     setIsSubmitting(false);
     setIsAutoProcessing(true);
-    setShowAiClipResult(false);
-    setShowRetentionResult(false);
-    setShowAiCreatorResult(false);
-    setShowAiEditResult(false);
+    setShowSubmittedConfirmation(false);
 
-    // Capture current mode before any async work
     const currentMode = activeMode;
-    console.log('[SpecialMode] currentMode captured:', currentMode);
 
-    // Start the 15-second dummy timer IMMEDIATELY (don't wait for DB)
-    const timerId = setTimeout(() => {
-      console.log('[SpecialMode] Timer fired! currentMode:', currentMode);
-      setIsAutoProcessing(false);
-      if (currentMode === 'retention') {
-        setShowRetentionResult(true);
-      } else if (currentMode === 'creator') {
-        setShowAiCreatorResult(true);
-      } else if (currentMode === 'aiclip') {
-        setShowAiClipResult(true);
-      } else {
-        // All feature modes show AI Edit result
-        setShowAiEditResult(true);
-      }
-    }, 15000);
-    console.log('[SpecialMode] Timer started with id:', timerId);
-
-    // Fire-and-forget DB logging (don't block the UI)
     try {
       const mc = getConfigByMode(currentMode || '');
       const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
@@ -310,8 +283,13 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       onRequestCreated?.();
+      setIsAutoProcessing(false);
+      setShowSubmittedConfirmation(true);
+      toast.success('Request submitted! Check your history for updates.');
     } catch (error) {
       console.error('Special mode submit error:', error);
+      setIsAutoProcessing(false);
+      toast.error('Failed to submit request.');
     }
   };
 
@@ -322,6 +300,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
 
     setIsSubmitting(true);
+    setShowSubmittedConfirmation(false);
     try {
       let fullPrompt = prompt.trim();
       if (selectedFeatures.length > 0) {
@@ -334,18 +313,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       if (result) {
         onRequestCreated?.();
+        setIsSubmitting(false);
+        setShowSubmittedConfirmation(true);
+        toast.success('Request submitted! Check your history for updates.');
       } else {
         toast.error('Failed to submit request. Please try again.');
         setIsSubmitting(false);
-        setIsAutoProcessing(false);
-        return;
       }
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('Something went wrong. Please try again.');
       setIsSubmitting(false);
-      setIsAutoProcessing(false);
-      return;
     }
   };
 
@@ -731,327 +709,33 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
       </div>
 
-      {/* AI Clip Results — full-width section outside max-w-4xl, 4 columns */}
-      {showAiClipResult && (
-        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Results header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#a259ff] to-[#d966ff]">
-                <Scissors className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-base font-bold text-white">AI Clip Results</span>
-              <span className="text-sm text-gray-400">— 4 viral clips extracted</span>
+      {/* Request Submitted Confirmation */}
+      {showSubmittedConfirmation && (
+        <div className="w-full max-w-4xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-card/50 backdrop-blur-sm border border-green-500/30 rounded-2xl p-8 text-center space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle className="w-7 h-7 text-green-500" />
             </div>
-            <button onClick={() => setShowAiClipResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* 4-column grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {dummyClips.map((clip) => {
-              const isPortrait = clip.aspect === '9:16';
-              return (
-                <div key={clip.id} className="rounded-xl overflow-hidden border border-gray-700/50 hover:border-[#a259ff]/40 transition-all duration-200 bg-gray-900 flex flex-col">
-                  {/* Video frame placeholder */}
-                  <div
-                    className="relative w-full overflow-hidden"
-                    style={{
-                      paddingBottom: isPortrait ? '177.78%' : '56.25%',
-                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                    }}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
-                          <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                        </div>
-                        <span className="text-xs text-gray-400">No video available</span>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 rounded text-xs text-white font-mono">{clip.duration}</div>
-                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-[#a259ff]/80 rounded-full text-xs text-white font-semibold">
-                      <Sparkles className="w-3 h-3" />{clip.score}% viral
-                    </div>
-                  </div>
-                  {/* Clip info */}
-                  <div className="px-3 py-3 flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-base font-bold leading-tight">{clip.title}</p>
-                       <p className="text-gray-300 text-sm mt-0.5 truncate">{clip.subtitle}</p>
-                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                         {clip.tags.slice(0, 2).map(tag => (
-                           <span key={tag} className="px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 text-xs border border-gray-700/50">#{tag}</span>
-                         ))}
-                         <span className="text-gray-400 text-xs">{clip.views} views avg</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Retention Editing Result — single video, wider layout */}
-      {showRetentionResult && (
-        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#ff6b6b] to-[#ff9a3c]">
-                <TrendingUp className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-base font-bold text-white">Retention Edit Result</span>
-              <span className="text-sm text-gray-400">— optimized for maximum watch time</span>
-            </div>
-            <button onClick={() => setShowRetentionResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Video + Info side by side */}
-          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#ff6b6b]/30 rounded-2xl overflow-hidden">
-            {/* Video player */}
-            <div className="lg:w-2/3 relative bg-black">
-              <video
-                src={retentionDemoVideo}
-                controls
-                className="w-full h-full object-contain"
-                style={{ maxHeight: '520px' }}
-              />
-            </div>
-
-            {/* Stats panel */}
-            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
-              <div>
-                <h2 className="text-xl font-bold text-white leading-snug">Startup Founder: Why The CEO Journey Is So Steep</h2>
-                <p className="text-gray-400 text-sm mt-1">Retention-optimized edit — smart cuts, dynamic pacing & hook reinforcement</p>
-              </div>
-
-              {/* Retention score */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-[#ff6b6b]/10 to-[#ff9a3c]/10 border border-[#ff6b6b]/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-300 font-medium">Retention Score</span>
-                  <span className="text-2xl font-black text-[#ff9a3c]">94%</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-gray-700">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c]" style={{ width: '94%' }} />
-                </div>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Watch Time', value: '+38%', icon: '⏱' },
-                  { label: 'Avg Duration', value: '4:12', icon: '🎬' },
-                  { label: 'Hook Strength', value: 'High', icon: '🎯' },
-                  { label: 'Pacing Score', value: '96/100', icon: '⚡' },
-                ].map(stat => (
-                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                    <div className="text-lg mb-0.5">{stat.icon}</div>
-                    <div className="text-white font-bold text-sm">{stat.value}</div>
-                    <div className="text-gray-500 text-xs">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Edits applied */}
-              <div>
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">Edits Applied</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Smart cuts', 'Hook boost', 'Pacing fix', 'B-roll insert', 'Audio sync'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#ff6b6b]/10 border border-[#ff6b6b]/30 text-[#ff9a3c] text-xs font-medium">{tag}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Download */}
-              <a
-                href={retentionDemoVideo}
-                download="retention-edit.mp4"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
-              >
-                <Download className="w-4 h-4" />
-                Download Edited Video
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Creator Result — single video, wider layout */}
-      {showAiCreatorResult && (
-        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#38d9f5] to-[#4f8eff]">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-base font-bold text-white">AI Creator Result</span>
-              <span className="text-sm text-gray-400">— AI-generated promotional content</span>
-            </div>
-            <button onClick={() => setShowAiCreatorResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Video + Info side by side */}
-          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#38d9f5]/30 rounded-2xl overflow-hidden">
-            {/* Video player */}
-            <div className="lg:w-2/3 relative bg-black flex items-center justify-center">
-              <video
-                src={aiCreatorDemoVideo}
-                controls
-                className="w-full h-full object-contain"
-                style={{ maxHeight: '520px' }}
-              />
-            </div>
-
-            {/* Stats panel */}
-            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
-              <div>
-                <h2 className="text-xl font-bold text-white leading-snug">AI Creator: Talking Character Ad</h2>
-                <p className="text-gray-400 text-sm mt-1">AI-generated promotional video with lip-synced avatar & branded overlay</p>
-              </div>
-
-              {/* Creator score */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-[#38d9f5]/10 to-[#4f8eff]/10 border border-[#38d9f5]/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-300 font-medium">Engagement Score</span>
-                  <span className="text-2xl font-black text-[#38d9f5]">97%</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-gray-700">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-[#38d9f5] to-[#4f8eff]" style={{ width: '97%' }} />
-                </div>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Click Rate', value: '+52%', icon: '🎯' },
-                  { label: 'Avg Watch', value: '95%', icon: '👁' },
-                  { label: 'AI Voice', value: 'Cloned', icon: '🎙' },
-                  { label: 'Lip Sync', value: '98/100', icon: '🤖' },
-                ].map(stat => (
-                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                    <div className="text-lg mb-0.5">{stat.icon}</div>
-                    <div className="text-white font-bold text-sm">{stat.value}</div>
-                    <div className="text-gray-500 text-xs">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Features applied */}
-              <div>
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">AI Features Used</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Talking avatar', 'Voice clone', 'Auto-caption', 'Brand overlay', 'Lip sync'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#38d9f5]/10 border border-[#38d9f5]/30 text-[#38d9f5] text-xs font-medium">{tag}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Download */}
-              <a
-                href={aiCreatorDemoVideo}
-                download="ai-creator-result.mp4"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
-              >
-                <Download className="w-4 h-4" />
-                Download Creator Video
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Edit Result — single video, wider layout */}
-      {showAiEditResult && (
-        <div className="w-full max-w-7xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-[#8c52ff] to-[#b616d6]">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-base font-bold text-white">AI Edit Result</span>
-              <span className="text-sm text-gray-400">— smart auto-edit applied</span>
-            </div>
-            <button onClick={() => setShowAiEditResult(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-800">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Video + Info side by side */}
-          <div className="flex flex-col lg:flex-row gap-6 bg-gray-900 border border-[#8c52ff]/30 rounded-2xl overflow-hidden">
-            {/* Video player */}
-            <div className="lg:w-2/3 relative bg-black flex items-center justify-center">
-              <video
-                src={aiEditDemoVideo}
-                controls
-                className="w-full h-full object-contain"
-                style={{ maxHeight: '520px' }}
-              />
-            </div>
-
-            {/* Stats panel */}
-            <div className="lg:w-1/3 p-6 flex flex-col gap-5">
-              <div>
-                <h2 className="text-xl font-bold text-white leading-snug">AI Edited: Auto-Enhanced Video</h2>
-                <p className="text-gray-400 text-sm mt-1">Smart cuts, effects, transitions & color grading applied automatically</p>
-              </div>
-
-              {/* Edit score */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-[#8c52ff]/10 to-[#b616d6]/10 border border-[#8c52ff]/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-300 font-medium">Edit Quality Score</span>
-                  <span className="text-2xl font-black text-[#b616d6]">96%</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-gray-700">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-[#8c52ff] to-[#b616d6]" style={{ width: '96%' }} />
-                </div>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Cuts Made', value: '24', icon: '✂️' },
-                  { label: 'Color Grade', value: 'Cinema', icon: '🎨' },
-                  { label: 'Transitions', value: '12', icon: '🎬' },
-                  { label: 'Effects', value: '8 FX', icon: '⚡' },
-                ].map(stat => (
-                  <div key={stat.label} className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                    <div className="text-lg mb-0.5">{stat.icon}</div>
-                    <div className="text-white font-bold text-sm">{stat.value}</div>
-                    <div className="text-gray-500 text-xs">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Edits applied */}
-              <div>
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">Edits Applied</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Smart cuts', 'Color grade', 'Transitions', 'Sound mix', 'Effects'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 rounded-full bg-[#8c52ff]/10 border border-[#8c52ff]/30 text-[#b616d6] text-xs font-medium">{tag}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Download */}
-              <a
-                href={aiEditDemoVideo}
-                download="ai-edit-result.mp4"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold text-sm hover:opacity-90 transition-opacity mt-auto"
-              >
-                <Download className="w-4 h-4" />
-                Download Edited Video
-              </a>
-            </div>
+            <h2 className="text-xl font-bold text-foreground">Request Submitted!</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Your request has been sent to our team. You'll be notified when it's ready.
+              Check the <strong>History</strong> panel on the left to track your request status.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSubmittedConfirmation(false);
+                setPrompt('');
+                setSelectedFeatures([]);
+                setActiveMode(null);
+                setUploadedVideos([]);
+                setUploadedAudio([]);
+                setUploadedFileUrls([]);
+              }}
+              className="mt-2"
+            >
+              Create Another
+            </Button>
           </div>
         </div>
       )}

@@ -1,9 +1,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, CheckCircle, Clock } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
+import { parsePromptString } from '@/utils/promptParser';
+import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestDetailsProps {
@@ -30,6 +32,15 @@ export const RequestDetails = ({
     return date.toLocaleString();
   };
 
+  const parsed = parsePromptString(request.prompt);
+
+  // Find matching feature config for color styling
+  const getFeatureConfig = (featureLabel: string) => {
+    return Object.values(FEATURE_MODE_MAP).find(
+      c => c.label.toLowerCase() === featureLabel.toLowerCase()
+    );
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-2 text-white">Request Details</h2>
@@ -49,20 +60,87 @@ export const RequestDetails = ({
           <h3 className="text-sm font-medium text-gray-400">Type</h3>
           <p className="text-white capitalize">{request.request_type}</p>
         </div>
+
+        {/* Feature Tags */}
+        {parsed.features.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Features Selected</h3>
+            <div className="flex flex-wrap gap-2">
+              {parsed.features.map((feature) => {
+                const config = getFeatureConfig(feature);
+                const Icon = config?.icon;
+                return (
+                  <span
+                    key={feature}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    style={{
+                      background: config
+                        ? `linear-gradient(135deg, ${config.colorFrom}, ${config.colorTo})`
+                        : 'linear-gradient(135deg, #8c52ff, #b616d6)',
+                    }}
+                  >
+                    {Icon && <Icon className="w-3 h-3" />}
+                    {feature}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
         
         <div>
           <h3 className="text-sm font-medium text-gray-400">Prompt</h3>
-          <p className="text-white bg-gray-800/50 p-2 rounded-md">{request.prompt}</p>
+          <p className="text-white bg-gray-800/50 p-3 rounded-md">{parsed.prompt}</p>
         </div>
-        
-        <div>
-          <h3 className="text-sm font-medium text-gray-400">Aspect Ratio</h3>
-          <p className="text-white">{request.aspect_ratio || '-'}</p>
-        </div>
+
+        {/* Settings Row */}
+        {(parsed.aspectRatio || parsed.resolution || parsed.duration || parsed.timeline) && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Settings</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {parsed.aspectRatio && (
+                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
+                  <Maximize className="w-3.5 h-3.5 text-gray-400" />
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Aspect</p>
+                    <p className="text-white text-sm font-medium">{parsed.aspectRatio}</p>
+                  </div>
+                </div>
+              )}
+              {parsed.resolution && (
+                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
+                  <Monitor className="w-3.5 h-3.5 text-gray-400" />
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Resolution</p>
+                    <p className="text-white text-sm font-medium">{parsed.resolution}</p>
+                  </div>
+                </div>
+              )}
+              {parsed.duration && (
+                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
+                  <Timer className="w-3.5 h-3.5 text-gray-400" />
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Duration</p>
+                    <p className="text-white text-sm font-medium">{parsed.duration}</p>
+                  </div>
+                </div>
+              )}
+              {parsed.timeline && (
+                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
+                  <Film className="w-3.5 h-3.5 text-gray-400" />
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Timeline</p>
+                    <p className="text-white text-sm font-medium">{parsed.timeline}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         {request.reference_image_url && (
           <div>
-            <h3 className="text-sm font-medium text-gray-400">Reference Image</h3>
+            <h3 className="text-sm font-medium text-gray-400">Reference / Attachment</h3>
             <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
               <img 
                 src={request.reference_image_url} 
@@ -75,7 +153,7 @@ export const RequestDetails = ({
         
         {request.status !== 'completed' ? (
           <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-1">Upload Result Image</h3>
+            <h3 className="text-sm font-medium text-gray-400 mb-1">Upload Result</h3>
             <ImageUploader 
               productImage={resultImage} 
               setProductImage={setResultImage} 

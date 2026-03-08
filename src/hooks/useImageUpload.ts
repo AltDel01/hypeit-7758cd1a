@@ -34,7 +34,7 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
       const fileName = `${selectedRequest.id}-${Date.now()}.${fileExt}`;
       const filePath = `results/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('generated-images')
         .upload(filePath, resultImage);
 
@@ -42,16 +42,15 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
         throw uploadError;
       }
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('generated-images')
-        .getPublicUrl(filePath);
+      // Store the storage path (not public URL) so we can create signed URLs later
+      // Format: "storage:generated-images/results/filename.ext"
+      const storageRef = `storage:generated-images/${filePath}`;
 
-      // Update request with result URL and mark as completed
+      // Update request with storage reference and mark as completed
       const success = await updateGenerationRequestStatus(
         selectedRequest.id,
         'completed',
-        publicUrl
+        storageRef
       );
       
       if (success) {
@@ -63,7 +62,7 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
         
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
-            imageUrl: publicUrl,
+            storageRef,
             prompt: selectedRequest.prompt,
             aspectRatio: selectedRequest.aspect_ratio,
             requestId: selectedRequest.id
