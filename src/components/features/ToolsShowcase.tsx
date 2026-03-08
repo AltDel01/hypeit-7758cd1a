@@ -80,7 +80,7 @@ const ToolsShowcase: React.FC = () => {
         {tools.map((tool, index) => (
           <div
             key={tool.badge}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 md:gap-8 lg:gap-16 mb-12 md:mb-24 last:mb-0`}
+            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-5 md:gap-8 lg:gap-16 mb-10 md:mb-24 last:mb-0`}
           >
             <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
               <div className="inline-flex items-center gap-3 mb-4 md:mb-5">
