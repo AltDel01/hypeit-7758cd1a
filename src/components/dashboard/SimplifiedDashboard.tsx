@@ -291,11 +291,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setShowRetentionResult(true);
       } else if (currentMode === 'creator') {
         setShowAiCreatorResult(true);
-      } else if (currentMode === 'aiedit') {
-        console.log('[SpecialMode] Setting showAiEditResult to TRUE');
-        setShowAiEditResult(true);
-      } else {
+      } else if (currentMode === 'aiclip') {
         setShowAiClipResult(true);
+      } else {
+        // All feature modes show AI Edit result
+        setShowAiEditResult(true);
       }
     }, 15000);
     console.log('[SpecialMode] Timer started with id:', timerId);
