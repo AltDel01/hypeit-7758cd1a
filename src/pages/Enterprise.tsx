@@ -19,6 +19,7 @@ const caseStudies = [
   company: 'Global Travel Brand',
   gradient: 'from-sky-500 to-blue-600',
   bgGlow: 'bg-sky-500/15',
+  bgImage: caseTravel,
   problem: 'Shooting promotional videos across 30+ destinations worldwide cost $500K+ per campaign with crews, logistics, and post-production delays of 8–12 weeks.',
   solution: 'With Viralin, their in-house team captures raw footage on-location using smartphones. AI handles editing, color grading, transitions, and format optimization for every platform — instantly.',
   results: [
