@@ -118,7 +118,7 @@ const CapabilitiesGrid: React.FC = () => {
           {capabilities.slice(1).map((cap) => (
             <div
               key={cap.title}
-              className="group relative rounded-xl overflow-hidden border border-white/10 bg-gray-900/50 hover:border-white/20 transition-all duration-300 p-5 md:p-6"
+              className="group relative rounded-xl overflow-hidden border border-white/10 bg-gray-900/50 hover:border-white/20 transition-all duration-300 p-4 md:p-6"
             >
               <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${cap.gradient} flex items-center justify-center mb-4`}>
                 <cap.icon className="w-5 h-5 text-white" />
