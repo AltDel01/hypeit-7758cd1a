@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminRole } from '@/hooks/useAdminRole';
 
@@ -13,8 +13,8 @@ interface AdminRouteProps {
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useAdminRole();
+  const location = useLocation();
 
-  // Show loading state while checking auth and role
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -26,12 +26,11 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const redirectPath = `${location.pathname}${location.search}`;
+    return <Navigate to={`/admin-login?redirect=${encodeURIComponent(redirectPath)}`} replace />;
   }
 
-  // Redirect to dashboard if not admin
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
