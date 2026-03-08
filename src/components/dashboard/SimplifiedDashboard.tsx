@@ -300,6 +300,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
 
     setIsSubmitting(true);
+    setShowSubmittedConfirmation(false);
     try {
       let fullPrompt = prompt.trim();
       if (selectedFeatures.length > 0) {
@@ -312,18 +313,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       if (result) {
         onRequestCreated?.();
+        setIsSubmitting(false);
+        setShowSubmittedConfirmation(true);
+        toast.success('Request submitted! Check your history for updates.');
       } else {
         toast.error('Failed to submit request. Please try again.');
         setIsSubmitting(false);
-        setIsAutoProcessing(false);
-        return;
       }
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('Something went wrong. Please try again.');
       setIsSubmitting(false);
-      setIsAutoProcessing(false);
-      return;
     }
   };
 
