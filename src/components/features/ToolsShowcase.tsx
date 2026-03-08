@@ -7,7 +7,7 @@ const tools = [
     icon: Film,
     badge: 'B-Roll Insertion',
     title: 'Context-Aware Footage, Instantly.',
-    description: 'AI reads your script or voiceover and auto-inserts perfectly-timed stock footage, relevant cutaways, and visual context — no manual searching required.',
+    description: 'AI reads your script or voiceover and auto-inserts perfectly-timed stock footage, relevant cutaways, and visual context. No manual searching required.',
     gradient: 'from-purple-500 to-pink-500',
     image: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&h=500&fit=crop',
   },
