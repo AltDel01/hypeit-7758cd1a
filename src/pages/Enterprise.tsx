@@ -150,7 +150,7 @@ const Enterprise = () => {
     script.src = 'https://assets.calendly.com/assets/external/widget.js';
     script.async = true;
     document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
+    return () => {document.body.removeChild(script);};
   }, []);
 
   return (
@@ -302,15 +302,15 @@ Viralin empowers your teams to create studio-quality video content from raw foot
               </p>
               <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
                 {[
-                  'Custom pricing for your team',
-                  'Live product walkthrough',
-                  'ROI analysis for your use case',
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
+                'Custom pricing for your team',
+                'Live product walkthrough',
+                'ROI analysis for your use case'].
+                map((item, i) =>
+                <div key={i} className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
                     <span className="text-sm text-muted-foreground">{item}</span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -322,7 +322,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   Book a Demo
                 </div>
                 
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground leading-[1.1]">
+                <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
                   Book your{' '}
                   <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                     30-minute
@@ -334,15 +334,15 @@ Viralin empowers your teams to create studio-quality video content from raw foot
 
                 <div className="space-y-4">
                   {[
-                    { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
-                    { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
-                    { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-3">
+                  { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
+                  { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
+                  { bold: 'pricing', text: 'Learn about pricing and features for your use case' }].
+                  map((item, i) =>
+                  <div key={i} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
                       <p className="text-sm md:text-base text-muted-foreground">{item.text}</p>
                     </div>
-                  ))}
+                  )}
                 </div>
 
               </div>
@@ -352,8 +352,8 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                 <div
                   className="calendly-inline-widget w-full"
                   data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6&hide_event_type_details=1&hide_gdpr_banner=1"
-                  style={{ minWidth: '320px', height: '480px' }}
-                />
+                  style={{ minWidth: '320px', height: '480px' }} />
+                
               </div>
             </div>
           </div>
