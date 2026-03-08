@@ -302,7 +302,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
     // Fire-and-forget DB logging (don't block the UI)
     try {
-      const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : currentMode === 'aiedit' ? 'AI Edit' : 'AI Creator';
+      const mc = getConfigByMode(currentMode || '');
+      const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
       let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
       fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
