@@ -3,14 +3,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Hook to check if the current user has admin role using server-side verification
+ * Hook to check if the current user has admin role using server-side verification.
+ * Waits for auth to be fully ready before checking.
  */
 export const useAdminRole = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Don't check until auth is fully loaded
+    if (authLoading) {
+      setIsLoading(true);
+      return;
+    }
+
     const checkAdminRole = async () => {
       if (!user) {
         setIsAdmin(false);
@@ -19,7 +26,6 @@ export const useAdminRole = () => {
       }
 
       try {
-        // Use server-side RPC function to check admin role
         const { data, error } = await supabase.rpc('has_role', {
           _user_id: user.id,
           _role: 'admin'
@@ -40,7 +46,7 @@ export const useAdminRole = () => {
     };
 
     checkAdminRole();
-  }, [user]);
+  }, [user, authLoading]);
 
   return { isAdmin, isLoading };
 };
