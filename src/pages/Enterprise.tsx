@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import HeroBackground from '@/components/enterprise/HeroBackground';
 import { Button } from '@/components/ui/button';
 import {
   Building2, Plane, ShoppingBag, Users, ArrowRight, CheckCircle,
