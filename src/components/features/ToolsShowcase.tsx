@@ -59,7 +59,7 @@ const tools = [
 
 const ToolsShowcase: React.FC = () => {
   return (
-    <section className="relative py-16 md:py-24 px-3 md:px-4 bg-black">
+    <section className="relative py-12 md:py-24 px-4 md:px-4 bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12 md:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-6">
