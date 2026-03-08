@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { GenerationRequest } from '@/services/generationRequestService';
+import { parsePromptString } from '@/utils/promptParser';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { FEATURE_MODE_MAP } from '@/config/featureModes';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
@@ -47,20 +50,37 @@ const statusConfig: Record<string, {
 const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
   const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
+  const parsed = parsePromptString(request.prompt);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (request.result_url) {
+      resolveResultUrl(request.result_url).then(setResolvedUrl);
+    } else {
+      setResolvedUrl(null);
+    }
+  }, [request.result_url]);
+
+  const getFeatureConfig = (featureLabel: string) => {
+    return Object.values(FEATURE_MODE_MAP).find(
+      c => c.label.toLowerCase() === featureLabel.toLowerCase()
+    );
+  };
 
   const handleDownload = async () => {
-    if (!request.result_url) return;
+    const url = resolvedUrl;
+    if (!url) return;
     
     try {
-      const response = await fetch(request.result_url);
+      const response = await fetch(url);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = blobUrl;
       a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${request.request_type === 'video' ? 'mp4' : 'png'}`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
     } catch (error) {
       console.error('Download error:', error);
@@ -94,17 +114,65 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
           <span>{format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}</span>
         </div>
 
+        {/* Feature Tags */}
+        {parsed.features.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Features</h3>
+            <div className="flex flex-wrap gap-2">
+              {parsed.features.map((feature) => {
+                const config = getFeatureConfig(feature);
+                const Icon = config?.icon;
+                return (
+                  <span
+                    key={feature}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    style={{
+                      background: config
+                        ? `linear-gradient(135deg, ${config.colorFrom}, ${config.colorTo})`
+                        : 'linear-gradient(135deg, #8c52ff, #b616d6)',
+                    }}
+                  >
+                    {Icon && <Icon className="w-3 h-3" />}
+                    {feature}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Prompt</h3>
           <p className="text-foreground bg-background/50 rounded-lg p-3 border border-border">
-            {request.prompt}
+            {parsed.prompt}
           </p>
         </div>
+
+        {/* Settings */}
+        {(parsed.aspectRatio || parsed.resolution || parsed.duration) && (
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+            {parsed.aspectRatio && (
+              <span className="bg-background/50 border border-border px-2.5 py-1 rounded-md">
+                Aspect: {parsed.aspectRatio}
+              </span>
+            )}
+            {parsed.resolution && (
+              <span className="bg-background/50 border border-border px-2.5 py-1 rounded-md">
+                Resolution: {parsed.resolution}
+              </span>
+            )}
+            {parsed.duration && (
+              <span className="bg-background/50 border border-border px-2.5 py-1 rounded-md">
+                Duration: {parsed.duration}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Reference Image */}
         {request.reference_image_url && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Reference Image</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Reference</h3>
             <img
               src={request.reference_image_url}
               alt="Reference"
@@ -114,19 +182,19 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
         )}
 
         {/* Result */}
-        {request.status === 'completed' && request.result_url && (
+        {request.status === 'completed' && resolvedUrl && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
               {request.request_type === 'video' ? (
                 <video
-                  src={request.result_url}
+                  src={resolvedUrl}
                   controls
                   className="w-full max-h-80 rounded-lg border border-border"
                 />
               ) : (
                 <img
-                  src={request.result_url}
+                  src={resolvedUrl}
                   alt="Result"
                   className="w-full max-h-80 rounded-lg border border-border object-contain"
                 />
@@ -140,7 +208,7 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => window.open(request.result_url!, '_blank')}
+                  onClick={() => window.open(resolvedUrl, '_blank')}
                   className="gap-2"
                 >
                   <ExternalLink className="h-4 w-4" />
