@@ -24,6 +24,7 @@ import CreditUsage from "./pages/CreditUsage";
 import Language from "./pages/Language";
 import Enterprise from "./pages/Enterprise";
 import Features from "./pages/Features";
+import AdminRequestWorkspace from "./pages/AdminRequestWorkspace";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -32,22 +33,22 @@ const queryClient = new QueryClient();
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
+
   return <>{children}</>;
 };
 
 // Auth routes - redirect to home if already logged in
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  
+
   if (user) return <Navigate to="/" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -62,38 +63,42 @@ const AppRoutes = () => {
       <Route path="/features" element={<CustomErrorBoundary><Features /></CustomErrorBoundary>} />
       <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
-      <Route 
-        path="/dashboard" 
-        element={<ProtectedRoute><CustomErrorBoundary><Dashboard /></CustomErrorBoundary></ProtectedRoute>} 
+      <Route
+        path="/dashboard"
+        element={<ProtectedRoute><CustomErrorBoundary><Dashboard /></CustomErrorBoundary></ProtectedRoute>}
       />
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
-      <Route 
-        path="/settings" 
-        element={<ProtectedRoute><CustomErrorBoundary><Settings /></CustomErrorBoundary></ProtectedRoute>} 
+      <Route
+        path="/settings"
+        element={<ProtectedRoute><CustomErrorBoundary><Settings /></CustomErrorBoundary></ProtectedRoute>}
       />
-      <Route 
-        path="/credit-usage" 
-        element={<ProtectedRoute><CustomErrorBoundary><CreditUsage /></CustomErrorBoundary></ProtectedRoute>} 
+      <Route
+        path="/credit-usage"
+        element={<ProtectedRoute><CustomErrorBoundary><CreditUsage /></CustomErrorBoundary></ProtectedRoute>}
       />
-      <Route 
-        path="/language" 
-        element={<ProtectedRoute><CustomErrorBoundary><Language /></CustomErrorBoundary></ProtectedRoute>} 
+      <Route
+        path="/language"
+        element={<ProtectedRoute><CustomErrorBoundary><Language /></CustomErrorBoundary></ProtectedRoute>}
       />
-      <Route 
-        path="/admin" 
-        element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>} 
+      <Route
+        path="/admin"
+        element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>}
       />
-      <Route 
-        path="/admin-login" 
-        element={<CustomErrorBoundary><AdminLogin /></CustomErrorBoundary>} 
+      <Route
+        path="/admin/requests/:requestId"
+        element={<AdminRoute><CustomErrorBoundary><AdminRequestWorkspace /></CustomErrorBoundary></AdminRoute>}
       />
-      <Route 
-        path="/login" 
-        element={<AuthRoute><CustomErrorBoundary><Login /></CustomErrorBoundary></AuthRoute>} 
+      <Route
+        path="/admin-login"
+        element={<CustomErrorBoundary><AdminLogin /></CustomErrorBoundary>}
       />
-      <Route 
-        path="/signup" 
-        element={<AuthRoute><CustomErrorBoundary><Signup /></CustomErrorBoundary></AuthRoute>} 
+      <Route
+        path="/login"
+        element={<AuthRoute><CustomErrorBoundary><Login /></CustomErrorBoundary></AuthRoute>}
+      />
+      <Route
+        path="/signup"
+        element={<AuthRoute><CustomErrorBoundary><Signup /></CustomErrorBoundary></AuthRoute>}
       />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
