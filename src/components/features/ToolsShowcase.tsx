@@ -3,6 +3,7 @@ import { Film, VolumeX, Languages, Sparkles, Captions, Maximize } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import brollImage from '@/assets/broll-insertion.png';
 import smartResizeImage from '@/assets/smart-resize.png';
+import aiCaptionsImage from '@/assets/ai-captions.png';
 
 const tools = [
   {
