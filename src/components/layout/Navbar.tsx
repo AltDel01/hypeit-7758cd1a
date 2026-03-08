@@ -153,7 +153,22 @@ const MobileTopBar = () => {
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
+  const [profileName, setProfileName] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!user) {
+      setProfileName(null);
+      return;
+    }
+    supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.display_name) setProfileName(data.display_name);
+      });
+  }, [user]);
 
   const NavLinks = () => (
     <>
