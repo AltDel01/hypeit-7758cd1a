@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { UserCheck, UserPlus } from 'lucide-react';
+import { ExternalLink, UserCheck, UserPlus } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
@@ -9,20 +9,16 @@ import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestListProps {
   requests: GenerationRequest[];
-  selectedRequest: GenerationRequest | null;
-  onSelectRequest: (request: GenerationRequest) => void;
-  onUpdateStatus: (id: string, status: 'in-progress') => void;
-  onClaimRequest: (id: string) => void;
+  onOpenRequest: (id: string) => void;
+  onClaimAndOpenRequest: (id: string) => void;
   currentUserId?: string;
 }
 
-export const RequestList = ({ 
-  requests, 
-  selectedRequest, 
-  onSelectRequest, 
-  onUpdateStatus,
-  onClaimRequest,
-  currentUserId
+export const RequestList = ({
+  requests,
+  onOpenRequest,
+  onClaimAndOpenRequest,
+  currentUserId,
 }: RequestListProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -31,13 +27,13 @@ export const RequestList = ({
 
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
-      c => c.label.toLowerCase() === featureLabel.toLowerCase()
+      (c) => c.label.toLowerCase() === featureLabel.toLowerCase()
     );
   };
 
   return (
     <div className="overflow-x-auto w-full">
-      <Table className="min-w-[800px]">
+      <Table className="min-w-[1120px]">
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
@@ -62,23 +58,17 @@ export const RequestList = ({
               const parsed = parsePromptString(request.prompt);
               const isClaimedByMe = request.assigned_to === currentUserId;
               const isClaimed = !!request.assigned_to;
-              
+
               return (
-                <TableRow 
-                  key={request.id} 
-                  className={`cursor-pointer transition-colors ${
-                    selectedRequest?.id === request.id 
-                      ? 'bg-accent/20' 
-                      : isClaimedByMe 
-                        ? 'bg-primary/5' 
-                        : ''
-                  }`}
-                  onClick={() => onSelectRequest(request)}
-                >
+                <TableRow key={request.id} className={isClaimedByMe ? 'bg-primary/5' : ''}>
                   <TableCell>
                     <div>
-                      <p className="text-sm font-medium font-mono">USR-{request.user_id.substring(0, 8).toUpperCase()}</p>
-                      <p className="text-xs text-muted-foreground">User #{request.user_id.substring(0, 6).toUpperCase()}</p>
+                      <p className="text-sm font-medium font-mono">
+                        USR-{request.user_id.substring(0, 8).toUpperCase()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        User #{request.user_id.substring(0, 6).toUpperCase()}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -105,26 +95,27 @@ export const RequestList = ({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-sm">
-                    {parsed.prompt}
-                  </TableCell>
+                  <TableCell className="max-w-[260px] truncate text-sm">{parsed.prompt}</TableCell>
                   <TableCell>
                     {request.reference_image_url ? (
                       <img
                         src={request.reference_image_url}
-                        alt="Ref"
+                        alt="Reference attachment"
                         className="w-10 h-10 rounded object-cover border border-border"
+                        loading="lazy"
                       />
                     ) : (
                       <span className="text-muted-foreground text-xs">None</span>
                     )}
                   </TableCell>
-                  <TableCell><StatusBadge status={request.status} /></TableCell>
+                  <TableCell>
+                    <StatusBadge status={request.status} />
+                  </TableCell>
                   <TableCell>
                     {isClaimed ? (
                       <div className="flex items-center gap-1.5">
-                        <UserCheck className="w-3.5 h-3.5 text-green-500" />
-                        <span className={`text-xs font-medium ${isClaimedByMe ? 'text-green-400' : 'text-muted-foreground'}`}>
+                        <UserCheck className="w-3.5 h-3.5 text-primary" />
+                        <span className={`text-xs font-medium ${isClaimedByMe ? 'text-primary' : 'text-muted-foreground'}`}>
                           {isClaimedByMe ? 'You' : request.assigned_to_name}
                         </span>
                       </div>
@@ -134,27 +125,31 @@ export const RequestList = ({
                   </TableCell>
                   <TableCell className="text-xs">{formatDate(request.created_at)}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
-                      {request.status === 'new' && !isClaimed && (
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => onClaimRequest(request.id)}
+                    <div className="flex space-x-2">
+                      {request.status === 'new' && !isClaimed ? (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => onClaimAndOpenRequest(request.id)}
                           className="gap-1"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
-                          Claim
+                          Claim & Open
                         </Button>
-                      )}
-                      {request.status === 'new' && isClaimed && !isClaimedByMe && (
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => onClaimRequest(request.id)}
+                      ) : request.status === 'new' && isClaimed && !isClaimedByMe ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onClaimAndOpenRequest(request.id)}
                           className="gap-1"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
-                          Reassign
+                          Reassign & Open
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => onOpenRequest(request.id)} className="gap-1">
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Open
                         </Button>
                       )}
                     </div>
