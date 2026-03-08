@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroBackground from '@/components/enterprise/HeroBackground';
@@ -145,6 +145,14 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
 };
 
 const Enterprise = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -317,13 +325,11 @@ Viralin empowers your teams to create studio-quality video content from raw foot
 
               {/* Right side - Calendly */}
               <div className="rounded-2xl border border-border/60 overflow-hidden bg-card/30 backdrop-blur-sm">
-                <iframe
-                  src="https://calendly.com/d/YOUR_CALENDLY_LINK"
-                  width="100%"
-                  height="650"
-                  frameBorder="0"
-                  title="Book a Demo"
-                  className="w-full min-h-[550px] md:min-h-[650px]" />
+                <div
+                  className="calendly-inline-widget w-full"
+                  data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6"
+                  style={{ minWidth: '320px', height: '700px' }}
+                />
               </div>
             </div>
           </div>
