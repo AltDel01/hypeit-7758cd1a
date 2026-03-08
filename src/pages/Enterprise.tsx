@@ -145,6 +145,14 @@ const CaseStudyCard = ({ study, index }: {study: typeof caseStudies[0];index: nu
 };
 
 const Enterprise = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
