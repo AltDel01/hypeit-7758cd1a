@@ -221,16 +221,16 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    // AI Edit: works like AI Clip/Retention/Creator — sets activeMode so Generate button triggers it
-    if (featureId === 'ai-edit') {
+    const config = FEATURE_MODE_MAP[featureId];
+    if (config) {
       setActiveMode(prev => {
-        if (prev !== 'aiedit') {
+        if (prev !== config.mode) {
           setShowAiClipResult(false);
           setShowRetentionResult(false);
           setShowAiCreatorResult(false);
           setShowAiEditResult(false);
         }
-        return prev === 'aiedit' ? null : 'aiedit';
+        return prev === config.mode ? null : config.mode;
       });
       return;
     }
