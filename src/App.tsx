@@ -19,8 +19,6 @@ import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
-import AdminEditors from "./pages/AdminEditors";
-import AdminStats from "./pages/AdminStats";
 import AdminRequestWorkspace from "./pages/AdminRequestWorkspace";
 import EditorDashboard from "./pages/EditorDashboard";
 import EditorRequestWorkspace from "./pages/EditorRequestWorkspace";
