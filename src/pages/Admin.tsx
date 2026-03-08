@@ -1,19 +1,19 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminRole } from '@/hooks/useAdminRole';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import { RequestManagementSection } from '@/components/admin/RequestManagementSection';
 import { TestRequestSection } from '@/components/admin/TestRequestSection';
-import { Button } from '@/components/ui/button';
-import { Users, BarChart3 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ClipboardList, Users, BarChart3 } from 'lucide-react';
+import AdminEditorsSection from '@/components/admin/AdminEditorsSection';
+import AdminStatsSection from '@/components/admin/AdminStatsSection';
 
 const Admin = () => {
   const { user } = useAuth();
   const { isAdmin, isLoading } = useAdminRole();
-  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -36,19 +36,35 @@ const Admin = () => {
         <Navbar />
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            {/* Admin Navigation */}
-            <div className="flex gap-2 mb-6">
-              <Button variant="outline" onClick={() => navigate('/admin/editors')} className="gap-2">
-                <Users className="h-4 w-4" />
-                Manage Editors
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/admin/stats')} className="gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Performance Stats
-              </Button>
-            </div>
-            <TestRequestSection />
-            <RequestManagementSection />
+            <Tabs defaultValue="requests" className="w-full">
+              <TabsList className="mb-6">
+                <TabsTrigger value="requests" className="gap-2">
+                  <ClipboardList className="h-4 w-4" />
+                  Requests
+                </TabsTrigger>
+                <TabsTrigger value="editors" className="gap-2">
+                  <Users className="h-4 w-4" />
+                  Editors
+                </TabsTrigger>
+                <TabsTrigger value="stats" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Performance
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="requests">
+                <TestRequestSection />
+                <RequestManagementSection />
+              </TabsContent>
+
+              <TabsContent value="editors">
+                <AdminEditorsSection />
+              </TabsContent>
+
+              <TabsContent value="stats">
+                <AdminStatsSection />
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
