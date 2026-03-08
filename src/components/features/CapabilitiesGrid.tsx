@@ -77,7 +77,7 @@ const CapabilitiesGrid: React.FC = () => {
             </span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
-            Every editing tool you need — powered by AI that understands your content and makes professional edits in seconds.
+            Every editing tool you need, powered by AI that understands your content and makes professional edits in seconds.
           </p>
         </div>
 

@@ -47,7 +47,7 @@ const tools = [
     icon: Maximize,
     badge: 'Smart Resize',
     title: 'One Video, Every Platform.',
-    description: 'Automatically adapt your content for TikTok, Reels, Shorts, Stories, and Feed — with intelligent subject reframing that keeps the action centered.',
+    description: 'Automatically adapt your content for TikTok, Reels, Shorts, Stories, and Feed with intelligent subject reframing that keeps the action centered.',
     gradient: 'from-violet-500 to-indigo-500',
     image: 'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=500&fit=crop',
   },

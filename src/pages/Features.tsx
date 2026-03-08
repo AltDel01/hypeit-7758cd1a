@@ -32,7 +32,7 @@ const Features: React.FC = () => {
             </h1>
 
             <p className="text-sm md:text-xl text-gray-400 mb-8 md:mb-10 max-w-2xl mx-auto">
-              Trimming, B-Roll insertion, word silencing, dubbing, transitions, motion graphics, captions — all powered by AI that edits like a pro.
+              Trimming, B-Roll insertion, word silencing, dubbing, transitions, motion graphics, captions, all powered by AI that edits like a pro.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-8">
