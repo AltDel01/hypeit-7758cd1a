@@ -255,23 +255,23 @@ Viralin empowers your teams to create studio-quality video content from raw foot
         </section>
 
         {/* Enterprise Features */}
-        <section className="py-16 md:py-24 px-4 bg-secondary/40 border-y border-border/40">
+        <section className="py-12 md:py-24 px-4 bg-secondary/40 border-y border-border/40">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
                 Built for Enterprise
               </h2>
-              <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xs md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Everything your organization needs to scale content production securely.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
               {enterpriseFeatures.map((feature, i) =>
-              <div key={i} className="p-6 rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300">
-                  <feature.icon className="w-8 h-8 text-purple-400 mb-4" />
-                  <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <div key={i} className="p-4 md:p-6 rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300">
+                  <feature.icon className="w-6 h-6 md:w-8 md:h-8 text-purple-400 mb-3 md:mb-4" />
+                  <h3 className="text-sm md:text-base font-semibold text-foreground mb-1 md:mb-2">{feature.title}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
                 </div>
               )}
             </div>
