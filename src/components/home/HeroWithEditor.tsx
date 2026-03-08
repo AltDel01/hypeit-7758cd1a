@@ -285,11 +285,12 @@ const HeroWithEditor: React.FC = () => {
         startTimestamp,
         endTimestamp,
         uploadedFiles,
-        autoSubmit: activeMode !== 'aiclip' && activeMode !== 'retention' && activeMode !== 'creator' && activeMode !== 'aiedit',
+        autoSubmit: !activeMode,
         aiClipMode: activeMode === 'aiclip',
         retentionMode: activeMode === 'retention',
         creatorMode: activeMode === 'creator',
         aiEditMode: activeMode === 'aiedit',
+        featureMode: isFeatureMode(activeMode) ? activeMode : null,
       });
       
       // Dismiss ALL toasts before navigating so nothing persists on dashboard
