@@ -1,6 +1,7 @@
 import React from 'react';
 import { Film, VolumeX, Languages, Sparkles, Captions, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import brollImage from '@/assets/broll-insertion.png';
 
 const tools = [
   {
@@ -9,7 +10,7 @@ const tools = [
     title: 'Context-Aware Footage, Instantly.',
     description: 'AI reads your script or voiceover and auto-inserts perfectly-timed stock footage, relevant cutaways, and visual context. No manual searching required.',
     gradient: 'from-purple-500 to-pink-500',
-    image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&h=500&fit=crop',
+    image: brollImage,
   },
   {
     icon: VolumeX,
@@ -49,7 +50,7 @@ const tools = [
     title: 'One Video, Every Platform.',
     description: 'Automatically adapt your content for TikTok, Reels, Shorts, Stories, and Feed with intelligent subject reframing that keeps the action centered.',
     gradient: 'from-violet-500 to-indigo-500',
-    image: 'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=500&fit=crop',
+    image: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&h=500&fit=crop',
   },
 ];
 
