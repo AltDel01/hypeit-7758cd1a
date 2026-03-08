@@ -195,6 +195,7 @@ export async function claimGenerationRequest(
         assigned_to: user.id,
         assigned_to_name: displayName,
         status: "in-progress",
+        assigned_at: new Date().toISOString(),
       })
       .eq("id", requestId);
 
