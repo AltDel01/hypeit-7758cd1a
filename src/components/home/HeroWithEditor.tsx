@@ -602,9 +602,6 @@ const HeroWithEditor: React.FC = () => {
                   if (mc) { const IconComp = mc.icon; return <div className="flex items-center justify-center gap-1.5"><IconComp className="w-3.5 h-3.5" /><span>{mc.label}</span></div>; }
                   return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>;
                 })()}
-                    <span>Generate</span>
-                  </div>
-                )}
               </Button>
             </div>
           </div>
