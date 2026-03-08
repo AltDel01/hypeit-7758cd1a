@@ -31,6 +31,13 @@ const MobileTopBar = () => {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSolutionsOpen, setIsSolutionsOpen] = useState(false);
+  const [mobileProfileName, setMobileProfileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) { setMobileProfileName(null); return; }
+    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+      .then(({ data }) => { if (data?.display_name) setMobileProfileName(data.display_name); });
+  }, [user]);
   
   return (
     <div className="flex flex-col w-full">
