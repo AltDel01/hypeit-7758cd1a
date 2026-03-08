@@ -162,6 +162,8 @@ export type Database = {
       generation_requests: {
         Row: {
           aspect_ratio: string | null
+          assigned_to: string | null
+          assigned_to_name: string | null
           completed_at: string | null
           created_at: string | null
           id: string
@@ -177,6 +179,8 @@ export type Database = {
         }
         Insert: {
           aspect_ratio?: string | null
+          assigned_to?: string | null
+          assigned_to_name?: string | null
           completed_at?: string | null
           created_at?: string | null
           id?: string
@@ -192,6 +196,8 @@ export type Database = {
         }
         Update: {
           aspect_ratio?: string | null
+          assigned_to?: string | null
+          assigned_to_name?: string | null
           completed_at?: string | null
           created_at?: string | null
           id?: string
