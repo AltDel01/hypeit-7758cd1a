@@ -317,13 +317,11 @@ Viralin empowers your teams to create studio-quality video content from raw foot
 
               {/* Right side - Calendly */}
               <div className="rounded-2xl border border-border/60 overflow-hidden bg-card/30 backdrop-blur-sm">
-                <iframe
-                  src="https://calendly.com/d/YOUR_CALENDLY_LINK"
-                  width="100%"
-                  height="650"
-                  frameBorder="0"
-                  title="Book a Demo"
-                  className="w-full min-h-[550px] md:min-h-[650px]" />
+                <div
+                  className="calendly-inline-widget w-full"
+                  data-url="https://calendly.com/hello-viralin/30min?primary_color=b616d6"
+                  style={{ minWidth: '320px', height: '700px' }}
+                />
               </div>
             </div>
           </div>
