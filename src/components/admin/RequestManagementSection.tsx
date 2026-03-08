@@ -162,6 +162,7 @@ export const RequestManagementSection = () => {
               onUploadResult={() => resultImage && handleUploadResult(resultImage)}
               setResultImage={setResultImage}
               onUnassign={handleUnassignRequest}
+              onClaimRequest={handleClaimRequest}
               currentUserId={user?.id}
             />
           ) : (

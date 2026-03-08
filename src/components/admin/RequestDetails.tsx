@@ -17,6 +17,7 @@ interface RequestDetailsProps {
   onUploadResult: () => void;
   setResultImage: (file: File | null) => void;
   onUnassign?: (id: string) => void;
+  onClaimRequest?: (id: string) => void;
   currentUserId?: string;
 }
 
@@ -29,6 +30,7 @@ export const RequestDetails = ({
   onUploadResult,
   setResultImage,
   onUnassign,
+  onClaimRequest,
   currentUserId
 }: RequestDetailsProps) => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
@@ -221,10 +223,18 @@ export const RequestDetails = ({
                 </p>
               </div>
             ) : (
-              <div className="bg-muted/30 rounded-md p-4 text-center">
+            <div className="bg-muted/30 rounded-md p-4 text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Claim this request to start working on it
                 </p>
+                <Button
+                  variant="newPurple"
+                  onClick={() => onClaimRequest?.(request.id)}
+                  className="gap-1.5"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  Claim Request
+                </Button>
               </div>
             )}
           </div>
