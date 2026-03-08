@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, Globe } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import FooterMenu from './FooterMenu';
