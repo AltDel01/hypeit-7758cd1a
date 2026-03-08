@@ -54,7 +54,7 @@ const capabilities = [
   {
     icon: Scissors,
     title: 'AI Clipping',
-    description: 'Automatically detect the most engaging moments in your content and extract them as standalone clips ready to publish.',
+    description: 'Turn long-form videos into bite-sized short-form clips — AI detects the most engaging moments and extracts them ready to publish.',
     gradient: 'from-fuchsia-500 to-pink-500',
   },
   {
