@@ -324,18 +324,26 @@ const HeroWithEditor: React.FC = () => {
         {/* Editing Feature Buttons - Scrollable on mobile */}
         <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
-            {editingFeatures.slice(0, 6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", feature.id === 'ai-edit' ? (activeMode === 'aiedit' ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50") : selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
+            {editingFeatures.slice(0, 6).map(feature => {
+              const config = FEATURE_MODE_MAP[feature.id];
+              const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
+              return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
                 <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
-              </button>)}
+              </button>;
+            })}
           </div>
         </div>
         {/* Second row - Hidden on mobile for cleaner look */}
         <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
-          {editingFeatures.slice(6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
+          {editingFeatures.slice(6).map(feature => {
+            const config = FEATURE_MODE_MAP[feature.id];
+            const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
+            return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
               <feature.icon className="w-4 h-4" />
               {feature.label}
-            </button>)}
+            </button>;
+          })}
         </div>
 
         {/* Prompt Box */}
