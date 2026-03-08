@@ -300,18 +300,6 @@ Viralin empowers your teams to create studio-quality video content from raw foot
               <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Book a personalized demo to see how Viralin can reduce your production costs by up to 85% while 10x-ing your content output.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
-                {[
-                'Custom pricing for your team',
-                'Live product walkthrough',
-                'ROI analysis for your use case'].
-                map((item, i) =>
-                <div key={i} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                    <span className="text-sm text-muted-foreground">{item}</span>
-                  </div>
-                )}
-              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
@@ -336,7 +324,8 @@ Viralin empowers your teams to create studio-quality video content from raw foot
                   {[
                   { bold: 'personalized demo', text: 'Get a personalized demo tailored to your business' },
                   { bold: 'success stories', text: 'Hear proven customer success stories in your industry' },
-                  { bold: 'pricing', text: 'Learn about pricing and features for your use case' }].
+                  { bold: 'pricing', text: 'Learn about pricing and features for your use case' },
+                  { bold: 'roi', text: 'ROI analysis for your use case' }].
                   map((item, i) =>
                   <div key={i} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
