@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import CustomErrorBoundary from "./components/error/ErrorBoundary";
 import AvaButton from "./components/audio/AvaButton";
 import AdminRoute from "./components/routes/AdminRoute";
+import EditorRoute from "./components/routes/EditorRoute";
 import Index from "./pages/Index";
 import BrandIdentity from "./pages/BrandIdentity";
 import Virality from "./pages/Virality";
@@ -18,13 +19,17 @@ import Signup from "./pages/Signup";
 import StableDiffusionPage from "./pages/StableDiffusionPage";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
+import AdminEditors from "./pages/AdminEditors";
+import AdminStats from "./pages/AdminStats";
+import AdminRequestWorkspace from "./pages/AdminRequestWorkspace";
+import EditorDashboard from "./pages/EditorDashboard";
+import EditorRequestWorkspace from "./pages/EditorRequestWorkspace";
 import Pricing from "./pages/Pricing";
 import Settings from "./pages/Settings";
 import CreditUsage from "./pages/CreditUsage";
 import Language from "./pages/Language";
 import Enterprise from "./pages/Enterprise";
 import Features from "./pages/Features";
-import AdminRequestWorkspace from "./pages/AdminRequestWorkspace";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -80,13 +85,31 @@ const AppRoutes = () => {
         path="/language"
         element={<ProtectedRoute><CustomErrorBoundary><Language /></CustomErrorBoundary></ProtectedRoute>}
       />
+      {/* Admin routes */}
       <Route
         path="/admin"
         element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>}
       />
       <Route
+        path="/admin/editors"
+        element={<AdminRoute><CustomErrorBoundary><AdminEditors /></CustomErrorBoundary></AdminRoute>}
+      />
+      <Route
+        path="/admin/stats"
+        element={<AdminRoute><CustomErrorBoundary><AdminStats /></CustomErrorBoundary></AdminRoute>}
+      />
+      <Route
         path="/admin/requests/:requestId"
         element={<AdminRoute><CustomErrorBoundary><AdminRequestWorkspace /></CustomErrorBoundary></AdminRoute>}
+      />
+      {/* Editor routes */}
+      <Route
+        path="/editor"
+        element={<EditorRoute><CustomErrorBoundary><EditorDashboard /></CustomErrorBoundary></EditorRoute>}
+      />
+      <Route
+        path="/editor/requests/:requestId"
+        element={<EditorRoute><CustomErrorBoundary><EditorRequestWorkspace /></CustomErrorBoundary></EditorRoute>}
       />
       <Route
         path="/admin-login"

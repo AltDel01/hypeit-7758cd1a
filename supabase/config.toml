@@ -13,6 +13,9 @@ verify_jwt = false
 [functions.test-gemini-key]
 verify_jwt = false
 
+[functions.create-editor]
+verify_jwt = false
+
 [functions.test-qwen-key]
 verify_jwt = false
 

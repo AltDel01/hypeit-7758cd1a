@@ -223,6 +223,7 @@ export async function unassignGenerationRequest(
       .update({
         assigned_to: null,
         assigned_to_name: null,
+        assigned_at: null,
         status: "new",
       })
       .eq("id", requestId);
