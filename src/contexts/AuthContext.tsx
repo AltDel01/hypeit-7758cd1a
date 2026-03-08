@@ -28,11 +28,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setLoading(false);
-        
+
         if (event === 'SIGNED_IN') {
-          // Only navigate on actual sign-in, not session refresh
-          const isActualSignIn = !session && currentSession;
-          if (isActualSignIn) {
+          // Only redirect when sign-in was explicitly initiated from UI
+          const shouldHandleRedirect = sessionStorage.getItem('authRedirectPending') === '1';
+          if (shouldHandleRedirect) {
+            sessionStorage.removeItem('authRedirectPending');
             const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
             sessionStorage.removeItem('postLoginRedirect');
             toast.success('Successfully signed in');
@@ -56,10 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
+    sessionStorage.setItem('authRedirectPending', '1');
+
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } catch (error: any) {
+      sessionStorage.removeItem('authRedirectPending');
       toast.error(error.message || 'Error signing in');
       throw error;
     }
