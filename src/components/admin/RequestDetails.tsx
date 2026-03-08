@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX } from 'lucide-react';
 import ImageUploader from '@/components/tabs/ImageUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
@@ -16,6 +16,8 @@ interface RequestDetailsProps {
   onUpdateStatus: (id: string, status: 'in-progress') => void;
   onUploadResult: () => void;
   setResultImage: (file: File | null) => void;
+  onUnassign?: (id: string) => void;
+  currentUserId?: string;
 }
 
 export const RequestDetails = ({
@@ -25,16 +27,15 @@ export const RequestDetails = ({
   resultImage,
   onUpdateStatus,
   onUploadResult,
-  setResultImage
+  setResultImage,
+  onUnassign,
+  currentUserId
 }: RequestDetailsProps) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
   const parsed = parsePromptString(request.prompt);
+  const isClaimedByMe = request.assigned_to === currentUserId;
+  const isClaimed = !!request.assigned_to;
 
-  // Find matching feature config for color styling
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
       c => c.label.toLowerCase() === featureLabel.toLowerCase()
@@ -43,28 +44,55 @@ export const RequestDetails = ({
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2 text-white">Request Details</h2>
+      <h2 className="text-xl font-bold mb-2 text-foreground">Request Details</h2>
       <div className="mb-4">
         <StatusBadge status={request.status} />
-        <p className="mt-2 text-sm text-gray-400">Last updated: {formatDate(request.updated_at)}</p>
+        <p className="mt-2 text-sm text-muted-foreground">Last updated: {formatDate(request.updated_at)}</p>
       </div>
       
       <div className="space-y-4">
+        {/* Assigned Editor */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Assigned Editor</h3>
+            {isClaimed ? (
+              <div className="flex items-center gap-1.5 mt-1">
+                <UserCheck className="w-4 h-4 text-green-500" />
+                <span className="text-foreground font-medium">
+                  {isClaimedByMe ? 'You' : request.assigned_to_name}
+                </span>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm mt-1">Unassigned</p>
+            )}
+          </div>
+          {isClaimed && onUnassign && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onUnassign(request.id)}
+              className="text-destructive hover:text-destructive gap-1"
+            >
+              <UserX className="w-3.5 h-3.5" />
+              Unassign
+            </Button>
+          )}
+        </div>
+
         <div>
-          <h3 className="text-sm font-medium text-gray-400">User</h3>
-          <p className="text-white">{request.user_name || request.user_email}</p>
-          <p className="text-xs text-gray-500">{request.user_email}</p>
+          <h3 className="text-sm font-medium text-muted-foreground">User</h3>
+          <p className="text-foreground">{request.user_name || request.user_email}</p>
+          <p className="text-xs text-muted-foreground">{request.user_email}</p>
         </div>
         
         <div>
-          <h3 className="text-sm font-medium text-gray-400">Type</h3>
-          <p className="text-white capitalize">{request.request_type}</p>
+          <h3 className="text-sm font-medium text-muted-foreground">Type</h3>
+          <p className="text-foreground capitalize">{request.request_type}</p>
         </div>
 
-        {/* Feature Tags */}
         {parsed.features.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Features Selected</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Features Selected</h3>
             <div className="flex flex-wrap gap-2">
               {parsed.features.map((feature) => {
                 const config = getFeatureConfig(feature);
@@ -89,48 +117,47 @@ export const RequestDetails = ({
         )}
         
         <div>
-          <h3 className="text-sm font-medium text-gray-400">Prompt</h3>
-          <p className="text-white bg-gray-800/50 p-3 rounded-md">{parsed.prompt}</p>
+          <h3 className="text-sm font-medium text-muted-foreground">Prompt</h3>
+          <p className="text-foreground bg-muted/50 p-3 rounded-md">{parsed.prompt}</p>
         </div>
 
-        {/* Settings Row */}
         {(parsed.aspectRatio || parsed.resolution || parsed.duration || parsed.timeline) && (
           <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Settings</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Settings</h3>
             <div className="grid grid-cols-2 gap-2">
               {parsed.aspectRatio && (
-                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
-                  <Maximize className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
+                  <Maximize className="w-3.5 h-3.5 text-muted-foreground" />
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase">Aspect</p>
-                    <p className="text-white text-sm font-medium">{parsed.aspectRatio}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Aspect</p>
+                    <p className="text-foreground text-sm font-medium">{parsed.aspectRatio}</p>
                   </div>
                 </div>
               )}
               {parsed.resolution && (
-                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
-                  <Monitor className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
+                  <Monitor className="w-3.5 h-3.5 text-muted-foreground" />
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase">Resolution</p>
-                    <p className="text-white text-sm font-medium">{parsed.resolution}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Resolution</p>
+                    <p className="text-foreground text-sm font-medium">{parsed.resolution}</p>
                   </div>
                 </div>
               )}
               {parsed.duration && (
-                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
-                  <Timer className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
+                  <Timer className="w-3.5 h-3.5 text-muted-foreground" />
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase">Duration</p>
-                    <p className="text-white text-sm font-medium">{parsed.duration}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Duration</p>
+                    <p className="text-foreground text-sm font-medium">{parsed.duration}</p>
                   </div>
                 </div>
               )}
               {parsed.timeline && (
-                <div className="flex items-center gap-2 bg-gray-800/50 p-2 rounded-md">
-                  <Film className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
+                  <Film className="w-3.5 h-3.5 text-muted-foreground" />
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase">Timeline</p>
-                    <p className="text-white text-sm font-medium">{parsed.timeline}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Timeline</p>
+                    <p className="text-foreground text-sm font-medium">{parsed.timeline}</p>
                   </div>
                 </div>
               )}
@@ -140,8 +167,8 @@ export const RequestDetails = ({
         
         {request.reference_image_url && (
           <div>
-            <h3 className="text-sm font-medium text-gray-400">Reference / Attachment</h3>
-            <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
+            <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachment</h3>
+            <div className="mt-1 h-40 bg-muted/50 rounded-md overflow-hidden">
               <img 
                 src={request.reference_image_url} 
                 alt="Reference" 
@@ -153,53 +180,57 @@ export const RequestDetails = ({
         
         {request.status !== 'completed' ? (
           <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-1">Upload Result</h3>
-            <ImageUploader 
-              productImage={resultImage} 
-              setProductImage={setResultImage} 
-              className="h-40"
-            />
-            
-            {request.status === 'new' ? (
-              <div className="flex space-x-2 mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => onUpdateStatus(request.id, 'in-progress')}
-                  className="flex-1"
-                >
-                  <Clock className="mr-2 h-4 w-4" />
-                  Mark In Progress
-                </Button>
+            {/* Only show upload section if claimed by current editor */}
+            {isClaimedByMe ? (
+              <>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">Upload Result</h3>
+                <ImageUploader 
+                  productImage={resultImage} 
+                  setProductImage={setResultImage} 
+                  className="h-40"
+                />
+                <div className="flex space-x-2 mt-4">
+                  {isUploading ? (
+                    <div className="w-full flex flex-col items-center justify-center p-4">
+                      <CircularProgressIndicator 
+                        progress={uploadProgress} 
+                        size="medium"
+                      />
+                      <p className="mt-2 text-sm text-muted-foreground">Uploading...</p>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="newPurple"
+                      disabled={!resultImage}
+                      onClick={onUploadResult}
+                      className="flex-1"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload & Complete
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : isClaimed ? (
+              <div className="bg-muted/30 rounded-md p-4 text-center">
+                <UserCheck className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Assigned to <span className="font-medium">{request.assigned_to_name}</span>
+                </p>
               </div>
             ) : (
-              <div className="flex space-x-2 mt-4">
-                {isUploading ? (
-                  <div className="w-full flex flex-col items-center justify-center p-4">
-                    <CircularProgressIndicator 
-                      progress={uploadProgress} 
-                      size="medium"
-                    />
-                    <p className="mt-2 text-sm text-gray-400">Uploading...</p>
-                  </div>
-                ) : (
-                  <Button 
-                    variant="newPurple"
-                    disabled={!resultImage}
-                    onClick={onUploadResult}
-                    className="flex-1"
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload & Complete
-                  </Button>
-                )}
+              <div className="bg-muted/30 rounded-md p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Claim this request to start working on it
+                </p>
               </div>
             )}
           </div>
         ) : (
           <div>
-            <h3 className="text-sm font-medium text-gray-400">Result</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Result</h3>
             {request.result_url ? (
-              <div className="mt-1 h-40 bg-gray-800/50 rounded-md overflow-hidden">
+              <div className="mt-1 h-40 bg-muted/50 rounded-md overflow-hidden">
                 <img 
                   src={request.result_url} 
                   alt="Result" 
@@ -207,11 +238,12 @@ export const RequestDetails = ({
                 />
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No result uploaded</p>
+              <p className="text-muted-foreground text-sm">No result uploaded</p>
             )}
             <p className="text-xs text-green-500 mt-1 flex items-center">
               <CheckCircle className="h-3 w-3 mr-1" />
               Completed {request.completed_at && `at ${formatDate(request.completed_at)}`}
+              {request.assigned_to_name && ` by ${request.assigned_to_name}`}
             </p>
           </div>
         )}

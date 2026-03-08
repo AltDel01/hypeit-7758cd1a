@@ -6,10 +6,13 @@ import { RequestList } from '@/components/admin/RequestList';
 import { RequestDetails } from '@/components/admin/RequestDetails';
 import { useRequestManagement } from '@/hooks/useRequestManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useAuth } from '@/contexts/AuthContext';
+import { claimGenerationRequest, unassignGenerationRequest } from '@/services/generationRequestService';
 import { toast } from 'sonner';
 import type { GenerationRequest } from '@/services/generationRequestService';
 
 export const RequestManagementSection = () => {
+  const { user } = useAuth();
   const {
     requests,
     selectedRequest,
@@ -29,54 +32,63 @@ export const RequestManagementSection = () => {
   const [activeTab, setActiveTab] = React.useState<string>('new');
   const [resultImage, setResultImage] = React.useState<File | null>(null);
   
-  // Memoized refresh function to avoid unnecessary rerenders
   const refreshRequests = useCallback(() => {
     handleRefresh();
     toast.info("Refreshing request list...");
   }, [handleRefresh]);
+
+  const handleClaimRequest = useCallback(async (requestId: string) => {
+    const success = await claimGenerationRequest(requestId);
+    if (success) {
+      toast.success("Request claimed! You can now work on it.");
+      await loadRequests();
+    } else {
+      toast.error("Failed to claim request");
+    }
+  }, [loadRequests]);
+
+  const handleUnassignRequest = useCallback(async (requestId: string) => {
+    const success = await unassignGenerationRequest(requestId);
+    if (success) {
+      toast.success("Request unassigned");
+      await loadRequests();
+      if (selectedRequest?.id === requestId) {
+        setSelectedRequest(null);
+      }
+    } else {
+      toast.error("Failed to unassign request");
+    }
+  }, [loadRequests, selectedRequest, setSelectedRequest]);
   
-  // Auto-refresh requests every 15 seconds (reduced frequency to avoid excessive refreshes)
+  // Auto-refresh every 15 seconds
   useEffect(() => {
     const refreshInterval = setInterval(() => {
-      console.log('Auto-refreshing request list...');
       loadRequests();
     }, 15000);
-    
     return () => clearInterval(refreshInterval);
   }, [loadRequests]);
 
-  // Refresh on initial load, tab visibility change, and broadcast messages
+  // Refresh on initial load, visibility change, and broadcast
   useEffect(() => {
-    // Initial load
     refreshRequests();
     
-    // Set up visibility change handler
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('Tab became visible, refreshing requests...');
         refreshRequests();
       }
     };
     
-    // Setup broadcast channel for direct tab-to-tab communication
     let broadcastChannel: BroadcastChannel | null = null;
     try {
       if ('BroadcastChannel' in window) {
         broadcastChannel = new BroadcastChannel('image_requests_channel');
-        broadcastChannel.onmessage = (event) => {
-          console.log('BroadcastChannel message received in RequestManagementSection:', event.data);
-          refreshRequests();
-        };
+        broadcastChannel.onmessage = () => refreshRequests();
       }
     } catch (error) {
       console.warn('BroadcastChannel not supported:', error);
     }
     
-    // Listen for custom events
-    const handleRequestEvent = () => {
-      console.log('Custom request event received, refreshing...');
-      refreshRequests();
-    };
+    const handleRequestEvent = () => refreshRequests();
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('imageRequestCreated', handleRequestEvent);
@@ -88,15 +100,13 @@ export const RequestManagementSection = () => {
       window.removeEventListener('imageRequestCreated', handleRequestEvent);
       window.removeEventListener('imageRequestsUpdated', handleRequestEvent);
       window.removeEventListener('imageRequestsCleared', handleRequestEvent);
-      
-      if (broadcastChannel) {
-        broadcastChannel.close();
-      }
+      if (broadcastChannel) broadcastChannel.close();
     };
   }, [refreshRequests]);
 
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'all') return true;
+    if (activeTab === 'mine') return request.assigned_to === user?.id;
     return request.status === activeTab;
   });
 
@@ -104,8 +114,8 @@ export const RequestManagementSection = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2 text-white">Admin Dashboard</h1>
-          <p className="text-gray-400">Manage image generation requests</p>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Editor Dashboard</h1>
+          <p className="text-muted-foreground">Claim and process user requests</p>
         </div>
         <Button 
           onClick={refreshRequests} 
@@ -120,10 +130,11 @@ export const RequestManagementSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <Tabs defaultValue="new" value={activeTab} onValueChange={setActiveTab}>
-            <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4">
-              <TabsList className="grid grid-cols-4 mb-4">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4">
+              <TabsList className="grid grid-cols-5 mb-4">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="new">New</TabsTrigger>
+                <TabsTrigger value="mine">My Tasks</TabsTrigger>
                 <TabsTrigger value="in-progress">In Progress</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
@@ -133,12 +144,14 @@ export const RequestManagementSection = () => {
                 selectedRequest={selectedRequest}
                 onSelectRequest={setSelectedRequest}
                 onUpdateStatus={handleUpdateStatus}
+                onClaimRequest={handleClaimRequest}
+                currentUserId={user?.id}
               />
             </div>
           </Tabs>
         </div>
         
-        <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4">
+        <div className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4">
           {selectedRequest ? (
             <RequestDetails 
               request={selectedRequest}
@@ -148,10 +161,12 @@ export const RequestManagementSection = () => {
               onUpdateStatus={handleUpdateStatus}
               onUploadResult={() => resultImage && handleUploadResult(resultImage)}
               setResultImage={setResultImage}
+              onUnassign={handleUnassignRequest}
+              currentUserId={user?.id}
             />
           ) : (
             <div className="h-full flex items-center justify-center">
-              <p className="text-gray-400">Select a request to view details</p>
+              <p className="text-muted-foreground">Select a request to view details</p>
             </div>
           )}
         </div>

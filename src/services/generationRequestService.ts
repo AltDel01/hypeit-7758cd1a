@@ -14,6 +14,8 @@ export interface GenerationRequest {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  assigned_to: string | null;
+  assigned_to_name: string | null;
 }
 
 export interface CreateGenerationRequestParams {
@@ -165,6 +167,73 @@ export async function updateGenerationRequestStatus(
     return true;
   } catch (error) {
     console.error("Error in updateGenerationRequestStatus:", error);
+    return false;
+  }
+}
+
+/**
+ * Claim a request (assign to current user)
+ */
+export async function claimGenerationRequest(
+  requestId: string
+): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const displayName = profile?.display_name || user.email?.split("@")[0] || "Editor";
+
+    const { error } = await supabase
+      .from("generation_requests")
+      .update({
+        assigned_to: user.id,
+        assigned_to_name: displayName,
+        status: "in-progress",
+      })
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error claiming request:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in claimGenerationRequest:", error);
+    return false;
+  }
+}
+
+/**
+ * Unassign a request
+ */
+export async function unassignGenerationRequest(
+  requestId: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("generation_requests")
+      .update({
+        assigned_to: null,
+        assigned_to_name: null,
+        status: "new",
+      })
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error unassigning request:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in unassignGenerationRequest:", error);
     return false;
   }
 }
