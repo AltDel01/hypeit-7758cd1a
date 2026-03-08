@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroBackground from '@/components/enterprise/HeroBackground';
+import caseTravel from '@/assets/enterprise/case-travel.jpg';
+import caseCpg from '@/assets/enterprise/case-cpg.jpg';
+import caseAgency from '@/assets/enterprise/case-agency.jpg';
 import { Button } from '@/components/ui/button';
 import {
   Building2, Plane, ShoppingBag, Users, ArrowRight, CheckCircle,
