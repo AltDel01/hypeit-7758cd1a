@@ -84,6 +84,10 @@ const AppRoutes = () => {
         element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>} 
       />
       <Route 
+        path="/admin-login" 
+        element={<CustomErrorBoundary><AdminLogin /></CustomErrorBoundary>} 
+      />
+      <Route 
         path="/login" 
         element={<AuthRoute><CustomErrorBoundary><Login /></CustomErrorBoundary></AuthRoute>} 
       />
