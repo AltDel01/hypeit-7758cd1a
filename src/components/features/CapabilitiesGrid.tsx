@@ -5,7 +5,7 @@ const capabilities = [
   {
     icon: Scissors,
     title: 'Trimming & Cutting',
-    description: 'Intelligent auto-trim that detects pauses, dead air, and low-engagement moments — cutting them instantly for tight, punchy edits.',
+    description: 'Intelligent auto-trim that detects pauses, dead air, and low-engagement moments, cutting them instantly for tight, punchy edits.',
     gradient: 'from-rose-500 to-orange-500',
     featured: true,
   },
@@ -54,13 +54,13 @@ const capabilities = [
   {
     icon: Scissors,
     title: 'AI Clipping',
-    description: 'Turn long-form videos into bite-sized short-form clips — AI detects the most engaging moments and extracts them ready to publish.',
+    description: 'Turn long-form videos into bite-sized short-form clips. AI detects the most engaging moments and extracts them ready to publish.',
     gradient: 'from-fuchsia-500 to-pink-500',
   },
   {
     icon: User,
     title: 'AI Avatar',
-    description: 'Generate realistic AI avatars that present your content — perfect for explainers, tutorials, and brand messaging without being on camera.',
+    description: 'Generate realistic AI avatars that present your content. Perfect for explainers, tutorials, and brand messaging without being on camera.',
     gradient: 'from-indigo-500 to-violet-500',
   },
 ];
@@ -77,7 +77,7 @@ const CapabilitiesGrid: React.FC = () => {
             </span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
-            Every editing tool you need — powered by AI that understands your content and makes professional edits in seconds.
+            Every editing tool you need, powered by AI that understands your content and makes professional edits in seconds.
           </p>
         </div>
 
