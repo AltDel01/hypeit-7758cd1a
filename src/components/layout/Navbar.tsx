@@ -104,10 +104,10 @@ const MobileTopBar = () => {
                   <div className="border-t border-gray-700 my-2"></div>
                   <Link to="/settings" className="px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
-                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                      {(mobileProfileName || user.email)?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{user.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-white text-sm font-medium">{mobileProfileName || user.email?.split('@')[0] || 'User'}</p>
                       <p className="text-gray-400 text-xs">@{user.email?.split('@')[0] || 'user'}</p>
                     </div>
                   </Link>
