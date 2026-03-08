@@ -35,7 +35,7 @@ const HeroBackground: React.FC = () => {
         </div>
       ))}
       {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/30 to-background/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background" />
     </div>
   );
 };
