@@ -31,7 +31,7 @@ const tools = [
     icon: Sparkles,
     badge: 'Transitions & Effects',
     title: 'Cinematic Quality, Zero Effort.',
-    description: 'From smooth cuts to dramatic zooms, glitch effects to light leaks — AI applies the perfect transitions and visual effects based on your content\'s mood and pacing.',
+    description: 'From smooth cuts to dramatic zooms, glitch effects to light leaks. AI applies the perfect transitions and visual effects based on your content\'s mood and pacing.',
     gradient: 'from-pink-500 to-rose-500',
     image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=500&fit=crop',
   },
