@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scissors, Film, VolumeX, Languages, Sparkles, Type, Captions, Maximize } from 'lucide-react';
+import { Scissors, Film, VolumeX, Languages, Sparkles, Type, Captions, Maximize, User } from 'lucide-react';
 
 const capabilities = [
   {
