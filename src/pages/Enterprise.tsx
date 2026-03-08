@@ -153,20 +153,19 @@ const Enterprise = () => {
               Enterprise Solutions
             </div>
             
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
               Video Production at{' '}
               <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
                 Enterprise Scale
               </span>
               ,{' '}
-              <br className="hidden md:block" />
               Without Enterprise Cost
             </h1>
             
-            <p className="text-base md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
-              Replace expensive production crews and months-long timelines. 
+            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+              Replace expensive content production cost and months-long timelines. 
               Viralin empowers your teams to create studio-quality video content 
-              from raw footage — in minutes, not months.
+              from raw footage in minutes, not months without needing technical content editing skills and complicated SaaS tools.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
