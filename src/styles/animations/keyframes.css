@@ -1,4 +1,10 @@
 
+/* Hero zoom animation */
+@keyframes heroZoom {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1.15); }
+}
+
 /* Basic animations */
 @keyframes pop {
   0% {
