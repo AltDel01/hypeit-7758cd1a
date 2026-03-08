@@ -82,7 +82,7 @@ const ToolsShowcase: React.FC = () => {
             key={tool.badge}
             className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-5 md:gap-8 lg:gap-16 mb-10 md:mb-24 last:mb-0`}
           >
-            <div className="flex-1 max-w-md text-center lg:text-left px-2 md:px-0">
+            <div className="flex-1 max-w-md text-center lg:text-left px-1 md:px-0">
               <div className="inline-flex items-center gap-3 mb-4 md:mb-5">
                 <tool.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400" />
                 <span className="text-purple-400 text-lg md:text-xl font-bold">{tool.badge}</span>
