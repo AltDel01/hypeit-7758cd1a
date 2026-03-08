@@ -1,6 +1,8 @@
 import React from 'react';
 import { Film, VolumeX, Languages, Sparkles, Captions, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import brollImage from '@/assets/broll-insertion.png';
+import { Button } from '@/components/ui/button';
 
 const tools = [
   {
