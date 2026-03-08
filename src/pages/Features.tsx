@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle, Play } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle, Play, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -20,19 +20,19 @@ const Features: React.FC = () => {
 
           <div className="relative z-10 max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs md:text-sm font-medium mb-6">
-              <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              Features & Capabilities
+              <Wand2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              AI-Powered Editing Tools
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-              Create Content That{' '}
+              Edit Smarter with{' '}
               <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-                Goes Viral
+                AI Intelligence
               </span>
             </h1>
 
             <p className="text-sm md:text-xl text-gray-400 mb-8 md:mb-10 max-w-2xl mx-auto">
-              Everything you need to produce, edit, and distribute professional video content — powered by AI that understands what performs.
+              Trimming, B-Roll insertion, word silencing, dubbing, transitions, motion graphics, captions — all powered by AI that edits like a pro.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-8">
