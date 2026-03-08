@@ -305,10 +305,7 @@ Viralin empowers your teams to create studio-quality video content from raw foot
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
               {/* Left side - Copy */}
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
-                  <Star className="w-3.5 h-3.5" />
-                  Book a Demo
-                </div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Book a Demo</p>
                 
                 <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-[1.1] lg:text-3xl">
                   Book your{' '}
