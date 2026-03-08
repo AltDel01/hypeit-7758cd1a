@@ -704,27 +704,26 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
-            className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
-                activeMode === 'aiclip' ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
-                : activeMode === 'retention' ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
-                : activeMode === 'creator' ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
-                : activeMode === 'aiedit' ? 'bg-gradient-to-r from-[#f9a825] to-[#ff6f00] shadow-lg shadow-amber-500/30'
-                : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
-              }`}
+              className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
+              style={(() => {
+                if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
+                if (activeMode === 'retention') return { backgroundImage: 'linear-gradient(to right, #ff6b6b, #ff9a3c)' };
+                if (activeMode === 'creator') return { backgroundImage: 'linear-gradient(to right, #38d9f5, #4f8eff)' };
+                const mc = getConfigByMode(activeMode || '');
+                if (mc) return { backgroundImage: `linear-gradient(to right, ${mc.colorFrom}, ${mc.colorTo})` };
+                return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
+              })()}
             >
               {(isSubmitting || isAutoProcessing) ? (
                 <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
-              ) : activeMode === 'aiclip' ? (
-                <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>
-              ) : activeMode === 'retention' ? (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>
-              ) : activeMode === 'creator' ? (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>
-              ) : activeMode === 'aiedit' ? (
-                <div className="flex items-center justify-center gap-1.5"><Wand2 className="w-3.5 h-3.5" /><span>AI Edit</span></div>
-              ) : (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>
-              )}
+              ) : (() => {
+                if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
+                if (activeMode === 'retention') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>;
+                if (activeMode === 'creator') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>;
+                const mc = getConfigByMode(activeMode || '');
+                if (mc) { const IconComp = mc.icon; return <div className="flex items-center justify-center gap-1.5"><IconComp className="w-3.5 h-3.5" /><span>{mc.label}</span></div>; }
+                return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>;
+              })()}
             </Button>
           </div>
 
