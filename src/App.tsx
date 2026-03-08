@@ -89,14 +89,6 @@ const AppRoutes = () => {
         element={<AdminRoute><CustomErrorBoundary><Admin /></CustomErrorBoundary></AdminRoute>}
       />
       <Route
-        path="/admin/editors"
-        element={<AdminRoute><CustomErrorBoundary><AdminEditors /></CustomErrorBoundary></AdminRoute>}
-      />
-      <Route
-        path="/admin/stats"
-        element={<AdminRoute><CustomErrorBoundary><AdminStats /></CustomErrorBoundary></AdminRoute>}
-      />
-      <Route
         path="/admin/requests/:requestId"
         element={<AdminRoute><CustomErrorBoundary><AdminRequestWorkspace /></CustomErrorBoundary></AdminRoute>}
       />
