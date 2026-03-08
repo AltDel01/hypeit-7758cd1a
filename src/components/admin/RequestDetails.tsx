@@ -188,10 +188,10 @@ export const RequestDetails = ({
             {isClaimedByMe ? (
               <>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Upload Result</h3>
-                <ImageUploader 
-                  productImage={resultImage} 
-                  setProductImage={setResultImage} 
-                  className="h-40"
+                <FileUploader 
+                  file={resultImage} 
+                  setFile={setResultImage} 
+                  className="min-h-[160px]"
                 />
                 <div className="flex space-x-2 mt-4">
                   {isUploading ? (
