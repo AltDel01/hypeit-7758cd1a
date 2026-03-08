@@ -19,6 +19,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
+import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
 
 // Dummy clips (video files removed)
 const dummyClips = [
@@ -141,6 +142,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     else if (savedState.retentionMode) mode = 'retention';
     else if (savedState.creatorMode) mode = 'creator';
     else if (savedState.aiEditMode) mode = 'aiedit';
+    else if (savedState.featureMode) mode = savedState.featureMode;
     if (mode) setActiveMode(mode);
 
     clearEditorState();
@@ -148,7 +150,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     if (mode) {
       // Special mode: show loading then inline results, AND log to DB + send email
       setIsAutoProcessing(true);
-      const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mode === 'aiedit' ? 'AI Edit' : 'AI Creator';
+      const mc = getConfigByMode(mode);
+      const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
       const fullPrompt = `[${modeLabel}] ${loadedPrompt.trim() || 'Generate viral content'} | Aspect: ${savedState.selectedAspectRatio || '9:16'} | Resolution: ${savedState.selectedResolution || '1080P'} | Duration: ${savedState.selectedDuration || '15s'}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
@@ -161,10 +164,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
           setShowRetentionResult(true);
         } else if (mode === 'creator') {
           setShowAiCreatorResult(true);
-        } else if (mode === 'aiedit') {
-          setShowAiEditResult(true);
-        } else {
+        } else if (mode === 'aiclip') {
           setShowAiClipResult(true);
+        } else {
+          // All feature modes (aiedit, trim, caption, etc.) show AI Edit result
+          setShowAiEditResult(true);
         }
       }, 15000);
     } else if (savedState.autoSubmit && (loadedPrompt.trim() || loadedFiles.length > 0)) {
@@ -217,16 +221,16 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   };
 
   const handleFeatureClick = (featureId: string) => {
-    // AI Edit: works like AI Clip/Retention/Creator — sets activeMode so Generate button triggers it
-    if (featureId === 'ai-edit') {
+    const config = FEATURE_MODE_MAP[featureId];
+    if (config) {
       setActiveMode(prev => {
-        if (prev !== 'aiedit') {
+        if (prev !== config.mode) {
           setShowAiClipResult(false);
           setShowRetentionResult(false);
           setShowAiCreatorResult(false);
           setShowAiEditResult(false);
         }
-        return prev === 'aiedit' ? null : 'aiedit';
+        return prev === config.mode ? null : config.mode;
       });
       return;
     }
@@ -287,18 +291,19 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         setShowRetentionResult(true);
       } else if (currentMode === 'creator') {
         setShowAiCreatorResult(true);
-      } else if (currentMode === 'aiedit') {
-        console.log('[SpecialMode] Setting showAiEditResult to TRUE');
-        setShowAiEditResult(true);
-      } else {
+      } else if (currentMode === 'aiclip') {
         setShowAiClipResult(true);
+      } else {
+        // All feature modes show AI Edit result
+        setShowAiEditResult(true);
       }
     }, 15000);
     console.log('[SpecialMode] Timer started with id:', timerId);
 
     // Fire-and-forget DB logging (don't block the UI)
     try {
-      const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : currentMode === 'aiedit' ? 'AI Edit' : 'AI Creator';
+      const mc = getConfigByMode(currentMode || '');
+      const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
       let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
       fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
@@ -344,7 +349,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
     }
   };
 
-  const isSpecialMode = ['aiclip', 'retention', 'creator', 'aiedit'].includes(activeMode || '');
+  const isSpecialMode = activeMode === 'aiclip' || activeMode === 'retention' || activeMode === 'creator' || isFeatureMode(activeMode);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
@@ -361,21 +366,17 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         <div className="w-full overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
             {editingFeatures.slice(0, 6).map((feature) => {
-              const isActive = feature.id === 'ai-edit' 
-                ? activeMode === 'aiedit' 
-                : selectedFeatures.includes(feature.id);
+              const config = FEATURE_MODE_MAP[feature.id];
+              const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
               return (
               <button
                 key={feature.id}
                 onClick={() => handleFeatureClick(feature.id)}
                 className={cn(
                   "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                  isActive
-                    ? feature.id === 'ai-edit' 
-                      ? "bg-gradient-to-r from-[#f9a825] to-[#ff6f00] text-white shadow-lg shadow-amber-500/30"
-                      : "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
-                    : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
+                  isActive && config ? "bg-gradient-to-r text-white shadow-lg" : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
                 )}
+                style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}
               >
                 <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
@@ -386,21 +387,24 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         </div>
 
         <div className="hidden md:flex flex-wrap justify-center gap-2 w-full">
-          {editingFeatures.slice(6).map((feature) => (
+          {editingFeatures.slice(6).map((feature) => {
+            const config = FEATURE_MODE_MAP[feature.id];
+            const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
+            return (
             <button
               key={feature.id}
               onClick={() => handleFeatureClick(feature.id)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-                selectedFeatures.includes(feature.id)
-                  ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
-                  : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
+                isActive && config ? "bg-gradient-to-r text-white shadow-lg" : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
               )}
+              style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}
             >
               <feature.icon className="w-4 h-4" />
               {feature.label}
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* AI Clip Button */}
@@ -437,13 +441,19 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
         {/* Prompt Box */}
         <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
-          activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
-          : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
-          : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
-          : activeMode === 'aiedit' ? 'border-[#f9a825]/60 shadow-lg shadow-[#f9a825]/10'
-          : 'border-gray-700/50'
-        }`}>
-          {/* Active Mode Banner */}
+          (() => {
+            if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
+            if (activeMode === 'retention') return 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10';
+            if (activeMode === 'creator') return 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10';
+            return 'border-gray-700/50';
+          })()
+        }`} style={(() => {
+          if (['aiclip', 'retention', 'creator'].includes(activeMode || '')) return undefined;
+          const mc = getConfigByMode(activeMode || '');
+          if (mc) return { borderColor: `${mc.color}66`, boxShadow: `0 10px 15px -3px ${mc.color}1a` };
+          return undefined;
+        })()}>
+          {/* Active Mode Banner — AI Clip / Retention / Creator */}
           {activeMode === 'aiclip' && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
               <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
@@ -465,13 +475,19 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
-          {activeMode === 'aiedit' && (
-            <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#f9a825]/10 border border-[#f9a825]/30">
-              <Wand2 className="w-3.5 h-3.5 text-[#f9a825]" />
-              <span className="text-xs text-[#f9a825] font-medium">AI Edit mode active — smart auto-edit with effects & transitions</span>
-              <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
-            </div>
-          )}
+          {/* Dynamic Feature Mode Banner */}
+          {activeMode && !['aiclip', 'retention', 'creator'].includes(activeMode) && (() => {
+            const mc = getConfigByMode(activeMode);
+            if (!mc) return null;
+            const IconComp = mc.icon;
+            return (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg border" style={{ backgroundColor: `${mc.color}1a`, borderColor: `${mc.color}4d` }}>
+                <IconComp className="w-3.5 h-3.5" style={{ color: mc.color }} />
+                <span className="text-xs font-medium" style={{ color: mc.color }}>{mc.label} mode active — {mc.description}</span>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
+              </div>
+            );
+          })()}
 
           {/* Video Preview from URLs (from homepage) */}
           {uploadedFileUrls.filter(f => f.type === 'video').length > 0 && (
@@ -688,27 +704,26 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
               disabled={isSubmitting || isAutoProcessing}
-            className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
-                activeMode === 'aiclip' ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
-                : activeMode === 'retention' ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
-                : activeMode === 'creator' ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
-                : activeMode === 'aiedit' ? 'bg-gradient-to-r from-[#f9a825] to-[#ff6f00] shadow-lg shadow-amber-500/30'
-                : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
-              }`}
+              className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
+              style={(() => {
+                if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
+                if (activeMode === 'retention') return { backgroundImage: 'linear-gradient(to right, #ff6b6b, #ff9a3c)' };
+                if (activeMode === 'creator') return { backgroundImage: 'linear-gradient(to right, #38d9f5, #4f8eff)' };
+                const mc = getConfigByMode(activeMode || '');
+                if (mc) return { backgroundImage: `linear-gradient(to right, ${mc.colorFrom}, ${mc.colorTo})` };
+                return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
+              })()}
             >
               {(isSubmitting || isAutoProcessing) ? (
                 <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
-              ) : activeMode === 'aiclip' ? (
-                <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>
-              ) : activeMode === 'retention' ? (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>
-              ) : activeMode === 'creator' ? (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>
-              ) : activeMode === 'aiedit' ? (
-                <div className="flex items-center justify-center gap-1.5"><Wand2 className="w-3.5 h-3.5" /><span>AI Edit</span></div>
-              ) : (
-                <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>
-              )}
+              ) : (() => {
+                if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
+                if (activeMode === 'retention') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>;
+                if (activeMode === 'creator') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>;
+                const mc = getConfigByMode(activeMode || '');
+                if (mc) { const IconComp = mc.icon; return <div className="flex items-center justify-center gap-1.5"><IconComp className="w-3.5 h-3.5" /><span>{mc.label}</span></div>; }
+                return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>;
+              })()}
             </Button>
           </div>
 

@@ -9,6 +9,7 @@ import { saveEditorState, UploadedFile } from '@/hooks/useEditorState';
 import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
+import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
 
 
 const frameOptions = [{
@@ -153,8 +154,9 @@ const HeroWithEditor: React.FC = () => {
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:15');
   const handleFeatureClick = (featureId: string) => {
-    if (featureId === 'ai-edit') {
-      setActiveMode(prev => prev === 'aiedit' ? null : 'aiedit');
+    const config = FEATURE_MODE_MAP[featureId];
+    if (config) {
+      setActiveMode(prev => prev === config.mode ? null : config.mode);
       return;
     }
     setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
@@ -283,11 +285,12 @@ const HeroWithEditor: React.FC = () => {
         startTimestamp,
         endTimestamp,
         uploadedFiles,
-        autoSubmit: activeMode !== 'aiclip' && activeMode !== 'retention' && activeMode !== 'creator' && activeMode !== 'aiedit',
+        autoSubmit: !activeMode,
         aiClipMode: activeMode === 'aiclip',
         retentionMode: activeMode === 'retention',
         creatorMode: activeMode === 'creator',
         aiEditMode: activeMode === 'aiedit',
+        featureMode: isFeatureMode(activeMode) ? activeMode : null,
       });
       
       // Dismiss ALL toasts before navigating so nothing persists on dashboard
@@ -322,18 +325,26 @@ const HeroWithEditor: React.FC = () => {
         {/* Editing Feature Buttons - Scrollable on mobile */}
         <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
-            {editingFeatures.slice(0, 6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", feature.id === 'ai-edit' ? (activeMode === 'aiedit' ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50") : selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
+            {editingFeatures.slice(0, 6).map(feature => {
+              const config = FEATURE_MODE_MAP[feature.id];
+              const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
+              return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
                 <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {feature.label}
-              </button>)}
+              </button>;
+            })}
           </div>
         </div>
         {/* Second row - Hidden on mobile for cleaner look */}
         <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
-          {editingFeatures.slice(6).map(feature => <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", selectedFeatures.includes(feature.id) ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")}>
+          {editingFeatures.slice(6).map(feature => {
+            const config = FEATURE_MODE_MAP[feature.id];
+            const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
+            return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
               <feature.icon className="w-4 h-4" />
               {feature.label}
-            </button>)}
+            </button>;
+          })}
         </div>
 
         {/* Prompt Box */}
@@ -346,49 +357,55 @@ const HeroWithEditor: React.FC = () => {
             onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
           />
           <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
-            activeMode === 'aiclip' ? 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10'
-            : activeMode === 'retention' ? 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10'
-            : activeMode === 'creator' ? 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10'
-            : activeMode === 'aiedit' ? 'border-amber-500/60 shadow-lg shadow-amber-500/10'
-            : 'border-gray-700/50'
-          }`}>
-            {/* Active Mode Banner */}
+            (() => {
+              if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
+              if (activeMode === 'retention') return 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10';
+              if (activeMode === 'creator') return 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10';
+              const mc = getConfigByMode(activeMode || '');
+              if (mc) return `border-[${mc.color}]/60 shadow-lg`;
+              return 'border-gray-700/50';
+            })()
+          }`} style={(() => {
+            if (['aiclip', 'retention', 'creator'].includes(activeMode || '')) return undefined;
+            const mc = getConfigByMode(activeMode || '');
+            if (mc) return { borderColor: `${mc.color}66`, boxShadow: `0 10px 15px -3px ${mc.color}1a` };
+            return undefined;
+          })()}>
+            {/* Active Mode Banner — AI Clip / Retention / Creator */}
             {activeMode === 'aiclip' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
                 <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
                 <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
             {activeMode === 'retention' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
                 <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
                 <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
             {activeMode === 'creator' && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
                 <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
                 <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
-            {activeMode === 'aiedit' && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs text-amber-400 font-medium">AI Edit mode active — smart auto-edit with effects & transitions</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+            {/* Dynamic Feature Mode Banner */}
+            {activeMode && !['aiclip', 'retention', 'creator'].includes(activeMode) && (() => {
+              const mc = getConfigByMode(activeMode);
+              if (!mc) return null;
+              const IconComp = mc.icon;
+              return (
+                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg border" style={{ backgroundColor: `${mc.color}1a`, borderColor: `${mc.color}4d` }}>
+                  <IconComp className="w-3.5 h-3.5" style={{ color: mc.color }} />
+                  <span className="text-xs font-medium" style={{ color: mc.color }}>{mc.label} mode active — {mc.description}</span>
+                  <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
+                </div>
+              );
+            })()}
             {/* Media Preview — shows image/video/doc previews */}
             {uploadedVideos.length > 0 && (
               <div className="mb-3 md:mb-4 flex flex-wrap gap-2">
@@ -562,49 +579,29 @@ const HeroWithEditor: React.FC = () => {
               <Button
                 onClick={handleCreate}
                 disabled={isProcessing}
-                className={`px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0 ${
-                  activeMode === 'aiclip'
-                    ? 'bg-gradient-to-r from-[#a259ff] to-[#d966ff] shadow-lg shadow-purple-500/40'
-                    : activeMode === 'retention'
-                    ? 'bg-gradient-to-r from-[#ff6b6b] to-[#ff9a3c] shadow-lg shadow-red-500/30'
-                     : activeMode === 'creator'
-                    ? 'bg-gradient-to-r from-[#38d9f5] to-[#4f8eff] shadow-lg shadow-cyan-500/30'
-                    : activeMode === 'aiedit'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30'
-                    : 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] shadow-lg shadow-purple-500/30'
-                }`}
+                className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
+                style={(() => {
+                  if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
+                  if (activeMode === 'retention') return { backgroundImage: 'linear-gradient(to right, #ff6b6b, #ff9a3c)' };
+                  if (activeMode === 'creator') return { backgroundImage: 'linear-gradient(to right, #38d9f5, #4f8eff)' };
+                  const mc = getConfigByMode(activeMode || '');
+                  if (mc) return { backgroundImage: `linear-gradient(to right, ${mc.colorFrom}, ${mc.colorTo})` };
+                  return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
+                })()}
               >
                 {isProcessing ? (
                   <div className="flex items-center justify-center gap-1.5">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span className="hidden sm:inline">Uploading...</span>
                   </div>
-                ) : activeMode === 'aiclip' ? (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Scissors className="w-3.5 h-3.5" />
-                    <span>AI Clip</span>
-                  </div>
-                ) : activeMode === 'retention' ? (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Retention Edit</span>
-                  </div>
-                ) : activeMode === 'creator' ? (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>AI Creator</span>
-                  </div>
-                ) : activeMode === 'aiedit' ? (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>AI Edit</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Generate</span>
-                  </div>
-                )}
+                ) : (() => {
+                  if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
+                  if (activeMode === 'retention') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>;
+                  if (activeMode === 'creator') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>;
+                  const mc = getConfigByMode(activeMode || '');
+                  if (mc) { const IconComp = mc.icon; return <div className="flex items-center justify-center gap-1.5"><IconComp className="w-3.5 h-3.5" /><span>{mc.label}</span></div>; }
+                  return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>;
+                })()}
               </Button>
             </div>
           </div>

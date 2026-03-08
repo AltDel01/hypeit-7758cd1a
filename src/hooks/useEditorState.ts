@@ -21,6 +21,7 @@ export interface EditorState {
   retentionMode?: boolean;
   creatorMode?: boolean;
   aiEditMode?: boolean;
+  featureMode?: string | null;
 }
 
 export const saveEditorState = (state: EditorState): void => {
