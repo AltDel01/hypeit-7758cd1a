@@ -437,6 +437,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         onRequestCreated?.();
         setIsSubmitting(false);
         setShowSubmittedConfirmation(true);
+        hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
       } else {
