@@ -106,6 +106,24 @@ const handler = async (req: Request): Promise<Response> => {
           <p style="color: #6b7280; margin-top: 20px;">View and manage this request in the admin dashboard.</p>
         </div>
       `;
+    } else if (payload.type === "refund_request") {
+      subject = "🔄 Token Refund Request - Viralin AI";
+      htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #dc2626;">Token Refund Request</h1>
+          <div style="background: #fef2f2; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626;">
+            <p><strong>Name:</strong> ${payload.userName || "Not provided"}</p>
+            <p><strong>Email:</strong> ${payload.userEmail}</p>
+            <p><strong>Issue:</strong></p>
+            <div style="background: white; padding: 12px; border-radius: 4px; margin: 8px 0;">
+              ${payload.issue}
+            </div>
+            ${payload.screenshotUrl ? `<p><strong>Screenshot:</strong> File uploaded at <code>${payload.screenshotUrl}</code></p>` : "<p><em>No screenshot attached</em></p>"}
+            <p><strong>Request Time:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
+          </div>
+          <p style="color: #6b7280; margin-top: 20px;">Please review this request and take appropriate action.</p>
+        </div>
+      `;
     } else {
       throw new Error("Invalid notification type");
     }
