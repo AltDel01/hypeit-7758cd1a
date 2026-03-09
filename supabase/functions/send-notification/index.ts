@@ -29,7 +29,16 @@ interface GenerationRequestNotification {
   timestamp: string;
 }
 
-type NotificationPayload = SignupNotification | GenerationRequestNotification;
+interface RefundRequestNotification {
+  type: "refund_request";
+  userName: string;
+  userEmail: string;
+  issue: string;
+  screenshotUrl?: string | null;
+  timestamp: string;
+}
+
+type NotificationPayload = SignupNotification | GenerationRequestNotification | RefundRequestNotification;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
