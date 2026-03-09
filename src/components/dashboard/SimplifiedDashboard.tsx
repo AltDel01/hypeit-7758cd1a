@@ -34,6 +34,7 @@ interface SimplifiedDashboardProps {
 }
 
 const frameOptions = [
+  { value: '', label: 'Frame' },
   { value: 'first-last', label: 'First and last frames' },
   { value: 'keyframes', label: 'Keyframes only' },
   { value: 'all', label: 'All frames' },
