@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
-  Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
+  Languages, Loader2, Play, ExternalLink, TrendingUp, CheckCircle
 } from 'lucide-react';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { GenerationRequest } from '@/services/generationRequestService';
