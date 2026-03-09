@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const payload: ResultReadyPayload = await req.json();
-    const { userEmail, userName, requestType, prompt, siteUrl } = payload;
+    const { userEmail, userName, requestType, prompt, requestId } = payload;
 
     if (!userEmail) {
       return new Response(
@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const dashboardUrl = `${siteUrl}/dashboard`;
+    const dashboardUrl = `https://viralin.ai/dashboard?request=${requestId}`;
     const typeLabel = requestType === "video" ? "Video" : "Image";
     const typeEmoji = requestType === "video" ? "🎬" : "🖼️";
     const truncatedPrompt = prompt.length > 100 ? prompt.slice(0, 100) + "..." : prompt;
