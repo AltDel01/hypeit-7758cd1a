@@ -31,10 +31,16 @@ export const useGenerationRequests = (userId: string | undefined) => {
     loadRequests();
   }, [loadRequests]);
 
-  // Real-time subscription
+  // Real-time subscription + polling fallback
   useEffect(() => {
     if (!userId) return;
 
+    let pollInterval = 3000;
+    let lastUpdatedAt: string | null = null;
+    let isActive = true;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    // Primary: realtime subscription
     const channel = supabase
       .channel(`generation_requests_${userId}`)
       .on(
@@ -47,6 +53,7 @@ export const useGenerationRequests = (userId: string | undefined) => {
         },
         (payload) => {
           console.log('Real-time update:', payload);
+          pollInterval = 3000; // Reset on successful realtime
           
           if (payload.eventType === 'INSERT') {
             setRequests((prev) => [payload.new as GenerationRequest, ...prev]);
@@ -65,7 +72,37 @@ export const useGenerationRequests = (userId: string | undefined) => {
       )
       .subscribe();
 
+    // Fallback: polling with backoff (catches missed realtime events)
+    const poll = async () => {
+      if (!isActive) return;
+      try {
+        const data = await fetchUserGenerationRequests();
+        if (!isActive) return;
+
+        // Check if data actually changed by comparing first item's updated_at
+        const latestUpdate = data.length > 0 ? data[0].updated_at : null;
+        if (latestUpdate && latestUpdate !== lastUpdatedAt) {
+          lastUpdatedAt = latestUpdate;
+          setRequests(data);
+          pollInterval = 3000; // Reset on change
+        } else {
+          // No change: slow down polling (max 30s)
+          pollInterval = Math.min(pollInterval * 1.5, 30000);
+        }
+      } catch (err) {
+        console.error('Poll error:', err);
+      }
+      if (isActive) {
+        timeoutId = setTimeout(poll, pollInterval);
+      }
+    };
+
+    // Start polling after initial delay
+    timeoutId = setTimeout(poll, pollInterval);
+
     return () => {
+      isActive = false;
+      clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
   }, [userId]);
