@@ -101,7 +101,7 @@ const getAspectClass = (ratio: string) => {
   return 'aspect-video';
 };
 
-const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => {
+const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDashboardProps) => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
