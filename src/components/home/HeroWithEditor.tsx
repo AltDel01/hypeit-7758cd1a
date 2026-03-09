@@ -13,6 +13,9 @@ import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featu
 
 
 const frameOptions = [{
+  value: '',
+  label: 'Frame'
+}, {
   value: 'first-last',
   label: 'First and last frames'
 }, {
@@ -26,6 +29,11 @@ const frameOptions = [{
   label: 'Custom selection'
 }];
 const aspectRatioOptions = [{
+  value: '',
+  label: 'Ratio',
+  width: 14,
+  height: 14
+}, {
   value: '16:9',
   label: '16:9',
   width: 20,
@@ -52,6 +60,9 @@ const aspectRatioOptions = [{
   height: 9
 }];
 const resolutionOptions = [{
+  value: '',
+  label: 'Quality'
+}, {
   value: '4K',
   label: '4K'
 }, {
@@ -65,6 +76,9 @@ const resolutionOptions = [{
   label: '480P'
 }];
 const durationOptions = [{
+  value: '',
+  label: 'Duration'
+}, {
   value: '5s',
   label: '5s'
 }, {
@@ -147,12 +161,12 @@ const HeroWithEditor: React.FC = () => {
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFrames, setSelectedFrames] = useState('first-last');
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState('16:9');
-  const [selectedResolution, setSelectedResolution] = useState('1080P');
-  const [selectedDuration, setSelectedDuration] = useState('15s');
+  const [selectedFrames, setSelectedFrames] = useState('');
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('');
+  const [selectedResolution, setSelectedResolution] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
-  const [endTimestamp, setEndTimestamp] = useState('00:15');
+  const [endTimestamp, setEndTimestamp] = useState('00:00');
   const handleFeatureClick = (featureId: string) => {
     const config = FEATURE_MODE_MAP[featureId];
     if (config) {

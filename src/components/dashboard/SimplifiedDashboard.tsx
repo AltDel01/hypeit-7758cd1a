@@ -34,6 +34,7 @@ interface SimplifiedDashboardProps {
 }
 
 const frameOptions = [
+  { value: '', label: 'Frame' },
   { value: 'first-last', label: 'First and last frames' },
   { value: 'keyframes', label: 'Keyframes only' },
   { value: 'all', label: 'All frames' },
@@ -41,6 +42,7 @@ const frameOptions = [
 ];
 
 const aspectRatioOptions = [
+  { value: '', label: 'Ratio', width: 14, height: 14 },
   { value: '16:9', label: '16:9', width: 20, height: 11 },
   { value: '9:16', label: '9:16', width: 11, height: 20 },
   { value: '4:3', label: '4:3', width: 16, height: 12 },
@@ -49,6 +51,7 @@ const aspectRatioOptions = [
 ];
 
 const resolutionOptions = [
+  { value: '', label: 'Quality' },
   { value: '4K', label: '4K' },
   { value: '1080P', label: '1080P' },
   { value: '720P', label: '720P' },
@@ -56,6 +59,7 @@ const resolutionOptions = [
 ];
 
 const durationOptions = [
+  { value: '', label: 'Duration' },
   { value: '5s', label: '5s' },
   { value: '10s', label: '10s' },
   { value: '15s', label: '15s' },
@@ -111,12 +115,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
-  const [selectedFrames, setSelectedFrames] = useState('first-last');
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState('16:9');
-  const [selectedResolution, setSelectedResolution] = useState('1080P');
-  const [selectedDuration, setSelectedDuration] = useState('15s');
+  const [selectedFrames, setSelectedFrames] = useState('');
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('');
+  const [selectedResolution, setSelectedResolution] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
-  const [endTimestamp, setEndTimestamp] = useState('00:15');
+  const [endTimestamp, setEndTimestamp] = useState('00:00');
 
   // Load editor state from homepage on mount and auto-submit if needed
   useEffect(() => {
@@ -129,12 +133,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
     setPrompt(loadedPrompt);
     setSelectedFeatures(loadedFeatures);
-    setSelectedAspectRatio(savedState.selectedAspectRatio || '16:9');
-    setSelectedResolution(savedState.selectedResolution || '1080P');
-    setSelectedDuration(savedState.selectedDuration || '15s');
-    setSelectedFrames(savedState.selectedFrames || 'first-last');
+    setSelectedAspectRatio(savedState.selectedAspectRatio || '');
+    setSelectedResolution(savedState.selectedResolution || '');
+    setSelectedDuration(savedState.selectedDuration || '');
+    setSelectedFrames(savedState.selectedFrames || '');
     setStartTimestamp(savedState.startTimestamp || '00:00');
-    setEndTimestamp(savedState.endTimestamp || '00:15');
+    setEndTimestamp(savedState.endTimestamp || '00:00');
     setUploadedFileUrls(loadedFiles);
 
     // Restore active mode
