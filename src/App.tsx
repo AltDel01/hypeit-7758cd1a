@@ -56,7 +56,16 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    // If there's a pending redirect (e.g. from email deep-link), go there instead of home
+    const pendingRedirect = sessionStorage.getItem('postLoginRedirect');
+    if (pendingRedirect) {
+      sessionStorage.removeItem('postLoginRedirect');
+      sessionStorage.removeItem('authRedirectPending');
+      return <Navigate to={pendingRedirect} replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
 
   return <>{children}</>;
 };
