@@ -770,3 +770,33 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
 export default SimplifiedDashboard;
 
+  // Real-time subscription for the submitted request
+  useEffect(() => {
+    if (!submittedRequestId) return;
+
+    const channel = supabaseClient
+      .channel(`submitted_request_${submittedRequestId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'generation_requests',
+          filter: `id=eq.${submittedRequestId}`,
+        },
+        (payload) => {
+          console.log('Real-time update for submitted request:', payload);
+          const updated = payload.new as GenerationRequest;
+          setSubmittedRequest(updated);
+          if (updated.status === 'completed' && updated.result_url) {
+            resolveResultUrl(updated.result_url).then(setResolvedResultUrl);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(channel);
+    };
+  }, [submittedRequestId]);
+
