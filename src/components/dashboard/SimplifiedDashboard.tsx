@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image,
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
-  Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
+  Languages, Loader2, Play, ExternalLink, TrendingUp, CheckCircle
 } from 'lucide-react';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { GenerationRequest } from '@/services/generationRequestService';
@@ -831,60 +831,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                     />
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(resolvedResultUrl);
-                        const blob = await response.blob();
-                        const blobUrl = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = blobUrl;
-                        a.download = `viralin-${submittedRequest.request_type}-${submittedRequest.id.slice(0, 8)}.${submittedRequest.request_type === 'video' ? 'mp4' : 'png'}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(blobUrl);
-                        document.body.removeChild(a);
-                      } catch (error) {
-                        console.error('Download error:', error);
-                      }
-                    }}
-                    className="gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(resolvedResultUrl, '_blank')}
-                    className="gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Open
-                  </Button>
-                </div>
               </div>
             )}
-
-            {/* Create Another button */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowSubmittedConfirmation(false);
-                setSubmittedRequestId(null);
-                setSubmittedRequest(null);
-                setResolvedResultUrl(null);
-                setPrompt('');
-                setSelectedFeatures([]);
-                setActiveMode(null);
-                setUploadedVideos([]);
-                setUploadedAudio([]);
-                setUploadedFileUrls([]);
-              }}
-              className="mt-2"
-            >
-              Create Another
-            </Button>
           </div>
         </div>
       )}
