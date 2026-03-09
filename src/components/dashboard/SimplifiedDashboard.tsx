@@ -193,10 +193,10 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, []);
 
-  // Always sync latestRequest from parent (parent has its own realtime subscription)
+  // Sync latestRequest from parent — this is triggered by parent's realtime subscription
   useEffect(() => {
     if (!latestRequest) return;
-    // Don't override if user just submitted a NEW request in this session
+    // Don't override if user just submitted a different request in this session
     if (submittedRequestId && submittedRequestId !== latestRequest.id) return;
 
     setSubmittedRequest(latestRequest);
@@ -204,95 +204,72 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     setShowSubmittedConfirmation(true);
 
     if (latestRequest.status === 'completed' && latestRequest.result_url) {
-      resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
-    } else {
+      resolveResultUrl(latestRequest.result_url).then(url => {
+        if (url) setResolvedResultUrl(url);
+      });
+    } else if (latestRequest.status !== 'completed') {
       setResolvedResultUrl(null);
     }
   }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
 
-  // Dedicated realtime + polling for submitted requests
+  // Simple polling fallback — polls the DB every 3s until request is completed with resolved URL
+  // This is the ONLY fallback mechanism; the parent's realtime subscription is the primary
   useEffect(() => {
     if (!submittedRequestId) return;
 
+    // Don't poll if already resolved
+    const isTerminal = submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed';
+    if (isTerminal && resolvedResultUrl) return;
+
     let isActive = true;
-    let pollTimeout: ReturnType<typeof setTimeout>;
-    const POLL_INTERVAL = 3000;
 
-    const handleUpdate = (updated: GenerationRequest) => {
-      if (!isActive) return;
-      setSubmittedRequest(prev => {
-        // Only update if something actually changed
-        if (prev?.status === updated.status && prev?.result_url === updated.result_url) return prev;
-        return updated;
-      });
-      if (updated.status === 'completed' && updated.result_url) {
-        resolveResultUrl(updated.result_url).then(url => {
-          setResolvedResultUrl(url);
-        });
-      }
-    };
-
-    // Realtime subscription — set up once, never torn down until unmount/id change
-    const channel = supabaseClient
-      .channel(`submitted_request_${submittedRequestId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'generation_requests',
-          filter: `id=eq.${submittedRequestId}`,
-        },
-        (payload) => {
-          console.log('Real-time update for submitted request:', payload);
-          handleUpdate(payload.new as GenerationRequest);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-      });
-
-    // Fallback polling — continues until terminal state + URL resolved
     const poll = async () => {
       if (!isActive) return;
       try {
-        const { data } = await supabaseClient
+        const { data, error } = await supabaseClient
           .from('generation_requests')
           .select('*')
           .eq('id', submittedRequestId)
           .maybeSingle();
-        if (data && isActive) {
-          const current = data as GenerationRequest;
-          handleUpdate(current);
-          // Stop polling only when terminal AND result URL is resolved (or no result expected)
-          if (current.status === 'completed' || current.status === 'failed') {
-            if (current.result_url) {
-              // Keep polling briefly until resolvedResultUrl is set
-              // (resolveResultUrl is async, give it a moment)
-              setTimeout(() => {
-                if (isActive) pollTimeout = setTimeout(poll, POLL_INTERVAL);
-              }, 1000);
-              return;
-            }
-            return; // failed with no result, stop
+
+        if (error) {
+          console.error('Poll error:', error);
+          return;
+        }
+
+        if (!data || !isActive) return;
+
+        const current = data as GenerationRequest;
+        
+        // Update state if anything changed
+        setSubmittedRequest(prev => {
+          if (prev?.status === current.status && prev?.result_url === current.result_url) return prev;
+          console.log('Poll detected change:', { oldStatus: prev?.status, newStatus: current.status, resultUrl: current.result_url });
+          return current;
+        });
+
+        // Resolve URL if completed
+        if (current.status === 'completed' && current.result_url) {
+          const url = await resolveResultUrl(current.result_url);
+          if (url && isActive) {
+            console.log('Poll resolved result URL successfully');
+            setResolvedResultUrl(url);
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
-      }
-      if (isActive) {
-        pollTimeout = setTimeout(poll, POLL_INTERVAL);
+        console.error('Poll exception:', err);
       }
     };
 
-    pollTimeout = setTimeout(poll, POLL_INTERVAL);
+    // Poll immediately, then every 3 seconds
+    poll();
+    const intervalId = setInterval(poll, 3000);
 
     return () => {
       isActive = false;
-      clearTimeout(pollTimeout);
-      supabaseClient.removeChannel(channel);
+      clearInterval(intervalId);
     };
-  }, [submittedRequestId]); // Only depends on the request ID — never tears down mid-flight
+  }, [submittedRequestId, submittedRequest?.status, resolvedResultUrl]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
