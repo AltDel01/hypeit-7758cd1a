@@ -526,7 +526,7 @@ const HeroWithEditor: React.FC = () => {
                       width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7,
                       height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7
                     }} />
-                      <span className="hidden sm:inline">{selectedAspectRatio}</span>
+                      <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio' || 'Ratio' || 'Ratio' || 'Ratio'}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
@@ -545,7 +545,7 @@ const HeroWithEditor: React.FC = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
-                      <span>{selectedResolution}</span>
+               <span>{selectedResolution || 'Quality'}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
@@ -561,7 +561,7 @@ const HeroWithEditor: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                       <Film className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="hidden md:inline">{frameOptions.find(f => f.value === selectedFrames)?.label || 'Frames'}</span>
+                      <span className="hidden md:inline">{frameOptions.find(f => f.value === selectedFrames)?.label || 'Frame'}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
@@ -577,7 +577,7 @@ const HeroWithEditor: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                       <Timer className="w-3.5 h-3.5 text-gray-400" />
-                      <span>{selectedDuration}</span>
+                       || 'Duration'<span>{selectedDuration}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
