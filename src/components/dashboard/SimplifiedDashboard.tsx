@@ -193,14 +193,94 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, []);
 
-  // Real-time subscription + fallback polling for the submitted request
+  // Always sync latestRequest from parent (parent has its own realtime subscription)
+  useEffect(() => {
+    if (!latestRequest) return;
+    // Don't override if user just submitted a NEW request in this session
+    if (submittedRequestId && submittedRequestId !== latestRequest.id) return;
+
+    setSubmittedRequest(latestRequest);
+    setSubmittedRequestId(latestRequest.id);
+    setShowSubmittedConfirmation(true);
+
+    if (latestRequest.status === 'completed' && latestRequest.result_url) {
+      resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
+    } else {
+      setResolvedResultUrl(null);
+    }
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
+
+  // Dedicated realtime + polling for in-session submitted requests
   useEffect(() => {
     if (!submittedRequestId) return;
+
+    // Skip if the request is already terminal
+    if (submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed') return;
+
     let isActive = true;
     let pollTimeout: ReturnType<typeof setTimeout>;
-    let pollInterval = 3000;
+    const pollInterval = 3000;
 
     const handleUpdate = (updated: GenerationRequest) => {
+      if (!isActive) return;
+      setSubmittedRequest(updated);
+      if (updated.status === 'completed' && updated.result_url) {
+        resolveResultUrl(updated.result_url).then(url => {
+          if (isActive) setResolvedResultUrl(url);
+        });
+      }
+    };
+
+    // Realtime subscription
+    const channel = supabaseClient
+      .channel(`submitted_request_${submittedRequestId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'generation_requests',
+          filter: `id=eq.${submittedRequestId}`,
+        },
+        (payload) => {
+          console.log('Real-time update for submitted request:', payload);
+          handleUpdate(payload.new as GenerationRequest);
+        }
+      )
+      .subscribe();
+
+    // Fallback polling every 3s
+    const poll = async () => {
+      if (!isActive) return;
+      try {
+        const { data } = await supabaseClient
+          .from('generation_requests')
+          .select('*')
+          .eq('id', submittedRequestId)
+          .maybeSingle();
+        if (data && isActive) {
+          const current = data as GenerationRequest;
+          handleUpdate(current);
+          if (current.status === 'completed' || current.status === 'failed') {
+            return; // stop polling
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+      if (isActive) {
+        pollTimeout = setTimeout(poll, pollInterval);
+      }
+    };
+
+    pollTimeout = setTimeout(poll, pollInterval);
+
+    return () => {
+      isActive = false;
+      clearTimeout(pollTimeout);
+      supabaseClient.removeChannel(channel);
+    };
+  }, [submittedRequestId, submittedRequest?.status]);
       setSubmittedRequest(updated);
       if (updated.status === 'completed' && updated.result_url) {
         resolveResultUrl(updated.result_url).then(url => {
