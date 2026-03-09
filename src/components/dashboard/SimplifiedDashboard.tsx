@@ -401,6 +401,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
       if (result) {
+        hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
       }
