@@ -29,6 +29,11 @@ const frameOptions = [{
   label: 'Custom selection'
 }];
 const aspectRatioOptions = [{
+  value: '',
+  label: 'Ratio',
+  width: 14,
+  height: 14
+}, {
   value: '16:9',
   label: '16:9',
   width: 20,
