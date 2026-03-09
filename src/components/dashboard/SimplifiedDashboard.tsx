@@ -313,7 +313,10 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         const featureLabels = selectedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).filter(Boolean).join(', ');
         fullPrompt = `[${featureLabels}] ${fullPrompt}`;
       }
-      fullPrompt += ` | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration} | Timeline: ${startTimestamp}-${endTimestamp}`;
+      if (selectedAspectRatio) fullPrompt += ` | Aspect: ${selectedAspectRatio}`;
+      if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
+      if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
+      if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
