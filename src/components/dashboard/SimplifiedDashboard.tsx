@@ -200,11 +200,11 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         const featureLabels = loadedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).filter(Boolean).join(', ');
         fullPrompt = `[${featureLabels}] ${fullPrompt}`;
       }
-      const aspectRatio = savedState?.selectedAspectRatio || '16:9';
-      const resolution = savedState?.selectedResolution || '1080P';
-      const duration = savedState?.selectedDuration || '15s';
+      const aspectRatio = savedState?.selectedAspectRatio || 'Default';
+      const resolution = savedState?.selectedResolution || 'Default';
+      const duration = savedState?.selectedDuration || 'Default';
       const start = savedState?.startTimestamp || '00:00';
-      const end = savedState?.endTimestamp || '00:15';
+      const end = savedState?.endTimestamp || '00:00';
       fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
