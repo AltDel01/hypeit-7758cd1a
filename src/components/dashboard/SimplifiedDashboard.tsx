@@ -299,11 +299,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
-      toast.success('Request submitted! Check your history for updates.');
+      if (result) {
+        setSubmittedRequestId(result.id);
+        setSubmittedRequest(result);
+      }
     } catch (error) {
       console.error('Special mode submit error:', error);
       setIsAutoProcessing(false);
