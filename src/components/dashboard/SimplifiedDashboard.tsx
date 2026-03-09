@@ -176,6 +176,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           setIsAutoProcessing(false);
           setShowSubmittedConfirmation(true);
           if (result) {
+            hasSubmittedInSession.current = true;
             setSubmittedRequestId(result.id);
             setSubmittedRequest(result);
           }
@@ -193,24 +194,41 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, []);
 
-  // Sync latestRequest from parent — this is triggered by parent's realtime subscription
+  // Track whether user actively submitted in this session
+  const hasSubmittedInSession = useRef(false);
+
+  // Sync latestRequest from parent — only for tracking the SAME request user submitted
+  // OR showing the latest result when user opens dashboard without submitting
   useEffect(() => {
     if (!latestRequest) return;
-    // Don't override if user just submitted a different request in this session
-    if (submittedRequestId && submittedRequestId !== latestRequest.id) return;
 
-    setSubmittedRequest(latestRequest);
-    setSubmittedRequestId(latestRequest.id);
-    setShowSubmittedConfirmation(true);
+    if (hasSubmittedInSession.current) {
+      // User submitted in this session — ONLY track updates to their specific request
+      if (submittedRequestId && submittedRequestId === latestRequest.id) {
+        setSubmittedRequest(latestRequest);
+        if (latestRequest.status === 'completed' && latestRequest.result_url) {
+          resolveResultUrl(latestRequest.result_url).then(url => {
+            if (url) setResolvedResultUrl(url);
+          });
+        } else if (latestRequest.status !== 'completed') {
+          setResolvedResultUrl(null);
+        }
+      }
+      // Ignore other requests — don't let old completed ones bleed in
+      return;
+    }
 
+    // User opened dashboard without submitting — show latest completed result passively
     if (latestRequest.status === 'completed' && latestRequest.result_url) {
+      setSubmittedRequest(latestRequest);
+      setSubmittedRequestId(latestRequest.id);
+      setShowSubmittedConfirmation(true);
       resolveResultUrl(latestRequest.result_url).then(url => {
         if (url) setResolvedResultUrl(url);
       });
-    } else if (latestRequest.status !== 'completed') {
-      setResolvedResultUrl(null);
     }
-  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
+    // Don't show in-progress requests from previous sessions
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url, submittedRequestId]);
 
   // Simple polling fallback — polls the DB every 3s until request is completed with resolved URL
   // This is the ONLY fallback mechanism; the parent's realtime subscription is the primary
@@ -383,6 +401,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
       if (result) {
+        hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
       }
@@ -418,6 +437,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         onRequestCreated?.();
         setIsSubmitting(false);
         setShowSubmittedConfirmation(true);
+        hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
       } else {
