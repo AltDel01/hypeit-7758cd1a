@@ -4,6 +4,9 @@ import {
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
   Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
 } from 'lucide-react';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
+import { GenerationRequest } from '@/services/generationRequestService';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
 const aiCreatorDemoVideo = '';
