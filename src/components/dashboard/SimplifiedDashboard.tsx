@@ -42,6 +42,7 @@ const frameOptions = [
 ];
 
 const aspectRatioOptions = [
+  { value: '', label: 'Ratio', width: 14, height: 14 },
   { value: '16:9', label: '16:9', width: 20, height: 11 },
   { value: '9:16', label: '9:16', width: 11, height: 20 },
   { value: '4:3', label: '4:3', width: 16, height: 12 },
