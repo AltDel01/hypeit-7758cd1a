@@ -526,7 +526,7 @@ const HeroWithEditor: React.FC = () => {
                       width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7,
                       height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7
                     }} />
-                      <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio' || 'Ratio' || 'Ratio' || 'Ratio'}</span>
+                      <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
