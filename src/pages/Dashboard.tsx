@@ -26,7 +26,11 @@ const Dashboard = () => {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!user) {
-      navigate('/signup');
+      // Save current URL (with query params like ?request=id) so user returns here after login
+      const currentUrl = window.location.pathname + window.location.search;
+      sessionStorage.setItem('postLoginRedirect', currentUrl);
+      sessionStorage.setItem('authRedirectPending', '1');
+      navigate('/login');
     }
   }, [user, navigate]);
 
