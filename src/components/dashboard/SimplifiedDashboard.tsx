@@ -673,11 +673,13 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             </div>
           )}
 
-          {/* Inline: Processing status for submitted request */}
-          {showSubmittedConfirmation && submittedRequest && submittedRequest.status !== 'completed' && !isSubmitting && !isAutoProcessing && (
+          {/* Inline: Processing status for submitted request (includes completed-but-URL-not-ready) */}
+          {showSubmittedConfirmation && submittedRequest && !isSubmitting && !isAutoProcessing && (submittedRequest.status !== 'completed' || (submittedRequest.status === 'completed' && !resolvedResultUrl)) && submittedRequest.status !== 'failed' && (
             <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
-              <span className="text-sm text-yellow-500 font-medium">Processing your request...</span>
+              <span className="text-sm text-yellow-500 font-medium">
+                {submittedRequest.status === 'completed' ? 'Loading your result...' : 'Processing your request...'}
+              </span>
               <span className="text-xs text-muted-foreground ml-1">The result will appear here automatically.</span>
             </div>
           )}
