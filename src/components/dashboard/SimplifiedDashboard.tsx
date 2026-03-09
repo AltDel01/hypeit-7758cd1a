@@ -114,6 +114,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
   const [showAiEditResult, setShowAiEditResult] = useState(false);
   const [showSubmittedConfirmation, setShowSubmittedConfirmation] = useState(false);
+  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
+  const [submittedRequest, setSubmittedRequest] = useState<GenerationRequest | null>(null);
+  const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
   
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
