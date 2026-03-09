@@ -170,11 +170,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
-        .then(() => {
+        .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
           setShowSubmittedConfirmation(true);
-          toast.success('Request submitted! Check your history for updates.');
+          if (result) {
+            setSubmittedRequestId(result.id);
+            setSubmittedRequest(result);
+          }
         })
         .catch((err) => {
           console.error(err);
