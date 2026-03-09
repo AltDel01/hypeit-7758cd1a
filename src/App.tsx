@@ -39,7 +39,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    // Save intended destination so user returns here after login
+    const currentUrl = window.location.pathname + window.location.search;
+    sessionStorage.setItem('postLoginRedirect', currentUrl);
+    sessionStorage.setItem('authRedirectPending', '1');
+    return <Navigate to="/login" replace />;
+  }
 
   return <>{children}</>;
 };
