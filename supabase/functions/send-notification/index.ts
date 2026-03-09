@@ -129,9 +129,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Invalid notification type");
     }
 
+    const recipientEmail = payload.type === "refund_request" ? REFUND_EMAIL : ADMIN_EMAIL;
+
     const emailResponse = await resend.emails.send({
       from: "Viralin AI <noreply@viralin.ai>",
-      to: [ADMIN_EMAIL],
+      to: [recipientEmail],
       subject,
       html: htmlContent,
     });
