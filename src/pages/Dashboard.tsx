@@ -176,7 +176,7 @@ const Dashboard = () => {
                 <RequestDetailView request={selectedRequest} />
               </div>
             ) : (
-              <SimplifiedDashboard onRequestCreated={handleRequestCreated} />
+              <SimplifiedDashboard onRequestCreated={handleRequestCreated} latestRequest={requests.length > 0 ? requests[0] : null} />
             )}
           </div>
         </main>

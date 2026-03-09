@@ -34,6 +34,7 @@ const dummyClips = [
 
 interface SimplifiedDashboardProps {
   onRequestCreated?: () => void;
+  latestRequest?: GenerationRequest | null;
 }
 
 const frameOptions = [
@@ -100,7 +101,7 @@ const getAspectClass = (ratio: string) => {
   return 'aspect-video';
 };
 
-const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => {
+const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDashboardProps) => {
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
@@ -221,6 +222,23 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       supabaseClient.removeChannel(channel);
     };
   }, [submittedRequestId]);
+
+  // Auto-show the latest request on mount and when it updates via realtime
+  useEffect(() => {
+    // Don't override if user just submitted something new in this session
+    if (submittedRequestId && submittedRequestId !== latestRequest?.id) return;
+    
+    if (latestRequest) {
+      setSubmittedRequest(latestRequest);
+      setSubmittedRequestId(latestRequest.id);
+      setShowSubmittedConfirmation(true);
+      if (latestRequest.status === 'completed' && latestRequest.result_url) {
+        resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
+      } else {
+        setResolvedResultUrl(null);
+      }
+    }
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
