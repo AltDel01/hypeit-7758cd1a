@@ -4,6 +4,9 @@ import {
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
   Languages, Loader2, Play, ExternalLink, TrendingUp, Download, CheckCircle
 } from 'lucide-react';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
+import { GenerationRequest } from '@/services/generationRequestService';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
 const aiCreatorDemoVideo = '';
@@ -111,6 +114,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const [showAiCreatorResult, setShowAiCreatorResult] = useState(false);
   const [showAiEditResult, setShowAiEditResult] = useState(false);
   const [showSubmittedConfirmation, setShowSubmittedConfirmation] = useState(false);
+  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
+  const [submittedRequest, setSubmittedRequest] = useState<GenerationRequest | null>(null);
+  const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
   
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -164,11 +170,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
-        .then(() => {
+        .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
           setShowSubmittedConfirmation(true);
-          toast.success('Request submitted! Check your history for updates.');
+          if (result) {
+            setSubmittedRequestId(result.id);
+            setSubmittedRequest(result);
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -182,6 +191,36 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       }, 100);
     }
   }, []);
+
+  // Real-time subscription for the submitted request
+  useEffect(() => {
+    if (!submittedRequestId) return;
+
+    const channel = supabaseClient
+      .channel(`submitted_request_${submittedRequestId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'generation_requests',
+          filter: `id=eq.${submittedRequestId}`,
+        },
+        (payload) => {
+          console.log('Real-time update for submitted request:', payload);
+          const updated = payload.new as GenerationRequest;
+          setSubmittedRequest(updated);
+          if (updated.status === 'completed' && updated.result_url) {
+            resolveResultUrl(updated.result_url).then(setResolvedResultUrl);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(channel);
+    };
+  }, [submittedRequestId]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
@@ -290,11 +329,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
-      toast.success('Request submitted! Check your history for updates.');
+      if (result) {
+        setSubmittedRequestId(result.id);
+        setSubmittedRequest(result);
+      }
     } catch (error) {
       console.error('Special mode submit error:', error);
       setIsAutoProcessing(false);
@@ -327,7 +369,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         onRequestCreated?.();
         setIsSubmitting(false);
         setShowSubmittedConfirmation(true);
-        toast.success('Request submitted! Check your history for updates.');
+        setSubmittedRequestId(result.id);
+        setSubmittedRequest(result);
       } else {
         toast.error('Failed to submit request. Please try again.');
         setIsSubmitting(false);
@@ -721,22 +764,98 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
       </div>
 
-      {/* Request Submitted Confirmation */}
-      {showSubmittedConfirmation && (
+      {/* Real-time Request Tracker */}
+      {showSubmittedConfirmation && submittedRequest && (
         <div className="w-full max-w-4xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-card/50 backdrop-blur-sm border border-green-500/30 rounded-2xl p-8 text-center space-y-4">
-            <div className="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-green-500" />
+          <div className={`bg-card/50 backdrop-blur-sm border rounded-2xl p-6 md:p-8 space-y-4 ${
+            submittedRequest.status === 'completed' ? 'border-green-500/30' : 'border-yellow-500/30'
+          }`}>
+            {/* Status indicator */}
+            <div className="flex items-center gap-3">
+              {submittedRequest.status === 'completed' ? (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-foreground">Your content is ready!</h2>
+                    <p className="text-sm text-muted-foreground">Download or preview your result below</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-foreground">Processing your request...</h2>
+                    <p className="text-sm text-muted-foreground">We're working on it. The result will appear here automatically.</p>
+                  </div>
+                </>
+              )}
             </div>
-            <h2 className="text-xl font-bold text-foreground">Request Submitted!</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Your request has been sent to our team. You'll be notified when it's ready.
-              Check the <strong>History</strong> panel on the left to track your request status.
-            </p>
+
+            {/* Result media */}
+            {submittedRequest.status === 'completed' && resolvedResultUrl && (
+              <div className="space-y-3">
+                <div className="relative rounded-lg overflow-hidden border border-border bg-black">
+                  {submittedRequest.request_type === 'video' ? (
+                    <video
+                      src={resolvedResultUrl}
+                      controls
+                      className="w-full max-h-[400px]"
+                    />
+                  ) : (
+                    <img
+                      src={resolvedResultUrl}
+                      alt="Result"
+                      className="w-full max-h-[400px] object-contain"
+                    />
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(resolvedResultUrl);
+                        const blob = await response.blob();
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = `viralin-${submittedRequest.request_type}-${submittedRequest.id.slice(0, 8)}.${submittedRequest.request_type === 'video' ? 'mp4' : 'png'}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(blobUrl);
+                        document.body.removeChild(a);
+                      } catch (error) {
+                        console.error('Download error:', error);
+                      }
+                    }}
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(resolvedResultUrl, '_blank')}
+                    className="gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Create Another button */}
             <Button
               variant="outline"
               onClick={() => {
                 setShowSubmittedConfirmation(false);
+                setSubmittedRequestId(null);
+                setSubmittedRequest(null);
+                setResolvedResultUrl(null);
                 setPrompt('');
                 setSelectedFeatures([]);
                 setActiveMode(null);
@@ -756,4 +875,3 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 };
 
 export default SimplifiedDashboard;
-
