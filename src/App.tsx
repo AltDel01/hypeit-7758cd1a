@@ -28,6 +28,7 @@ import CreditUsage from "./pages/CreditUsage";
 import Language from "./pages/Language";
 import Enterprise from "./pages/Enterprise";
 import Features from "./pages/Features";
+import RefundRequest from "./pages/RefundRequest";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -128,6 +129,7 @@ const AppRoutes = () => {
         path="/signup"
         element={<AuthRoute><CustomErrorBoundary><Signup /></CustomErrorBoundary></AuthRoute>}
       />
+      <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
     </Routes>
