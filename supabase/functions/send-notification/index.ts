@@ -5,6 +5,7 @@ import { Resend } from "npm:resend@2.0.0";
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const ADMIN_EMAIL = "eka@viralin.ai";
+const REFUND_EMAIL = "hello.viralin@gmail.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
