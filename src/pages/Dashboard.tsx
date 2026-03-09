@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Menu, X, History } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import SimplifiedDashboard from '@/components/dashboard/SimplifiedDashboard';
@@ -15,6 +15,7 @@ import { GenerationRequest } from '@/services/generationRequestService';
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -28,6 +29,18 @@ const Dashboard = () => {
       navigate('/signup');
     }
   }, [user, navigate]);
+
+  // Auto-select request from URL query param (e.g. ?request=<id>)
+  useEffect(() => {
+    const requestId = searchParams.get('request');
+    if (requestId && requests.length > 0 && !selectedRequest) {
+      const match = requests.find((r) => r.id === requestId);
+      if (match) {
+        setSelectedRequest(match);
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, requests, selectedRequest, setSearchParams]);
 
   const handleSelectRequest = (request: GenerationRequest) => {
     setSelectedRequest(request);
