@@ -339,7 +339,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
         onRequestCreated?.();
         setIsSubmitting(false);
         setShowSubmittedConfirmation(true);
-        toast.success('Request submitted! Check your history for updates.');
+        setSubmittedRequestId(result.id);
+        setSubmittedRequest(result);
       } else {
         toast.error('Failed to submit request. Please try again.');
         setIsSubmitting(false);
