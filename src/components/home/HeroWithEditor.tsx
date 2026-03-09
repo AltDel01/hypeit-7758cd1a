@@ -13,6 +13,9 @@ import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featu
 
 
 const frameOptions = [{
+  value: '',
+  label: 'Frame'
+}, {
   value: 'first-last',
   label: 'First and last frames'
 }, {
