@@ -59,6 +59,21 @@ export const useImageUpload = ({ selectedRequest, onRequestUpdated }: UseImageUp
         setUploadProgress(100);
         
         toast.success("Image uploaded and request completed!");
+
+        // Send result-ready email to the user (fire and forget)
+        const siteUrl = window.location.origin;
+        supabase.functions.invoke("send-result-ready", {
+          body: {
+            userEmail: selectedRequest.user_email,
+            userName: selectedRequest.user_name || "there",
+            requestType: selectedRequest.request_type,
+            prompt: selectedRequest.prompt,
+            siteUrl,
+          },
+        }).then(({ error }) => {
+          if (error) console.error("Failed to send result-ready email:", error);
+          else console.log("Result-ready email sent to", selectedRequest.user_email);
+        });
         
         const imageGeneratedEvent = new CustomEvent('imageGenerated', {
           detail: {
