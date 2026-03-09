@@ -614,7 +614,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                     <div className="border border-gray-500 rounded-sm" style={{ width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7, height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7 }} />
-                    <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio' || 'Ratio' || 'Ratio' || 'Ratio'}</span>
+                    <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'}</span>
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
