@@ -76,6 +76,9 @@ const resolutionOptions = [{
   label: '480P'
 }];
 const durationOptions = [{
+  value: '',
+  label: 'Duration'
+}, {
   value: '5s',
   label: '5s'
 }, {
