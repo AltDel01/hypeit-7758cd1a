@@ -210,29 +210,29 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
 
-  // Dedicated realtime + polling for in-session submitted requests
+  // Dedicated realtime + polling for submitted requests
   useEffect(() => {
     if (!submittedRequestId) return;
 
-    // Skip if the request is already terminal AND we already have the resolved URL
-    if ((submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed') && resolvedResultUrl) return;
-
     let isActive = true;
     let pollTimeout: ReturnType<typeof setTimeout>;
-    const pollInterval = 3000;
+    const POLL_INTERVAL = 3000;
 
     const handleUpdate = (updated: GenerationRequest) => {
       if (!isActive) return;
-      setSubmittedRequest(updated);
+      setSubmittedRequest(prev => {
+        // Only update if something actually changed
+        if (prev?.status === updated.status && prev?.result_url === updated.result_url) return prev;
+        return updated;
+      });
       if (updated.status === 'completed' && updated.result_url) {
-        // Resolve URL without isActive guard — setState after unmount is safe in React 18
         resolveResultUrl(updated.result_url).then(url => {
           setResolvedResultUrl(url);
         });
       }
     };
 
-    // Realtime subscription
+    // Realtime subscription — set up once, never torn down until unmount/id change
     const channel = supabaseClient
       .channel(`submitted_request_${submittedRequestId}`)
       .on(
@@ -248,9 +248,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           handleUpdate(payload.new as GenerationRequest);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
-    // Fallback polling every 3s
+    // Fallback polling — continues until terminal state + URL resolved
     const poll = async () => {
       if (!isActive) return;
       try {
@@ -262,26 +264,35 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         if (data && isActive) {
           const current = data as GenerationRequest;
           handleUpdate(current);
+          // Stop polling only when terminal AND result URL is resolved (or no result expected)
           if (current.status === 'completed' || current.status === 'failed') {
-            return; // stop polling
+            if (current.result_url) {
+              // Keep polling briefly until resolvedResultUrl is set
+              // (resolveResultUrl is async, give it a moment)
+              setTimeout(() => {
+                if (isActive) pollTimeout = setTimeout(poll, POLL_INTERVAL);
+              }, 1000);
+              return;
+            }
+            return; // failed with no result, stop
           }
         }
       } catch (err) {
         console.error('Polling error:', err);
       }
       if (isActive) {
-        pollTimeout = setTimeout(poll, pollInterval);
+        pollTimeout = setTimeout(poll, POLL_INTERVAL);
       }
     };
 
-    pollTimeout = setTimeout(poll, pollInterval);
+    pollTimeout = setTimeout(poll, POLL_INTERVAL);
 
     return () => {
       isActive = false;
       clearTimeout(pollTimeout);
       supabaseClient.removeChannel(channel);
     };
-  }, [submittedRequestId, submittedRequest?.status, resolvedResultUrl]);
+  }, [submittedRequestId]); // Only depends on the request ID — never tears down mid-flight
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
