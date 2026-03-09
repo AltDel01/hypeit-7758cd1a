@@ -526,11 +526,11 @@ const HeroWithEditor: React.FC = () => {
                       width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7,
                       height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7
                     }} />
-                      <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'hevronDown className="w-3 h-3 text-gray-500" />
+                      <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio't-gray-500" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                    {aspectRatioOptions.map(option => <DropdownMenuItem kfilter(o => o.value !== '').ey={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
+                    {aspectRatioOptions.map(option => <DropdownMenuItem kfilter(o => o.value !== '').ey={ofilter(o => o.value !== '').ption.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
                         <div className="border border-gray-400 rounded-sm" style={{
                       width: option.width,
                       height: option.height
@@ -549,7 +549,7 @@ const HeroWithEditor: React.FC = () => {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                    {resolutionOptions.map(option => <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn("cursor-pointer", selectedResolution === option.value && "bg-purple-500/20")}>
+                    {resolutionOptions.map(ofilter(o => o.value !== '').ption => <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn("cursor-pointer", selectedResolution === option.value && "bg-purple-500/20")}>
                         <span className="text-gray-200">{option.label}</span>
                       </DropdownMenuItem>)}
                   </DropdownMenuContent>
