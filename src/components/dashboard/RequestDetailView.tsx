@@ -22,7 +22,7 @@ const statusConfig: Record<string, {
 }> = {
   new: {
     label: 'Processing',
-    description: 'Our team is working on your request',
+    description: 'Your request is in the queue',
     icon: Loader2,
     className: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
     animate: true,
