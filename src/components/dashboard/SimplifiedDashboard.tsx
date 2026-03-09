@@ -214,8 +214,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   useEffect(() => {
     if (!submittedRequestId) return;
 
-    // Skip if the request is already terminal
-    if (submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed') return;
+    // Skip if the request is already terminal AND we already have the resolved URL
+    if ((submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed') && resolvedResultUrl) return;
 
     let isActive = true;
     let pollTimeout: ReturnType<typeof setTimeout>;
@@ -225,8 +225,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (!isActive) return;
       setSubmittedRequest(updated);
       if (updated.status === 'completed' && updated.result_url) {
+        // Resolve URL without isActive guard — setState after unmount is safe in React 18
         resolveResultUrl(updated.result_url).then(url => {
-          if (isActive) setResolvedResultUrl(url);
+          setResolvedResultUrl(url);
         });
       }
     };
@@ -280,7 +281,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       clearTimeout(pollTimeout);
       supabaseClient.removeChannel(channel);
     };
-  }, [submittedRequestId, submittedRequest?.status]);
+  }, [submittedRequestId, submittedRequest?.status, resolvedResultUrl]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
