@@ -611,10 +611,31 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           />
 
           {/* Inline Processing Indicator */}
-          {(isAutoProcessing || isSubmitting) && (
-            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <Loader2 className="w-4 h-4 animate-spin text-primary" />
-              <span className="text-sm text-primary">Processing your request...</span>
+          {(isAutoProcessing || isSubmitting) && !resolvedResultUrl && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+              <span className="text-sm text-yellow-500 font-medium">Processing your request...</span>
+              <span className="text-xs text-muted-foreground ml-1">The result will appear here automatically.</span>
+            </div>
+          )}
+
+          {/* Inline: Processing status for submitted request */}
+          {showSubmittedConfirmation && submittedRequest && submittedRequest.status !== 'completed' && !isSubmitting && !isAutoProcessing && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+              <span className="text-sm text-yellow-500 font-medium">Processing your request...</span>
+              <span className="text-xs text-muted-foreground ml-1">The result will appear here automatically.</span>
+            </div>
+          )}
+
+          {/* Inline: Completed result */}
+          {showSubmittedConfirmation && submittedRequest && submittedRequest.status === 'completed' && resolvedResultUrl && (
+            <div className="mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-black">
+              {submittedRequest.request_type === 'video' ? (
+                <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
+              ) : (
+                <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />
+              )}
             </div>
           )}
 
