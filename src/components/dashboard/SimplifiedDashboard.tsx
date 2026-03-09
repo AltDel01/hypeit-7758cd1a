@@ -282,7 +282,9 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       const mc = getConfigByMode(currentMode || '');
       const modeLabel = currentMode === 'aiclip' ? 'AI Clip' : currentMode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
       let fullPrompt = prompt.trim() || `[${modeLabel}] Generate viral content`;
-      fullPrompt = `[${modeLabel}] ${fullPrompt} | Aspect: ${selectedAspectRatio} | Resolution: ${selectedResolution} | Duration: ${selectedDuration}`;
+      if (selectedAspectRatio) fullPrompt += ` | Aspect: ${selectedAspectRatio}`;
+      if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
+      if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
