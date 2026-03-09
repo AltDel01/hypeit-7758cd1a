@@ -668,7 +668,7 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                     <Timer className="w-3.5 h-3.5 text-gray-400" />
-                     || 'Duration'<span>{selectedDuration}</span>
+                     <span>{selectedDuration || 'Duration'}</span>
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
