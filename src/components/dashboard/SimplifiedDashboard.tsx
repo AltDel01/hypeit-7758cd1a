@@ -223,6 +223,23 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     };
   }, [submittedRequestId]);
 
+  // Auto-show the latest request on mount and when it updates via realtime
+  useEffect(() => {
+    // Don't override if user just submitted something new in this session
+    if (submittedRequestId && submittedRequestId !== latestRequest?.id) return;
+    
+    if (latestRequest) {
+      setSubmittedRequest(latestRequest);
+      setSubmittedRequestId(latestRequest.id);
+      setShowSubmittedConfirmation(true);
+      if (latestRequest.status === 'completed' && latestRequest.result_url) {
+        resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
+      } else {
+        setResolvedResultUrl(null);
+      }
+    }
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
+
   const handleAutoSubmit = async (
     loadedPrompt: string,
     loadedFeatures: string[],
