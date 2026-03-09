@@ -15,6 +15,7 @@ import { GenerationRequest } from '@/services/generationRequestService';
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
