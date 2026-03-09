@@ -30,6 +30,18 @@ const Dashboard = () => {
     }
   }, [user, navigate]);
 
+  // Auto-select request from URL query param (e.g. ?request=<id>)
+  useEffect(() => {
+    const requestId = searchParams.get('request');
+    if (requestId && requests.length > 0 && !selectedRequest) {
+      const match = requests.find((r) => r.id === requestId);
+      if (match) {
+        setSelectedRequest(match);
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, requests, selectedRequest, setSearchParams]);
+
   const handleSelectRequest = (request: GenerationRequest) => {
     setSelectedRequest(request);
     if (isMobile) {
