@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
             Hi <strong>${userName || "there"}</strong>,
           </p>
           <p style="color: #374151; font-size: 16px; line-height: 1.6;">
-            Great news! Your ${typeLabel.toLowerCase()} generation request has been completed by our team.
+            Great news! Your ${typeLabel.toLowerCase()} generation request has been completed.
           </p>
           <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
             <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px 0; font-weight: 600;">YOUR PROMPT</p>
