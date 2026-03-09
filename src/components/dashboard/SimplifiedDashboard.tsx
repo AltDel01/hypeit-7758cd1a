@@ -613,11 +613,14 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
-                    <div className="border border-gray-500 rounded-sm" style={{ width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 16) * 0.7, height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 9) * 0.7 }} />
-                    <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'nMenuTrigger>
+                    <div className="border border-gray-500 rounded-sm" style={{ width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 14) * 0.7, height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 14) * 0.7 }} />
+                    <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'}</span>
+                    <ChevronDown className="w-3 h-3 text-gray-500" />
+                  </button>
+                </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                  {aspectRatioOptions.map((option) => (
-               filter(o => o.value !== '').     filter(o => o.value !== '').<Dropfilter(o => o.value !== '').downMfilter(o => o.value !== '').enuItem key={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
+                  {aspectRatioOptions.filter(o => o.value !== '').map((option) => (
+                    <DropdownMenuItem key={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
                       <div className="border border-gray-400 rounded-sm" style={{ width: option.width, height: option.height }} />
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
@@ -629,12 +632,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
-             <span>{selectedResolution || 'Quality'}</span>
+                    <span>{selectedResolution || 'Quality'}</span>
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
-                  {resolutionOptions.map((filtefiltefilter(o => o.value !== '').r(o => o.value !== '').r(o => o.value !== '').option) => (
+                  {resolutionOptions.filter(o => o.value !== '').map((option) => (
                     <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn("cursor-pointer", selectedResolution === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
@@ -651,8 +654,8 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-gray-800 bordfilter(o => o.value !== '').er-gray-700">
-         filter(o => o.value !== '').         {frameOptions.map((option) => (
+                <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
+                  {frameOptions.filter(o => o.value !== '').map((option) => (
                     <DropdownMenuItem key={option.value} onClick={() => setSelectedFrames(option.value)} className={cn("cursor-pointer", selectedFrames === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
@@ -665,12 +668,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                     <Timer className="w-3.5 h-3.5 text-gray-400" />
-                     <span>{selectedDuration || 'Duration'}</span>
+                    <span>{selectedDuration || 'Duration'}</span>
                     <ChevronDown className="w-3 h-3 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-gray-800 bofilter(o => o.value !== '').rder-gray-700">
-                  {durationOptions.map((option) => (
+                <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
+                  {durationOptions.filter(o => o.value !== '').map((option) => (
                     <DropdownMenuItem key={option.value} onClick={() => setSelectedDuration(option.value)} className={cn("cursor-pointer", selectedDuration === option.value && "bg-purple-500/20")}>
                       <span className="text-gray-200">{option.label}</span>
                     </DropdownMenuItem>
