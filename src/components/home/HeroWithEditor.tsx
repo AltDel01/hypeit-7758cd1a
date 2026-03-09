@@ -161,12 +161,12 @@ const HeroWithEditor: React.FC = () => {
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFrames, setSelectedFrames] = useState('first-last');
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState('16:9');
-  const [selectedResolution, setSelectedResolution] = useState('1080P');
-  const [selectedDuration, setSelectedDuration] = useState('15s');
+  const [selectedFrames, setSelectedFrames] = useState('');
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('');
+  const [selectedResolution, setSelectedResolution] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
-  const [endTimestamp, setEndTimestamp] = useState('00:15');
+  const [endTimestamp, setEndTimestamp] = useState('00:00');
   const handleFeatureClick = (featureId: string) => {
     const config = FEATURE_MODE_MAP[featureId];
     if (config) {

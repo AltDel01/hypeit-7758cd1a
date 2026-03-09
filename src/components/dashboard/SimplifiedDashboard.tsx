@@ -115,12 +115,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   
-  const [selectedFrames, setSelectedFrames] = useState('first-last');
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState('16:9');
-  const [selectedResolution, setSelectedResolution] = useState('1080P');
-  const [selectedDuration, setSelectedDuration] = useState('15s');
+  const [selectedFrames, setSelectedFrames] = useState('');
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('');
+  const [selectedResolution, setSelectedResolution] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
-  const [endTimestamp, setEndTimestamp] = useState('00:15');
+  const [endTimestamp, setEndTimestamp] = useState('00:00');
 
   // Load editor state from homepage on mount and auto-submit if needed
   useEffect(() => {
