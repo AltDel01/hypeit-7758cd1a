@@ -193,10 +193,23 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, []);
 
-  // Real-time subscription for the submitted request
+  // Real-time subscription + fallback polling for the submitted request
   useEffect(() => {
     if (!submittedRequestId) return;
+    let isActive = true;
+    let pollTimeout: ReturnType<typeof setTimeout>;
+    let pollInterval = 3000;
 
+    const handleUpdate = (updated: GenerationRequest) => {
+      setSubmittedRequest(updated);
+      if (updated.status === 'completed' && updated.result_url) {
+        resolveResultUrl(updated.result_url).then(url => {
+          if (isActive) setResolvedResultUrl(url);
+        });
+      }
+    };
+
+    // Realtime subscription
     const channel = supabaseClient
       .channel(`submitted_request_${submittedRequestId}`)
       .on(
@@ -209,16 +222,55 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         },
         (payload) => {
           console.log('Real-time update for submitted request:', payload);
-          const updated = payload.new as GenerationRequest;
-          setSubmittedRequest(updated);
-          if (updated.status === 'completed' && updated.result_url) {
-            resolveResultUrl(updated.result_url).then(setResolvedResultUrl);
-          }
+          handleUpdate(payload.new as GenerationRequest);
+          pollInterval = 3000; // reset on realtime success
         }
       )
       .subscribe();
 
+    // Fallback polling
+    const poll = async () => {
+      if (!isActive) return;
+      try {
+        const { data } = await supabaseClient
+          .from('generation_requests')
+          .select('*')
+          .eq('id', submittedRequestId)
+          .maybeSingle();
+        if (data && isActive) {
+          const current = data as GenerationRequest;
+          // Only update if status or result_url changed
+          setSubmittedRequest(prev => {
+            if (prev?.status !== current.status || prev?.result_url !== current.result_url) {
+              console.log('Polling detected update:', current.status, current.result_url);
+              if (current.status === 'completed' && current.result_url) {
+                resolveResultUrl(current.result_url).then(url => {
+                  if (isActive) setResolvedResultUrl(url);
+                });
+              }
+              return current;
+            }
+            return prev;
+          });
+          // Stop polling if completed or failed
+          if (current.status === 'completed' || current.status === 'failed') {
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+      pollInterval = Math.min(pollInterval * 1.2, 15000);
+      if (isActive) {
+        pollTimeout = setTimeout(poll, pollInterval);
+      }
+    };
+
+    pollTimeout = setTimeout(poll, pollInterval);
+
     return () => {
+      isActive = false;
+      clearTimeout(pollTimeout);
       supabaseClient.removeChannel(channel);
     };
   }, [submittedRequestId]);
