@@ -60,6 +60,9 @@ const aspectRatioOptions = [{
   height: 9
 }];
 const resolutionOptions = [{
+  value: '',
+  label: 'Quality'
+}, {
   value: '4K',
   label: '4K'
 }, {
