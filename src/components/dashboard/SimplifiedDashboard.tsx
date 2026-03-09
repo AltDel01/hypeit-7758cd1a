@@ -611,10 +611,31 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           />
 
           {/* Inline Processing Indicator */}
-          {(isAutoProcessing || isSubmitting) && (
-            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <Loader2 className="w-4 h-4 animate-spin text-primary" />
-              <span className="text-sm text-primary">Processing your request...</span>
+          {(isAutoProcessing || isSubmitting) && !resolvedResultUrl && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+              <span className="text-sm text-yellow-500 font-medium">Processing your request...</span>
+              <span className="text-xs text-muted-foreground ml-1">The result will appear here automatically.</span>
+            </div>
+          )}
+
+          {/* Inline: Processing status for submitted request */}
+          {showSubmittedConfirmation && submittedRequest && submittedRequest.status !== 'completed' && !isSubmitting && !isAutoProcessing && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+              <span className="text-sm text-yellow-500 font-medium">Processing your request...</span>
+              <span className="text-xs text-muted-foreground ml-1">The result will appear here automatically.</span>
+            </div>
+          )}
+
+          {/* Inline: Completed result */}
+          {showSubmittedConfirmation && submittedRequest && submittedRequest.status === 'completed' && resolvedResultUrl && (
+            <div className="mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-black">
+              {submittedRequest.request_type === 'video' ? (
+                <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
+              ) : (
+                <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />
+              )}
             </div>
           )}
 
@@ -781,61 +802,6 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         </div>
 
       </div>
-
-      {/* Real-time Request Tracker */}
-      {showSubmittedConfirmation && submittedRequest && (
-        <div className="w-full max-w-4xl mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className={`bg-card/50 backdrop-blur-sm border rounded-2xl p-6 md:p-8 space-y-4 ${
-            submittedRequest.status === 'completed' ? 'border-green-500/30' : 'border-yellow-500/30'
-          }`}>
-            {/* Status indicator */}
-            <div className="flex items-center gap-3">
-              {submittedRequest.status === 'completed' ? (
-                <>
-                  <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">Your content is ready!</h2>
-                    <p className="text-sm text-muted-foreground">Download or preview your result below</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">Processing your request...</h2>
-                    <p className="text-sm text-muted-foreground">We're working on it. The result will appear here automatically.</p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Result media */}
-            {submittedRequest.status === 'completed' && resolvedResultUrl && (
-              <div className="space-y-3">
-                <div className="relative rounded-lg overflow-hidden border border-border bg-black">
-                  {submittedRequest.request_type === 'video' ? (
-                    <video
-                      src={resolvedResultUrl}
-                      controls
-                      className="w-full max-h-[400px]"
-                    />
-                  ) : (
-                    <img
-                      src={resolvedResultUrl}
-                      alt="Result"
-                      className="w-full max-h-[400px] object-contain"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
