@@ -34,6 +34,7 @@ const dummyClips = [
 
 interface SimplifiedDashboardProps {
   onRequestCreated?: () => void;
+  latestRequest?: GenerationRequest | null;
 }
 
 const frameOptions = [
