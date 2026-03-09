@@ -157,7 +157,10 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
       setIsAutoProcessing(true);
       const mc = getConfigByMode(mode);
       const modeLabel = mode === 'aiclip' ? 'AI Clip' : mode === 'retention' ? 'Retention Editing' : mc ? mc.label : 'AI Creator';
-      const fullPrompt = `[${modeLabel}] ${loadedPrompt.trim() || 'Generate viral content'} | Aspect: ${savedState.selectedAspectRatio || '9:16'} | Resolution: ${savedState.selectedResolution || '1080P'} | Duration: ${savedState.selectedDuration || '15s'}`;
+      let fullPrompt = `[${modeLabel}] ${loadedPrompt.trim() || 'Generate viral content'}`;
+      if (savedState.selectedAspectRatio) fullPrompt += ` | Aspect: ${savedState.selectedAspectRatio}`;
+      if (savedState.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
+      if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
