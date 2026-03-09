@@ -133,12 +133,12 @@ const SimplifiedDashboard = ({ onRequestCreated }: SimplifiedDashboardProps) => 
 
     setPrompt(loadedPrompt);
     setSelectedFeatures(loadedFeatures);
-    setSelectedAspectRatio(savedState.selectedAspectRatio || '16:9');
-    setSelectedResolution(savedState.selectedResolution || '1080P');
-    setSelectedDuration(savedState.selectedDuration || '15s');
-    setSelectedFrames(savedState.selectedFrames || 'first-last');
+    setSelectedAspectRatio(savedState.selectedAspectRatio || '');
+    setSelectedResolution(savedState.selectedResolution || '');
+    setSelectedDuration(savedState.selectedDuration || '');
+    setSelectedFrames(savedState.selectedFrames || '');
     setStartTimestamp(savedState.startTimestamp || '00:00');
-    setEndTimestamp(savedState.endTimestamp || '00:15');
+    setEndTimestamp(savedState.endTimestamp || '00:00');
     setUploadedFileUrls(loadedFiles);
 
     // Restore active mode
