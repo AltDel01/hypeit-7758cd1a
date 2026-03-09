@@ -21,16 +21,17 @@ const statusConfig: Record<string, {
   animate?: boolean;
 }> = {
   new: {
-    label: 'Pending',
-    description: 'Your request is in the queue',
-    icon: Clock,
+    label: 'Processing',
+    description: 'Our team is working on your request',
+    icon: Loader2,
     className: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
+    animate: true,
   },
   'in-progress': {
     label: 'Processing',
     description: 'Our team is working on your request',
     icon: Loader2,
-    className: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    className: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
     animate: true,
   },
   completed: {

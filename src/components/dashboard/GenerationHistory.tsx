@@ -19,14 +19,15 @@ const statusConfig: Record<string, {
   animate?: boolean;
 }> = {
   new: {
-    label: 'Pending',
-    icon: Clock,
+    label: 'Processing',
+    icon: Loader2,
     className: 'text-yellow-500 bg-yellow-500/10',
+    animate: true,
   },
   'in-progress': {
     label: 'Processing',
     icon: Loader2,
-    className: 'text-blue-500 bg-blue-500/10',
+    className: 'text-yellow-500 bg-yellow-500/10',
     animate: true,
   },
   completed: {
