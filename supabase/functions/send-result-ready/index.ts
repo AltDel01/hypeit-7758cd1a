@@ -15,6 +15,7 @@ interface ResultReadyPayload {
   requestType: "video" | "image";
   prompt: string;
   siteUrl: string;
+  requestId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
