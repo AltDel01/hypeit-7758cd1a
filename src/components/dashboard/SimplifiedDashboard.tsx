@@ -193,14 +193,36 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
   }, []);
 
-  // Real-time subscription + fallback polling for the submitted request
+  // Always sync latestRequest from parent (parent has its own realtime subscription)
+  useEffect(() => {
+    if (!latestRequest) return;
+    // Don't override if user just submitted a NEW request in this session
+    if (submittedRequestId && submittedRequestId !== latestRequest.id) return;
+
+    setSubmittedRequest(latestRequest);
+    setSubmittedRequestId(latestRequest.id);
+    setShowSubmittedConfirmation(true);
+
+    if (latestRequest.status === 'completed' && latestRequest.result_url) {
+      resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
+    } else {
+      setResolvedResultUrl(null);
+    }
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
+
+  // Dedicated realtime + polling for in-session submitted requests
   useEffect(() => {
     if (!submittedRequestId) return;
+
+    // Skip if the request is already terminal
+    if (submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed') return;
+
     let isActive = true;
     let pollTimeout: ReturnType<typeof setTimeout>;
-    let pollInterval = 3000;
+    const pollInterval = 3000;
 
     const handleUpdate = (updated: GenerationRequest) => {
+      if (!isActive) return;
       setSubmittedRequest(updated);
       if (updated.status === 'completed' && updated.result_url) {
         resolveResultUrl(updated.result_url).then(url => {
@@ -223,12 +245,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         (payload) => {
           console.log('Real-time update for submitted request:', payload);
           handleUpdate(payload.new as GenerationRequest);
-          pollInterval = 3000; // reset on realtime success
         }
       )
       .subscribe();
 
-    // Fallback polling
+    // Fallback polling every 3s
     const poll = async () => {
       if (!isActive) return;
       try {
@@ -239,28 +260,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           .maybeSingle();
         if (data && isActive) {
           const current = data as GenerationRequest;
-          // Only update if status or result_url changed
-          setSubmittedRequest(prev => {
-            if (prev?.status !== current.status || prev?.result_url !== current.result_url) {
-              console.log('Polling detected update:', current.status, current.result_url);
-              if (current.status === 'completed' && current.result_url) {
-                resolveResultUrl(current.result_url).then(url => {
-                  if (isActive) setResolvedResultUrl(url);
-                });
-              }
-              return current;
-            }
-            return prev;
-          });
-          // Stop polling if completed or failed
+          handleUpdate(current);
           if (current.status === 'completed' || current.status === 'failed') {
-            return;
+            return; // stop polling
           }
         }
       } catch (err) {
         console.error('Polling error:', err);
       }
-      pollInterval = Math.min(pollInterval * 1.2, 15000);
       if (isActive) {
         pollTimeout = setTimeout(poll, pollInterval);
       }
@@ -273,24 +280,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       clearTimeout(pollTimeout);
       supabaseClient.removeChannel(channel);
     };
-  }, [submittedRequestId]);
-
-  // Auto-show the latest request on mount and when it updates via realtime
-  useEffect(() => {
-    // Don't override if user just submitted something new in this session
-    if (submittedRequestId && submittedRequestId !== latestRequest?.id) return;
-    
-    if (latestRequest) {
-      setSubmittedRequest(latestRequest);
-      setSubmittedRequestId(latestRequest.id);
-      setShowSubmittedConfirmation(true);
-      if (latestRequest.status === 'completed' && latestRequest.result_url) {
-        resolveResultUrl(latestRequest.result_url).then(setResolvedResultUrl);
-      } else {
-        setResolvedResultUrl(null);
-      }
-    }
-  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url]);
+  }, [submittedRequestId, submittedRequest?.status]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
