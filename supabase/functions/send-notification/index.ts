@@ -5,6 +5,7 @@ import { Resend } from "npm:resend@2.0.0";
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const ADMIN_EMAIL = "eka@viralin.ai";
+const REFUND_EMAIL = "hello.viralin@gmail.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -128,9 +129,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Invalid notification type");
     }
 
+    const recipientEmail = payload.type === "refund_request" ? REFUND_EMAIL : ADMIN_EMAIL;
+
     const emailResponse = await resend.emails.send({
       from: "Viralin AI <noreply@viralin.ai>",
-      to: [ADMIN_EMAIL],
+      to: [recipientEmail],
       subject,
       html: htmlContent,
     });
