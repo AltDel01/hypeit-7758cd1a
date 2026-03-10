@@ -202,6 +202,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   useEffect(() => {
     if (!latestRequest) return;
 
+    // Don't show old results while auto-submit is still in progress
+    if (isAutoProcessing) return;
+
     if (hasSubmittedInSession.current) {
       // User submitted in this session — ONLY track updates to their specific request
       if (submittedRequestId && submittedRequestId === latestRequest.id) {
