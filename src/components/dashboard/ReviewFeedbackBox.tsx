@@ -96,7 +96,7 @@ const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
       <Textarea
         value={feedback}
         onChange={(e) => setFeedback(e.target.value)}
-        placeholder="Share your feedback (optional)..."
+        placeholder="Share your feedback, what can we improve.."
         className="min-h-[60px] bg-gray-800/60 border-gray-700/50 text-white placeholder:text-gray-500 resize-none text-sm"
       />
 
