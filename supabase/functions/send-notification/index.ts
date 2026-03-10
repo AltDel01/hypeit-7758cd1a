@@ -39,7 +39,17 @@ interface RefundRequestNotification {
   timestamp: string;
 }
 
-type NotificationPayload = SignupNotification | GenerationRequestNotification | RefundRequestNotification;
+interface ReviewFeedbackNotification {
+  type: "review_feedback";
+  userName: string;
+  userEmail: string;
+  requestId: string;
+  rating: number;
+  feedback: string;
+  timestamp: string;
+}
+
+type NotificationPayload = SignupNotification | GenerationRequestNotification | RefundRequestNotification | ReviewFeedbackNotification;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
