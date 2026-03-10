@@ -324,6 +324,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
         setShowSubmittedConfirmation(true);
+        setIsSubmitting(false);
+        setIsAutoProcessing(false);
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
@@ -854,7 +856,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
               })()}
             >
-              {(isSubmitting || isAutoProcessing) ? (
+              {(isSubmitting || isAutoProcessing) && !resolvedResultUrl ? (
                 <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
               ) : (() => {
                 if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
