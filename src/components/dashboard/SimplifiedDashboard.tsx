@@ -231,7 +231,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       });
     }
     // Don't show in-progress requests from previous sessions
-  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url, submittedRequestId]);
+  }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url, submittedRequestId, isAutoProcessing]);
 
   // Simple polling fallback — polls the DB every 3s until request is completed with resolved URL
   // This is the ONLY fallback mechanism; the parent's realtime subscription is the primary
