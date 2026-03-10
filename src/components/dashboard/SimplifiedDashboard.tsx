@@ -324,6 +324,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setSubmittedRequestId(result.id);
         setSubmittedRequest(result);
         setShowSubmittedConfirmation(true);
+        setIsSubmitting(false);
+        setIsAutoProcessing(false);
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
