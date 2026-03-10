@@ -316,6 +316,10 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
       if (result) {
+        hasSubmittedInSession.current = true;
+        setSubmittedRequestId(result.id);
+        setSubmittedRequest(result);
+        setShowSubmittedConfirmation(true);
         onRequestCreated?.();
       } else {
         toast.error('Failed to submit request. Please try again.');
