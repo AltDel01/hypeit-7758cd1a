@@ -39,7 +39,17 @@ interface RefundRequestNotification {
   timestamp: string;
 }
 
-type NotificationPayload = SignupNotification | GenerationRequestNotification | RefundRequestNotification;
+interface ReviewFeedbackNotification {
+  type: "review_feedback";
+  userName: string;
+  userEmail: string;
+  requestId: string;
+  rating: number;
+  feedback: string;
+  timestamp: string;
+}
+
+type NotificationPayload = SignupNotification | GenerationRequestNotification | RefundRequestNotification | ReviewFeedbackNotification;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -125,11 +135,26 @@ const handler = async (req: Request): Promise<Response> => {
           <p style="color: #6b7280; margin-top: 20px;">Please review this request and take appropriate action.</p>
         </div>
       `;
+    } else if (payload.type === "review_feedback") {
+      const stars = "★".repeat(payload.rating) + "☆".repeat(5 - payload.rating);
+      subject = `⭐ Video Review (${payload.rating}/5) - Viralin AI`;
+      htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #7c3aed;">Video Review & Feedback</h1>
+          <div style="background: #f3f4f6; padding: 20px; border-radius: 8px;">
+            <p><strong>User:</strong> ${payload.userName} (${payload.userEmail})</p>
+            <p><strong>Rating:</strong> <span style="font-size: 20px; color: #f59e0b;">${stars}</span> (${payload.rating}/5)</p>
+            <p><strong>Request ID:</strong> <code>${payload.requestId}</code></p>
+            ${payload.feedback ? `<p><strong>Feedback:</strong></p><div style="background: white; padding: 12px; border-radius: 4px; margin: 8px 0;">${payload.feedback}</div>` : "<p><em>No written feedback provided</em></p>"}
+            <p><strong>Submitted:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
+          </div>
+        </div>
+      `;
     } else {
       throw new Error("Invalid notification type");
     }
 
-    const recipientEmail = payload.type === "refund_request" ? REFUND_EMAIL : ADMIN_EMAIL;
+    const recipientEmail = (payload.type === "refund_request" || payload.type === "review_feedback") ? REFUND_EMAIL : ADMIN_EMAIL;
 
     const emailResponse = await resend.emails.send({
       from: "Viralin AI <noreply@viralin.ai>",

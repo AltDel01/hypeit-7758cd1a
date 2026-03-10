@@ -4,6 +4,7 @@ import {
   Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff,
   Languages, Loader2, Play, ExternalLink, TrendingUp, CheckCircle
 } from 'lucide-react';
+import ReviewFeedbackBox from './ReviewFeedbackBox';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { GenerationRequest } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
@@ -699,7 +700,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             </div>
           )}
 
-          {/* Example Prompts */}
+          {/* Review & Feedback — appears with completed result */}
+          {showSubmittedConfirmation && submittedRequest && submittedRequest.status === 'completed' && resolvedResultUrl && (
+            <div className="mb-3">
+              <ReviewFeedbackBox requestId={submittedRequest.id} />
+            </div>
+          )}
+
+
           <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 mt-2 mb-3 md:mb-4">
             <div className="flex md:flex-wrap gap-2 min-w-max md:min-w-0">
               {examplePrompts.slice(0, 3).map((example, index) => (
