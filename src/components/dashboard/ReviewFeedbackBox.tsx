@@ -38,6 +38,19 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
         return;
       }
 
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('review_feedback' as any)
+        .upsert({
+          request_id: requestId,
+          user_id: session.user.id,
+          rating,
+          feedback: feedback.trim(),
+        } as any, { onConflict: 'request_id,user_id' } as any);
+
+      if (dbError) throw dbError;
+
+      // Send email notification
       const { error } = await supabase.functions.invoke('send-notification', {
         body: {
           type: 'review_feedback',
@@ -46,11 +59,14 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
           requestId,
           rating,
           feedback: feedback.trim(),
+          prompt: prompt || '',
+          resultUrl: resultUrl || '',
+          requestType: requestType || 'video',
           timestamp: new Date().toISOString(),
         },
       });
 
-      if (error) throw error;
+      if (error) console.warn('Email notification failed but feedback saved:', error);
 
       setIsSent(true);
       toast.success('Thank you for your feedback!');
