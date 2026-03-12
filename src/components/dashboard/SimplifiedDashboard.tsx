@@ -693,12 +693,20 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
 
           {/* Inline: Completed result */}
           {showSubmittedConfirmation && submittedRequest && submittedRequest.status === 'completed' && resolvedResultUrl && (
-            <div className="mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-black">
-              {submittedRequest.request_type === 'video' ? (
-                <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
-              ) : (
-                <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />
+            <div className="mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-card/50">
+              {submittedRequest.prompt && (
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Prompt</p>
+                  <p className="text-sm text-foreground line-clamp-3">{submittedRequest.prompt}</p>
+                </div>
               )}
+              <div className="bg-black">
+                {submittedRequest.request_type === 'video' ? (
+                  <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
+                ) : (
+                  <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />
+                )}
+              </div>
             </div>
           )}
 
