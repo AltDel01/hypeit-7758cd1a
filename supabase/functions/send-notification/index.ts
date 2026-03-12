@@ -46,6 +46,9 @@ interface ReviewFeedbackNotification {
   requestId: string;
   rating: number;
   feedback: string;
+  prompt?: string;
+  resultUrl?: string;
+  requestType?: string;
   timestamp: string;
 }
 
@@ -145,7 +148,10 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>User:</strong> ${payload.userName} (${payload.userEmail})</p>
             <p><strong>Rating:</strong> <span style="font-size: 20px; color: #f59e0b;">${stars}</span> (${payload.rating}/5)</p>
             <p><strong>Request ID:</strong> <code>${payload.requestId}</code></p>
+            <p><strong>Type:</strong> ${(payload.requestType || 'video').toUpperCase()}</p>
+            ${payload.prompt ? `<p><strong>Prompt:</strong></p><div style="background: white; padding: 12px; border-radius: 4px; margin: 8px 0;">${payload.prompt}</div>` : ""}
             ${payload.feedback ? `<p><strong>Feedback:</strong></p><div style="background: white; padding: 12px; border-radius: 4px; margin: 8px 0;">${payload.feedback}</div>` : "<p><em>No written feedback provided</em></p>"}
+            ${payload.resultUrl ? `<p><strong>Result:</strong> <a href="${payload.resultUrl}" style="color: #7c3aed;">View Result</a></p>` : ""}
             <p><strong>Submitted:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
           </div>
         </div>

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX, Star } from 'lucide-react';
 import FileUploader from '@/components/admin/FileUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestDetailsProps {
@@ -37,6 +39,20 @@ export const RequestDetails = ({
   const parsed = parsePromptString(request.prompt);
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
+  const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const { data } = await supabase
+        .from('review_feedback' as any)
+        .select('rating, feedback, created_at')
+        .eq('request_id', request.id)
+        .maybeSingle();
+      if (data) setUserFeedback(data as any);
+      else setUserFeedback(null);
+    };
+    fetchFeedback();
+  }, [request.id]);
 
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
@@ -256,6 +272,34 @@ export const RequestDetails = ({
               <CheckCircle className="h-3 w-3 mr-1" />
               Completed {request.completed_at && `at ${formatDate(request.completed_at)}`}
               {request.assigned_to_name && ` by ${request.assigned_to_name}`}
+            </p>
+          </div>
+        )}
+        {/* User Feedback */}
+        {userFeedback && (
+          <div className="border border-border rounded-lg p-4 space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">User Review</h3>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  className={cn(
+                    'w-5 h-5',
+                    s <= userFeedback.rating
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-muted-foreground/30'
+                  )}
+                />
+              ))}
+              <span className="text-sm text-muted-foreground ml-2">({userFeedback.rating}/5)</span>
+            </div>
+            {userFeedback.feedback && (
+              <p className="text-sm text-foreground bg-muted/50 p-3 rounded-md">
+                {userFeedback.feedback}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Submitted {formatDate(userFeedback.created_at)}
             </p>
           </div>
         )}

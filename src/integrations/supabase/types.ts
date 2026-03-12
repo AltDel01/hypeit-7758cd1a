@@ -308,6 +308,41 @@ export type Database = {
         }
         Relationships: []
       }
+      review_feedback: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating: number
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_feedback_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "generation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null

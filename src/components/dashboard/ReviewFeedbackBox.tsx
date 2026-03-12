@@ -8,14 +8,20 @@ import { cn } from '@/lib/utils';
 
 interface ReviewFeedbackBoxProps {
   requestId: string;
+  prompt?: string;
+  resultUrl?: string;
+  requestType?: string;
+  initialRating?: number;
+  initialFeedback?: string;
+  alreadySubmitted?: boolean;
 }
 
-const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
-  const [rating, setRating] = useState(0);
+const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted }: ReviewFeedbackBoxProps) => {
+  const [rating, setRating] = useState(initialRating || 0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState(initialFeedback || '');
   const [isSending, setIsSending] = useState(false);
-  const [isSent, setIsSent] = useState(false);
+  const [isSent, setIsSent] = useState(alreadySubmitted || false);
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -32,6 +38,19 @@ const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
         return;
       }
 
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('review_feedback' as any)
+        .upsert({
+          request_id: requestId,
+          user_id: session.user.id,
+          rating,
+          feedback: feedback.trim(),
+        } as any, { onConflict: 'request_id,user_id' } as any);
+
+      if (dbError) throw dbError;
+
+      // Send email notification
       const { error } = await supabase.functions.invoke('send-notification', {
         body: {
           type: 'review_feedback',
@@ -40,11 +59,14 @@ const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
           requestId,
           rating,
           feedback: feedback.trim(),
+          prompt: prompt || '',
+          resultUrl: resultUrl || '',
+          requestType: requestType || 'video',
           timestamp: new Date().toISOString(),
         },
       });
 
-      if (error) throw error;
+      if (error) console.warn('Email notification failed but feedback saved:', error);
 
       setIsSent(true);
       toast.success('Thank you for your feedback!');

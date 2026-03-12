@@ -7,6 +7,8 @@ import { GenerationRequest } from '@/services/generationRequestService';
 import { parsePromptString } from '@/utils/promptParser';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
+import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
@@ -53,6 +55,20 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [existingFeedback, setExistingFeedback] = useState<{ rating: number; feedback: string } | null>(null);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const { data } = await supabase
+        .from('review_feedback' as any)
+        .select('rating, feedback')
+        .eq('request_id', request.id)
+        .maybeSingle();
+      if (data) setExistingFeedback(data as any);
+      else setExistingFeedback(null);
+    };
+    if (request.status === 'completed') fetchFeedback();
+  }, [request.id, request.status]);
 
   useEffect(() => {
     if (request.result_url) {
@@ -225,6 +241,19 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
           <p className="text-sm text-muted-foreground">
             Completed on {format(new Date(request.completed_at), 'MMM d, yyyy h:mm a')}
           </p>
+        )}
+
+        {/* Review Feedback */}
+        {request.status === 'completed' && (
+          <ReviewFeedbackBox
+            requestId={request.id}
+            prompt={parsed.prompt}
+            resultUrl={resolvedUrl || undefined}
+            requestType={request.request_type}
+            initialRating={existingFeedback?.rating}
+            initialFeedback={existingFeedback?.feedback}
+            alreadySubmitted={!!existingFeedback}
+          />
         )}
       </div>
     </div>
