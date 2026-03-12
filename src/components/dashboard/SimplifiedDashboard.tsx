@@ -700,6 +700,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             <div className="relative mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-card/50">
               <button
                 onClick={() => {
+                  hasDismissedResult.current = true;
                   setShowSubmittedConfirmation(false);
                   setResolvedResultUrl(null);
                   setSubmittedRequest(null);
