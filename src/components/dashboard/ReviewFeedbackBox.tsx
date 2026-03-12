@@ -8,6 +8,12 @@ import { cn } from '@/lib/utils';
 
 interface ReviewFeedbackBoxProps {
   requestId: string;
+  prompt?: string;
+  resultUrl?: string;
+  requestType?: string;
+  initialRating?: number;
+  initialFeedback?: string;
+  alreadySubmitted?: boolean;
 }
 
 const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
