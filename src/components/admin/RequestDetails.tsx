@@ -275,6 +275,34 @@ export const RequestDetails = ({
             </p>
           </div>
         )}
+        {/* User Feedback */}
+        {userFeedback && (
+          <div className="border border-border rounded-lg p-4 space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">User Review</h3>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  className={cn(
+                    'w-5 h-5',
+                    s <= userFeedback.rating
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-muted-foreground/30'
+                  )}
+                />
+              ))}
+              <span className="text-sm text-muted-foreground ml-2">({userFeedback.rating}/5)</span>
+            </div>
+            {userFeedback.feedback && (
+              <p className="text-sm text-foreground bg-muted/50 p-3 rounded-md">
+                {userFeedback.feedback}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Submitted {formatDate(userFeedback.created_at)}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
