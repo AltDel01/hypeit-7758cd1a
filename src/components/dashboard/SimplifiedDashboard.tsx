@@ -197,6 +197,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
 
   // Track whether user actively submitted in this session
   const hasSubmittedInSession = useRef(false);
+  // Track whether user dismissed the result via X button
+  const hasDismissedResult = useRef(false);
 
   // Sync latestRequest from parent — only for tracking the SAME request user submitted
   // OR showing the latest result when user opens dashboard without submitting
@@ -223,6 +225,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
 
     // User opened dashboard without submitting — show latest completed result passively
+    // But NOT if the user already dismissed it
+    if (hasDismissedResult.current) return;
     if (latestRequest.status === 'completed' && latestRequest.result_url) {
       setSubmittedRequest(latestRequest);
       setSubmittedRequestId(latestRequest.id);
@@ -696,6 +700,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             <div className="relative mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-card/50">
               <button
                 onClick={() => {
+                  hasDismissedResult.current = true;
                   setShowSubmittedConfirmation(false);
                   setResolvedResultUrl(null);
                   setSubmittedRequest(null);
