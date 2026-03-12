@@ -197,6 +197,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
 
   // Track whether user actively submitted in this session
   const hasSubmittedInSession = useRef(false);
+  // Track whether user dismissed the result via X button
+  const hasDismissedResult = useRef(false);
 
   // Sync latestRequest from parent — only for tracking the SAME request user submitted
   // OR showing the latest result when user opens dashboard without submitting
