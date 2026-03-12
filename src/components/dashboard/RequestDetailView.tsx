@@ -242,6 +242,19 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
             Completed on {format(new Date(request.completed_at), 'MMM d, yyyy h:mm a')}
           </p>
         )}
+
+        {/* Review Feedback */}
+        {request.status === 'completed' && (
+          <ReviewFeedbackBox
+            requestId={request.id}
+            prompt={parsed.prompt}
+            resultUrl={resolvedUrl || undefined}
+            requestType={request.request_type}
+            initialRating={existingFeedback?.rating}
+            initialFeedback={existingFeedback?.feedback}
+            alreadySubmitted={!!existingFeedback}
+          />
+        )}
       </div>
     </div>
   );
