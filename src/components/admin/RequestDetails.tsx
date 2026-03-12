@@ -39,6 +39,20 @@ export const RequestDetails = ({
   const parsed = parsePromptString(request.prompt);
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
+  const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const { data } = await supabase
+        .from('review_feedback' as any)
+        .select('rating, feedback, created_at')
+        .eq('request_id', request.id)
+        .maybeSingle();
+      if (data) setUserFeedback(data as any);
+      else setUserFeedback(null);
+    };
+    fetchFeedback();
+  }, [request.id]);
 
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
