@@ -16,12 +16,12 @@ interface ReviewFeedbackBoxProps {
   alreadySubmitted?: boolean;
 }
 
-const ReviewFeedbackBox = ({ requestId }: ReviewFeedbackBoxProps) => {
-  const [rating, setRating] = useState(0);
+const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted }: ReviewFeedbackBoxProps) => {
+  const [rating, setRating] = useState(initialRating || 0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState(initialFeedback || '');
   const [isSending, setIsSending] = useState(false);
-  const [isSent, setIsSent] = useState(false);
+  const [isSent, setIsSent] = useState(alreadySubmitted || false);
 
   const handleSubmit = async () => {
     if (rating === 0) {
