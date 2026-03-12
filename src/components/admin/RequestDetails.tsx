@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX, Star } from 'lucide-react';
 import FileUploader from '@/components/admin/FileUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestDetailsProps {
