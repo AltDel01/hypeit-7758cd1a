@@ -225,6 +225,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     }
 
     // User opened dashboard without submitting — show latest completed result passively
+    // But NOT if the user already dismissed it
+    if (hasDismissedResult.current) return;
     if (latestRequest.status === 'completed' && latestRequest.result_url) {
       setSubmittedRequest(latestRequest);
       setSubmittedRequestId(latestRequest.id);
