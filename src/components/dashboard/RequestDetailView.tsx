@@ -7,6 +7,8 @@ import { GenerationRequest } from '@/services/generationRequestService';
 import { parsePromptString } from '@/utils/promptParser';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
+import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
