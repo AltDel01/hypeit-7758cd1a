@@ -46,6 +46,9 @@ interface ReviewFeedbackNotification {
   requestId: string;
   rating: number;
   feedback: string;
+  prompt?: string;
+  resultUrl?: string;
+  requestType?: string;
   timestamp: string;
 }
 
