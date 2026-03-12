@@ -693,7 +693,19 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
 
           {/* Inline: Completed result */}
           {showSubmittedConfirmation && submittedRequest && submittedRequest.status === 'completed' && resolvedResultUrl && (
-            <div className="mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-card/50">
+            <div className="relative mb-3 rounded-lg overflow-hidden border border-green-500/30 bg-card/50">
+              <button
+                onClick={() => {
+                  setShowSubmittedConfirmation(false);
+                  setResolvedResultUrl(null);
+                  setSubmittedRequest(null);
+                  setSubmittedRequestId(null);
+                }}
+                className="absolute top-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white/80 hover:text-white transition-colors backdrop-blur-sm"
+                aria-label="Close result"
+              >
+                <X className="w-4 h-4" />
+              </button>
               {submittedRequest.prompt && (
                 <div className="px-4 py-3 border-b border-border">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Prompt</p>
