@@ -67,12 +67,12 @@ const EditorDashboard = () => {
         <Navbar />
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
               <div>
-                <h1 className="text-3xl font-bold mb-2 text-foreground">Editor Dashboard</h1>
-                <p className="text-muted-foreground">View and work on your assigned tasks</p>
+                <h1 className="text-2xl md:text-3xl font-bold mb-1 text-foreground">Editor Dashboard</h1>
+                <p className="text-sm text-muted-foreground">View and work on your assigned tasks</p>
               </div>
-              <Button onClick={() => { loadRequests(); toast.info('Refreshed'); }} variant="outline" className="gap-2">
+              <Button onClick={() => { loadRequests(); toast.info('Refreshed'); }} variant="outline" size="sm" className="gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </Button>
