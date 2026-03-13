@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useElevenLabsAgent } from '@/hooks/useElevenLabsAgent';
-import { useLocation } from 'react-router-dom';
 
 const HIDDEN_ROUTES = ['/admin', '/editor', '/admin-login'];
 
