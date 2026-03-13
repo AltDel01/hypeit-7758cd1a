@@ -14,6 +14,7 @@ interface ReviewFeedbackBoxProps {
   initialRating?: number;
   initialFeedback?: string;
   alreadySubmitted?: boolean;
+  onSubmitted?: () => void;
 }
 
 const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted }: ReviewFeedbackBoxProps) => {
