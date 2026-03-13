@@ -108,9 +108,9 @@ const AdminEditorsSection = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Editor Management</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Editor Management</h2>
           <p className="text-muted-foreground text-sm">Register and manage video editors</p>
         </div>
         <div className="flex gap-2">
