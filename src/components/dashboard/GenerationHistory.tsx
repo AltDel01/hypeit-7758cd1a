@@ -1,15 +1,17 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { Image, Video, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GenerationRequest } from '@/services/generationRequestService';
+import { FeedbackMap } from '@/pages/Dashboard';
 
 interface GenerationHistoryProps {
   requests: GenerationRequest[];
   selectedId: string | null;
   onSelect: (request: GenerationRequest) => void;
   isLoading?: boolean;
+  feedbackMap?: FeedbackMap;
 }
 
 const statusConfig: Record<string, {
@@ -46,7 +48,8 @@ const GenerationHistory = ({
   requests, 
   selectedId, 
   onSelect, 
-  isLoading 
+  isLoading,
+  feedbackMap = {},
 }: GenerationHistoryProps) => {
   if (isLoading) {
     return (
@@ -77,6 +80,7 @@ const GenerationHistory = ({
           const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
           const StatusIcon = status.icon;
           const isSelected = selectedId === request.id;
+          const fb = feedbackMap[request.id];
 
           return (
             <button
@@ -117,10 +121,25 @@ const GenerationHistory = ({
                 {request.prompt}
               </p>
 
-              {/* Timestamp */}
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(request.created_at), 'MMM d, h:mm a')}
-              </p>
+              {/* Timestamp + Review indicator */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(request.created_at), 'MMM d, h:mm a')}
+                </p>
+                {fb && (
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={cn(
+                          'w-3 h-3',
+                          s <= fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </button>
           );
         })}

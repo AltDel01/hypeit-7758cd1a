@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface RequestDetailViewProps {
   request: GenerationRequest;
   onClose?: () => void;
+  onFeedbackSubmitted?: () => void;
 }
 
 const statusConfig: Record<string, {
@@ -50,7 +51,7 @@ const statusConfig: Record<string, {
   },
 };
 
-const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
+const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
   const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
@@ -253,6 +254,7 @@ const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
             initialRating={existingFeedback?.rating}
             initialFeedback={existingFeedback?.feedback}
             alreadySubmitted={!!existingFeedback}
+            onSubmitted={onFeedbackSubmitted}
           />
         )}
       </div>

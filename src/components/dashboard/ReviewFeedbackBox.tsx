@@ -14,9 +14,10 @@ interface ReviewFeedbackBoxProps {
   initialRating?: number;
   initialFeedback?: string;
   alreadySubmitted?: boolean;
+  onSubmitted?: () => void;
 }
 
-const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted }: ReviewFeedbackBoxProps) => {
+const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted, onSubmitted }: ReviewFeedbackBoxProps) => {
   const [rating, setRating] = useState(initialRating || 0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [feedback, setFeedback] = useState(initialFeedback || '');
@@ -99,6 +100,7 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
 
       setIsSent(true);
       toast.success('Thank you for your feedback!');
+      onSubmitted?.();
     } catch (err) {
       console.error('Failed to send feedback:', err);
       toast.error('Failed to send feedback. Please try again.');
