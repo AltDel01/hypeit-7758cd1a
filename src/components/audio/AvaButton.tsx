@@ -12,10 +12,12 @@ import { useLocation } from 'react-router-dom';
 const HIDDEN_ROUTES = ['/admin', '/editor', '/admin-login'];
 
 const AvaButton: React.FC = () => {
+  const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const isHiddenRoute = HIDDEN_ROUTES.some(route => location.pathname.startsWith(route));
-
-  if (isHiddenRoute) return null;
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
