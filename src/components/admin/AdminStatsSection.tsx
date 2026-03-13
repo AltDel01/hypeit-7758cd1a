@@ -75,9 +75,9 @@ const AdminStatsSection = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Performance Stats</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Performance Stats</h2>
           <p className="text-muted-foreground text-sm">Track editor performance and request metrics</p>
         </div>
         <Button onClick={() => { loadStats(); toast.info('Refreshed'); }} variant="outline" size="sm" className="gap-2">
