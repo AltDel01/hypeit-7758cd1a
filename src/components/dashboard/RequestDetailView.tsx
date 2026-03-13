@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface RequestDetailViewProps {
   request: GenerationRequest;
   onClose?: () => void;
+  onFeedbackSubmitted?: () => void;
 }
 
 const statusConfig: Record<string, {
