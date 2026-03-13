@@ -198,7 +198,7 @@ const Dashboard = () => {
                   <ArrowLeft className="h-4 w-4" />
                   Back to Create
                 </Button>
-                <RequestDetailView request={selectedRequest} />
+                <RequestDetailView request={selectedRequest} onFeedbackSubmitted={fetchFeedbackMap} />
               </div>
             ) : (
               <SimplifiedDashboard onRequestCreated={handleRequestCreated} latestRequest={requests.length > 0 ? requests[0] : null} />
