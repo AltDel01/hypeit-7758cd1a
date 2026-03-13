@@ -1,15 +1,17 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { Image, Video, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GenerationRequest } from '@/services/generationRequestService';
+import { FeedbackMap } from '@/pages/Dashboard';
 
 interface GenerationHistoryProps {
   requests: GenerationRequest[];
   selectedId: string | null;
   onSelect: (request: GenerationRequest) => void;
   isLoading?: boolean;
+  feedbackMap?: FeedbackMap;
 }
 
 const statusConfig: Record<string, {
