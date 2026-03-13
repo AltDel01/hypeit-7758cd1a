@@ -98,6 +98,7 @@ const Dashboard = () => {
           selectedId={selectedRequest?.id || null}
           onSelect={handleSelectRequest}
           isLoading={isLoading}
+          feedbackMap={feedbackMap}
         />
       </div>
     </div>
