@@ -56,20 +56,6 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
-  const [existingFeedback, setExistingFeedback] = useState<{ rating: number; feedback: string } | null>(null);
-
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      const { data } = await supabase
-        .from('review_feedback' as any)
-        .select('rating, feedback')
-        .eq('request_id', request.id)
-        .maybeSingle();
-      if (data) setExistingFeedback(data as any);
-      else setExistingFeedback(null);
-    };
-    if (request.status === 'completed') fetchFeedback();
-  }, [request.id, request.status]);
 
   useEffect(() => {
     if (request.result_url) {
@@ -247,13 +233,11 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
         {/* Review Feedback */}
         {request.status === 'completed' && (
           <ReviewFeedbackBox
+            key={request.id}
             requestId={request.id}
             prompt={parsed.prompt}
             resultUrl={resolvedUrl || undefined}
             requestType={request.request_type}
-            initialRating={existingFeedback?.rating}
-            initialFeedback={existingFeedback?.feedback}
-            alreadySubmitted={!!existingFeedback}
             onSubmitted={onFeedbackSubmitted}
           />
         )}

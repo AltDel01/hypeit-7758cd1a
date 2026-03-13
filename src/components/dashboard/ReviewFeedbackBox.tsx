@@ -11,26 +11,18 @@ interface ReviewFeedbackBoxProps {
   prompt?: string;
   resultUrl?: string;
   requestType?: string;
-  initialRating?: number;
-  initialFeedback?: string;
-  alreadySubmitted?: boolean;
   onSubmitted?: () => void;
 }
 
-const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialRating, initialFeedback, alreadySubmitted, onSubmitted }: ReviewFeedbackBoxProps) => {
-  const [rating, setRating] = useState(initialRating || 0);
+const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, onSubmitted }: ReviewFeedbackBoxProps) => {
+  const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [feedback, setFeedback] = useState(initialFeedback || '');
+  const [feedback, setFeedback] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [isSent, setIsSent] = useState(alreadySubmitted || false);
-  const [isLoading, setIsLoading] = useState(!alreadySubmitted && !initialRating);
+  const [isSent, setIsSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Self-fetch existing feedback if not provided by parent
   useEffect(() => {
-    if (alreadySubmitted !== undefined || initialRating !== undefined) {
-      setIsLoading(false);
-      return;
-    }
     const fetchExisting = async () => {
       try {
         const { data } = await supabase
@@ -51,7 +43,7 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
       }
     };
     fetchExisting();
-  }, [requestId, alreadySubmitted, initialRating]);
+  }, [requestId]);
 
   const handleSubmit = async () => {
     if (rating === 0) {
