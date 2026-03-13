@@ -254,6 +254,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
             initialRating={existingFeedback?.rating}
             initialFeedback={existingFeedback?.feedback}
             alreadySubmitted={!!existingFeedback}
+            onSubmitted={onFeedbackSubmitted}
           />
         )}
       </div>
