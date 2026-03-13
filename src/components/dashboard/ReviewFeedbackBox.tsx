@@ -100,6 +100,7 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
 
       setIsSent(true);
       toast.success('Thank you for your feedback!');
+      onSubmitted?.();
     } catch (err) {
       console.error('Failed to send feedback:', err);
       toast.error('Failed to send feedback. Please try again.');
