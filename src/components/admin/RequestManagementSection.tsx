@@ -107,7 +107,7 @@ export const RequestManagementSection = () => {
 
       <Tabs defaultValue="new" value={activeTab} onValueChange={setActiveTab}>
         <div className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4">
-          <TabsList className="grid grid-cols-5 mb-4">
+          <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4 h-auto gap-1">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="new">New</TabsTrigger>
             <TabsTrigger value="mine">My Tasks</TabsTrigger>
