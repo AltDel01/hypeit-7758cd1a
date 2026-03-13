@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Menu, X, History } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
@@ -11,6 +11,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { GenerationRequest } from '@/services/generationRequestService';
+import { supabase } from '@/integrations/supabase/client';
+
+export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -20,8 +23,29 @@ const Dashboard = () => {
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [feedbackMap, setFeedbackMap] = useState<FeedbackMap>({});
   
   const { requests, isLoading, refresh } = useGenerationRequests(user?.id);
+
+  // Batch-fetch all review feedback for user's requests
+  const fetchFeedbackMap = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('review_feedback')
+      .select('request_id, rating, feedback')
+      .eq('user_id', user.id);
+    if (data) {
+      const map: FeedbackMap = {};
+      (data as any[]).forEach((d) => {
+        map[d.request_id] = { rating: d.rating, feedback: d.feedback || '' };
+      });
+      setFeedbackMap(map);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchFeedbackMap();
+  }, [fetchFeedbackMap, requests]);
 
   // Redirect if not authenticated
   React.useEffect(() => {
