@@ -233,13 +233,11 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
         {/* Review Feedback */}
         {request.status === 'completed' && (
           <ReviewFeedbackBox
+            key={request.id}
             requestId={request.id}
             prompt={parsed.prompt}
             resultUrl={resolvedUrl || undefined}
             requestType={request.request_type}
-            initialRating={existingFeedback?.rating}
-            initialFeedback={existingFeedback?.feedback}
-            alreadySubmitted={!!existingFeedback}
             onSubmitted={onFeedbackSubmitted}
           />
         )}
