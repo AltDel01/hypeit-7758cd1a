@@ -48,7 +48,8 @@ const GenerationHistory = ({
   requests, 
   selectedId, 
   onSelect, 
-  isLoading 
+  isLoading,
+  feedbackMap = {},
 }: GenerationHistoryProps) => {
   if (isLoading) {
     return (
