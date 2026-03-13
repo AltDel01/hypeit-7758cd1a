@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Send, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,35 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
   const [feedback, setFeedback] = useState(initialFeedback || '');
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(alreadySubmitted || false);
+  const [isLoading, setIsLoading] = useState(!alreadySubmitted && !initialRating);
+
+  // Self-fetch existing feedback if not provided by parent
+  useEffect(() => {
+    if (alreadySubmitted !== undefined || initialRating !== undefined) {
+      setIsLoading(false);
+      return;
+    }
+    const fetchExisting = async () => {
+      try {
+        const { data } = await supabase
+          .from('review_feedback' as any)
+          .select('rating, feedback')
+          .eq('request_id', requestId)
+          .maybeSingle();
+        if (data) {
+          const d = data as any;
+          setRating(d.rating);
+          setFeedback(d.feedback || '');
+          setIsSent(true);
+        }
+      } catch (e) {
+        // ignore
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchExisting();
+  }, [requestId, alreadySubmitted, initialRating]);
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -78,11 +107,31 @@ const ReviewFeedbackBox = ({ requestId, prompt, resultUrl, requestType, initialR
     }
   };
 
+  if (isLoading) return null;
+
   if (isSent) {
     return (
-      <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30">
-        <CheckCircle className="w-4 h-4 text-green-500" />
-        <span className="text-sm text-green-400 font-medium">Thanks for your review!</span>
+      <div className="rounded-lg border border-gray-700/50 bg-gray-900/60 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-500" />
+          <span className="text-sm text-green-400 font-medium">Your review</span>
+        </div>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={cn(
+                'w-5 h-5',
+                star <= rating
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'text-gray-600'
+              )}
+            />
+          ))}
+        </div>
+        {feedback && (
+          <p className="text-sm text-muted-foreground">{feedback}</p>
+        )}
       </div>
     );
   }
