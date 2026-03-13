@@ -80,6 +80,7 @@ const GenerationHistory = ({
           const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
           const StatusIcon = status.icon;
           const isSelected = selectedId === request.id;
+          const fb = feedbackMap[request.id];
 
           return (
             <button
