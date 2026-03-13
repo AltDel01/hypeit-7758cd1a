@@ -51,7 +51,7 @@ const statusConfig: Record<string, {
   },
 };
 
-const RequestDetailView = ({ request, onClose }: RequestDetailViewProps) => {
+const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
   const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
