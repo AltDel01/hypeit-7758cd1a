@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button';
 import MicrophoneVisualizer from './MicrophoneVisualizer';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useElevenLabsAgent } from '@/hooks/useElevenLabsAgent';
+
+const HIDDEN_ROUTES = ['/admin', '/editor', '/admin-login'];
 
 const AvaButton: React.FC = () => {
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { 
     startConversation, 
     endConversation, 
@@ -22,6 +25,10 @@ const AvaButton: React.FC = () => {
     isInitialized,
     requestMicrophonePermission 
   } = useElevenLabsAgent();
+
+  const isHiddenRoute = HIDDEN_ROUTES.some(route => location.pathname.startsWith(route));
+
+  if (isHiddenRoute) return null;
 
   // Remove the auto-cleanup effect that was causing disconnects
   // useEffect(() => {
