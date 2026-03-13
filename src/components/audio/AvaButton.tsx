@@ -17,11 +17,6 @@ const AvaButton: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isHiddenRoute = HIDDEN_ROUTES.some(route => location.pathname.startsWith(route));
-  const [isVisualizerActive, setIsVisualizerActive] = useState(false);
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const { 
     startConversation, 
     endConversation, 
@@ -31,6 +26,10 @@ const AvaButton: React.FC = () => {
     isInitialized,
     requestMicrophonePermission 
   } = useElevenLabsAgent();
+
+  const isHiddenRoute = HIDDEN_ROUTES.some(route => location.pathname.startsWith(route));
+
+  if (isHiddenRoute) return null;
 
   // Remove the auto-cleanup effect that was causing disconnects
   // useEffect(() => {
