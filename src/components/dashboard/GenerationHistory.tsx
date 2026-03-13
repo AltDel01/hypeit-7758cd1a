@@ -121,10 +121,25 @@ const GenerationHistory = ({
                 {request.prompt}
               </p>
 
-              {/* Timestamp */}
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(request.created_at), 'MMM d, h:mm a')}
-              </p>
+              {/* Timestamp + Review indicator */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(request.created_at), 'MMM d, h:mm a')}
+                </p>
+                {fb && (
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={cn(
+                          'w-3 h-3',
+                          s <= fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </button>
           );
         })}
