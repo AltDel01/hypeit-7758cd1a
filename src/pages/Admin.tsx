@@ -37,7 +37,7 @@ const Admin = () => {
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
             <Tabs defaultValue="requests" className="w-full">
-              <TabsList className="mb-6">
+              <TabsList className="mb-6 w-full md:w-auto">
                 <TabsTrigger value="requests" className="gap-2">
                   <ClipboardList className="h-4 w-4" />
                   Requests

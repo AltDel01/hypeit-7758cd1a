@@ -144,7 +144,24 @@ const AdminStatsSection = () => {
           {editorStats.length > 0 && (
             <div className="bg-card/50 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
               <h3 className="font-semibold text-foreground p-4 pb-2">Editor Speed Rankings</h3>
-              <table className="w-full text-sm">
+              {/* Mobile card view */}
+              <div className="md:hidden divide-y divide-border">
+                {[...editorStats].sort((a, b) => b.completed - a.completed).map((editor, i) => (
+                  <div key={editor.name} className="p-3 flex items-center gap-3">
+                    <span className="text-lg font-bold text-muted-foreground w-6 text-center">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground text-sm truncate">{editor.name}</p>
+                      <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
+                        <span>{editor.completed} done</span>
+                        <span>{editor.inProgress} active</span>
+                        <span>{editor.avgHours === null ? '—' : editor.avgHours < 1 ? `${Math.round(editor.avgHours * 60)}m avg` : `${editor.avgHours.toFixed(1)}h avg`}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop table */}
+              <table className="hidden md:table w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
                     <th className="text-left p-3 font-medium text-muted-foreground">#</th>

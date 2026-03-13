@@ -80,7 +80,7 @@ const EditorDashboard = () => {
 
             <Tabs defaultValue="assigned" value={activeTab} onValueChange={setActiveTab}>
               <div className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4">
-                <TabsList className="grid grid-cols-4 mb-4">
+                <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4 h-auto gap-1">
                   <TabsTrigger value="all">All Assigned</TabsTrigger>
                   <TabsTrigger value="assigned">My Tasks</TabsTrigger>
                   <TabsTrigger value="in-progress">In Progress</TabsTrigger>

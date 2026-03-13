@@ -94,12 +94,12 @@ export const RequestManagementSection = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2 text-foreground">Editor Dashboard</h1>
-          <p className="text-muted-foreground">Claim and process user requests</p>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 text-foreground">Editor Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Claim and process user requests</p>
         </div>
-        <Button onClick={refreshRequests} variant="outline" className="flex items-center gap-2">
+        <Button onClick={refreshRequests} variant="outline" size="sm" className="gap-2">
           <RefreshCw className="h-4 w-4" />
           Refresh
         </Button>

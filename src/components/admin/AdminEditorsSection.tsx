@@ -159,38 +159,67 @@ const AdminEditorsSection = () => {
             <p className="text-sm text-muted-foreground mt-1">Click "Add Editor" to create the first editor account</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left p-3 font-medium text-muted-foreground">Editor</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                  <th className="text-center p-3 font-medium text-muted-foreground">
-                    <div className="flex items-center justify-center gap-1"><Clock className="h-3.5 w-3.5" /> Assigned</div>
-                  </th>
-                  <th className="text-center p-3 font-medium text-muted-foreground">
-                    <div className="flex items-center justify-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Completed</div>
-                  </th>
-                  <th className="text-center p-3 font-medium text-muted-foreground">
-                    <div className="flex items-center justify-center gap-1"><TrendingUp className="h-3.5 w-3.5" /> Avg Speed</div>
-                  </th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {editors.map((editor) => (
-                  <tr key={editor.userId} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                    <td className="p-3 font-medium text-foreground">{editor.displayName || editor.email.split('@')[0]}</td>
-                    <td className="p-3 text-muted-foreground">{editor.email}</td>
-                    <td className="p-3 text-center text-foreground">{editor.totalAssigned}</td>
-                    <td className="p-3 text-center text-foreground">{editor.totalCompleted}</td>
-                    <td className="p-3 text-center text-foreground">{formatHours(editor.avgTurnaroundHours)}</td>
-                    <td className="p-3 text-muted-foreground text-xs">{editor.createdAt ? new Date(editor.createdAt).toLocaleDateString() : '—'}</td>
+          <>
+            {/* Mobile card view */}
+            <div className="md:hidden divide-y divide-border">
+              {editors.map((editor) => (
+                <div key={editor.userId} className="p-3 space-y-2">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{editor.displayName || editor.email.split('@')[0]}</p>
+                    <p className="text-xs text-muted-foreground truncate">{editor.email}</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-muted/30 rounded-md py-1.5 px-1">
+                      <p className="text-xs text-muted-foreground">Assigned</p>
+                      <p className="text-sm font-semibold text-foreground">{editor.totalAssigned}</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-md py-1.5 px-1">
+                      <p className="text-xs text-muted-foreground">Done</p>
+                      <p className="text-sm font-semibold text-foreground">{editor.totalCompleted}</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-md py-1.5 px-1">
+                      <p className="text-xs text-muted-foreground">Speed</p>
+                      <p className="text-sm font-semibold text-foreground">{formatHours(editor.avgTurnaroundHours)}</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Joined {editor.createdAt ? new Date(editor.createdAt).toLocaleDateString() : '—'}</p>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-left p-3 font-medium text-muted-foreground">Editor</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
+                    <th className="text-center p-3 font-medium text-muted-foreground">
+                      <div className="flex items-center justify-center gap-1"><Clock className="h-3.5 w-3.5" /> Assigned</div>
+                    </th>
+                    <th className="text-center p-3 font-medium text-muted-foreground">
+                      <div className="flex items-center justify-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Completed</div>
+                    </th>
+                    <th className="text-center p-3 font-medium text-muted-foreground">
+                      <div className="flex items-center justify-center gap-1"><TrendingUp className="h-3.5 w-3.5" /> Avg Speed</div>
+                    </th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Joined</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {editors.map((editor) => (
+                    <tr key={editor.userId} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                      <td className="p-3 font-medium text-foreground">{editor.displayName || editor.email.split('@')[0]}</td>
+                      <td className="p-3 text-muted-foreground">{editor.email}</td>
+                      <td className="p-3 text-center text-foreground">{editor.totalAssigned}</td>
+                      <td className="p-3 text-center text-foreground">{editor.totalCompleted}</td>
+                      <td className="p-3 text-center text-foreground">{formatHours(editor.avgTurnaroundHours)}</td>
+                      <td className="p-3 text-muted-foreground text-xs">{editor.createdAt ? new Date(editor.createdAt).toLocaleDateString() : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>
