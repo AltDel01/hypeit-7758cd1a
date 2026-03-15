@@ -16,7 +16,7 @@ const footerLinks = {
     { label: 'Virality Strategy', href: '/virality' },
   ],
   Resources: [
-    { label: 'Documentation', href: '#' },
+    { label: 'FAQ', href: '/faq' },
     { label: 'Tutorials', href: '#' },
     { label: 'Blog', href: '#' },
     { label: 'Community', href: '#' },
