@@ -263,6 +263,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bonus_credits: number
           created_at: string | null
           display_name: string | null
           email: string
@@ -272,6 +273,8 @@ export type Database = {
           linkedin_url: string | null
           monthly_generation_limit: number | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           subscription_tier: string | null
           twitter_handle: string | null
           updated_at: string | null
@@ -279,6 +282,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bonus_credits?: number
           created_at?: string | null
           display_name?: string | null
           email: string
@@ -288,6 +292,8 @@ export type Database = {
           linkedin_url?: string | null
           monthly_generation_limit?: number | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription_tier?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
@@ -295,6 +301,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bonus_credits?: number
           created_at?: string | null
           display_name?: string | null
           email?: string
@@ -304,10 +311,45 @@ export type Database = {
           linkedin_url?: string | null
           monthly_generation_limit?: number | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription_tier?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          credits_awarded: boolean
+          id: string
+          referral_code: string
+          referred_id: string | null
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          credits_awarded?: boolean
+          id?: string
+          referral_code: string
+          referred_id?: string | null
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          credits_awarded?: boolean
+          id?: string
+          referral_code?: string
+          referred_id?: string | null
+          referrer_id?: string
+          status?: string
         }
         Relationships: []
       }
