@@ -135,7 +135,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Return safe defaults instead of throwing to prevent blank screens
+    // during HMR or transient re-render cycles
+    return {
+      session: null,
+      user: null,
+      loading: true,
+      signIn: async () => { throw new Error('AuthProvider not available'); },
+      signUp: async () => { throw new Error('AuthProvider not available'); },
+      signOut: async () => { throw new Error('AuthProvider not available'); },
+    } as AuthContextType;
   }
   return context;
 };
