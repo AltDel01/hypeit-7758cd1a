@@ -366,6 +366,7 @@ const Navbar = () => {
       </nav>
       
       <FooterMenu />
+      <ReferralDialog open={referralOpen} onOpenChange={setReferralOpen} />
     </>
   );
 };
