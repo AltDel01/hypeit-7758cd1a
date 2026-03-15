@@ -35,12 +35,12 @@ const CreditUsage = () => {
     enabled: !!user?.id,
   });
 
-  const { data: generatedImages } = useQuery({
-    queryKey: ['generated-images', user?.id],
+  const { data: generationRequests } = useQuery({
+    queryKey: ['generation-requests-usage', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
-        .from('generated_images')
+        .from('generation_requests')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -54,16 +54,22 @@ const CreditUsage = () => {
 
   const usedCredits = profile?.generations_this_month || 0;
   const totalCredits = profile?.monthly_generation_limit || 25;
-  const usagePercentage = (usedCredits / totalCredits) * 100;
+  const usagePercentage = Math.min((usedCredits / totalCredits) * 100, 100);
 
-  // Transform generated images into usage history
-  const usageHistory: UsageHistoryItem[] = (generatedImages || []).map((img) => ({
-    id: img.id,
-    action: 'Image Generation',
-    credits: 1,
-    date: img.created_at || '',
-    platform: img.platform,
-  }));
+  // Transform generation requests into usage history
+  const usageHistory: UsageHistoryItem[] = (generationRequests || []).map((req: any) => {
+    // Parse prompt to get a readable action label
+    const promptStr = req.prompt || '';
+    const featureMatch = promptStr.match(/^\[([^\]]+)\]/);
+    const action = featureMatch ? featureMatch[1] : (req.request_type === 'video' ? 'Video Generation' : 'Image Generation');
+    return {
+      id: req.id,
+      action,
+      credits: req.credits_used || 10,
+      date: req.created_at || '',
+      platform: req.request_type || 'video',
+    };
+  });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

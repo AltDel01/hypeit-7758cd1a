@@ -167,6 +167,7 @@ export type Database = {
           assigned_to_name: string | null
           completed_at: string | null
           created_at: string | null
+          credits_used: number
           id: string
           prompt: string
           reference_image_url: string | null
@@ -185,6 +186,7 @@ export type Database = {
           assigned_to_name?: string | null
           completed_at?: string | null
           created_at?: string | null
+          credits_used?: number
           id?: string
           prompt: string
           reference_image_url?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           assigned_to_name?: string | null
           completed_at?: string | null
           created_at?: string | null
+          credits_used?: number
           id?: string
           prompt?: string
           reference_image_url?: string | null

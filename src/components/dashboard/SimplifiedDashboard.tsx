@@ -24,6 +24,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AiClipButton from '@/components/shared/AiClipButton';
 import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
+import CreditCostPreview from './CreditCostPreview';
+import { calculateCreditCost } from '@/config/creditCosts';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 // Dummy clips (video files removed)
 const dummyClips = [
@@ -103,6 +107,23 @@ const getAspectClass = (ratio: string) => {
 };
 
 const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDashboardProps) => {
+  const { user } = useAuth();
+  const { data: profileData } = useQuery({
+    queryKey: ['profile-credits', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('generations_this_month, monthly_generation_limit')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+    refetchInterval: 10000,
+  });
+
+  const remainingCredits = (profileData?.monthly_generation_limit || 25) - (profileData?.generations_this_month || 0);
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
@@ -171,7 +192,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl })
+      const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '' });
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
         .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
@@ -322,7 +344,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '' });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
       if (result) {
         hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
@@ -410,7 +433,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
@@ -446,7 +470,13 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const submitCost = calculateCreditCost({ activeMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration });
+      if (submitCost.totalCost > remainingCredits) {
+        toast.error(`Not enough credits. You need ${submitCost.totalCost} but have ${remainingCredits} remaining. Try lowering quality or duration, or upgrade your plan.`);
+        setIsSubmitting(false);
+        return;
+      }
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
@@ -866,6 +896,15 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
+            {/* Credit Cost Preview */}
+            <CreditCostPreview
+              activeMode={activeMode}
+              selectedFeatures={selectedFeatures}
+              resolution={selectedResolution}
+              duration={selectedDuration}
+              remainingCredits={remainingCredits}
+            />
 
             {/* Generate Button */}
             <Button

@@ -23,6 +23,7 @@ export interface CreateGenerationRequestParams {
   prompt: string;
   aspectRatio?: string;
   referenceImageUrl?: string;
+  creditsUsed?: number;
 }
 
 /**
@@ -42,12 +43,23 @@ export async function createGenerationRequest(
     // Get user profile for display name
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, email")
+      .select("display_name, email, generations_this_month, monthly_generation_limit")
       .eq("id", user.id)
       .maybeSingle();
 
     const userName = profile?.display_name || user.email?.split("@")[0] || "Unknown";
     const userEmail = profile?.email || user.email || "";
+
+    // Check credit balance before inserting
+    const creditsUsed = params.creditsUsed || 10;
+    const remaining = (profile as any)?.monthly_generation_limit 
+      ? ((profile as any).monthly_generation_limit - ((profile as any).generations_this_month || 0))
+      : 25;
+    
+    if (creditsUsed > remaining) {
+      console.error("Insufficient credits:", { creditsUsed, remaining });
+      return null;
+    }
 
     // Insert generation request
     const { data: request, error } = await supabase
@@ -61,6 +73,7 @@ export async function createGenerationRequest(
         aspect_ratio: params.aspectRatio || null,
         reference_image_url: params.referenceImageUrl || null,
         status: "new",
+        credits_used: creditsUsed,
       })
       .select()
       .single();
