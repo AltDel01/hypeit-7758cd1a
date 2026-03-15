@@ -55,6 +55,8 @@ const CreditUsage = () => {
   const usedCredits = profile?.generations_this_month || 0;
   const totalCredits = profile?.monthly_generation_limit || 25;
   const usagePercentage = Math.min((usedCredits / totalCredits) * 100, 100);
+  const isFree = (profile?.subscription_tier || 'free') === 'free';
+  const periodLabel = isFree ? 'Lifetime' : 'Monthly';
 
   // Transform generation requests into usage history
   const usageHistory: UsageHistoryItem[] = (generationRequests || []).map((req: any) => {
@@ -117,7 +119,7 @@ const CreditUsage = () => {
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="text-2xl sm:text-3xl font-bold text-white">{usedCredits}</div>
-              <p className="text-[10px] sm:text-xs text-gray-500">out of {totalCredits} this month</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">out of {totalCredits} {isFree ? 'total' : 'this month'}</p>
             </CardContent>
           </Card>
 
@@ -143,7 +145,7 @@ const CreditUsage = () => {
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="text-2xl sm:text-3xl font-bold text-white capitalize">{profile?.subscription_tier || 'Free'}</div>
-              <p className="text-[10px] sm:text-xs text-gray-500">{totalCredits}/month</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">{totalCredits} {isFree ? 'one-time' : '/month'}</p>
             </CardContent>
           </Card>
         </div>
@@ -151,7 +153,7 @@ const CreditUsage = () => {
         {/* Usage Progress */}
         <Card className="bg-gray-900/50 border-gray-800 mb-6 sm:mb-8">
           <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
-            <CardTitle className="text-base sm:text-lg font-medium text-white">Monthly Usage</CardTitle>
+            <CardTitle className="text-base sm:text-lg font-medium text-white">{periodLabel} Usage</CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6 pt-0">
             <div className="space-y-2 sm:space-y-3">
@@ -163,7 +165,7 @@ const CreditUsage = () => {
               <p className="text-[10px] sm:text-xs text-gray-500">
                 {usagePercentage >= 80 
                   ? "You're running low on credits. Consider upgrading."
-                  : `${Math.round(100 - usagePercentage)}% of your monthly credits remaining`
+                  : `${Math.round(100 - usagePercentage)}% of your ${isFree ? 'total' : 'monthly'} credits remaining`
                 }
               </p>
             </div>
