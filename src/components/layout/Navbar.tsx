@@ -163,6 +163,8 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [referralOpen, setReferralOpen] = useState(false);
+  const credits = useUserCredits();
 
   useEffect(() => {
     if (!user) {
