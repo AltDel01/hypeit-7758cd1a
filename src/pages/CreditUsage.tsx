@@ -153,7 +153,7 @@ const CreditUsage = () => {
         {/* Usage Progress */}
         <Card className="bg-gray-900/50 border-gray-800 mb-6 sm:mb-8">
           <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
-            <CardTitle className="text-base sm:text-lg font-medium text-white">Monthly Usage</CardTitle>
+            <CardTitle className="text-base sm:text-lg font-medium text-white">{periodLabel} Usage</CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6 pt-0">
             <div className="space-y-2 sm:space-y-3">
