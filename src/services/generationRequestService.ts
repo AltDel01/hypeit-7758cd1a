@@ -23,6 +23,7 @@ export interface CreateGenerationRequestParams {
   prompt: string;
   aspectRatio?: string;
   referenceImageUrl?: string;
+  creditsUsed?: number;
 }
 
 /**
