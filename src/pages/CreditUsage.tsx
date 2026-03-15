@@ -145,7 +145,7 @@ const CreditUsage = () => {
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="text-2xl sm:text-3xl font-bold text-white capitalize">{profile?.subscription_tier || 'Free'}</div>
-              <p className="text-[10px] sm:text-xs text-gray-500">{totalCredits}/month</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">{totalCredits} {isFree ? 'one-time' : '/month'}</p>
             </CardContent>
           </Card>
         </div>
