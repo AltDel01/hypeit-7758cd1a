@@ -165,7 +165,7 @@ const CreditUsage = () => {
               <p className="text-[10px] sm:text-xs text-gray-500">
                 {usagePercentage >= 80 
                   ? "You're running low on credits. Consider upgrading."
-                  : `${Math.round(100 - usagePercentage)}% of your monthly credits remaining`
+                  : `${Math.round(100 - usagePercentage)}% of your ${isFree ? 'total' : 'monthly'} credits remaining`
                 }
               </p>
             </div>
