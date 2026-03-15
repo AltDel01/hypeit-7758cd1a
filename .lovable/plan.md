@@ -1,54 +1,38 @@
 
-## Why You Can't Upload to Supabase Storage
 
-The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
+# Fix Default Credit Limits & Backfill Usage
 
-- avatars bucket: has an INSERT policy for authenticated users
-- product-images bucket: has an INSERT policy for authenticated users  
-- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
+## The Problem
 
-This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
+Right now every user has `monthly_generation_limit = 25` and `generations_this_month = 0`, even though some users (like your account with 290 actual credits used) have made real generation requests. This is because:
 
----
+1. The old limit of 25 was designed for "25 generations" (flat count), not "25 credits" — but now a single generation can cost 60-200+ credits
+2. The trigger that tracks usage was added after existing requests were made, so past usage was never counted
 
-## What Will Be Fixed
+## What Will Change
 
-### 1. Add an INSERT policy to `generated-images` bucket
-A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
+### 1. Update all existing free-tier users' limit from 25 to 500
+Every profile currently on the `free` tier gets `monthly_generation_limit = 500`.
 
-```sql
-CREATE POLICY "Authenticated users can upload to generated-images"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'generated-images');
-```
+### 2. Backfill `generations_this_month` from actual usage
+For each user, sum up all `credits_used` from their `generation_requests` and set that as their `generations_this_month`. Your account would go from 0 to 290 (leaving you 210 credits remaining).
 
-We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
+### 3. Update `handle_new_user()` function
+New signups will get `monthly_generation_limit = 500` instead of the default 25.
 
-```sql
-CREATE POLICY "Service role can upload to generated-images"
-ON storage.objects
-FOR INSERT
-TO service_role
-WITH CHECK (bucket_id = 'generated-images');
-```
+### 4. Update the profiles table default
+Change the column default from 25 to 500.
 
-### 2. Update the dashboard code to use Supabase video URLs
-Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
+## Files to Modify
 
-- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
-- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
-- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
-- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
+| Target | Change |
+|--------|--------|
+| DB migration | ALTER profiles default to 500, UPDATE existing free users to 500, backfill `generations_this_month` from `generation_requests` |
+| DB migration | Replace `handle_new_user()` to set limit = 500 |
 
-### Upload Steps (after policy fix)
+No frontend code changes needed — the existing `useUserCredits` hook already reads these values correctly.
 
-1. Go to Supabase Storage → `generated-images` bucket
-2. Create a folder called `demo-clips`
-3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
-4. Tell me when done — I'll update the code
+## After This
 
-### Files to Change
-- **SQL migration** — add INSERT policy on `generated-images` bucket
-- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
+Your credit display would show: **210 / 500 credits remaining** (500 limit minus 290 used).
+
