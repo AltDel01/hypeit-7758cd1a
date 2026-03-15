@@ -55,6 +55,8 @@ const CreditUsage = () => {
   const usedCredits = profile?.generations_this_month || 0;
   const totalCredits = profile?.monthly_generation_limit || 25;
   const usagePercentage = Math.min((usedCredits / totalCredits) * 100, 100);
+  const isFree = (profile?.subscription_tier || 'free') === 'free';
+  const periodLabel = isFree ? 'Lifetime' : 'Monthly';
 
   // Transform generation requests into usage history
   const usageHistory: UsageHistoryItem[] = (generationRequests || []).map((req: any) => {
