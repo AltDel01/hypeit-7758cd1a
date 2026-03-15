@@ -43,7 +43,7 @@ export async function createGenerationRequest(
     // Get user profile for display name
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, email")
+      .select("display_name, email, generations_this_month, monthly_generation_limit")
       .eq("id", user.id)
       .maybeSingle();
 
