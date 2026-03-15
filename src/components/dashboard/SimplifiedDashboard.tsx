@@ -897,6 +897,15 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
               </DropdownMenu>
             </div>
 
+            {/* Credit Cost Preview */}
+            <CreditCostPreview
+              activeMode={activeMode}
+              selectedFeatures={selectedFeatures}
+              resolution={selectedResolution}
+              duration={selectedDuration}
+              remainingCredits={remainingCredits}
+            />
+
             {/* Generate Button */}
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
