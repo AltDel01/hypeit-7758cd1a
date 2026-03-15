@@ -232,7 +232,7 @@ const Navbar = () => {
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-gray-900/95 backdrop-blur-lg border-gray-800">
+            <DropdownMenuContent align="end" className="w-64 bg-gray-900/95 backdrop-blur-lg border-gray-800">
               <Link to="/settings" className="block px-3 py-3 hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-medium">
@@ -244,6 +244,43 @@ const Navbar = () => {
                   </div>
                 </div>
               </Link>
+              <DropdownMenuSeparator className="bg-gray-700" />
+
+              {/* Credits display */}
+              {user && !credits.isLoading && (
+                <div className="px-3 py-3">
+                  <Link to="/credit-usage" className="block group">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-300 text-sm font-medium">Credits</span>
+                      <span className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">
+                        {credits.remaining} left <span className="text-gray-500">›</span>
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-[#b616d6] transition-all duration-500"
+                        style={{ width: `${Math.max(2, 100 - credits.percentage)}%` }}
+                      />
+                    </div>
+                    {credits.bonusCredits > 0 && (
+                      <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                        Using bonus credits
+                      </p>
+                    )}
+                  </Link>
+                </div>
+              )}
+
+              {/* Get free credits */}
+              <button
+                onClick={() => setReferralOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 w-full text-left hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer"
+              >
+                <Gift size={16} className="text-primary" />
+                <span className="text-primary text-sm font-medium">Get free credits</span>
+              </button>
+
               <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuItem asChild>
                 <Link to="/pricing" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
