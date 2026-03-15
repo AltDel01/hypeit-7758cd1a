@@ -107,6 +107,23 @@ const getAspectClass = (ratio: string) => {
 };
 
 const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDashboardProps) => {
+  const { user } = useAuth();
+  const { data: profileData } = useQuery({
+    queryKey: ['profile-credits', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('generations_this_month, monthly_generation_limit')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+    refetchInterval: 10000,
+  });
+
+  const remainingCredits = (profileData?.monthly_generation_limit || 25) - (profileData?.generations_this_month || 0);
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
