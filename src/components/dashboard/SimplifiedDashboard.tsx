@@ -470,7 +470,13 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const submitCost = calculateCreditCost({ activeMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration });
+      if (submitCost.totalCost > remainingCredits) {
+        toast.error(`Not enough credits. You need ${submitCost.totalCost} but have ${remainingCredits} remaining. Try lowering quality or duration, or upgrade your plan.`);
+        setIsSubmitting(false);
+        return;
+      }
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
