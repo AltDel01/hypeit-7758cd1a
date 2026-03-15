@@ -130,11 +130,10 @@ const Pricing = () => {
         </div>
         
         <div className="mt-10 text-center text-brand-slate-500 text-sm px-2">
-          Need a custom plan?{" "}
-          <a href="#" className="text-brand-blue hover:underline">
-            Contact us
-          </a>{" "}
-          for enterprise pricing.
+          Need a custom plan? Visit our page{" "}
+          <a href="/enterprise" className="text-brand-blue hover:underline">
+            here
+          </a>
         </div>
       </div>
     </section>);
