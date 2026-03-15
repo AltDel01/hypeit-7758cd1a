@@ -433,7 +433,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl });
+      const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
