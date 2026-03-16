@@ -114,16 +114,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .is('referred_id', null);
 
           // Award bonus credits to the new user
-          await supabase.rpc('increment_bonus_credits' as any, {
-            user_id: data.user.id,
-            amount: 10
-          }).then(() => {}).catch(() => {
-            // Fallback: direct update
-            supabase
+          try {
+            await supabase
               .from('profiles')
-              .update({ bonus_credits: 10 })
+              .update({ bonus_credits: 10 } as any)
               .eq('id', data.user.id);
-          });
+          } catch {
+            console.error('Failed to award bonus credits');
+          }
         }
       }
       
