@@ -30,6 +30,7 @@ import Enterprise from "./pages/Enterprise";
 import Features from "./pages/Features";
 import RefundRequest from "./pages/RefundRequest";
 import FAQ from "./pages/FAQ";
+import InviteRedirect from "./pages/InviteRedirect";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -132,6 +133,7 @@ const AppRoutes = () => {
       />
       <Route path="/faq" element={<CustomErrorBoundary><FAQ /></CustomErrorBoundary>} />
       <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
+      <Route path="/invite/:code" element={<InviteRedirect />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
     </Routes>

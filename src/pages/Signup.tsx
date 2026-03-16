@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +31,15 @@ const formSchema = z.object({
 export default function Signup() {
   const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Capture referral code from URL or localStorage
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+  }, [searchParams]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +54,10 @@ export default function Signup() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signUp(values.email, values.password, values.name);
+      const refCode = localStorage.getItem('referralCode') || undefined;
+      await signUp(values.email, values.password, values.name, refCode);
+      // Clear referral code after successful signup
+      localStorage.removeItem('referralCode');
     } catch (error) {
       console.error('Signup failed:', error);
     } finally {

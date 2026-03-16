@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name?: string) => Promise<void>;
+  signUp: (email: string, password: string, name?: string, referralCode?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -69,21 +69,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string, referralCode?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({ 
+      const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            name
+            name,
+            referral_code: referralCode
           }
         }
       });
       if (error) throw error;
+
+      // If referral code provided, link the referral
+      if (referralCode && data.user) {
+        // Find the referrer by referral_code
+        const { data: referrerProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('referral_code', referralCode)
+          .maybeSingle();
+
+        if (referrerProfile) {
+          // Update the new user's referred_by
+          await supabase
+            .from('profiles')
+            .update({ referred_by: referrerProfile.id })
+            .eq('id', data.user.id);
+
+          // Update the referral record status
+          await supabase
+            .from('referrals')
+            .update({ 
+              referred_id: data.user.id, 
+              status: 'signed_up' 
+            } as any)
+            .eq('referrer_id', referrerProfile.id)
+            .eq('referral_code', referralCode)
+            .is('referred_id', null);
+
+          // Award bonus credits to the new user
+          try {
+            await supabase
+              .from('profiles')
+              .update({ bonus_credits: 10 } as any)
+              .eq('id', data.user.id);
+          } catch {
+            console.error('Failed to award bonus credits');
+          }
+        }
+      }
       
       // Send signup notification email (fire and forget)
       sendNotificationEmail({
