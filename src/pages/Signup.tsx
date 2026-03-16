@@ -31,6 +31,15 @@ const formSchema = z.object({
 export default function Signup() {
   const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Capture referral code from URL or localStorage
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+  }, [searchParams]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
