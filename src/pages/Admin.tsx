@@ -51,6 +51,10 @@ const Admin = () => {
                   <BarChart3 className="h-4 w-4" />
                   Performance
                 </TabsTrigger>
+                <TabsTrigger value="credits" className="gap-2">
+                  <Zap className="h-4 w-4" />
+                  Credits
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="requests">
@@ -64,6 +68,10 @@ const Admin = () => {
 
               <TabsContent value="stats">
                 <AdminStatsSection />
+              </TabsContent>
+
+              <TabsContent value="credits">
+                <AdminCreditsSection />
               </TabsContent>
             </Tabs>
           </div>
