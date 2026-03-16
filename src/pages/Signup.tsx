@@ -54,7 +54,10 @@ export default function Signup() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signUp(values.email, values.password, values.name);
+      const refCode = localStorage.getItem('referralCode') || undefined;
+      await signUp(values.email, values.password, values.name, refCode);
+      // Clear referral code after successful signup
+      localStorage.removeItem('referralCode');
     } catch (error) {
       console.error('Signup failed:', error);
     } finally {
