@@ -76,7 +76,7 @@ export function useReferral(): ReferralData {
   }, [user]);
 
   const referralLink = referralCode
-    ? `${window.location.origin}/signup?ref=${referralCode}`
+    ? `https://viralin.ai/invite/${referralCode}`
     : '';
 
   return { referralCode, referralLink, signedUp, converted, isLoading, generateCode };
