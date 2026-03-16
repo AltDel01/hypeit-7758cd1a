@@ -7,9 +7,10 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { RequestManagementSection } from '@/components/admin/RequestManagementSection';
 import { TestRequestSection } from '@/components/admin/TestRequestSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Users, BarChart3 } from 'lucide-react';
+import { ClipboardList, Users, BarChart3, Zap } from 'lucide-react';
 import AdminEditorsSection from '@/components/admin/AdminEditorsSection';
 import AdminStatsSection from '@/components/admin/AdminStatsSection';
+import AdminCreditsSection from '@/components/admin/AdminCreditsSection';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -50,6 +51,10 @@ const Admin = () => {
                   <BarChart3 className="h-4 w-4" />
                   Performance
                 </TabsTrigger>
+                <TabsTrigger value="credits" className="gap-2">
+                  <Zap className="h-4 w-4" />
+                  Credits
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="requests">
@@ -63,6 +68,10 @@ const Admin = () => {
 
               <TabsContent value="stats">
                 <AdminStatsSection />
+              </TabsContent>
+
+              <TabsContent value="credits">
+                <AdminCreditsSection />
               </TabsContent>
             </Tabs>
           </div>
