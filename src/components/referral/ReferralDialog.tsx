@@ -38,7 +38,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           </div>
 
           <DialogTitle className="text-2xl font-bold text-foreground mb-1">
-            Spread the word
+            Make other people viral too
           </DialogTitle>
           <p className="text-muted-foreground text-sm">and earn free credits</p>
 
