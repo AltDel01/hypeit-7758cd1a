@@ -904,6 +904,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
               resolution={selectedResolution}
               duration={selectedDuration}
               remainingCredits={remainingCredits}
+              prompt={prompt}
+              requestType="video"
             />
 
             {/* Generate Button */}
