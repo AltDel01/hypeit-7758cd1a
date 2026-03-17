@@ -14,6 +14,8 @@ interface CreditCostPreviewProps {
   resolution: string;
   duration: string;
   remainingCredits: number;
+  prompt?: string;
+  requestType?: 'video' | 'image';
 }
 
 const CreditCostPreview: React.FC<CreditCostPreviewProps> = ({
@@ -22,8 +24,10 @@ const CreditCostPreview: React.FC<CreditCostPreviewProps> = ({
   resolution,
   duration,
   remainingCredits,
+  prompt,
+  requestType,
 }) => {
-  const cost = calculateCreditCost({ activeMode, selectedFeatures, resolution, duration });
+  const cost = calculateCreditCost({ activeMode, selectedFeatures, resolution, duration, prompt, requestType });
   const isInsufficient = cost.totalCost > remainingCredits;
   const isLow = !isInsufficient && remainingCredits - cost.totalCost < remainingCredits * 0.2;
 
