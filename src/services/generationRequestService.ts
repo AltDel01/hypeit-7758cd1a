@@ -51,10 +51,10 @@ export async function createGenerationRequest(
     const userEmail = profile?.email || user.email || "";
 
     // Check credit balance before inserting
-    const creditsUsed = params.creditsUsed || 10;
+    const creditsUsed = params.creditsUsed || 50;
     const remaining = (profile as any)?.monthly_generation_limit 
       ? ((profile as any).monthly_generation_limit - ((profile as any).generations_this_month || 0))
-      : 25;
+      : 500;
     
     if (creditsUsed > remaining) {
       console.error("Insufficient credits:", { creditsUsed, remaining });

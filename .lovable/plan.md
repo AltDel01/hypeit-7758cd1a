@@ -1,29 +1,54 @@
 
+## Why You Can't Upload to Supabase Storage
 
-# Ensure Credit Changes Work End-to-End (Homepage → Dashboard)
+The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
 
-## Current State
-The credit calculation with prompt-based detection is already integrated into all 4 `calculateCreditCost` call sites in `SimplifiedDashboard.tsx`. The homepage saves prompt text, features, resolution, duration, and mode via `saveEditorState`, and the dashboard loads and uses all of these when calculating costs. **The flow is already connected.**
+- avatars bucket: has an INSERT policy for authenticated users
+- product-images bucket: has an INSERT policy for authenticated users  
+- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
 
-## One Issue Found
-In `src/services/generationRequestService.ts` line 54, there's a **fallback of 10 credits**:
-```ts
-const creditsUsed = params.creditsUsed || 10;
+This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
+
+---
+
+## What Will Be Fixed
+
+### 1. Add an INSERT policy to `generated-images` bucket
+A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
+
+```sql
+CREATE POLICY "Authenticated users can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'generated-images');
 ```
-If for any reason `creditsUsed` isn't passed (edge case), it would fall back to the old 10-credit charge. This should be updated to **50** to match the new minimum video floor.
 
-Also, the default remaining credits fallback on line 57 is `25`, which may be too low now that minimum costs are 50.
+We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
 
-## Changes
+```sql
+CREATE POLICY "Service role can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO service_role
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-### 1. Update `src/services/generationRequestService.ts`
-- Line 54: Change fallback from `10` to `50` — `const creditsUsed = params.creditsUsed || 50;`
-- Line 57: Update remaining credits fallback from `25` to `500` to match the current free tier allocation
+### 2. Update the dashboard code to use Supabase video URLs
+Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
 
-### 2. No other changes needed
-All 4 `calculateCreditCost` call sites already pass `prompt` (the raw user text) and `requestType: 'video'`, so prompt-based keyword detection and the new base costs are already active for:
-- Special mode auto-submit (homepage → dashboard with AI Clip/Retention/Creator)
-- Standard prompt auto-submit (homepage → dashboard)
-- Special mode manual submit (dashboard)
-- Standard prompt manual submit (dashboard)
+- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
+- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
+- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
+- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
 
+### Upload Steps (after policy fix)
+
+1. Go to Supabase Storage → `generated-images` bucket
+2. Create a folder called `demo-clips`
+3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
+4. Tell me when done — I'll update the code
+
+### Files to Change
+- **SQL migration** — add INSERT policy on `generated-images` bucket
+- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
