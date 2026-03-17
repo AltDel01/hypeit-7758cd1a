@@ -1,79 +1,54 @@
 
+## Why You Can't Upload to Supabase Storage
 
-# Update Credit Costs + Prompt-Based Credit Detection
+The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
 
-## 1. Update base costs in `src/config/creditCosts.ts`
+- avatars bucket: has an INSERT policy for authenticated users
+- product-images bucket: has an INSERT policy for authenticated users  
+- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
 
-| Mode | Current | New |
-|------|---------|-----|
-| default | 10 | **50** |
-| aiedit | 20 | **40** |
-| retention | 40 | **50** |
-| creator | 50 | **50** |
-| aiclip | 60 | **70** |
+This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
 
-## 2. Add minimum cost floors in `calculateCreditCost`
+---
 
-- Video requests: `Math.max(totalCost, 50)`
-- Image requests: `Math.max(totalCost, 30)`
-- Add `requestType` and `prompt` optional parameters to the function signature
+## What Will Be Fixed
 
-## 3. New function: `extractSettingsFromPrompt(prompt)` in `creditCosts.ts`
+### 1. Add an INSERT policy to `generated-images` bucket
+A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
 
-Scans the raw prompt text (case-insensitive) for:
+```sql
+CREATE POLICY "Authenticated users can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-**Duration keywords** → map to duration multiplier:
-- "5 seconds/5s" → 5s (1.0x)
-- "10 seconds/10s" → 10s (1.8x)
-- "15 seconds/15s" → 15s (2.5x)
-- "30 seconds/30s" → 30s (4.0x)
-- "60 seconds/60s/1 minute" → 60s (7.0x)
+We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
 
-**Quality keywords** → map to resolution multiplier:
-- "480p" → 0.5x
-- "720p" → 1.0x
-- "1080p" → 1.5x
-- "4k" → 3.0x
+```sql
+CREATE POLICY "Service role can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO service_role
+WITH CHECK (bucket_id = 'generated-images');
+```
 
-**Feature keywords** → map to feature add-on costs (detected only if not already in `selectedFeatures`):
-- "AI Edit", "Motion", "Insert", "Blur", "Scale", "Clear" → aiedit mode or effects add-on
-- "iPhone Quality" → `iphone-quality` (+5)
-- "Trim", "Crop" → `trim` (+5)
-- "Caption" → `caption` (+10)
-- "Color" → `effects` (+10)
-- "B-roll" → `b-roll` (+15)
-- "Transitions" → `transitions` (+10)
-- "Effects" → `effects` (+10)
-- "Zoom", "Zoom In", "Zoom Out" → `zoom` (+5)
-- "Thumbnail", "Thumbnail Generator" → `thumbnail` (+5)
-- "Censor Word", "Silent" → `censor-word` (+5)
-- "Language Dubbing" → `change-language` (+25)
-- "AI Clip", "Clipping", "Clipper", "Clip" → override activeMode to `aiclip`
-- "Retention Editing", "Hook" → override activeMode to `retention`
-- "AI Creator", "Avatar", "UGC", "AI Influencer" → override activeMode to `creator`
+### 2. Update the dashboard code to use Supabase video URLs
+Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
 
-Logic: prompt-detected values only apply when the corresponding UI setting is unselected ("" or "Default"). UI selections always take priority.
+- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
+- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
+- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
+- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
 
-## 4. Update `calculateCreditCost` flow
+### Upload Steps (after policy fix)
 
-1. Call `extractSettingsFromPrompt(prompt)` to get detected resolution, duration, features, and mode override
-2. Merge: if UI resolution is empty, use prompt-detected resolution; same for duration
-3. Add prompt-detected features to selectedFeatures (no duplicates)
-4. If prompt detects a tool mode and no activeMode is set, use prompt-detected mode for base cost
-5. Calculate total, then apply `Math.max(total, floor)`
+1. Go to Supabase Storage → `generated-images` bucket
+2. Create a folder called `demo-clips`
+3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
+4. Tell me when done — I'll update the code
 
-## 5. Update callers (4 call sites in `SimplifiedDashboard.tsx`)
-
-Pass `prompt` (the raw user text) and `requestType: 'video'` to all `calculateCreditCost` calls at lines ~195, ~347, ~436, ~473.
-
-## 6. Update `CreditCostPreview.tsx`
-
-Add `prompt` and `requestType` props, pass through to `calculateCreditCost` so the live preview reflects prompt-based detection in real time.
-
-## Result
-
-- No settings, no prompt hints: `50 × 1 × 1 = 50 credits` (minimum floor)
-- User types "make it 15 seconds 1080p": `50 × 1.5 × 2.5 = 188 credits`
-- User types "add b-roll and captions, 30s 1080p": `(50+15+10) × 1.5 × 4.0 = 450 credits`
-- User selects AI Clip + 1080P + 30s via UI: `70 × 1.5 × 4.0 = 420 credits`
-
+### Files to Change
+- **SQL migration** — add INSERT policy on `generated-images` bucket
+- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
