@@ -133,6 +133,7 @@ const AppRoutes = () => {
         element={<AuthRoute><CustomErrorBoundary><Signup /></CustomErrorBoundary></AuthRoute>}
       />
       <Route path="/faq" element={<CustomErrorBoundary><FAQ /></CustomErrorBoundary>} />
+      <Route path="/explainer" element={<CustomErrorBoundary><Explainer /></CustomErrorBoundary>} />
       <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
       <Route path="/invite/:code" element={<InviteRedirect />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
