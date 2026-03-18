@@ -1,47 +1,54 @@
 
+## Why You Can't Upload to Supabase Storage
 
-# Video Explainer Page for Viralin AI
+The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
 
-Create a new `/explainer` page with an animated, auto-playing product demo that showcases the Viralin AI workflow using motion graphics built with Framer Motion and CSS animations. This page will NOT modify any existing files except adding a route in `App.tsx`.
+- avatars bucket: has an INSERT policy for authenticated users
+- product-images bucket: has an INSERT policy for authenticated users  
+- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
 
-## What it will show (auto-playing loop)
+This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
 
-A cinematic, scroll-driven animated sequence with 4 scenes:
+---
 
-1. **Scene 1 — Hero Intro** (fade-in with scale): "Viralin AI" title with gradient text animation, tagline "Chat-Based AI Video Editing", particle/glow background
-2. **Scene 2 — Upload**: Animated file icon drops into a mock upload zone, file name types out character-by-character
-3. **Scene 3 — Chat Prompt**: A mock chat interface where a prompt auto-types ("Add captions, B-roll, and transitions. Make it 1080p 15 seconds"), then feature pills animate in one-by-one (Caption, B-roll, Transitions), a processing spinner appears
-4. **Scene 4 — Result**: A mock video player "reveals" with view/like counters animating up, social platform icons appear, CTA button pulses
+## What Will Be Fixed
 
-Each scene auto-advances after a timed delay, then the whole sequence loops.
+### 1. Add an INSERT policy to `generated-images` bucket
+A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
 
-## Technical approach
-
-### New files
-- `src/pages/Explainer.tsx` — page component with route
-- `src/components/explainer/ExplainerHero.tsx` — scene orchestrator using `useState` + `useEffect` timers and CSS animations/transitions
-- `src/components/explainer/scenes/IntroScene.tsx`
-- `src/components/explainer/scenes/UploadScene.tsx`
-- `src/components/explainer/scenes/ChatPromptScene.tsx`
-- `src/components/explainer/scenes/ResultScene.tsx`
-
-### Route addition (only existing file change)
-Add to `App.tsx`:
-```
-<Route path="/explainer" element={<CustomErrorBoundary><Explainer /></CustomErrorBoundary>} />
+```sql
+CREATE POLICY "Authenticated users can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'generated-images');
 ```
 
-### Animation approach
-- **No new dependencies** — use CSS keyframes (already have a rich animation system) + React state-driven transitions with `transition-all duration-700` and conditional class toggling
-- Typewriter effect via `useState` + `setInterval` character-by-character
-- Scene transitions via opacity/transform with CSS transitions triggered by state changes
-- Staggered pill animations via `animation-delay` on each element
-- Counter animation via `requestAnimationFrame` number interpolation
-- Background: reuse existing gradient blurs from HeroWithEditor pattern
+We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
 
-### Design
-- Full dark theme matching existing homepage (`bg-black`, `bg-gray-900`, purple/blue gradients)
-- Reuse existing UI components: `Button`, gradient text styles, rounded pill buttons
-- Full-screen sections, each scene occupies viewport height
-- Navigation: minimal — just a back-to-home link and the scene indicator dots
+```sql
+CREATE POLICY "Service role can upload to generated-images"
+ON storage.objects
+FOR INSERT
+TO service_role
+WITH CHECK (bucket_id = 'generated-images');
+```
 
+### 2. Update the dashboard code to use Supabase video URLs
+Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
+
+- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
+- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
+- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
+- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
+
+### Upload Steps (after policy fix)
+
+1. Go to Supabase Storage → `generated-images` bucket
+2. Create a folder called `demo-clips`
+3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
+4. Tell me when done — I'll update the code
+
+### Files to Change
+- **SQL migration** — add INSERT policy on `generated-images` bucket
+- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
