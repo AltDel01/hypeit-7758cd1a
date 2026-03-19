@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useReferral } from '@/hooks/useReferral';
 import { Zap, Share2, Crown, MessageSquare, Link2, X, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import viralinLogo from '@/assets/viralin-logo-icon.png';
 
 interface ReferralDialogProps {
   open: boolean;
