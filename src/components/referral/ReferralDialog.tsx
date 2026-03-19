@@ -53,17 +53,17 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <Share2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <Share2 className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm font-medium">Share your invite link</span>
             </div>
             <div className="flex items-start gap-3">
-              <Crown className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <Crown className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm">
                 They sign up and get <strong>extra 10 credits</strong>
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <MessageSquare className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <MessageSquare className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm">
                 You get <strong>50 credits</strong> once they subscribe to a qualifying paid plan
               </span>
@@ -71,7 +71,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           </div>
 
           {/* Stats */}
-          <p className="text-primary text-sm font-medium pt-2">
+          <p className="text-[#8c52ff] text-sm font-medium pt-2">
             {signedUp} signed up, {converted} converted
           </p>
 
