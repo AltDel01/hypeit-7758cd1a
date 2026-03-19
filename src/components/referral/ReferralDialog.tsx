@@ -44,7 +44,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           <p className="text-muted-foreground text-sm">and earn free credits</p>
 
           {/* Logo */}
-          <img src={viralinLogo} alt="Viralin AI" className="absolute top-12 right-8 w-20 h-20 rounded-2xl object-contain" />
+          <img src={viralinLogo} alt="Viralin AI" className="absolute top-12 right-10 w-16 h-16 rounded-2xl object-contain" />
         </div>
 
         {/* How it works */}
