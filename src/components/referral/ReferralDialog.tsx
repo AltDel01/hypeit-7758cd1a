@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useReferral } from '@/hooks/useReferral';
 import { Zap, Share2, Crown, MessageSquare, Link2, X, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import viralinLogo from '@/assets/viralin-logo-icon.png';
 
 interface ReferralDialogProps {
   open: boolean;
@@ -32,8 +33,8 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md p-0 overflow-hidden">
         {/* Hero section */}
-        <div className="relative p-6 pb-4">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-medium mb-4">
+        <div className="relative px-6 pt-6 pb-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#8c52ff]/20 text-[#8c52ff] text-xs font-medium mb-4">
             Earn 50+ credits
           </div>
 
@@ -42,8 +43,8 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           </DialogTitle>
           <p className="text-muted-foreground text-sm">and earn free credits</p>
 
-          {/* Decorative gradient blob */}
-          <div className="absolute top-4 right-4 w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/60 via-pink-500/50 to-orange-400/60 blur-sm opacity-80" />
+          {/* Logo */}
+          <img src={viralinLogo} alt="Viralin AI" className="absolute top-4 right-6 w-20 h-20 rounded-2xl object-contain" />
         </div>
 
         {/* How it works */}
@@ -52,17 +53,17 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <Share2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <Share2 className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm font-medium">Share your invite link</span>
             </div>
             <div className="flex items-start gap-3">
-              <Crown className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <Crown className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm">
                 They sign up and get <strong>extra 10 credits</strong>
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <MessageSquare className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <MessageSquare className="w-4 h-4 text-[#8c52ff] mt-0.5 shrink-0" />
               <span className="text-foreground text-sm">
                 You get <strong>50 credits</strong> once they subscribe to a qualifying paid plan
               </span>
@@ -70,7 +71,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           </div>
 
           {/* Stats */}
-          <p className="text-primary text-sm font-medium pt-2">
+          <p className="text-[#8c52ff] text-sm font-medium pt-2">
             {signedUp} signed up, {converted} converted
           </p>
 
@@ -92,10 +93,10 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
               </Button>
             </div>
           ) : (
-            <Button
+             <Button
               onClick={handleGenerateAndCopy}
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-[#8c52ff] hover:bg-[#7a45e6]"
             >
               <Zap className="w-4 h-4 mr-2" />
               Generate my referral link
