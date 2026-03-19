@@ -48,7 +48,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
         </div>
 
         {/* How it works */}
-        <div className="px-6 pb-4 space-y-4">
+        <div className="px-4 pb-4 space-y-4">
           <p className="text-muted-foreground text-sm font-medium">How it works:</p>
 
           <div className="space-y-3">
