@@ -33,7 +33,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md p-0 overflow-hidden">
         {/* Hero section */}
-        <div className="relative px-6 pt-6 pb-4">
+        <div className="relative px-8 pt-6 pb-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#8c52ff]/20 text-[#8c52ff] text-xs font-medium mb-4">
             Earn 50+ credits
           </div>
@@ -44,7 +44,7 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
           <p className="text-muted-foreground text-sm">and earn free credits</p>
 
           {/* Logo */}
-          <img src={viralinLogo} alt="Viralin AI" className="absolute top-4 right-6 w-20 h-20 rounded-2xl object-contain" />
+          <img src={viralinLogo} alt="Viralin AI" className="absolute top-12 right-8 w-20 h-20 rounded-2xl object-contain" />
         </div>
 
         {/* How it works */}
