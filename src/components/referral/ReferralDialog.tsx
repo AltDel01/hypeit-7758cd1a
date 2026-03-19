@@ -93,10 +93,10 @@ const ReferralDialog: React.FC<ReferralDialogProps> = ({ open, onOpenChange }) =
               </Button>
             </div>
           ) : (
-            <Button
+             <Button
               onClick={handleGenerateAndCopy}
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-[#8c52ff] hover:bg-[#7a45e6]"
             >
               <Zap className="w-4 h-4 mr-2" />
               Generate my referral link
