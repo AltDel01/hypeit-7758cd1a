@@ -113,13 +113,16 @@ const AdminCreditsSection = () => {
             {filtered.map(u => {
               const pct = getUsage(u);
               return (
-                <div key={u.id} className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2">
+                <div key={u.id} className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setSelectedUser(u)}>
                   <div className="flex justify-between items-start">
                     <div className="min-w-0">
                       <p className="font-medium text-foreground text-sm truncate">{u.display_name || u.email.split('@')[0]}</p>
                       <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                     </div>
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground shrink-0">{u.subscription_tier || 'free'}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{u.subscription_tier || 'free'}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{u.generations_this_month} / {u.monthly_generation_limit}{u.bonus_credits > 0 ? ` +${u.bonus_credits}` : ''}</span>
