@@ -180,6 +180,23 @@ const AdminCreditsSection = () => {
           </div>
         </div>
       )}
+
+      {/* User Credit History Sheet */}
+      <Sheet open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Credit History</SheetTitle>
+            <SheetDescription>
+              {selectedUser?.display_name || selectedUser?.email} — Usage history & credit deductions
+            </SheetDescription>
+          </SheetHeader>
+          {selectedUser && (
+            <div className="mt-4">
+              <UserCreditHistory userId={selectedUser.id} userName={selectedUser.display_name || selectedUser.email} />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
