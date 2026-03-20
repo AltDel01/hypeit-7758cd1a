@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { RefreshCw, Zap, Search } from 'lucide-react';
+import { RefreshCw, Zap, Search, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import UserCreditHistory from './UserCreditHistory';
 import { toast } from 'sonner';
 
 interface UserCredit {
