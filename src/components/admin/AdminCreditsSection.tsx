@@ -23,6 +23,7 @@ const AdminCreditsSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'usage' | 'name'>('usage');
+  const [selectedUser, setSelectedUser] = useState<UserCredit | null>(null);
 
   const loadCredits = useCallback(async () => {
     setIsLoading(true);
