@@ -151,7 +151,7 @@ const AdminCreditsSection = () => {
                 {filtered.map(u => {
                   const pct = getUsage(u);
                   return (
-                    <tr key={u.id} className="border-b border-border/50 hover:bg-muted/20">
+                    <tr key={u.id} className="border-b border-border/50 hover:bg-muted/20 cursor-pointer" onClick={() => setSelectedUser(u)}>
                       <td className="p-3">
                         <p className="font-medium text-foreground">{u.display_name || u.email.split('@')[0]}</p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>
@@ -166,6 +166,7 @@ const AdminCreditsSection = () => {
                         <div className="flex items-center gap-2">
                           <Progress value={pct} className="h-2 flex-1" indicatorClassName={usageColor(pct)} />
                           <span className="text-xs text-muted-foreground w-10 text-right">{Math.round(pct)}%</span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </td>
                     </tr>
