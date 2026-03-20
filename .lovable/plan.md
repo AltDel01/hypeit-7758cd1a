@@ -1,54 +1,37 @@
 
-## Why You Can't Upload to Supabase Storage
 
-The `generated-images` bucket is missing an INSERT (upload) RLS policy. Looking at the existing policies:
+## Add Credit Usage History Per User in Admin Credits Tab
 
-- avatars bucket: has an INSERT policy for authenticated users
-- product-images bucket: has an INSERT policy for authenticated users  
-- generated-images bucket: only has a SELECT (read) policy — NO INSERT policy exists
+**What**: When an admin clicks on a user row in the Credits tab, an expandable detail panel (or dialog) shows that user's complete generation request history with credit deductions -- useful for investigating complaints or disputes.
 
-This means nobody can upload files to `generated-images`, even from the Supabase dashboard.
+### Approach
 
----
+**Expand-on-click pattern**: Clicking a user row in the existing credits table opens a Dialog/Sheet showing that user's `generation_requests` history, sorted by most recent first.
 
-## What Will Be Fixed
+### Changes
 
-### 1. Add an INSERT policy to `generated-images` bucket
-A new SQL migration will create an RLS policy that allows uploads to the `generated-images` bucket. Since this bucket is used for demo/AI-generated content (not user-private files), we'll allow any authenticated user to upload:
+**1. Create `src/components/admin/UserCreditHistory.tsx`**
+- New component that receives a `userId` and `userName` props
+- Fetches from `generation_requests` where `user_id = userId`, ordered by `created_at DESC`
+- Displays a table/list with columns: Date, Request Type, Prompt (truncated), Status, Credits Used
+- Color-code status badges (completed = green, pending = yellow, failed = red)
+- Show a summary at top: total credits consumed, number of requests
+- Mobile-responsive with card layout on small screens
+- Include a "No history found" empty state
 
-```sql
-CREATE POLICY "Authenticated users can upload to generated-images"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'generated-images');
-```
+**2. Update `src/components/admin/AdminCreditsSection.tsx`**
+- Add state for `selectedUser: UserCredit | null`
+- Make each user row clickable (cursor-pointer, hover effect)
+- On click, set `selectedUser` and open a Dialog/Sheet
+- Render `UserCreditHistory` inside the dialog, passing the selected user's ID and display name
+- Add a visual affordance (e.g., chevron icon or "View history" text) to indicate rows are clickable
 
-We'll also add a policy to allow the Supabase service role (dashboard uploads) to upload as well:
+### Data Source
+- Query: `supabase.from('generation_requests').select('*').eq('user_id', userId).order('created_at', { ascending: false })`
+- Admin already has RLS SELECT access to all generation_requests -- no migration needed
 
-```sql
-CREATE POLICY "Service role can upload to generated-images"
-ON storage.objects
-FOR INSERT
-TO service_role
-WITH CHECK (bucket_id = 'generated-images');
-```
+### History Table Columns
+| Date | Type | Prompt | Status | Credits |
+|------|------|--------|--------|---------|
+| Mar 20, 2026 14:30 | video | "Create a viral..." | completed | 70 |
 
-### 2. Update the dashboard code to use Supabase video URLs
-Once you've uploaded the 4 videos into the `demo-clips/` folder, I'll update `src/components/dashboard/SimplifiedDashboard.tsx` to:
-
-- Replace Google Drive `<iframe>` with HTML5 `<video>` tag
-- Use the Supabase public URL for each clip: `https://mkwinxbualpcivkujlfd.supabase.co/storage/v1/object/public/generated-images/demo-clips/clip1.mp4`
-- Use `object-fit: cover` so the video fills the portrait frame perfectly with zero black bars
-- The `dummyClips` array keeps the title, tags, and score metadata — the filename is just a pointer to the video file
-
-### Upload Steps (after policy fix)
-
-1. Go to Supabase Storage → `generated-images` bucket
-2. Create a folder called `demo-clips`
-3. Upload your 4 MP4 files named: `clip1.mp4`, `clip2.mp4`, `clip3.mp4`, `clip4.mp4`
-4. Tell me when done — I'll update the code
-
-### Files to Change
-- **SQL migration** — add INSERT policy on `generated-images` bucket
-- **`src/components/dashboard/SimplifiedDashboard.tsx`** — replace iframe with `<video>` tags using Supabase URLs
