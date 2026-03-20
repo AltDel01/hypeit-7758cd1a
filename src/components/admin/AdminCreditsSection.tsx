@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { RefreshCw, Zap, Search } from 'lucide-react';
+import { RefreshCw, Zap, Search, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import UserCreditHistory from './UserCreditHistory';
 import { toast } from 'sonner';
 
 interface UserCredit {
@@ -21,6 +23,7 @@ const AdminCreditsSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'usage' | 'name'>('usage');
+  const [selectedUser, setSelectedUser] = useState<UserCredit | null>(null);
 
   const loadCredits = useCallback(async () => {
     setIsLoading(true);
@@ -110,13 +113,16 @@ const AdminCreditsSection = () => {
             {filtered.map(u => {
               const pct = getUsage(u);
               return (
-                <div key={u.id} className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2">
+                <div key={u.id} className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setSelectedUser(u)}>
                   <div className="flex justify-between items-start">
                     <div className="min-w-0">
                       <p className="font-medium text-foreground text-sm truncate">{u.display_name || u.email.split('@')[0]}</p>
                       <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                     </div>
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground shrink-0">{u.subscription_tier || 'free'}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{u.subscription_tier || 'free'}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{u.generations_this_month} / {u.monthly_generation_limit}{u.bonus_credits > 0 ? ` +${u.bonus_credits}` : ''}</span>
@@ -145,7 +151,7 @@ const AdminCreditsSection = () => {
                 {filtered.map(u => {
                   const pct = getUsage(u);
                   return (
-                    <tr key={u.id} className="border-b border-border/50 hover:bg-muted/20">
+                    <tr key={u.id} className="border-b border-border/50 hover:bg-muted/20 cursor-pointer" onClick={() => setSelectedUser(u)}>
                       <td className="p-3">
                         <p className="font-medium text-foreground">{u.display_name || u.email.split('@')[0]}</p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>
@@ -160,6 +166,7 @@ const AdminCreditsSection = () => {
                         <div className="flex items-center gap-2">
                           <Progress value={pct} className="h-2 flex-1" indicatorClassName={usageColor(pct)} />
                           <span className="text-xs text-muted-foreground w-10 text-right">{Math.round(pct)}%</span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </td>
                     </tr>
@@ -173,6 +180,23 @@ const AdminCreditsSection = () => {
           </div>
         </div>
       )}
+
+      {/* User Credit History Sheet */}
+      <Sheet open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Credit History</SheetTitle>
+            <SheetDescription>
+              {selectedUser?.display_name || selectedUser?.email} — Usage history & credit deductions
+            </SheetDescription>
+          </SheetHeader>
+          {selectedUser && (
+            <div className="mt-4">
+              <UserCreditHistory userId={selectedUser.id} userName={selectedUser.display_name || selectedUser.email} />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
