@@ -1,37 +1,45 @@
 
 
-## Add Credit Usage History Per User in Admin Credits Tab
+# Track Video Played & Downloaded Status in Admin Credit History
 
-**What**: When an admin clicks on a user row in the Credits tab, an expandable detail panel (or dialog) shows that user's complete generation request history with credit deductions -- useful for investigating complaints or disputes.
+## What
+Add two new columns to the `generation_requests` table — `video_played_at` and `video_downloaded_at` — to track when a user plays or downloads their completed result. Display these in the admin credit history slide-out panel with ✅/❌ indicators and timestamps.
 
-### Approach
+## Database Change
 
-**Expand-on-click pattern**: Clicking a user row in the existing credits table opens a Dialog/Sheet showing that user's `generation_requests` history, sorted by most recent first.
+**Migration**: Add two nullable timestamp columns to `generation_requests`:
+```sql
+ALTER TABLE public.generation_requests
+  ADD COLUMN video_played_at timestamptz DEFAULT NULL,
+  ADD COLUMN video_downloaded_at timestamptz DEFAULT NULL;
+```
 
-### Changes
+No RLS changes needed — existing policies already cover UPDATE for users on their own rows and SELECT for admins.
 
-**1. Create `src/components/admin/UserCreditHistory.tsx`**
-- New component that receives a `userId` and `userName` props
-- Fetches from `generation_requests` where `user_id = userId`, ordered by `created_at DESC`
-- Displays a table/list with columns: Date, Request Type, Prompt (truncated), Status, Credits Used
-- Color-code status badges (completed = green, pending = yellow, failed = red)
-- Show a summary at top: total credits consumed, number of requests
-- Mobile-responsive with card layout on small screens
-- Include a "No history found" empty state
+## Client-Side Tracking (User Dashboard)
 
-**2. Update `src/components/admin/AdminCreditsSection.tsx`**
-- Add state for `selectedUser: UserCredit | null`
-- Make each user row clickable (cursor-pointer, hover effect)
-- On click, set `selectedUser` and open a Dialog/Sheet
-- Render `UserCreditHistory` inside the dialog, passing the selected user's ID and display name
-- Add a visual affordance (e.g., chevron icon or "View history" text) to indicate rows are clickable
+**1. Track "Video Played"** — in `src/components/dashboard/RequestDetailView.tsx`:
+- Add an `onPlay` event handler to the `<video>` element
+- When fired, update `generation_requests.video_played_at = now()` for that request (only if not already set)
 
-### Data Source
-- Query: `supabase.from('generation_requests').select('*').eq('user_id', userId).order('created_at', { ascending: false })`
-- Admin already has RLS SELECT access to all generation_requests -- no migration needed
+**2. Track "Video Downloaded"** — in `src/components/dashboard/RequestDetailView.tsx`:
+- Inside the existing `handleDownload` function, after successful download, update `generation_requests.video_downloaded_at = now()` (only if not already set)
 
-### History Table Columns
-| Date | Type | Prompt | Status | Credits |
-|------|------|--------|--------|---------|
-| Mar 20, 2026 14:30 | video | "Create a viral..." | completed | 70 |
+Both updates use: `supabase.from('generation_requests').update({ video_played_at: new Date().toISOString() }).eq('id', request.id).is('video_played_at', null)`
+
+This covers both scenarios: user opens from email deep-link or from history sidebar — both lead to `RequestDetailView`.
+
+## Admin Display
+
+**3. Update `src/components/admin/UserCreditHistory.tsx`**:
+- Fetch the two new columns (`video_played_at`, `video_downloaded_at`) in the query
+- Add two new columns in the desktop table: "Played" and "Downloaded"
+- Show ✅ with timestamp tooltip (or inline small text) when set, ❌ when null
+- In mobile cards, add a row showing played/downloaded status with the same indicators
+- Only show these columns for `request_type === 'video'` rows; show "—" for image requests
+
+## Summary of files changed
+- **Migration**: 1 new migration adding 2 columns
+- `src/components/dashboard/RequestDetailView.tsx` — add play/download tracking calls
+- `src/components/admin/UserCreditHistory.tsx` — display played/downloaded columns
 
