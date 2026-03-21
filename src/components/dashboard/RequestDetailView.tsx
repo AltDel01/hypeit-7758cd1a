@@ -71,6 +71,19 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
     );
   };
 
+  const handleVideoPlay = async () => {
+    if (request.request_type !== 'video') return;
+    try {
+      await supabase
+        .from('generation_requests')
+        .update({ video_played_at: new Date().toISOString() })
+        .eq('id', request.id)
+        .is('video_played_at', null);
+    } catch (error) {
+      console.error('Error tracking video play:', error);
+    }
+  };
+
   const handleDownload = async () => {
     const url = resolvedUrl;
     if (!url) return;
@@ -86,6 +99,15 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       a.click();
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
+
+      // Track download timestamp
+      if (request.request_type === 'video') {
+        await supabase
+          .from('generation_requests')
+          .update({ video_downloaded_at: new Date().toISOString() })
+          .eq('id', request.id)
+          .is('video_downloaded_at', null);
+      }
     } catch (error) {
       console.error('Download error:', error);
     }
@@ -194,6 +216,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                 <video
                   src={resolvedUrl}
                   controls
+                  onPlay={handleVideoPlay}
                   className="w-full max-h-80 rounded-lg border border-border"
                 />
               ) : (
