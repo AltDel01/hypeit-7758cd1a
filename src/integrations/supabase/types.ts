@@ -178,6 +178,8 @@ export type Database = {
           user_email: string
           user_id: string
           user_name: string | null
+          video_downloaded_at: string | null
+          video_played_at: string | null
         }
         Insert: {
           aspect_ratio?: string | null
@@ -197,6 +199,8 @@ export type Database = {
           user_email: string
           user_id: string
           user_name?: string | null
+          video_downloaded_at?: string | null
+          video_played_at?: string | null
         }
         Update: {
           aspect_ratio?: string | null
@@ -216,6 +220,8 @@ export type Database = {
           user_email?: string
           user_id?: string
           user_name?: string | null
+          video_downloaded_at?: string | null
+          video_played_at?: string | null
         }
         Relationships: []
       }

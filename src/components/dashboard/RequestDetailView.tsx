@@ -216,6 +216,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                 <video
                   src={resolvedUrl}
                   controls
+                  onPlay={handleVideoPlay}
                   className="w-full max-h-80 rounded-lg border border-border"
                 />
               ) : (
