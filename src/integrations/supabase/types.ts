@@ -173,6 +173,7 @@ export type Database = {
           reference_image_url: string | null
           request_type: string
           result_url: string | null
+          stale_notified_at: string | null
           status: string | null
           updated_at: string | null
           user_email: string
@@ -194,6 +195,7 @@ export type Database = {
           reference_image_url?: string | null
           request_type: string
           result_url?: string | null
+          stale_notified_at?: string | null
           status?: string | null
           updated_at?: string | null
           user_email: string
@@ -215,6 +217,7 @@ export type Database = {
           reference_image_url?: string | null
           request_type?: string
           result_url?: string | null
+          stale_notified_at?: string | null
           status?: string | null
           updated_at?: string | null
           user_email?: string

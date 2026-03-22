@@ -28,6 +28,12 @@ export const RequestList = ({
     return date.toLocaleString();
   };
 
+  const isRequestStale = (request: GenerationRequest) => {
+    if (request.status !== 'new' || request.assigned_to) return false;
+    const createdAt = new Date(request.created_at).getTime();
+    return Date.now() - createdAt > 5 * 60 * 1000; // 5 minutes
+  };
+
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
       (c) => c.label.toLowerCase() === featureLabel.toLowerCase()
@@ -64,7 +70,7 @@ export const RequestList = ({
                     {formatDate(request.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={request.status} />
+                <StatusBadge status={request.status} isStale={isRequestStale(request)} />
               </div>
 
               {parsed.features.length > 0 && (
@@ -202,7 +208,7 @@ export const RequestList = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge status={request.status} />
+                  <StatusBadge status={request.status} isStale={isRequestStale(request)} />
                 </TableCell>
                 <TableCell>
                   {isClaimed ? (

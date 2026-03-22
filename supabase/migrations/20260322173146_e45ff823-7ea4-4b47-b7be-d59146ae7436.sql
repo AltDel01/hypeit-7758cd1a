@@ -1,0 +1,1 @@
+ALTER TABLE public.generation_requests ADD COLUMN stale_notified_at timestamptz DEFAULT NULL;
