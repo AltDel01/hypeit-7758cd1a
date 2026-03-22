@@ -1,45 +1,53 @@
 
 
-# Track Video Played & Downloaded Status in Admin Credit History
+## Hide Tech Stack from Public Detection
 
-## What
-Add two new columns to the `generation_requests` table — `video_played_at` and `video_downloaded_at` — to track when a user plays or downloads their completed result. Display these in the admin credit history slide-out panel with ✅/❌ indicators and timestamps.
+**What**: Reduce the fingerprint that tools like BuiltWith and browser DevTools can use to identify the technology stack (React, Vite, Supabase, Radix UI, etc.).
 
-## Database Change
+### What's Currently Detectable
 
-**Migration**: Add two nullable timestamp columns to `generation_requests`:
-```sql
-ALTER TABLE public.generation_requests
-  ADD COLUMN video_played_at timestamptz DEFAULT NULL,
-  ADD COLUMN video_downloaded_at timestamptz DEFAULT NULL;
-```
+1. **`<meta name="generator" content="Website Builder">`** in `index.html` — signals a builder platform
+2. **`<div id="root">`** — classic React SPA fingerprint
+3. **Vite chunk naming** — default output files like `index-[hash].js` reveal Vite
+4. **Radix UI data attributes** — components emit `data-radix-*`, `data-state`, etc. in the DOM
+5. **Supabase client** — network requests to `*.supabase.co` are visible in DevTools
+6. **`gptengineer.js` script** — loaded from `cdn.gpteng.co` (cannot be removed per project rules)
+7. **React DevTools detection** — React exposes `__REACT_DEVTOOLS_*` globals in dev builds
 
-No RLS changes needed — existing policies already cover UPDATE for users on their own rows and SELECT for admins.
+### What We Can Do (realistic scope)
 
-## Client-Side Tracking (User Dashboard)
+| Change | Impact |
+|--------|--------|
+| Remove `<meta name="generator">` tag | Hides builder signal from BuiltWith |
+| Rename `<div id="root">` to a custom ID like `<div id="app">` | Less obvious React fingerprint |
+| Customize Vite chunk file names via `build.rollupOptions.output` | Removes Vite naming patterns |
+| Strip Radix `data-*` attributes in production (via a Vite plugin) | Removes UI library fingerprint |
 
-**1. Track "Video Played"** — in `src/components/dashboard/RequestDetailView.tsx`:
-- Add an `onPlay` event handler to the `<video>` element
-- When fired, update `generation_requests.video_played_at = now()` for that request (only if not already set)
+### What We Cannot Fully Hide
 
-**2. Track "Video Downloaded"** — in `src/components/dashboard/RequestDetailView.tsx`:
-- Inside the existing `handleDownload` function, after successful download, update `generation_requests.video_downloaded_at = now()` (only if not already set)
+- **Supabase API calls** — network requests to `*.supabase.co` will always be visible; a proxy would require a custom backend
+- **`gptengineer.js`** — must not be removed per project rules
+- **React runtime behavior** — a determined analyst can still identify React from bundle patterns; full obfuscation is impractical
 
-Both updates use: `supabase.from('generation_requests').update({ video_played_at: new Date().toISOString() }).eq('id', request.id).is('video_played_at', null)`
+### Changes
 
-This covers both scenarios: user opens from email deep-link or from history sidebar — both lead to `RequestDetailView`.
+**1. `index.html`**
+- Remove `<meta name="generator" content="Website Builder" />`
+- Change `<div id="root">` to `<div id="app">`
 
-## Admin Display
+**2. `src/main.tsx`**
+- Update `getElementById('root')` to `getElementById('app')`
 
-**3. Update `src/components/admin/UserCreditHistory.tsx`**:
-- Fetch the two new columns (`video_played_at`, `video_downloaded_at`) in the query
-- Add two new columns in the desktop table: "Played" and "Downloaded"
-- Show ✅ with timestamp tooltip (or inline small text) when set, ❌ when null
-- In mobile cards, add a row showing played/downloaded status with the same indicators
-- Only show these columns for `request_type === 'video'` rows; show "—" for image requests
+**3. `vite.config.ts`**
+- Add `build.rollupOptions.output` to randomize chunk/asset names:
+  ```
+  chunkFileNames: 'assets/[hash].js'
+  assetFileNames: 'assets/[hash][extname]'
+  entryFileNames: 'assets/[hash].js'
+  ```
 
-## Summary of files changed
-- **Migration**: 1 new migration adding 2 columns
-- `src/components/dashboard/RequestDetailView.tsx` — add play/download tracking calls
-- `src/components/admin/UserCreditHistory.tsx` — display played/downloaded columns
+**4. Optionally**: Add a small Vite plugin or PostCSS plugin to strip `data-radix-*` attributes from production HTML — though this risks breaking Radix component behavior, so I'd recommend skipping this one unless you're comfortable with potential side effects.
+
+### Summary
+4 small edits across 3 files. This won't make the stack completely invisible to a determined analyst, but it removes the easy fingerprints that automated scanners like BuiltWith pick up.
 
