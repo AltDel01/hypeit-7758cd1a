@@ -30,7 +30,7 @@ Sentry.init({
 });
 
 // Use non-standard mounting to avoid React/ReactDOM detection
-const appRoot = document.getElementById("root");
+const appRoot = document.getElementById("app");
 if (appRoot) {
   createRoot(appRoot).render(
     <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
