@@ -208,7 +208,7 @@ export const RequestList = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge status={request.status} />
+                  <StatusBadge status={request.status} isStale={isRequestStale(request)} />
                 </TableCell>
                 <TableCell>
                   {isClaimed ? (
