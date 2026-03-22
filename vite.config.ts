@@ -43,14 +43,21 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      sourcemap: false, // Disable source maps for production builds
+      sourcemap: false,
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: true, // Remove console logs
+          drop_console: true,
         },
         format: {
-          comments: false, // Remove comments
+          comments: false,
+        },
+      },
+      rollupOptions: {
+        output: {
+          chunkFileNames: 'assets/[hash].js',
+          assetFileNames: 'assets/[hash][extname]',
+          entryFileNames: 'assets/[hash].js',
         },
       },
     },
