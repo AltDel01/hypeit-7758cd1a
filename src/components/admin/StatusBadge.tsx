@@ -1,13 +1,23 @@
 
 import React from 'react';
-import { AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle, Flame } from 'lucide-react';
 import type { RequestStatus } from '@/services/requests';
 
 interface StatusBadgeProps {
   status: RequestStatus;
+  isStale?: boolean;
 }
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({ status, isStale }: StatusBadgeProps) => {
+  if (status === 'new' && isStale) {
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 animate-pulse">
+        <Flame className="w-3 h-3 mr-1" />
+        Overdue
+      </span>
+    );
+  }
+
   switch (status) {
     case 'new':
       return (
