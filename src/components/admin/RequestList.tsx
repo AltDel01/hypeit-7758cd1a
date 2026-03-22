@@ -70,7 +70,7 @@ export const RequestList = ({
                     {formatDate(request.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={request.status} />
+                <StatusBadge status={request.status} isStale={isRequestStale(request)} />
               </div>
 
               {parsed.features.length > 0 && (
