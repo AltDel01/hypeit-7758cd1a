@@ -5,6 +5,7 @@ import { Resend } from "npm:resend@2.0.0";
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const ALERT_EMAIL = "hello.viralin@gmail.com";
 const STALE_MINUTES = 5;
+const MAX_AGE_MINUTES = 30;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,16 +24,19 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Find requests that are "new", older than 5 minutes, and not yet notified
-    const cutoff = new Date(Date.now() - STALE_MINUTES * 60 * 1000).toISOString();
+    const now = Date.now();
+    const fiveMinAgo = new Date(now - STALE_MINUTES * 60 * 1000).toISOString();
+    const thirtyMinAgo = new Date(now - MAX_AGE_MINUTES * 60 * 1000).toISOString();
 
+    // Only check requests created between 5-30 minutes ago (not all historical)
     const { data: staleRequests, error } = await supabaseAdmin
       .from("generation_requests")
       .select("id, user_email, user_name, prompt, request_type, created_at")
       .eq("status", "new")
       .is("assigned_to", null)
       .is("stale_notified_at", null)
-      .lt("created_at", cutoff);
+      .lt("created_at", fiveMinAgo)
+      .gt("created_at", thirtyMinAgo);
 
     if (error) {
       console.error("Error fetching stale requests:", error);
@@ -51,8 +55,23 @@ serve(async (req: Request) => {
 
     console.log(`Found ${staleRequests.length} stale request(s)`);
 
-    // Send one email per stale request and mark as notified
+    let notifiedCount = 0;
+
     for (const req of staleRequests) {
+      // Atomic claim: mark as notified FIRST, only send email if we won the race
+      const { data: claimed } = await supabaseAdmin
+        .from("generation_requests")
+        .update({ stale_notified_at: new Date().toISOString() })
+        .eq("id", req.id)
+        .is("stale_notified_at", null)
+        .select("id");
+
+      // If no rows returned, another invocation already claimed this request
+      if (!claimed || claimed.length === 0) {
+        console.log(`Request ${req.id} already claimed by another invocation, skipping`);
+        continue;
+      }
+
       const minutesAgo = Math.round(
         (Date.now() - new Date(req.created_at).getTime()) / 60000
       );
@@ -83,20 +102,20 @@ serve(async (req: Request) => {
           html: htmlContent,
         });
 
-        // Mark as notified
-        await supabaseAdmin
-          .from("generation_requests")
-          .update({ stale_notified_at: new Date().toISOString() })
-          .eq("id", req.id);
-
+        notifiedCount++;
         console.log(`Notified for request ${req.id}`);
       } catch (emailErr) {
         console.error(`Failed to send notification for ${req.id}:`, emailErr);
+        // Roll back the claim so it can be retried next cycle
+        await supabaseAdmin
+          .from("generation_requests")
+          .update({ stale_notified_at: null })
+          .eq("id", req.id);
       }
     }
 
     return new Response(
-      JSON.stringify({ success: true, notified: staleRequests.length }),
+      JSON.stringify({ success: true, notified: notifiedCount }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
