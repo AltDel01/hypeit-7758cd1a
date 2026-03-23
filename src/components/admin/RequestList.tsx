@@ -3,6 +3,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { ExternalLink, UserCheck, UserPlus } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
+import { EditorSlaBadge } from './EditorSlaBadge';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -70,7 +71,10 @@ export const RequestList = ({
                     {formatDate(request.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={request.status} isStale={isRequestStale(request)} />
+                <div className="flex items-center gap-1.5">
+                  <StatusBadge status={request.status} isStale={isRequestStale(request)} />
+                  <EditorSlaBadge assignedAt={request.assigned_at} status={request.status} assignedTo={request.assigned_to} />
+                </div>
               </div>
 
               {parsed.features.length > 0 && (
@@ -147,6 +151,7 @@ export const RequestList = ({
             <TableHead>Prompt</TableHead>
             <TableHead>Attachment</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>SLA</TableHead>
             <TableHead>Editor</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Action</TableHead>
@@ -209,6 +214,9 @@ export const RequestList = ({
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={request.status} isStale={isRequestStale(request)} />
+                </TableCell>
+                <TableCell>
+                  <EditorSlaBadge assignedAt={request.assigned_at} status={request.status} assignedTo={request.assigned_to} />
                 </TableCell>
                 <TableCell>
                   {isClaimed ? (

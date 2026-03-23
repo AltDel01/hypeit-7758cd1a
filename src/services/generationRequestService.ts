@@ -16,6 +16,7 @@ export interface GenerationRequest {
   completed_at: string | null;
   assigned_to: string | null;
   assigned_to_name: string | null;
+  assigned_at: string | null;
 }
 
 export interface CreateGenerationRequestParams {

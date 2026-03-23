@@ -168,6 +168,9 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           credits_used: number
+          editor_warn_10min_at: string | null
+          editor_warn_15min_at: string | null
+          editor_warn_5min_at: string | null
           id: string
           prompt: string
           reference_image_url: string | null
@@ -190,6 +193,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           credits_used?: number
+          editor_warn_10min_at?: string | null
+          editor_warn_15min_at?: string | null
+          editor_warn_5min_at?: string | null
           id?: string
           prompt: string
           reference_image_url?: string | null
@@ -212,6 +218,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           credits_used?: number
+          editor_warn_10min_at?: string | null
+          editor_warn_15min_at?: string | null
+          editor_warn_5min_at?: string | null
           id?: string
           prompt?: string
           reference_image_url?: string | null
