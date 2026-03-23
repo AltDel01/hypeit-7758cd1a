@@ -216,6 +216,9 @@ export const RequestList = ({
                   <StatusBadge status={request.status} isStale={isRequestStale(request)} />
                 </TableCell>
                 <TableCell>
+                  <EditorSlaBadge assignedAt={request.assigned_at} status={request.status} assignedTo={request.assigned_to} />
+                </TableCell>
+                <TableCell>
                   {isClaimed ? (
                     <div className="flex items-center gap-1.5">
                       <UserCheck className="w-3.5 h-3.5 text-primary" />
