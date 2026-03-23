@@ -71,7 +71,10 @@ export const RequestList = ({
                     {formatDate(request.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={request.status} isStale={isRequestStale(request)} />
+                <div className="flex items-center gap-1.5">
+                  <StatusBadge status={request.status} isStale={isRequestStale(request)} />
+                  <EditorSlaBadge assignedAt={request.assigned_at} status={request.status} assignedTo={request.assigned_to} />
+                </div>
               </div>
 
               {parsed.features.length > 0 && (
