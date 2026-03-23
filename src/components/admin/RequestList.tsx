@@ -151,6 +151,7 @@ export const RequestList = ({
             <TableHead>Prompt</TableHead>
             <TableHead>Attachment</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>SLA</TableHead>
             <TableHead>Editor</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Action</TableHead>
