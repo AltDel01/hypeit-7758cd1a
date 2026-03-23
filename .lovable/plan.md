@@ -1,53 +1,37 @@
 
 
-## Hide Tech Stack from Public Detection
-
-**What**: Reduce the fingerprint that tools like BuiltWith and browser DevTools can use to identify the technology stack (React, Vite, Supabase, Radix UI, etc.).
-
-### What's Currently Detectable
-
-1. **`<meta name="generator" content="Website Builder">`** in `index.html` — signals a builder platform
-2. **`<div id="root">`** — classic React SPA fingerprint
-3. **Vite chunk naming** — default output files like `index-[hash].js` reveal Vite
-4. **Radix UI data attributes** — components emit `data-radix-*`, `data-state`, etc. in the DOM
-5. **Supabase client** — network requests to `*.supabase.co` are visible in DevTools
-6. **`gptengineer.js` script** — loaded from `cdn.gpteng.co` (cannot be removed per project rules)
-7. **React DevTools detection** — React exposes `__REACT_DEVTOOLS_*` globals in dev builds
-
-### What We Can Do (realistic scope)
-
-| Change | Impact |
-|--------|--------|
-| Remove `<meta name="generator">` tag | Hides builder signal from BuiltWith |
-| Rename `<div id="root">` to a custom ID like `<div id="app">` | Less obvious React fingerprint |
-| Customize Vite chunk file names via `build.rollupOptions.output` | Removes Vite naming patterns |
-| Strip Radix `data-*` attributes in production (via a Vite plugin) | Removes UI library fingerprint |
-
-### What We Cannot Fully Hide
-
-- **Supabase API calls** — network requests to `*.supabase.co` will always be visible; a proxy would require a custom backend
-- **`gptengineer.js`** — must not be removed per project rules
-- **React runtime behavior** — a determined analyst can still identify React from bundle patterns; full obfuscation is impractical
+## Fix Stale Request Email Flooding & Duplicates
 
 ### Changes
 
-**1. `index.html`**
-- Remove `<meta name="generator" content="Website Builder" />`
-- Change `<div id="root">` to `<div id="app">`
+**1. `supabase/functions/check-stale-requests/index.ts`**
+- Add a lower bound to the query: only check requests created within the last 30 minutes (not all historical requests). Anything older than 30 minutes that wasn't notified is stale beyond recovery and shouldn't trigger alerts now.
+- This prevents the "historical flood" problem.
 
-**2. `src/main.tsx`**
-- Update `getElementById('root')` to `getElementById('app')`
+**2. Database migration: Reset `stale_notified_at` on old requests**
+- Run a one-time update to set `stale_notified_at = now()` on ALL existing "new" requests older than 30 minutes that still have `stale_notified_at IS NULL`. This prevents re-flooding if the function runs again before the code fix deploys.
 
-**3. `vite.config.ts`**
-- Add `build.rollupOptions.output` to randomize chunk/asset names:
-  ```
-  chunkFileNames: 'assets/[hash].js'
-  assetFileNames: 'assets/[hash][extname]'
-  entryFileNames: 'assets/[hash].js'
-  ```
-
-**4. Optionally**: Add a small Vite plugin or PostCSS plugin to strip `data-radix-*` attributes from production HTML — though this risks breaking Radix component behavior, so I'd recommend skipping this one unless you're comfortable with potential side effects.
+**3. Prevent duplicate sends (race condition fix)**
+- In the edge function, do an atomic "claim" before sending: `UPDATE generation_requests SET stale_notified_at = now() WHERE id = X AND stale_notified_at IS NULL` and check if the update actually modified a row. If another invocation already claimed it, skip the email.
+- This ensures only one invocation can "win" per request.
 
 ### Summary
-4 small edits across 3 files. This won't make the stack completely invisible to a determined analyst, but it removes the easy fingerprints that automated scanners like BuiltWith pick up.
+- 2 file changes: edge function + 1 migration
+- Fixes both the historical flood and the duplicate race condition
+
+### Technical Detail
+
+The atomic claim pattern:
+```
+UPDATE generation_requests 
+SET stale_notified_at = now() 
+WHERE id = :id AND stale_notified_at IS NULL
+```
+If `rowCount = 0`, another invocation already claimed it — skip the email. This is a standard optimistic locking pattern.
+
+The 30-minute window:
+```sql
+.gt("created_at", thirtyMinAgo)  -- lower bound
+.lt("created_at", fiveMinAgo)    -- upper bound (existing)
+```
 
