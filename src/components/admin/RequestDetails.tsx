@@ -56,6 +56,16 @@ export const RequestDetails = ({
     fetchFeedback();
   }, [request.id]);
 
+  // Resolve reference_image_url (handles storage: prefix and legacy signed URLs)
+  useEffect(() => {
+    const resolve = async () => {
+      if (!request.reference_image_url) { setResolvedRefUrl(null); return; }
+      const url = await resolveResultUrl(request.reference_image_url);
+      setResolvedRefUrl(url);
+    };
+    resolve();
+  }, [request.reference_image_url]);
+
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
       c => c.label.toLowerCase() === featureLabel.toLowerCase()
