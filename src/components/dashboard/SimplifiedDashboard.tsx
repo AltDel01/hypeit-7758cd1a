@@ -391,16 +391,32 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error('Please sign in to upload videos'); return; }
+      const newFileUrls: UploadedFile[] = [];
       for (const file of newFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        await supabase.storage.from('product-images').upload(fileName, file);
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
+        if (uploadError) {
+          console.error('Upload error for file:', file.name, uploadError);
+          continue;
+        }
+        const { data: signedData } = await supabase.storage.from('product-images').createSignedUrl(uploadData.path, 60 * 60 * 24 * 7);
+        if (signedData?.signedUrl) {
+          const fileType = file.type.startsWith('video/') ? 'video' as const
+            : file.type.startsWith('audio/') ? 'audio' as const
+            : file.type.startsWith('image/') ? 'image' as const
+            : 'document' as const;
+          newFileUrls.push({ name: file.name, url: signedData.signedUrl, type: fileType });
+        }
       }
       setUploadedVideos(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} video(s) added`);
+      if (newFileUrls.length > 0) {
+        setUploadedFileUrls(prev => [...prev, ...newFileUrls]);
+      }
+      toast.success(`${newFiles.length} file(s) added`);
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload video');
+      toast.error('Failed to upload file');
     }
   };
 
