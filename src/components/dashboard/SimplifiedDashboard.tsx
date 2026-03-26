@@ -400,14 +400,15 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           console.error('Upload error for file:', file.name, uploadError);
           continue;
         }
+        // Store as storage: path so it never expires — resolve at display time
+        const storagePath = `storage:product-images/${uploadData.path}`;
+        const fileType = file.type.startsWith('video/') ? 'video' as const
+          : file.type.startsWith('audio/') ? 'audio' as const
+          : file.type.startsWith('image/') ? 'image' as const
+          : 'document' as const;
+        // For local preview, create a signed URL
         const { data: signedData } = await supabase.storage.from('product-images').createSignedUrl(uploadData.path, 60 * 60 * 24 * 7);
-        if (signedData?.signedUrl) {
-          const fileType = file.type.startsWith('video/') ? 'video' as const
-            : file.type.startsWith('audio/') ? 'audio' as const
-            : file.type.startsWith('image/') ? 'image' as const
-            : 'document' as const;
-          newFileUrls.push({ name: file.name, url: signedData.signedUrl, type: fileType });
-        }
+        newFileUrls.push({ name: file.name, url: signedData?.signedUrl || storagePath, type: fileType, storagePath });
       }
       setUploadedVideos(prev => [...prev, ...newFiles]);
       if (newFileUrls.length > 0) {
