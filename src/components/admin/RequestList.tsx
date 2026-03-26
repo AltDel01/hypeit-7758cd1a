@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, UserCheck, UserPlus } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { EditorSlaBadge } from './EditorSlaBadge';
+import { ResolvedAttachment } from './ResolvedAttachment';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import { useIsMobile } from '@/hooks/use-mobile';
