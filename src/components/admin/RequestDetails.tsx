@@ -66,7 +66,7 @@ export const RequestDetails = ({
     resolve();
   }, [request.reference_image_url]);
 
-  const getFeatureConfig = (featureLabel: string) => {
+  const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
     return Object.values(FEATURE_MODE_MAP).find(
       c => c.label.toLowerCase() === featureLabel.toLowerCase()
     );
