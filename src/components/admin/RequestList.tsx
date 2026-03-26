@@ -198,12 +198,7 @@ export const RequestList = ({
                 <TableCell className="max-w-[260px] truncate text-sm">{parsed.prompt}</TableCell>
                 <TableCell>
                   {request.reference_image_url ? (
-                    <img
-                      src={request.reference_image_url}
-                      alt="Reference attachment"
-                      className="w-10 h-10 rounded object-cover border border-border"
-                      loading="lazy"
-                    />
+                    <ResolvedAttachment url={request.reference_image_url} size="md" />
                   ) : (
                     <span className="text-muted-foreground text-xs">None</span>
                   )}
