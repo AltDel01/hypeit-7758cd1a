@@ -41,6 +41,7 @@ export const RequestDetails = ({
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
+  const [resolvedRefUrl, setResolvedRefUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeedback = async () => {
