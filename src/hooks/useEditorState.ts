@@ -4,6 +4,7 @@ export interface UploadedFile {
   name: string;
   url: string;
   type: 'video' | 'audio' | 'image' | 'document';
+  storagePath?: string;
 }
 
 export interface EditorState {
