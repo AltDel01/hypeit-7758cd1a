@@ -113,6 +113,7 @@ export async function sendNotificationEmail(payload: {
   requestType?: "video" | "image";
   prompt?: string;
   aspectRatio?: string;
+  referenceImageUrl?: string;
   timestamp: string;
 }): Promise<void> {
   try {
