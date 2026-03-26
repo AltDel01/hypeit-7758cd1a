@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, UserCheck, UserPlus } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { EditorSlaBadge } from './EditorSlaBadge';
+import { ResolvedAttachment } from './ResolvedAttachment';
 import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -103,12 +104,7 @@ export const RequestList = ({
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {request.reference_image_url && (
-                    <img
-                      src={request.reference_image_url}
-                      alt="Ref"
-                      className="w-8 h-8 rounded object-cover border border-border"
-                      loading="lazy"
-                    />
+                    <ResolvedAttachment url={request.reference_image_url} size="sm" />
                   )}
                   {isClaimed && (
                     <div className="flex items-center gap-1">
@@ -202,12 +198,7 @@ export const RequestList = ({
                 <TableCell className="max-w-[260px] truncate text-sm">{parsed.prompt}</TableCell>
                 <TableCell>
                   {request.reference_image_url ? (
-                    <img
-                      src={request.reference_image_url}
-                      alt="Reference attachment"
-                      className="w-10 h-10 rounded object-cover border border-border"
-                      loading="lazy"
-                    />
+                    <ResolvedAttachment url={request.reference_image_url} size="md" />
                   ) : (
                     <span className="text-muted-foreground text-xs">None</span>
                   )}

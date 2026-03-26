@@ -191,7 +191,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (savedState.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
       if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
         .then((result) => {
@@ -343,7 +343,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const end = savedState?.endTimestamp || '00:00';
       fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
       if (result) {
@@ -400,14 +400,15 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           console.error('Upload error for file:', file.name, uploadError);
           continue;
         }
+        // Store as storage: path so it never expires — resolve at display time
+        const storagePath = `storage:product-images/${uploadData.path}`;
+        const fileType = file.type.startsWith('video/') ? 'video' as const
+          : file.type.startsWith('audio/') ? 'audio' as const
+          : file.type.startsWith('image/') ? 'image' as const
+          : 'document' as const;
+        // For local preview, create a signed URL
         const { data: signedData } = await supabase.storage.from('product-images').createSignedUrl(uploadData.path, 60 * 60 * 24 * 7);
-        if (signedData?.signedUrl) {
-          const fileType = file.type.startsWith('video/') ? 'video' as const
-            : file.type.startsWith('audio/') ? 'audio' as const
-            : file.type.startsWith('image/') ? 'image' as const
-            : 'document' as const;
-          newFileUrls.push({ name: file.name, url: signedData.signedUrl, type: fileType });
-        }
+        newFileUrls.push({ name: file.name, url: signedData?.signedUrl || storagePath, type: fileType, storagePath });
       }
       setUploadedVideos(prev => [...prev, ...newFiles]);
       if (newFileUrls.length > 0) {
@@ -448,7 +449,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
       onRequestCreated?.();
@@ -485,7 +486,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
       const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const submitCost = calculateCreditCost({ activeMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       if (submitCost.totalCost > remainingCredits) {
         toast.error(`Not enough credits. You need ${submitCost.totalCost} but have ${remainingCredits} remaining. Try lowering quality or duration, or upgrade your plan.`);

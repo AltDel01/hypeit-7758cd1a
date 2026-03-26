@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX, Star } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Monitor, Timer, Maximize, Film, UserCheck, UserX, Star, Download, ExternalLink } from 'lucide-react';
 import FileUploader from '@/components/admin/FileUploader';
 import CircularProgressIndicator from '@/components/ui/loading/CircularProgressIndicator';
 import { StatusBadge } from './StatusBadge';
@@ -8,6 +8,7 @@ import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import type { GenerationRequest } from '@/services/generationRequestService';
 
 interface RequestDetailsProps {
@@ -40,6 +41,7 @@ export const RequestDetails = ({
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
+  const [resolvedRefUrl, setResolvedRefUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -54,7 +56,17 @@ export const RequestDetails = ({
     fetchFeedback();
   }, [request.id]);
 
-  const getFeatureConfig = (featureLabel: string) => {
+  // Resolve reference_image_url (handles storage: prefix and legacy signed URLs)
+  useEffect(() => {
+    const resolve = async () => {
+      if (!request.reference_image_url) { setResolvedRefUrl(null); return; }
+      const url = await resolveResultUrl(request.reference_image_url);
+      setResolvedRefUrl(url);
+    };
+    resolve();
+  }, [request.reference_image_url]);
+
+  const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
     return Object.values(FEATURE_MODE_MAP).find(
       c => c.label.toLowerCase() === featureLabel.toLowerCase()
     );
@@ -185,15 +197,35 @@ export const RequestDetails = ({
           </div>
         )}
         
-        {request.reference_image_url && (
+        {resolvedRefUrl && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachment</h3>
-            <div className="mt-1 h-40 bg-muted/50 rounded-md overflow-hidden">
-              <img 
-                src={request.reference_image_url} 
-                alt="Reference" 
-                className="w-full h-full object-contain"
-              />
+            <div className="mt-1 rounded-md overflow-hidden border border-border">
+              {isVideoUrl(request.reference_image_url || resolvedRefUrl) ? (
+                <video 
+                  src={resolvedRefUrl} 
+                  controls 
+                  className="w-full max-h-60 object-contain bg-black"
+                />
+              ) : (
+                <img 
+                  src={resolvedRefUrl} 
+                  alt="Reference" 
+                  className="w-full max-h-60 object-contain bg-muted/50"
+                />
+              )}
+              <div className="p-2 flex gap-2 border-t border-border">
+                <a href={resolvedRefUrl} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="gap-1 text-xs">
+                    <ExternalLink className="w-3 h-3" /> Open
+                  </Button>
+                </a>
+                <a href={resolvedRefUrl} download>
+                  <Button size="sm" variant="outline" className="gap-1 text-xs">
+                    <Download className="w-3 h-3" /> Download
+                  </Button>
+                </a>
+              </div>
             </div>
           </div>
         )}
