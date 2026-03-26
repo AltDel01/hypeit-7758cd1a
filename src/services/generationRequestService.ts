@@ -92,6 +92,7 @@ export async function createGenerationRequest(
       requestType: params.requestType,
       prompt: params.prompt,
       aspectRatio: params.aspectRatio,
+      referenceImageUrl: params.referenceImageUrl,
       timestamp: new Date().toISOString(),
     }).catch(console.error);
 
@@ -112,6 +113,7 @@ export async function sendNotificationEmail(payload: {
   requestType?: "video" | "image";
   prompt?: string;
   aspectRatio?: string;
+  referenceImageUrl?: string;
   timestamp: string;
 }): Promise<void> {
   try {
