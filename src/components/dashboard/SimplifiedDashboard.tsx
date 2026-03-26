@@ -191,7 +191,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (savedState.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
       if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? videoFiles[0].url : undefined;
+      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
         .then((result) => {
