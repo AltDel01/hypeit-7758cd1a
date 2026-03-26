@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
               ${payload.prompt}
             </div>
             ${payload.aspectRatio ? `<p><strong>Aspect Ratio:</strong> ${payload.aspectRatio}</p>` : ""}
-            ${(payload as any).referenceImageUrl ? `<p><strong>Attachment:</strong></p><div style="margin: 8px 0;"><a href="${(payload as any).referenceImageUrl}" style="color: #7c3aed; text-decoration: underline;">View Attached File</a></div>` : "<p><em>No file attached</em></p>"}
+            ${payload.referenceImageUrl ? `<p><strong>Attachment:</strong></p><div style="margin: 8px 0;"><a href="${payload.referenceImageUrl}" style="color: #7c3aed; text-decoration: underline;">View Attached File</a></div>` : "<p><em>No file attached</em></p>"}
             <p><strong>Request Time:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
           </div>
           <p style="color: #6b7280; margin-top: 20px;">View and manage this request in the admin dashboard.</p>
