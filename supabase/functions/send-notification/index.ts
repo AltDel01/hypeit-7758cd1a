@@ -27,6 +27,7 @@ interface GenerationRequestNotification {
   requestType: "video" | "image";
   prompt: string;
   aspectRatio?: string;
+  referenceImageUrl?: string;
   timestamp: string;
 }
 
