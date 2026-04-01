@@ -336,12 +336,12 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         const featureLabels = loadedFeatures.map(id => editingFeatures.find(f => f.id === id)?.label).filter(Boolean).join(', ');
         fullPrompt = `[${featureLabels}] ${fullPrompt}`;
       }
-      const aspectRatio = savedState?.selectedAspectRatio || 'Default';
-      const resolution = savedState?.selectedResolution || 'Default';
-      const duration = savedState?.selectedDuration || 'Default';
+      if (savedState?.selectedAspectRatio) fullPrompt += ` | Aspect: ${savedState.selectedAspectRatio}`;
+      if (savedState?.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
+      if (savedState?.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const start = savedState?.startTimestamp || '00:00';
       const end = savedState?.endTimestamp || '00:00';
-      fullPrompt += ` | Aspect: ${aspectRatio} | Resolution: ${resolution} | Duration: ${duration} | Timeline: ${start}-${end}`;
+      if (start !== '00:00' || end !== '00:00') fullPrompt += ` | Timeline: ${start}-${end}`;
       const videoFiles = loadedFiles.filter(f => f.type === 'video');
       const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
