@@ -42,6 +42,9 @@ serve(async (req) => {
     .greeting { color: #ffffff; font-size: 18px; font-weight: 600; margin: 0 0 20px 0; }
     p { color: #b0b0c0; font-size: 15px; line-height: 1.7; margin: 0 0 16px 0; }
     .highlight { color: #d966ff; font-weight: 500; }
+    .section-title { color: #ffffff; font-size: 16px; font-weight: 600; margin: 24px 0 12px 0; }
+    .tip-number { color: #d966ff; font-weight: 700; }
+    a { color: #d966ff; text-decoration: underline; }
     .divider { height: 1px; background: #2a2a3a; margin: 24px 0; }
     .signature { color: #ffffff; font-weight: 600; margin: 0; }
     .signature-title { color: #888; font-size: 13px; margin: 4px 0 0 0; }
@@ -57,11 +60,16 @@ serve(async (req) => {
     <div class="card">
       <p class="greeting">Dear ${firstName},</p>
       <p>I'm <strong style="color:#fff;">Eka</strong>, the founder of <span class="highlight">Viralin AI</span>.</p>
-      <p>Thank you for signing up and being part of our early journey. We're building Viralin AI to make content creation radically simpler through chat-based AI editing — and we're excited to have you with us.</p>
-      <p>As a bootstrapped startup, we're continuously improving our infrastructure and product performance. While we aim to deliver a smooth experience, you may occasionally encounter minor glitches, longer loading times, or generation delays. If that happens, please know we're actively working behind the scenes to make the system faster, more stable, and more reliable every day.</p>
-      <p>If the system ever crashes or fails during generation and your tokens are deducted unintentionally, please contact us right away. We will review the issue and <span class="highlight">refund or replenish your tokens</span> accordingly. Your trust matters to us, and we want to ensure you always receive full value for what you use.</p>
-      <p>Your feedback is incredibly valuable at this stage. If you experience any issues or have suggestions for improvement, feel free to reply directly to this email — I read them personally.</p>
-      <p>Thank you for your patience and for being an early supporter of Viralin AI. We're just getting started, and we're committed to building something great for you.</p>
+      <p>Thank you for signing up and joining us at the start of our journey. We are building Viralin AI to make content creation radically simpler through chat-based AI editing, and we are thrilled to have you on board.</p>
+      <p>As a bootstrapped startup, we are continuously improving our infrastructure and product performance. While we aim to deliver a smooth experience, you may occasionally encounter minor glitches, longer loading times, or generation delays. Please know that we are actively working behind the scenes to make the system faster and more reliable every day.</p>
+      <p class="section-title">A few tips for the best experience:</p>
+      <p><span class="tip-number">1. Patience with Processing:</span> If you encounter a long loading time while you are busy, feel free to close the platform and return later. You can check your history dashboard, where your completed results will be waiting for you.</p>
+      <p><span class="tip-number">2. Token Usage Protection:</span> If the system crashes during generation and your tokens are deducted unintentionally, you can reclaim them at <a href="https://viralin.ai/refund-request">https://viralin.ai/refund-request</a>. We will review the issue and replenish your tokens promptly.</p>
+      <p><span class="tip-number">3. Better Results:</span> To get the perfect content result, be specific in your prompt, attach necessary files, and provide media references whenever possible.</p>
+      <div class="divider"></div>
+      <p class="section-title">Help us improve</p>
+      <p>We value your input. We suggest leaving feedback directly on your generated content or within your history dashboard. Your insights help us serve you better as we grow.</p>
+      <p>Thank you for your patience and for being an early supporter of Viralin AI. We are just getting started, and we are committed to building the best possible tools for you.</p>
       <div class="divider"></div>
       <p class="signature">Best regards,<br>Eka</p>
       <p class="signature-title">Founder, Viralin AI</p>
@@ -72,7 +80,6 @@ serve(async (req) => {
   </div>
 </body>
 </html>`;
-
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
