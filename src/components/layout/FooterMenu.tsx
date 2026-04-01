@@ -11,7 +11,11 @@ const FooterMenu = () => {
   const isActive = (path: string) => location.pathname === path;
   
   // Hide footer menu on homepage and landing pages
-  const hiddenRoutes = ['/', '/pricing', '/login', '/signup'];
+  const hiddenRoutes = ['/', '/pricing', '/login', '/signup', '/admin-login'];
+  const hiddenPrefixes = ['/admin', '/editor'];
+  if (hiddenPrefixes.some(prefix => location.pathname.startsWith(prefix))) {
+    return null;
+  }
   if (hiddenRoutes.includes(location.pathname)) {
     return null;
   }
