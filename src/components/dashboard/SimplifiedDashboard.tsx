@@ -955,6 +955,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
 
         </div>
 
+      {/* Projects Showcase */}
+      <ProjectsShowcase />
+
       </div>
     </div>
   );
