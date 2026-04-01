@@ -25,6 +25,7 @@ import {
 import AiClipButton from '@/components/shared/AiClipButton';
 import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
 import CreditCostPreview from './CreditCostPreview';
+import ProjectsShowcase from './ProjectsShowcase';
 import { calculateCreditCost } from '@/config/creditCosts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -953,6 +954,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           </div>
 
         </div>
+
+      {/* Projects Showcase */}
+      <ProjectsShowcase />
 
       </div>
     </div>
