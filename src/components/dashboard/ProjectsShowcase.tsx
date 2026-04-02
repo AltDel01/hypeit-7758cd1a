@@ -115,8 +115,8 @@ const VideoCard: React.FC<{ project: Project }> = ({ project }) => {
             onClick={togglePlay}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/30 transition-transform group-hover:scale-110">
-              <Play className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground ml-0.5" fill="currentColor" />
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/30 transition-transform group-hover:scale-110">
+              <Play className="w-4 h-4 md:w-4.5 md:h-4.5 text-primary-foreground ml-0.5" fill="currentColor" />
             </div>
           </button>
         )}
