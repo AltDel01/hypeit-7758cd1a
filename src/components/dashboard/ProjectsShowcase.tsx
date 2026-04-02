@@ -158,9 +158,9 @@ const VideoCard: React.FC<{ project: Project }> = ({ project }) => {
       </div>
 
       {/* Info */}
-      <div className="p-3 md:p-4">
+      <div className="px-3 py-2 md:px-4 md:py-2.5 flex items-center justify-between gap-2">
         <h3 className="font-semibold text-foreground text-sm md:text-base truncate">{project.title}</h3>
-        <span className="inline-block mt-1.5 text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+        <span className="shrink-0 text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
           {project.category}
         </span>
       </div>
