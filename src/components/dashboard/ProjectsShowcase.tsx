@@ -27,6 +27,8 @@ const projects: Project[] = [
   { id: '15', title: 'Coconico', category: 'Retail', videoUrl: '/projects/Coconico.mp4' },
   { id: '16', title: 'Dear Me Beauty', category: 'Retail', videoUrl: '/projects/Dear_Me_Beauty.mp4' },
   { id: '17', title: 'ZAM2JK', category: 'Retail', videoUrl: '/projects/ZAM2JK.mp4' },
+  { id: '18', title: 'Let People Understand Your Product', category: 'Text', videoUrl: '/projects/Let_People_Understand_Your_Product.mp4' },
+  { id: '19', title: 'Ready To Grow', category: 'Text', videoUrl: '/projects/Ready_To_Grow.mp4' },
 ];
 
 const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
@@ -156,9 +158,9 @@ const VideoCard: React.FC<{ project: Project }> = ({ project }) => {
       </div>
 
       {/* Info */}
-      <div className="p-3 md:p-4">
+      <div className="px-3 py-2 md:px-4 md:py-2.5 flex items-center justify-between gap-2">
         <h3 className="font-semibold text-foreground text-sm md:text-base truncate">{project.title}</h3>
-        <span className="inline-block mt-1.5 text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+        <span className="shrink-0 text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
           {project.category}
         </span>
       </div>
@@ -174,7 +176,7 @@ const ProjectsShowcase: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="mt-16 md:mt-24 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12">
+    <div className="mt-16 md:mt-24 -mx-6 md:-mx-12 lg:-mx-20 px-6 md:px-12 lg:px-20">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
@@ -205,7 +207,7 @@ const ProjectsShowcase: React.FC = () => {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
         {filtered.map(project => (
           <VideoCard key={project.id} project={project} />
         ))}
