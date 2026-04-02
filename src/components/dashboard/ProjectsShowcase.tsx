@@ -174,7 +174,7 @@ const ProjectsShowcase: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="mt-10 md:mt-14">
+    <div className="mt-16 md:mt-24 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
