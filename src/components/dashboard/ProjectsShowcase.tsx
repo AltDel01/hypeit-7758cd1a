@@ -115,8 +115,8 @@ const VideoCard: React.FC<{ project: Project }> = ({ project }) => {
             onClick={togglePlay}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/30 transition-transform group-hover:scale-110">
-              <Play className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground ml-0.5" fill="currentColor" />
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/30 transition-transform group-hover:scale-110">
+              <Play className="w-4 h-4 md:w-4.5 md:h-4.5 text-primary-foreground ml-0.5" fill="currentColor" />
             </div>
           </button>
         )}
@@ -176,7 +176,7 @@ const ProjectsShowcase: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="mt-16 md:mt-24 -mx-6 md:-mx-12 lg:-mx-20 px-6 md:px-12 lg:px-20">
+    <div className="mt-16 md:mt-24 -mx-8 md:-mx-16 lg:-mx-28 xl:-mx-36 px-8 md:px-16 lg:px-28 xl:px-36">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
