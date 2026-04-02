@@ -176,7 +176,7 @@ const ProjectsShowcase: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="mt-16 md:mt-24 -mx-8 md:-mx-16 lg:-mx-28 xl:-mx-36 px-8 md:px-16 lg:px-28 xl:px-36">
+    <section className="mt-16 md:mt-24 w-screen relative left-1/2 right-1/2 -translate-x-1/2 px-6 md:px-10 lg:px-16 xl:px-24">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
@@ -207,12 +207,12 @@ const ProjectsShowcase: React.FC = () => {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {filtered.map(project => (
           <VideoCard key={project.id} project={project} />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
