@@ -20,6 +20,13 @@ const projects: Project[] = [
   { id: '8', title: 'Gemini 3', category: 'Technology', videoUrl: '/projects/Gemini_3.mp4' },
   { id: '9', title: 'Dub', category: 'Technology', videoUrl: '/projects/Dub.mp4' },
   { id: '10', title: 'Coinborn', category: 'Technology', videoUrl: '/projects/Coinborn.mp4' },
+  { id: '11', title: 'Seger', category: 'Retail', videoUrl: '/projects/Seger.mp4' },
+  { id: '12', title: 'Skingame', category: 'Retail', videoUrl: '/projects/Skingame.mp4' },
+  { id: '13', title: 'Heaven Lights', category: 'Retail', videoUrl: '/projects/Heaven_Lights.mp4' },
+  { id: '14', title: 'Millie Sambel', category: 'Retail', videoUrl: '/projects/Millie_Sambel.mp4' },
+  { id: '15', title: 'Coconico', category: 'Retail', videoUrl: '/projects/Coconico.mp4' },
+  { id: '16', title: 'Dear Me Beauty', category: 'Retail', videoUrl: '/projects/Dear_Me_Beauty.mp4' },
+  { id: '17', title: 'ZAM2JK', category: 'Retail', videoUrl: '/projects/ZAM2JK.mp4' },
 ];
 
 const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
@@ -167,7 +174,7 @@ const ProjectsShowcase: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="mt-10 md:mt-14">
+    <div className="mt-16 md:mt-24 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
