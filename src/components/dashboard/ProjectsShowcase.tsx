@@ -27,6 +27,8 @@ const projects: Project[] = [
   { id: '15', title: 'Coconico', category: 'Retail', videoUrl: '/projects/Coconico.mp4' },
   { id: '16', title: 'Dear Me Beauty', category: 'Retail', videoUrl: '/projects/Dear_Me_Beauty.mp4' },
   { id: '17', title: 'ZAM2JK', category: 'Retail', videoUrl: '/projects/ZAM2JK.mp4' },
+  { id: '18', title: 'Let People Understand Your Product', category: 'Text', videoUrl: '/projects/Let_People_Understand_Your_Product.mp4' },
+  { id: '19', title: 'Ready To Grow', category: 'Text', videoUrl: '/projects/Ready_To_Grow.mp4' },
 ];
 
 const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
