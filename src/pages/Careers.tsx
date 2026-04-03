@@ -28,7 +28,7 @@ const positions: Position[] = [
   },
   {
     title: 'Social Creative',
-    description: 'As a Social Creative for Google Cloud Brand & Creative, you will concept social-first executions, as well as social extensions to larger brand campaigns. You\'ll live and breathe all aspects of social media, staying aware of current trends and conversations, with the ability to translate those trends into creative advertising in the B2B space. Whether your background is in copywriting, art direction, or filmmaking, you\'ll be able to utilize your obsession with social media, plus a thirst to learn more about our B2B audience.',
+    description: 'As a Social Creative, you will concept social-first executions, as well as social extensions to larger brand campaigns. You\'ll live and breathe all aspects of social media, staying aware of current trends and conversations, with the ability to translate those trends into creative advertising in the B2B space. Whether your background is in copywriting, art direction, or filmmaking, you\'ll be able to utilize your obsession with social media, plus a thirst to learn more about our B2B audience.',
   },
   {
     title: 'Video Storyteller (AI Focus)',
