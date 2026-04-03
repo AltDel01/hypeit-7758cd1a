@@ -1,60 +1,161 @@
-import React from 'react';
-import { Play, Eye, Heart, MessageCircle, Sparkles } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Play, Pause, Volume2, VolumeX, Maximize2, Folder, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const showcaseItems = [
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=600&fit=crop',
-    title: 'Product Launch Video',
-    views: '2.4M',
-    likes: '184K',
-    category: 'E-commerce',
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=400&h=600&fit=crop',
-    title: 'Travel Vlog Edit',
-    views: '1.8M',
-    likes: '156K',
-    category: 'Travel',
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=600&fit=crop',
-    title: 'Fitness Tutorial',
-    views: '3.2M',
-    likes: '245K',
-    category: 'Fitness',
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=600&fit=crop',
-    title: 'Tech Review',
-    views: '890K',
-    likes: '67K',
-    category: 'Tech',
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=600&fit=crop',
-    title: 'Recipe Short',
-    views: '4.1M',
-    likes: '312K',
-    category: 'Food',
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=600&fit=crop',
-    title: 'Music Promo',
-    views: '1.5M',
-    likes: '98K',
-    category: 'Music',
-  },
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  videoUrl: string;
+}
+
+const projects: Project[] = [
+  { id: '1', title: 'Velobank', category: 'Technology', videoUrl: '/projects/Velobank.mp4' },
+  { id: '2', title: 'Gemini', category: 'Technology', videoUrl: '/projects/Gemini.mp4' },
+  { id: '3', title: 'ChatGPT', category: 'Technology', videoUrl: '/projects/ChatGPT.mp4' },
+  { id: '4', title: 'Cursor', category: 'Technology', videoUrl: '/projects/Cursor.mp4' },
+  { id: '5', title: 'Hylix', category: 'Technology', videoUrl: '/projects/Hylix.mp4' },
+  { id: '6', title: 'Zoro', category: 'Technology', videoUrl: '/projects/Zoro.mp4' },
+  { id: '7', title: 'Glass Health', category: 'Technology', videoUrl: '/projects/Glass_Health.mp4' },
+  { id: '8', title: 'Gemini 3', category: 'Technology', videoUrl: '/projects/Gemini_3.mp4' },
+  { id: '9', title: 'Dub', category: 'Technology', videoUrl: '/projects/Dub.mp4' },
+  { id: '10', title: 'Coinborn', category: 'Technology', videoUrl: '/projects/Coinborn.mp4' },
+  { id: '11', title: 'Seger', category: 'Retail', videoUrl: '/projects/Seger.mp4' },
+  { id: '12', title: 'Skingame', category: 'Retail', videoUrl: '/projects/Skingame.mp4' },
+  { id: '13', title: 'Heaven Lights', category: 'Retail', videoUrl: '/projects/Heaven_Lights.mp4' },
+  { id: '14', title: 'Millie Sambel', category: 'Retail', videoUrl: '/projects/Millie_Sambel.mp4' },
+  { id: '15', title: 'Coconico', category: 'Retail', videoUrl: '/projects/Coconico.mp4' },
+  { id: '16', title: 'Dear Me Beauty', category: 'Retail', videoUrl: '/projects/Dear_Me_Beauty.mp4' },
+  { id: '17', title: 'ZAM2JK', category: 'Retail', videoUrl: '/projects/ZAM2JK.mp4' },
+  { id: '18', title: 'Let People Understand Your Product', category: 'Text', videoUrl: '/projects/Let_People_Understand_Your_Product.mp4' },
+  { id: '19', title: 'Ready To Grow', category: 'Text', videoUrl: '/projects/Ready_To_Grow.mp4' },
 ];
 
-const ShowcaseGallery: React.FC = () => {
+const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
+
+const ShowcaseVideoCard: React.FC<{ project: Project }> = ({ project }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const handleFullscreen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    if (videoRef.current.requestFullscreen) {
+      videoRef.current.requestFullscreen();
+    }
+  };
+
+  const preventContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   return (
-    <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
-      {/* Background */}
+    <div
+      className="group relative rounded-xl overflow-hidden bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 hover:border-purple-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        if (videoRef.current && isPlaying) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+      }}
+      onContextMenu={preventContextMenu}
+    >
+      <div className="relative aspect-video bg-black/40">
+        <video
+          ref={videoRef}
+          src={project.videoUrl}
+          className="w-full h-full object-cover"
+          muted={isMuted}
+          loop
+          playsInline
+          preload="metadata"
+          onContextMenu={preventContextMenu}
+          controlsList="nodownload nofullscreen noremoteplayback"
+          disablePictureInPicture
+        />
+
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent transition-opacity duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )} />
+
+        {!isPlaying && (
+          <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-purple-600/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-purple-500/30 transition-transform group-hover:scale-110">
+              <Play className="w-4 h-4 text-white ml-0.5" fill="currentColor" />
+            </div>
+          </button>
+        )}
+
+        <div className={cn(
+          "absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between transition-opacity duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )}>
+          <div className="flex items-center gap-2">
+            <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors">
+              {isPlaying ? <Pause className="w-3.5 h-3.5 text-white" fill="currentColor" /> : <Play className="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" />}
+            </button>
+            <button onClick={toggleMute} className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors">
+              {isMuted ? <VolumeX className="w-3.5 h-3.5 text-white" /> : <Volume2 className="w-3.5 h-3.5 text-white" />}
+            </button>
+          </div>
+          <button onClick={handleFullscreen} className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors">
+            <Maximize2 className="w-3.5 h-3.5 text-white" />
+          </button>
+        </div>
+      </div>
+
+      <div className="px-3 py-2 md:px-4 md:py-2.5 flex items-center justify-between gap-2">
+        <h3 className="font-semibold text-white text-sm md:text-base truncate">{project.title}</h3>
+        <span className="shrink-0 text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          {project.category}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const ShowcaseGallery: React.FC = () => {
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const filtered = activeCategory === 'All'
+    ? projects
+    : projects.filter(p => p.category === activeCategory);
+
+  return (
+    <section className="relative py-12 md:py-20 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black" />
-      
-      <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-6 md:mb-12">
+
+      <div className="relative z-10 px-6 md:px-10 lg:px-16 xl:px-24">
+        {/* Header */}
+        <div className="text-center mb-8 md:mb-12">
           <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-3 md:mb-6">
             <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
             <span className="text-xs md:text-sm font-medium text-purple-300">Showcase</span>
@@ -65,66 +166,34 @@ const ShowcaseGallery: React.FC = () => {
               Viralin
             </span>
           </h2>
-          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-2">
+          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
             See what creators are building with our AI video editor
           </p>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-4">
-          {showcaseItems.map((item, index) => (
-            <div
-              key={index}
-              className="group relative aspect-[9/16] rounded-lg md:rounded-xl overflow-hidden cursor-pointer"
+        {/* Category tabs */}
+        <div className="flex justify-center gap-2 mb-8 overflow-x-auto pb-1">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 border",
+                activeCategory === cat
+                  ? "bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-500/20"
+                  : "bg-gray-800/60 text-gray-400 border-gray-700/50 hover:border-purple-500/30 hover:text-white"
+              )}
             >
-              {/* Thumbnail */}
-              <img
-                src={item.thumbnail}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              {/* Play button */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white" />
-                </div>
-              </div>
-              
-              {/* Category badge */}
-              <div className="absolute top-2 left-2 md:top-3 md:left-3">
-                <span className="px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] md:text-xs font-medium">
-                  {item.category}
-                </span>
-              </div>
-              
-              {/* Stats */}
-              <div className="absolute bottom-0 left-0 right-0 p-2 md:p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-white text-xs md:text-sm font-medium mb-1 md:mb-2 line-clamp-1">{item.title}</p>
-                <div className="flex items-center gap-2 md:gap-3 text-gray-300 text-[10px] md:text-xs">
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                    {item.views}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Heart className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                    {item.likes}
-                  </span>
-                </div>
-              </div>
-            </div>
+              {cat}
+            </button>
           ))}
         </div>
 
-        {/* View more link */}
-        <div className="text-center mt-6 md:mt-8">
-          <button className="inline-flex items-center gap-1.5 md:gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-[#25D366] text-white text-sm md:text-base font-medium hover:bg-[#1fb855] transition-colors">
-            <MessageCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-            Join our community
-          </button>
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          {filtered.map(project => (
+            <ShowcaseVideoCard key={project.id} project={project} />
+          ))}
         </div>
       </div>
     </section>
