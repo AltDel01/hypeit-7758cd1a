@@ -32,6 +32,7 @@ import RefundRequest from "./pages/RefundRequest";
 import FAQ from "./pages/FAQ";
 import InviteRedirect from "./pages/InviteRedirect";
 import Explainer from "./pages/Explainer";
+import Careers from "./pages/Careers";
 import React from "react";
 
 // Create a new query client outside of component rendering
