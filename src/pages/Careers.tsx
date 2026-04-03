@@ -141,7 +141,7 @@ const Careers = () => {
             className="group relative inline-flex items-center justify-center px-12 py-5 text-lg font-bold text-primary-foreground rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105"
           >
             {/* Animated metallic purple border */}
-            <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary via-purple-400 to-primary bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite]" />
+            <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary via-[hsl(270,80%,70%)] to-primary bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite]" />
             <span className="absolute inset-[3px] rounded-[13px] bg-primary" />
             <span className="relative z-10">Try Now</span>
           </a>
