@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Briefcase, GraduationCap } from 'lucide-react';
@@ -44,6 +45,7 @@ const folderGroup2: Position[] = [
 ];
 const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
 
   return (
     <div className="w-full">
@@ -78,12 +80,12 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
           {positions[activeIndex].description}
         </p>
         <div className="flex gap-3">
-          <a href="#" className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+          <button onClick={() => navigate(`/careers/apply?position=${encodeURIComponent(positions[activeIndex].title)}&type=full-time`)} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
             Apply
-          </a>
-          <a href="#" className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
+          </button>
+          <button onClick={() => navigate(`/careers/apply?position=${encodeURIComponent(positions[activeIndex].title)}&type=intern`)} className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
             Apply for Intern
-          </a>
+          </button>
         </div>
       </div>
     </div>
