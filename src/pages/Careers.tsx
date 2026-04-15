@@ -37,8 +37,11 @@ const folderGroup2: Position[] = [
     title: 'Video Storyteller (AI Focus)',
     description: 'As a Video Storyteller, you\'ll become a mini film director, eager to get your hands dirty with creative maker. You\'ll bring brand stories, character, or news to life by blending strong narratives with AI tools, handling everything from the first prompt to the final master. Whether you\'re a filmmaker, editor, or motion pro, you\'ll be a visual artist who uses AI to create original work, not just edit. You\'ll embrace the experimentation of generating and posting peeking under the hood to bring fresh ideas to life across the brand\'s social media, from social campaigns to big brand moments.',
   },
+  {
+    title: 'Project Officer',
+    description: 'As a Project Officer, you\'ll be the versatile backbone of operations, wearing many hats across the organization. You\'ll coordinate events from concept to execution, handle administrative workflows, support marketing campaigns, contribute to product development cycles, assist with design direction, and nurture client relationships. Your ability to juggle multiple responsibilities while maintaining quality and meeting deadlines will be essential. You thrive in fast-paced environments and enjoy the variety of working across different functions to keep the team running smoothly.',
+  },
 ];
-
 const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -71,9 +74,17 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
         <div className="mb-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</span>
         </div>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
           {positions[activeIndex].description}
         </p>
+        <div className="flex gap-3">
+          <a href="#" className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+            Apply
+          </a>
+          <a href="#" className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
+            Apply for Intern
+          </a>
+        </div>
       </div>
     </div>
   );
