@@ -7,11 +7,12 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { RequestManagementSection } from '@/components/admin/RequestManagementSection';
 import { TestRequestSection } from '@/components/admin/TestRequestSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Users, BarChart3, Zap, LayoutDashboard } from 'lucide-react';
+import { ClipboardList, Users, BarChart3, Zap, LayoutDashboard, Briefcase } from 'lucide-react';
 import AdminEditorsSection from '@/components/admin/AdminEditorsSection';
 import AdminStatsSection from '@/components/admin/AdminStatsSection';
 import AdminCreditsSection from '@/components/admin/AdminCreditsSection';
 import AdminTokenDashboard from '@/components/admin/AdminTokenDashboard';
+import AdminCareersSection from '@/components/admin/AdminCareersSection';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -60,6 +61,10 @@ const Admin = () => {
                   <Zap className="h-4 w-4" />
                   Credits
                 </TabsTrigger>
+                <TabsTrigger value="careers" className="gap-2">
+                  <Briefcase className="h-4 w-4" />
+                  Careers
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="dashboard">
@@ -81,6 +86,10 @@ const Admin = () => {
 
               <TabsContent value="credits">
                 <AdminCreditsSection />
+              </TabsContent>
+
+              <TabsContent value="careers">
+                <AdminCareersSection />
               </TabsContent>
             </Tabs>
           </div>

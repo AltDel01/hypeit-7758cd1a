@@ -64,6 +64,48 @@ export type Database = {
           },
         ]
       }
+      career_applications: {
+        Row: {
+          application_type: string
+          cover_letter: string
+          created_at: string
+          cv_url: string | null
+          full_name: string
+          id: string
+          phone: string
+          portfolio_url: string | null
+          position: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_type?: string
+          cover_letter: string
+          created_at?: string
+          cv_url?: string | null
+          full_name: string
+          id?: string
+          phone: string
+          portfolio_url?: string | null
+          position: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_type?: string
+          cover_letter?: string
+          created_at?: string
+          cv_url?: string | null
+          full_name?: string
+          id?: string
+          phone?: string
+          portfolio_url?: string | null
+          position?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generated_images: {
         Row: {
           created_at: string | null
