@@ -74,9 +74,17 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
         <div className="mb-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</span>
         </div>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
           {positions[activeIndex].description}
         </p>
+        <div className="flex gap-3">
+          <a href="#" className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+            Apply
+          </a>
+          <a href="#" className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
+            Apply for Intern
+          </a>
+        </div>
       </div>
     </div>
   );
