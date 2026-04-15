@@ -7,10 +7,11 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { RequestManagementSection } from '@/components/admin/RequestManagementSection';
 import { TestRequestSection } from '@/components/admin/TestRequestSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Users, BarChart3, Zap } from 'lucide-react';
+import { ClipboardList, Users, BarChart3, Zap, LayoutDashboard } from 'lucide-react';
 import AdminEditorsSection from '@/components/admin/AdminEditorsSection';
 import AdminStatsSection from '@/components/admin/AdminStatsSection';
 import AdminCreditsSection from '@/components/admin/AdminCreditsSection';
+import AdminTokenDashboard from '@/components/admin/AdminTokenDashboard';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -37,8 +38,12 @@ const Admin = () => {
         <Navbar />
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <Tabs defaultValue="requests" className="w-full">
+            <Tabs defaultValue="dashboard" className="w-full">
               <TabsList className="mb-6 w-full md:w-auto">
+                <TabsTrigger value="dashboard" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </TabsTrigger>
                 <TabsTrigger value="requests" className="gap-2">
                   <ClipboardList className="h-4 w-4" />
                   Requests
@@ -56,6 +61,10 @@ const Admin = () => {
                   Credits
                 </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="dashboard">
+                <AdminTokenDashboard />
+              </TabsContent>
 
               <TabsContent value="requests">
                 <TestRequestSection />
