@@ -191,8 +191,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (savedState.selectedAspectRatio) fullPrompt += ` | Aspect: ${savedState.selectedAspectRatio}`;
       if (savedState.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
       if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
-      const videoFiles = loadedFiles.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
+      const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
+      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
         .then((result) => {
@@ -343,8 +343,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const start = savedState?.startTimestamp || '00:00';
       const end = savedState?.endTimestamp || '00:00';
       if (start !== '00:00' || end !== '00:00') fullPrompt += ` | Timeline: ${start}-${end}`;
-      const videoFiles = loadedFiles.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
+      const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
+      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
       if (result) {
@@ -449,8 +449,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedAspectRatio) fullPrompt += ` | Aspect: ${selectedAspectRatio}`;
       if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
-      const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
+      const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
+      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
       onRequestCreated?.();
@@ -486,8 +486,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
-      const videoFiles = uploadedFileUrls.filter(f => f.type === 'video');
-      const referenceUrl = videoFiles.length > 0 ? (videoFiles[0].storagePath || videoFiles[0].url) : undefined;
+      const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
+      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
       const submitCost = calculateCreditCost({ activeMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       if (submitCost.totalCost > remainingCredits) {
         toast.error(`Not enough credits. You need ${submitCost.totalCost} but have ${remainingCredits} remaining. Try lowering quality or duration, or upgrade your plan.`);
