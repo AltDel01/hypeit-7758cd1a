@@ -195,15 +195,20 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </div>
         )}
 
-        {/* Reference Image */}
+        {/* Reference Images */}
         {request.reference_image_url && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Reference</h3>
-            <img
-              src={request.reference_image_url}
-              alt="Reference"
-              className="max-h-40 rounded-lg border border-border object-contain"
-            />
+            <div className="flex flex-wrap gap-2">
+              {request.reference_image_url.split(',').map((url, idx) => (
+                <img
+                  key={idx}
+                  src={url.trim()}
+                  alt={`Reference ${idx + 1}`}
+                  className="max-h-40 rounded-lg border border-border object-contain"
+                />
+              ))}
+            </div>
           </div>
         )}
 

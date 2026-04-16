@@ -41,27 +41,17 @@ export const RequestDetails = ({
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
-  const [resolvedRefUrl, setResolvedRefUrl] = useState<string | null>(null);
+  const [resolvedRefUrls, setResolvedRefUrls] = useState<string[]>([]);
+  const [refRawUrls, setRefRawUrls] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      const { data } = await supabase
-        .from('review_feedback' as any)
-        .select('rating, feedback, created_at')
-        .eq('request_id', request.id)
-        .maybeSingle();
-      if (data) setUserFeedback(data as any);
-      else setUserFeedback(null);
-    };
-    fetchFeedback();
-  }, [request.id]);
-
-  // Resolve reference_image_url (handles storage: prefix and legacy signed URLs)
+  // Resolve reference_image_url (handles comma-separated multiple URLs)
   useEffect(() => {
     const resolve = async () => {
-      if (!request.reference_image_url) { setResolvedRefUrl(null); return; }
-      const url = await resolveResultUrl(request.reference_image_url);
-      setResolvedRefUrl(url);
+      if (!request.reference_image_url) { setResolvedRefUrls([]); setRefRawUrls([]); return; }
+      const rawUrls = request.reference_image_url.split(',').map(u => u.trim()).filter(Boolean);
+      setRefRawUrls(rawUrls);
+      const resolved = await Promise.all(rawUrls.map(u => resolveResultUrl(u)));
+      setResolvedRefUrls(resolved.filter((u): u is string => !!u));
     };
     resolve();
   }, [request.reference_image_url]);
@@ -199,35 +189,39 @@ export const RequestDetails = ({
           </div>
         )}
         
-        {resolvedRefUrl && (
+        {resolvedRefUrls.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachment</h3>
-            <div className="mt-1 rounded-md overflow-hidden border border-border">
-              {isVideoUrl(request.reference_image_url || resolvedRefUrl) ? (
-                <video 
-                  src={resolvedRefUrl} 
-                  controls 
-                  className="w-full max-h-60 object-contain bg-black"
-                />
-              ) : (
-                <img 
-                  src={resolvedRefUrl} 
-                  alt="Reference" 
-                  className="w-full max-h-60 object-contain bg-muted/50"
-                />
-              )}
-              <div className="p-2 flex gap-2 border-t border-border">
-                <a href={resolvedRefUrl} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="gap-1 text-xs">
-                    <ExternalLink className="w-3 h-3" /> Open
-                  </Button>
-                </a>
-                <a href={resolvedRefUrl} download>
-                  <Button size="sm" variant="outline" className="gap-1 text-xs">
-                    <Download className="w-3 h-3" /> Download
-                  </Button>
-                </a>
-              </div>
+            <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachments ({resolvedRefUrls.length})</h3>
+            <div className="mt-1 space-y-3">
+              {resolvedRefUrls.map((url, idx) => (
+                <div key={idx} className="rounded-md overflow-hidden border border-border">
+                  {isVideoUrl(refRawUrls[idx] || url) ? (
+                    <video 
+                      src={url} 
+                      controls 
+                      className="w-full max-h-60 object-contain bg-black"
+                    />
+                  ) : (
+                    <img 
+                      src={url} 
+                      alt={`Reference ${idx + 1}`} 
+                      className="w-full max-h-60 object-contain bg-muted/50"
+                    />
+                  )}
+                  <div className="p-2 flex gap-2 border-t border-border">
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" variant="outline" className="gap-1 text-xs">
+                        <ExternalLink className="w-3 h-3" /> Open
+                      </Button>
+                    </a>
+                    <a href={url} download>
+                      <Button size="sm" variant="outline" className="gap-1 text-xs">
+                        <Download className="w-3 h-3" /> Download
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -103,9 +103,9 @@ export const RequestList = ({
 
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  {request.reference_image_url && (
-                    <ResolvedAttachment url={request.reference_image_url} size="sm" />
-                  )}
+                  {request.reference_image_url && request.reference_image_url.split(',').map((url, idx) => (
+                    <ResolvedAttachment key={idx} url={url.trim()} size="sm" />
+                  ))}
                   {isClaimed && (
                     <div className="flex items-center gap-1">
                       <UserCheck className="w-3 h-3 text-primary" />
@@ -198,7 +198,11 @@ export const RequestList = ({
                 <TableCell className="max-w-[260px] truncate text-sm">{parsed.prompt}</TableCell>
                 <TableCell>
                   {request.reference_image_url ? (
-                    <ResolvedAttachment url={request.reference_image_url} size="md" />
+                    <div className="flex gap-1">
+                      {request.reference_image_url.split(',').map((url, idx) => (
+                        <ResolvedAttachment key={idx} url={url.trim()} size="md" />
+                      ))}
+                    </div>
                   ) : (
                     <span className="text-muted-foreground text-xs">None</span>
                   )}
