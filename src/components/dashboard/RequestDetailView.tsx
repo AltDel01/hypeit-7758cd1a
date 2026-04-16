@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink } from 'lucide-react';
+import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink, FileText, Music2, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { GenerationRequest } from '@/services/generationRequestService';
@@ -14,6 +14,11 @@ interface RequestDetailViewProps {
   request: GenerationRequest;
   onClose?: () => void;
   onFeedbackSubmitted?: () => void;
+}
+
+interface ResolvedAttachmentItem {
+  rawUrl: string;
+  resolvedUrl: string | null;
 }
 
 const statusConfig: Record<string, {
@@ -51,11 +56,20 @@ const statusConfig: Record<string, {
   },
 };
 
+const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
+const isImageUrl = (url: string) => /\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/i.test(url) || url.includes('/image');
+const isAudioUrl = (url: string) => /\.(mp3|wav|m4a|aac|ogg)(\?|$)/i.test(url) || url.includes('/audio');
+const getFileName = (url: string) => {
+  const cleanUrl = url.startsWith('storage:') ? url.split('/').pop() || url : url.split('?')[0].split('/').pop() || url;
+  return decodeURIComponent(cleanUrl);
+};
+
 const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
   const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<ResolvedAttachmentItem[]>([]);
 
   useEffect(() => {
     if (request.result_url) {
@@ -64,6 +78,25 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       setResolvedUrl(null);
     }
   }, [request.result_url]);
+
+  useEffect(() => {
+    const resolveAttachments = async () => {
+      if (!request.reference_image_url) {
+        setAttachments([]);
+        return;
+      }
+
+      const rawUrls = request.reference_image_url
+        .split(',')
+        .map((url) => url.trim())
+        .filter(Boolean);
+
+      const resolvedUrls = await Promise.all(rawUrls.map((url) => resolveResultUrl(url)));
+      setAttachments(rawUrls.map((rawUrl, index) => ({ rawUrl, resolvedUrl: resolvedUrls[index] ?? null })));
+    };
+
+    resolveAttachments();
+  }, [request.reference_image_url]);
 
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
@@ -100,7 +133,6 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      // Track download timestamp
       if (request.request_type === 'video') {
         await supabase
           .from('generation_requests')
@@ -115,19 +147,17 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
 
   return (
     <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 space-y-6">
-      {/* Status Banner */}
       <div className={cn(
-        "flex items-center gap-3 p-4 rounded-lg border",
+        'flex items-center gap-3 p-4 rounded-lg border',
         status.className
       )}>
-        <StatusIcon className={cn("h-5 w-5", status.animate && "animate-spin")} />
+        <StatusIcon className={cn('h-5 w-5', status.animate && 'animate-spin')} />
         <div>
           <p className="font-medium">{status.label}</p>
           <p className="text-sm opacity-80">{status.description}</p>
         </div>
       </div>
 
-      {/* Request Details */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           {request.request_type === 'video' ? (
@@ -140,7 +170,6 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           <span>{format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}</span>
         </div>
 
-        {/* Feature Tags */}
         {parsed.features.length > 0 && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Features</h3>
@@ -174,7 +203,6 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </p>
         </div>
 
-        {/* Settings */}
         {(parsed.aspectRatio || parsed.resolution || parsed.duration) && (
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
             {parsed.aspectRatio && (
@@ -195,24 +223,101 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </div>
         )}
 
-        {/* Reference Images */}
-        {request.reference_image_url && (
+        {attachments.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Reference</h3>
-            <div className="flex flex-wrap gap-2">
-              {request.reference_image_url.split(',').map((url, idx) => (
-                <img
-                  key={idx}
-                  src={url.trim()}
-                  alt={`Reference ${idx + 1}`}
-                  className="max-h-40 rounded-lg border border-border object-contain"
-                />
-              ))}
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">References ({attachments.length})</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {attachments.map((attachment, idx) => {
+                const displayUrl = attachment.resolvedUrl;
+                const sourceForType = attachment.rawUrl || displayUrl || '';
+
+                if (!displayUrl) {
+                  return (
+                    <div key={idx} className="rounded-lg border border-border bg-background/50 p-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Paperclip className="h-4 w-4" />
+                        <span className="truncate">{getFileName(attachment.rawUrl)}</span>
+                      </div>
+                      <p className="mt-2 text-xs">Attachment unavailable</p>
+                    </div>
+                  );
+                }
+
+                if (isVideoUrl(sourceForType)) {
+                  return (
+                    <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
+                      <video src={displayUrl} controls className="w-full max-h-52 object-contain bg-black" />
+                      <div className="flex items-center justify-between gap-2 p-3 border-t border-border">
+                        <span className="truncate text-xs text-muted-foreground">{getFileName(attachment.rawUrl)}</span>
+                        <Button variant="outline" size="sm" onClick={() => window.open(displayUrl, '_blank')} className="gap-1">
+                          <ExternalLink className="h-3 w-3" />
+                          Open
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (isAudioUrl(sourceForType)) {
+                  return (
+                    <div key={idx} className="rounded-lg border border-border bg-background/50 p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Music2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="truncate">{getFileName(attachment.rawUrl)}</span>
+                      </div>
+                      <audio src={displayUrl} controls className="w-full" />
+                    </div>
+                  );
+                }
+
+                if (isImageUrl(sourceForType)) {
+                  return (
+                    <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
+                      <img
+                        src={displayUrl}
+                        alt={`Reference ${idx + 1}`}
+                        className="w-full max-h-52 object-contain"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="hidden items-center gap-2 p-4 text-sm text-muted-foreground">
+                        <FileText className="h-4 w-4" />
+                        <span className="truncate">{getFileName(attachment.rawUrl)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 p-3 border-t border-border">
+                        <span className="truncate text-xs text-muted-foreground">{getFileName(attachment.rawUrl)}</span>
+                        <Button variant="outline" size="sm" onClick={() => window.open(displayUrl, '_blank')} className="gap-1">
+                          <ExternalLink className="h-3 w-3" />
+                          Open
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={idx} className="rounded-lg border border-border bg-background/50 p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="truncate">{getFileName(attachment.rawUrl)}</span>
+                    </div>
+                    <div className="mt-3">
+                      <Button variant="outline" size="sm" onClick={() => window.open(displayUrl, '_blank')} className="gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        Open attachment
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Result */}
         {request.status === 'completed' && resolvedUrl && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
@@ -231,8 +336,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                   className="w-full max-h-80 rounded-lg border border-border object-contain"
                 />
               )}
-              
-              {/* Action Buttons */}
+
               <div className="flex gap-2 mt-3">
                 <Button onClick={handleDownload} className="gap-2">
                   <Download className="h-4 w-4" />
