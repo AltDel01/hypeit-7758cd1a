@@ -31,20 +31,21 @@ export const useRequestManagement = () => {
     const success = await updateGenerationRequestStatus(id, status, resultUrl);
     
     if (success) {
-      await loadRequests();
+      const allRequests = await fetchAllGenerationRequests();
+      setRequests(allRequests);
       toast.success(`Request marked as ${status}`);
       
       // Update selected request if it was the one that changed
       if (selectedRequest?.id === id) {
-        const updatedRequest = requests.find(r => r.id === id);
+        const updatedRequest = allRequests.find(r => r.id === id);
         if (updatedRequest) {
-          setSelectedRequest({ ...updatedRequest, status, result_url: resultUrl || updatedRequest.result_url });
+          setSelectedRequest(updatedRequest);
         }
       }
     } else {
       toast.error(`Failed to update request`);
     }
-  }, [loadRequests, selectedRequest, requests]);
+  }, [selectedRequest]);
 
   return {
     requests,
