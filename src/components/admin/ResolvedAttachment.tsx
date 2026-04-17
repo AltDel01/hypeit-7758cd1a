@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { Paperclip } from 'lucide-react';
+import { getMediaKind } from '@/utils/requestMedia';
 
 interface ResolvedAttachmentProps {
   url: string;
   className?: string;
   size?: 'sm' | 'md';
 }
-
-const isVideoUrl = (url: string) =>
-  /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
 
 export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
   url,
@@ -43,8 +41,9 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
   }
 
   const sizeClasses = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
+  const mediaKind = getMediaKind(url);
 
-  if (isVideoUrl(url) || isVideoUrl(resolvedUrl)) {
+  if (mediaKind === 'video') {
     return (
       <video
         src={resolvedUrl}
