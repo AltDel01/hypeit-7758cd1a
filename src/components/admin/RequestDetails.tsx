@@ -12,6 +12,10 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import type { GenerationRequest } from '@/services/generationRequestService';
 import { getMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
+const getResolvedMediaKind = (rawUrl?: string | null, resolvedUrl?: string | null) => {
+  return getMediaKind(rawUrl || resolvedUrl || '');
+};
+
 interface RequestDetailsProps {
   request: GenerationRequest;
   isUploading: boolean;
@@ -45,6 +49,7 @@ export const RequestDetails = ({
   const [resolvedRefUrls, setResolvedRefUrls] = useState<Array<string | null>>([]);
   const [refRawUrls, setRefRawUrls] = useState<string[]>([]);
   const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
+  const resultMediaKind = getResolvedMediaKind(request.result_url, resolvedResultUrl);
 
   // Resolve reference_image_url (handles comma-separated multiple URLs)
   useEffect(() => {
@@ -212,7 +217,7 @@ export const RequestDetails = ({
                      <div className="flex min-h-40 items-center justify-center bg-muted/50 text-sm text-muted-foreground">
                        Attachment unavailable
                      </div>
-                   ) : getMediaKind(refRawUrls[idx] || url) === 'video' ? (
+                    ) : getResolvedMediaKind(refRawUrls[idx], url) === 'video' ? (
                     <video 
                       src={url} 
                       controls 
@@ -304,7 +309,7 @@ export const RequestDetails = ({
             <h3 className="text-sm font-medium text-muted-foreground">Result</h3>
              {resolvedResultUrl ? (
               <div className="mt-1 h-40 bg-muted/50 rounded-md overflow-hidden">
-                 {request.result_url && getMediaKind(request.result_url) === 'video' ? (
+                 {resultMediaKind === 'video' ? (
                    <video 
                      src={resolvedResultUrl} 
                      controls 
