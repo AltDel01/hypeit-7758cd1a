@@ -99,7 +99,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   };
 
   const handleVideoPlay = async () => {
-    if (request.request_type !== 'video') return;
+    if (!request.result_url || getMediaKind(request.result_url) !== 'video') return;
     try {
       await supabase
         .from('generation_requests')
@@ -121,13 +121,15 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${request.request_type === 'video' ? 'mp4' : 'png'}`;
+      const mediaKind = request.result_url ? getMediaKind(request.result_url) : 'image';
+      const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
+      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      if (request.request_type === 'video') {
+      if (request.result_url && getMediaKind(request.result_url) === 'video') {
         await supabase
           .from('generation_requests')
           .update({ video_downloaded_at: new Date().toISOString() })

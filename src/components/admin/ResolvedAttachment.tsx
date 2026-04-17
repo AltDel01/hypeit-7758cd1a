@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
-import { Paperclip } from 'lucide-react';
+import { Music2, Paperclip } from 'lucide-react';
 import { getMediaKind } from '@/utils/requestMedia';
 
 interface ResolvedAttachmentProps {
@@ -51,6 +51,22 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
         muted
         preload="metadata"
       />
+    );
+  }
+
+  if (mediaKind === 'audio') {
+    return (
+      <div className={`${sizeClasses} rounded border border-border bg-muted/50 text-muted-foreground flex items-center justify-center ${className}`}>
+        <Music2 className="w-4 h-4" />
+      </div>
+    );
+  }
+
+  if (mediaKind === 'file') {
+    return (
+      <div className={`${sizeClasses} rounded border border-border bg-muted/50 text-muted-foreground flex items-center justify-center ${className}`}>
+        <Paperclip className="w-4 h-4" />
+      </div>
     );
   }
 

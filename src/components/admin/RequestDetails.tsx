@@ -42,7 +42,7 @@ export const RequestDetails = ({
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
-  const [resolvedRefUrls, setResolvedRefUrls] = useState<string[]>([]);
+  const [resolvedRefUrls, setResolvedRefUrls] = useState<Array<string | null>>([]);
   const [refRawUrls, setRefRawUrls] = useState<string[]>([]);
   const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
 
@@ -53,7 +53,7 @@ export const RequestDetails = ({
       const rawUrls = splitStoredAttachmentUrls(request.reference_image_url);
       setRefRawUrls(rawUrls);
       const resolved = await Promise.all(rawUrls.map(u => resolveResultUrl(u)));
-      setResolvedRefUrls(resolved.filter((u): u is string => !!u));
+      setResolvedRefUrls(resolved);
     };
     resolve();
   }, [request.reference_image_url]);
@@ -206,9 +206,13 @@ export const RequestDetails = ({
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachments ({resolvedRefUrls.length})</h3>
             <div className="mt-1 space-y-3">
-              {resolvedRefUrls.map((url, idx) => (
+               {resolvedRefUrls.map((url, idx) => (
                 <div key={idx} className="rounded-md overflow-hidden border border-border">
-                   {getMediaKind(refRawUrls[idx] || url) === 'video' ? (
+                   {!url ? (
+                     <div className="flex min-h-40 items-center justify-center bg-muted/50 text-sm text-muted-foreground">
+                       Attachment unavailable
+                     </div>
+                   ) : getMediaKind(refRawUrls[idx] || url) === 'video' ? (
                     <video 
                       src={url} 
                       controls 
@@ -222,12 +226,12 @@ export const RequestDetails = ({
                     />
                   )}
                   <div className="p-2 flex gap-2 border-t border-border">
-                    <a href={url} target="_blank" rel="noopener noreferrer">
+                     <a href={url || undefined} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="gap-1 text-xs">
                         <ExternalLink className="w-3 h-3" /> Open
                       </Button>
                     </a>
-                    <a href={url} download>
+                     <a href={url || undefined} download>
                       <Button size="sm" variant="outline" className="gap-1 text-xs">
                         <Download className="w-3 h-3" /> Download
                       </Button>
