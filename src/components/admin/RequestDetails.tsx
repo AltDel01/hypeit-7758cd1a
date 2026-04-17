@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import type { GenerationRequest } from '@/services/generationRequestService';
+import { getMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface RequestDetailsProps {
   request: GenerationRequest;
@@ -43,12 +44,13 @@ export const RequestDetails = ({
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
   const [resolvedRefUrls, setResolvedRefUrls] = useState<string[]>([]);
   const [refRawUrls, setRefRawUrls] = useState<string[]>([]);
+  const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
 
   // Resolve reference_image_url (handles comma-separated multiple URLs)
   useEffect(() => {
     const resolve = async () => {
       if (!request.reference_image_url) { setResolvedRefUrls([]); setRefRawUrls([]); return; }
-      const rawUrls = request.reference_image_url.split(',').map(u => u.trim()).filter(Boolean);
+      const rawUrls = splitStoredAttachmentUrls(request.reference_image_url);
       setRefRawUrls(rawUrls);
       const resolved = await Promise.all(rawUrls.map(u => resolveResultUrl(u)));
       setResolvedRefUrls(resolved.filter((u): u is string => !!u));
@@ -56,7 +58,18 @@ export const RequestDetails = ({
     resolve();
   }, [request.reference_image_url]);
 
-  const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
+  useEffect(() => {
+    const resolve = async () => {
+      if (!request.result_url) {
+        setResolvedResultUrl(null);
+        return;
+      }
+
+      setResolvedResultUrl(await resolveResultUrl(request.result_url));
+    };
+
+    resolve();
+  }, [request.result_url]);
 
   const getFeatureConfig = (featureLabel: string) => {
     return Object.values(FEATURE_MODE_MAP).find(
@@ -195,7 +208,7 @@ export const RequestDetails = ({
             <div className="mt-1 space-y-3">
               {resolvedRefUrls.map((url, idx) => (
                 <div key={idx} className="rounded-md overflow-hidden border border-border">
-                  {isVideoUrl(refRawUrls[idx] || url) ? (
+                   {getMediaKind(refRawUrls[idx] || url) === 'video' ? (
                     <video 
                       src={url} 
                       controls 
@@ -285,13 +298,21 @@ export const RequestDetails = ({
         ) : (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Result</h3>
-            {request.result_url ? (
+             {resolvedResultUrl ? (
               <div className="mt-1 h-40 bg-muted/50 rounded-md overflow-hidden">
-                <img 
-                  src={request.result_url} 
-                  alt="Result" 
-                  className="w-full h-full object-contain"
-                />
+                 {request.result_url && getMediaKind(request.result_url) === 'video' ? (
+                   <video 
+                     src={resolvedResultUrl} 
+                     controls 
+                     className="w-full h-full object-contain bg-black"
+                   />
+                 ) : (
+                   <img 
+                     src={resolvedResultUrl} 
+                     alt="Result" 
+                     className="w-full h-full object-contain"
+                   />
+                 )}
               </div>
             ) : (
               <p className="text-muted-foreground text-sm">No result uploaded</p>
