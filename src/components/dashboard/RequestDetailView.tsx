@@ -22,6 +22,10 @@ interface ResolvedAttachmentItem {
   resolvedUrl: string | null;
 }
 
+const getResolvedMediaKind = (rawUrl?: string | null, resolvedUrl?: string | null) => {
+  return getMediaKind(rawUrl || resolvedUrl || '');
+};
+
 const statusConfig: Record<string, {
   label: string;
   description: string;
@@ -67,6 +71,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<ResolvedAttachmentItem[]>([]);
+  const resultMediaKind = getResolvedMediaKind(request.result_url, resolvedUrl);
 
   useEffect(() => {
     if (request.result_url) {
@@ -99,7 +104,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   };
 
   const handleVideoPlay = async () => {
-    if (!request.result_url || getMediaKind(request.result_url) !== 'video') return;
+    if (resultMediaKind !== 'video') return;
     try {
       await supabase
         .from('generation_requests')
@@ -121,7 +126,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      const mediaKind = request.result_url ? getMediaKind(request.result_url) : 'image';
+      const mediaKind = resultMediaKind || 'image';
       const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
       a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
       document.body.appendChild(a);
@@ -129,7 +134,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      if (request.result_url && getMediaKind(request.result_url) === 'video') {
+      if (resultMediaKind === 'video') {
         await supabase
           .from('generation_requests')
           .update({ video_downloaded_at: new Date().toISOString() })
@@ -225,8 +230,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
             <div className="grid gap-3 sm:grid-cols-2">
               {attachments.map((attachment, idx) => {
                 const displayUrl = attachment.resolvedUrl;
-                 const sourceForType = attachment.rawUrl || displayUrl || '';
-                 const mediaKind = getMediaKind(sourceForType);
+                const mediaKind = getResolvedMediaKind(attachment.rawUrl, displayUrl);
 
                 if (!displayUrl) {
                   return (
@@ -319,7 +323,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
-               {request.result_url && getMediaKind(request.result_url) === 'video' ? (
+               {resultMediaKind === 'video' ? (
                 <video
                   src={resolvedUrl}
                   controls
