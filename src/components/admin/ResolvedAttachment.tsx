@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { Music2, Paperclip } from 'lucide-react';
-import { getMediaKind } from '@/utils/requestMedia';
+import { MediaKind, resolveMediaKind } from '@/utils/requestMedia';
 
 interface ResolvedAttachmentProps {
   url: string;
@@ -16,13 +16,19 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
 }) => {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [mediaKind, setMediaKind] = useState<MediaKind>('file');
 
   useEffect(() => {
     let active = true;
-    resolveResultUrl(url).then((resolved) => {
-      if (active) {
-        setResolvedUrl(resolved);
-        setError(!resolved);
+    resolveResultUrl(url).then(async (resolved) => {
+      if (!active) return;
+
+      setResolvedUrl(resolved);
+      setError(!resolved);
+
+      if (resolved) {
+        const detectedKind = await resolveMediaKind(url, resolved);
+        if (active) setMediaKind(detectedKind);
       }
     });
     return () => { active = false; };
@@ -41,7 +47,6 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
   }
 
   const sizeClasses = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
-  const mediaKind = getMediaKind(url);
 
   if (mediaKind === 'video') {
     return (
@@ -76,6 +81,7 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
       alt="Attachment"
       className={`${sizeClasses} rounded object-cover border border-border ${className}`}
       loading="lazy"
+      onError={() => setError(true)}
     />
   );
 };

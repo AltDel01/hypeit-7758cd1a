@@ -8,7 +8,7 @@ import ReviewFeedbackBox from './ReviewFeedbackBox';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { GenerationRequest } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
-import { getMediaKind, joinStoredAttachmentUrls } from '@/utils/requestMedia';
+import { MediaKind, resolveMediaKind, joinStoredAttachmentUrls } from '@/utils/requestMedia';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
 const aiCreatorDemoVideo = '';
@@ -142,6 +142,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
   const [submittedRequest, setSubmittedRequest] = useState<GenerationRequest | null>(null);
   const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
+  const [resolvedResultMediaKind, setResolvedResultMediaKind] = useState<MediaKind>('file');
   
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -238,10 +239,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setSubmittedRequest(latestRequest);
         if (latestRequest.status === 'completed' && latestRequest.result_url) {
           resolveResultUrl(latestRequest.result_url).then(url => {
-            if (url) setResolvedResultUrl(url);
+            if (url) {
+              setResolvedResultUrl(url);
+              resolveMediaKind(latestRequest.result_url, url).then(setResolvedResultMediaKind);
+            }
           });
         } else if (latestRequest.status !== 'completed') {
           setResolvedResultUrl(null);
+          setResolvedResultMediaKind('file');
         }
       }
       // Ignore other requests — don't let old completed ones bleed in
@@ -256,7 +261,10 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       setSubmittedRequestId(latestRequest.id);
       setShowSubmittedConfirmation(true);
       resolveResultUrl(latestRequest.result_url).then(url => {
-        if (url) setResolvedResultUrl(url);
+        if (url) {
+          setResolvedResultUrl(url);
+          resolveMediaKind(latestRequest.result_url, url).then(setResolvedResultMediaKind);
+        }
       });
     }
     // Don't show in-progress requests from previous sessions
@@ -304,6 +312,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
           if (url && isActive) {
             console.log('Poll resolved result URL successfully');
             setResolvedResultUrl(url);
+            resolveMediaKind(current.result_url, url).then((kind) => {
+              if (isActive) setResolvedResultMediaKind(kind);
+            });
           }
         }
       } catch (err) {
@@ -752,6 +763,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                   hasDismissedResult.current = true;
                   setShowSubmittedConfirmation(false);
                   setResolvedResultUrl(null);
+                  setResolvedResultMediaKind('file');
                   setSubmittedRequest(null);
                   setSubmittedRequestId(null);
                 }}
@@ -767,7 +779,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 </div>
               )}
               <div className="bg-black">
-                {submittedRequest.result_url && getMediaKind(submittedRequest.result_url) === 'video' ? (
+                {resolvedResultMediaKind === 'video' ? (
                   <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
                 ) : (
                   <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />

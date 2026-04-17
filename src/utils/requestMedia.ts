@@ -70,6 +70,29 @@ export const getMediaKind = (value: string): MediaKind => {
   return 'file';
 };
 
+export const getMediaKindFromMimeType = (mimeType?: string | null): MediaKind => {
+  const normalizedMimeType = mimeType?.toLowerCase().trim();
+
+  if (!normalizedMimeType) return 'file';
+  if (normalizedMimeType.startsWith('video/')) return 'video';
+  if (normalizedMimeType.startsWith('image/')) return 'image';
+  if (normalizedMimeType.startsWith('audio/')) return 'audio';
+
+  return 'file';
+};
+
+export const resolveMediaKind = async (rawValue?: string | null, resolvedUrl?: string | null): Promise<MediaKind> => {
+  const detectedFromPath = getMediaKind(rawValue || resolvedUrl || '');
+  if (detectedFromPath !== 'file' || !resolvedUrl) return detectedFromPath;
+
+  try {
+    const response = await fetch(resolvedUrl, { method: 'GET' });
+    return getMediaKindFromMimeType(response.headers.get('content-type'));
+  } catch {
+    return 'file';
+  }
+};
+
 export const getMediaFileName = (value: string) => {
   const normalizedPath = getNormalizedPath(value);
   return normalizedPath.split('/').pop() || normalizedPath;

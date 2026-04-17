@@ -1,25 +1,61 @@
 import { supabase } from '@/integrations/supabase/client';
 
+type StorageReference = {
+  bucket: string;
+  path: string;
+};
+
+const parseStorageReference = (value: string): StorageReference | null => {
+  if (!value) return null;
+
+  if (value.startsWith('storage:')) {
+    const withoutPrefix = value.slice('storage:'.length);
+    const slashIndex = withoutPrefix.indexOf('/');
+    if (slashIndex === -1) return null;
+
+    return {
+      bucket: withoutPrefix.slice(0, slashIndex),
+      path: withoutPrefix.slice(slashIndex + 1),
+    };
+  }
+
+  try {
+    const parsedUrl = new URL(value);
+    const segments = parsedUrl.pathname.split('/').filter(Boolean);
+    const objectIndex = segments.findIndex((segment) => segment === 'object');
+
+    if (objectIndex === -1) return null;
+
+    const accessMode = segments[objectIndex + 1];
+    const bucket = segments[objectIndex + 2];
+    const pathSegments = segments.slice(objectIndex + 3);
+
+    if (!accessMode || !bucket || pathSegments.length === 0) return null;
+    if (!['sign', 'authenticated'].includes(accessMode)) return null;
+
+    return {
+      bucket,
+      path: decodeURIComponent(pathSegments.join('/')),
+    };
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Resolve a result_url to a displayable URL.
- * If it starts with "storage:", create a signed URL.
- * Otherwise return as-is (legacy public URLs).
+ * Supports permanent `storage:` refs plus legacy Supabase signed URLs,
+ * and always returns a fresh signed URL for private storage objects.
  */
 export async function resolveResultUrl(resultUrl: string): Promise<string | null> {
   if (!resultUrl) return null;
 
-  if (resultUrl.startsWith('storage:')) {
-    // Format: "storage:bucket-name/path/to/file"
-    const withoutPrefix = resultUrl.slice('storage:'.length);
-    const slashIndex = withoutPrefix.indexOf('/');
-    if (slashIndex === -1) return null;
+  const storageReference = parseStorageReference(resultUrl);
 
-    const bucket = withoutPrefix.slice(0, slashIndex);
-    const path = withoutPrefix.slice(slashIndex + 1);
-
+  if (storageReference) {
     const { data, error } = await supabase.storage
-      .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hour expiry
+      .from(storageReference.bucket)
+      .createSignedUrl(storageReference.path, 3600);
 
     if (error) {
       console.error('Error creating signed URL:', error);
@@ -29,6 +65,6 @@ export async function resolveResultUrl(resultUrl: string): Promise<string | null
     return data.signedUrl;
   }
 
-  // Legacy: already a full URL
+  // Legacy non-Supabase/public URLs can be used directly.
   return resultUrl;
 }

@@ -9,7 +9,7 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
 import { supabase } from '@/integrations/supabase/client';
-import { getMediaFileName, getMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
+import { getMediaFileName, MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
@@ -20,6 +20,7 @@ interface RequestDetailViewProps {
 interface ResolvedAttachmentItem {
   rawUrl: string;
   resolvedUrl: string | null;
+  mediaKind: MediaKind;
 }
 
 const statusConfig: Record<string, {
@@ -67,13 +68,33 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<ResolvedAttachmentItem[]>([]);
+  const [resultMediaKind, setResultMediaKind] = useState<MediaKind>('file');
 
   useEffect(() => {
-    if (request.result_url) {
-      resolveResultUrl(request.result_url).then(setResolvedUrl);
-    } else {
-      setResolvedUrl(null);
-    }
+    let active = true;
+
+    const resolveResult = async () => {
+      if (!request.result_url) {
+        if (active) {
+          setResolvedUrl(null);
+          setResultMediaKind('file');
+        }
+        return;
+      }
+
+      const nextResolvedUrl = await resolveResultUrl(request.result_url);
+      if (!active) return;
+
+      setResolvedUrl(nextResolvedUrl);
+      const nextMediaKind = await resolveMediaKind(request.result_url, nextResolvedUrl);
+      if (active) setResultMediaKind(nextMediaKind);
+    };
+
+    resolveResult();
+
+    return () => {
+      active = false;
+    };
   }, [request.result_url]);
 
   useEffect(() => {
@@ -86,7 +107,17 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       const rawUrls = splitStoredAttachmentUrls(request.reference_image_url);
 
       const resolvedUrls = await Promise.all(rawUrls.map((url) => resolveResultUrl(url)));
-      setAttachments(rawUrls.map((rawUrl, index) => ({ rawUrl, resolvedUrl: resolvedUrls[index] ?? null })));
+      const mediaKinds = await Promise.all(
+        rawUrls.map((rawUrl, index) => resolveMediaKind(rawUrl, resolvedUrls[index] ?? null))
+      );
+
+      setAttachments(
+        rawUrls.map((rawUrl, index) => ({
+          rawUrl,
+          resolvedUrl: resolvedUrls[index] ?? null,
+          mediaKind: mediaKinds[index],
+        }))
+      );
     };
 
     resolveAttachments();
@@ -99,7 +130,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   };
 
   const handleVideoPlay = async () => {
-    if (!request.result_url || getMediaKind(request.result_url) !== 'video') return;
+    if (resultMediaKind !== 'video') return;
     try {
       await supabase
         .from('generation_requests')
@@ -121,7 +152,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      const mediaKind = request.result_url ? getMediaKind(request.result_url) : 'image';
+      const mediaKind = resultMediaKind || 'image';
       const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
       a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
       document.body.appendChild(a);
@@ -129,7 +160,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      if (request.result_url && getMediaKind(request.result_url) === 'video') {
+      if (resultMediaKind === 'video') {
         await supabase
           .from('generation_requests')
           .update({ video_downloaded_at: new Date().toISOString() })
@@ -225,8 +256,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
             <div className="grid gap-3 sm:grid-cols-2">
               {attachments.map((attachment, idx) => {
                 const displayUrl = attachment.resolvedUrl;
-                 const sourceForType = attachment.rawUrl || displayUrl || '';
-                 const mediaKind = getMediaKind(sourceForType);
+                const mediaKind = attachment.mediaKind;
 
                 if (!displayUrl) {
                   return (
@@ -319,7 +349,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
-               {request.result_url && getMediaKind(request.result_url) === 'video' ? (
+               {resultMediaKind === 'video' ? (
                 <video
                   src={resolvedUrl}
                   controls
