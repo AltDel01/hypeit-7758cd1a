@@ -10,11 +10,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import type { GenerationRequest } from '@/services/generationRequestService';
-import { getMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
+import { MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
-const getResolvedMediaKind = (rawUrl?: string | null, resolvedUrl?: string | null) => {
-  return getMediaKind(rawUrl || resolvedUrl || '');
-};
+interface ResolvedReferenceItem {
+  rawUrl: string;
+  resolvedUrl: string | null;
+  mediaKind: MediaKind;
+}
 
 interface RequestDetailsProps {
   request: GenerationRequest;
@@ -46,19 +48,31 @@ export const RequestDetails = ({
   const isClaimedByMe = request.assigned_to === currentUserId;
   const isClaimed = !!request.assigned_to;
   const [userFeedback, setUserFeedback] = useState<{ rating: number; feedback: string; created_at: string } | null>(null);
-  const [resolvedRefUrls, setResolvedRefUrls] = useState<Array<string | null>>([]);
-  const [refRawUrls, setRefRawUrls] = useState<string[]>([]);
+  const [resolvedAttachments, setResolvedAttachments] = useState<ResolvedReferenceItem[]>([]);
   const [resolvedResultUrl, setResolvedResultUrl] = useState<string | null>(null);
-  const resultMediaKind = getResolvedMediaKind(request.result_url, resolvedResultUrl);
+  const [resultMediaKind, setResultMediaKind] = useState<MediaKind>('file');
 
   // Resolve reference_image_url (handles comma-separated multiple URLs)
   useEffect(() => {
     const resolve = async () => {
-      if (!request.reference_image_url) { setResolvedRefUrls([]); setRefRawUrls([]); return; }
+      if (!request.reference_image_url) {
+        setResolvedAttachments([]);
+        return;
+      }
+
       const rawUrls = splitStoredAttachmentUrls(request.reference_image_url);
-      setRefRawUrls(rawUrls);
       const resolved = await Promise.all(rawUrls.map(u => resolveResultUrl(u)));
-      setResolvedRefUrls(resolved);
+      const mediaKinds = await Promise.all(
+        rawUrls.map((rawUrl, index) => resolveMediaKind(rawUrl, resolved[index] ?? null))
+      );
+
+      setResolvedAttachments(
+        rawUrls.map((rawUrl, index) => ({
+          rawUrl,
+          resolvedUrl: resolved[index] ?? null,
+          mediaKind: mediaKinds[index],
+        }))
+      );
     };
     resolve();
   }, [request.reference_image_url]);
@@ -67,10 +81,13 @@ export const RequestDetails = ({
     const resolve = async () => {
       if (!request.result_url) {
         setResolvedResultUrl(null);
+        setResultMediaKind('file');
         return;
       }
 
-      setResolvedResultUrl(await resolveResultUrl(request.result_url));
+      const nextResolvedUrl = await resolveResultUrl(request.result_url);
+      setResolvedResultUrl(nextResolvedUrl);
+      setResultMediaKind(await resolveMediaKind(request.result_url, nextResolvedUrl));
     };
 
     resolve();
@@ -207,36 +224,36 @@ export const RequestDetails = ({
           </div>
         )}
         
-        {resolvedRefUrls.length > 0 && (
+        {resolvedAttachments.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachments ({resolvedRefUrls.length})</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Reference / Attachments ({resolvedAttachments.length})</h3>
             <div className="mt-1 space-y-3">
-               {resolvedRefUrls.map((url, idx) => (
+               {resolvedAttachments.map((attachment, idx) => (
                 <div key={idx} className="rounded-md overflow-hidden border border-border">
-                   {!url ? (
+                   {!attachment.resolvedUrl ? (
                      <div className="flex min-h-40 items-center justify-center bg-muted/50 text-sm text-muted-foreground">
                        Attachment unavailable
                      </div>
-                    ) : getResolvedMediaKind(refRawUrls[idx], url) === 'video' ? (
+                    ) : attachment.mediaKind === 'video' ? (
                     <video 
-                      src={url} 
+                       src={attachment.resolvedUrl} 
                       controls 
                       className="w-full max-h-60 object-contain bg-black"
                     />
                   ) : (
                     <img 
-                      src={url} 
+                       src={attachment.resolvedUrl} 
                       alt={`Reference ${idx + 1}`} 
                       className="w-full max-h-60 object-contain bg-muted/50"
                     />
                   )}
                   <div className="p-2 flex gap-2 border-t border-border">
-                     <a href={url || undefined} target="_blank" rel="noopener noreferrer">
+                      <a href={attachment.resolvedUrl || undefined} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="gap-1 text-xs">
                         <ExternalLink className="w-3 h-3" /> Open
                       </Button>
                     </a>
-                     <a href={url || undefined} download>
+                      <a href={attachment.resolvedUrl || undefined} download>
                       <Button size="sm" variant="outline" className="gap-1 text-xs">
                         <Download className="w-3 h-3" /> Download
                       </Button>
