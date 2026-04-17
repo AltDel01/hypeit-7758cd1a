@@ -76,6 +76,7 @@ export const ResolvedAttachment: React.FC<ResolvedAttachmentProps> = ({
       alt="Attachment"
       className={`${sizeClasses} rounded object-cover border border-border ${className}`}
       loading="lazy"
+      onError={() => setError(true)}
     />
   );
 };
