@@ -70,6 +70,15 @@ const Dashboard = () => {
     }
   }, [searchParams, requests, selectedRequest, setSearchParams]);
 
+  useEffect(() => {
+    if (!selectedRequest) return;
+
+    const updatedSelectedRequest = requests.find((request) => request.id === selectedRequest.id);
+    if (updatedSelectedRequest && updatedSelectedRequest !== selectedRequest) {
+      setSelectedRequest(updatedSelectedRequest);
+    }
+  }, [requests, selectedRequest]);
+
   const handleSelectRequest = (request: GenerationRequest) => {
     setSelectedRequest(request);
     if (isMobile) {
