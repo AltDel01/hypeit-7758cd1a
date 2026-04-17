@@ -9,6 +9,7 @@ import { parsePromptString } from '@/utils/promptParser';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { GenerationRequest } from '@/services/generationRequestService';
+import { splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface RequestListProps {
   requests: GenerationRequest[];
@@ -103,8 +104,8 @@ export const RequestList = ({
 
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  {request.reference_image_url && request.reference_image_url.split(',').map((url, idx) => (
-                    <ResolvedAttachment key={idx} url={url.trim()} size="sm" />
+                  {splitStoredAttachmentUrls(request.reference_image_url).map((url, idx) => (
+                    <ResolvedAttachment key={`${request.id}-${idx}`} url={url} size="sm" />
                   ))}
                   {isClaimed && (
                     <div className="flex items-center gap-1">
@@ -199,8 +200,8 @@ export const RequestList = ({
                 <TableCell>
                   {request.reference_image_url ? (
                     <div className="flex gap-1">
-                      {request.reference_image_url.split(',').map((url, idx) => (
-                        <ResolvedAttachment key={idx} url={url.trim()} size="md" />
+                      {splitStoredAttachmentUrls(request.reference_image_url).map((url, idx) => (
+                        <ResolvedAttachment key={`${request.id}-${idx}`} url={url} size="md" />
                       ))}
                     </div>
                   ) : (

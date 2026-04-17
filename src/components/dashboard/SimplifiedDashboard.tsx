@@ -8,6 +8,7 @@ import ReviewFeedbackBox from './ReviewFeedbackBox';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { GenerationRequest } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { getMediaKind, joinStoredAttachmentUrls } from '@/utils/requestMedia';
 // Dummy video placeholders (files removed)
 const retentionDemoVideo = '';
 const aiCreatorDemoVideo = '';
@@ -192,7 +193,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (savedState.selectedResolution) fullPrompt += ` | Resolution: ${savedState.selectedResolution}`;
       if (savedState.selectedDuration) fullPrompt += ` | Duration: ${savedState.selectedDuration}`;
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
-      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
+      const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
         .then((result) => {
@@ -344,7 +345,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const end = savedState?.endTimestamp || '00:00';
       if (start !== '00:00' || end !== '00:00') fullPrompt += ` | Timeline: ${start}-${end}`;
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
-      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
+      const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
       if (result) {
@@ -450,7 +451,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedResolution) fullPrompt += ` | Resolution: ${selectedResolution}`;
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
-      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
+      const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
       onRequestCreated?.();
@@ -487,7 +488,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       if (selectedDuration) fullPrompt += ` | Duration: ${selectedDuration}`;
       if (startTimestamp !== '00:00' || endTimestamp !== '00:00') fullPrompt += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
-      const referenceUrl = allFiles.length > 0 ? allFiles.map(f => f.storagePath || f.url).join(',') : undefined;
+      const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const submitCost = calculateCreditCost({ activeMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
       if (submitCost.totalCost > remainingCredits) {
         toast.error(`Not enough credits. You need ${submitCost.totalCost} but have ${remainingCredits} remaining. Try lowering quality or duration, or upgrade your plan.`);
@@ -766,7 +767,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 </div>
               )}
               <div className="bg-black">
-                {submittedRequest.request_type === 'video' ? (
+                {submittedRequest.result_url && getMediaKind(submittedRequest.result_url) === 'video' ? (
                   <video src={resolvedResultUrl} controls className="w-full max-h-[400px]" />
                 ) : (
                   <img src={resolvedResultUrl} alt="Result" className="w-full max-h-[400px] object-contain" />

@@ -9,6 +9,7 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
 import { supabase } from '@/integrations/supabase/client';
+import { getMediaFileName, getMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
@@ -56,12 +57,8 @@ const statusConfig: Record<string, {
   },
 };
 
-const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url) || url.includes('/video');
-const isImageUrl = (url: string) => /\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/i.test(url) || url.includes('/image');
-const isAudioUrl = (url: string) => /\.(mp3|wav|m4a|aac|ogg)(\?|$)/i.test(url) || url.includes('/audio');
 const getFileName = (url: string) => {
-  const cleanUrl = url.startsWith('storage:') ? url.split('/').pop() || url : url.split('?')[0].split('/').pop() || url;
-  return decodeURIComponent(cleanUrl);
+  return decodeURIComponent(getMediaFileName(url));
 };
 
 const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
@@ -86,10 +83,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
         return;
       }
 
-      const rawUrls = request.reference_image_url
-        .split(',')
-        .map((url) => url.trim())
-        .filter(Boolean);
+      const rawUrls = splitStoredAttachmentUrls(request.reference_image_url);
 
       const resolvedUrls = await Promise.all(rawUrls.map((url) => resolveResultUrl(url)));
       setAttachments(rawUrls.map((rawUrl, index) => ({ rawUrl, resolvedUrl: resolvedUrls[index] ?? null })));
@@ -105,7 +99,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   };
 
   const handleVideoPlay = async () => {
-    if (request.request_type !== 'video') return;
+    if (!request.result_url || getMediaKind(request.result_url) !== 'video') return;
     try {
       await supabase
         .from('generation_requests')
@@ -127,13 +121,15 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${request.request_type === 'video' ? 'mp4' : 'png'}`;
+      const mediaKind = request.result_url ? getMediaKind(request.result_url) : 'image';
+      const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
+      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      if (request.request_type === 'video') {
+      if (request.result_url && getMediaKind(request.result_url) === 'video') {
         await supabase
           .from('generation_requests')
           .update({ video_downloaded_at: new Date().toISOString() })
@@ -229,7 +225,8 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
             <div className="grid gap-3 sm:grid-cols-2">
               {attachments.map((attachment, idx) => {
                 const displayUrl = attachment.resolvedUrl;
-                const sourceForType = attachment.rawUrl || displayUrl || '';
+                 const sourceForType = attachment.rawUrl || displayUrl || '';
+                 const mediaKind = getMediaKind(sourceForType);
 
                 if (!displayUrl) {
                   return (
@@ -243,7 +240,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                   );
                 }
 
-                if (isVideoUrl(sourceForType)) {
+                 if (mediaKind === 'video') {
                   return (
                     <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
                       <video src={displayUrl} controls className="w-full max-h-52 object-contain bg-black" />
@@ -258,7 +255,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                   );
                 }
 
-                if (isAudioUrl(sourceForType)) {
+                 if (mediaKind === 'audio') {
                   return (
                     <div key={idx} className="rounded-lg border border-border bg-background/50 p-4 space-y-3">
                       <div className="flex items-center gap-2 text-sm font-medium">
@@ -270,7 +267,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                   );
                 }
 
-                if (isImageUrl(sourceForType)) {
+                 if (mediaKind === 'image') {
                   return (
                     <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
                       <img
@@ -322,7 +319,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
-              {request.request_type === 'video' ? (
+               {request.result_url && getMediaKind(request.result_url) === 'video' ? (
                 <video
                   src={resolvedUrl}
                   controls
