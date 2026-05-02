@@ -52,3 +52,118 @@ input:focus, textarea:focus {
     scrollbar-width: auto;
   }
 }
+
+/* ============ Pokemon-style hologram cards ============ */
+.holo-card {
+  position: relative;
+  isolation: isolate;
+  will-change: transform;
+}
+
+/* Animated conic-gradient border */
+.holo-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 1.05rem;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--holo-angle, 0deg),
+    var(--c1, #a855f7),
+    var(--c2, #22d3ee),
+    var(--c3, #f0abfc),
+    var(--c1, #a855f7)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: holoSpin 6s linear infinite;
+  z-index: 0;
+  filter: drop-shadow(0 0 14px var(--c1, #a855f7));
+}
+
+.holo-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  background: radial-gradient(
+    700px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--c1) 35%, transparent) 0%,
+    transparent 40%
+  );
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.holo-card:hover::after {
+  opacity: 1;
+}
+
+.holo-foil {
+  background:
+    radial-gradient(
+      400px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.18),
+      transparent 45%
+    ),
+    conic-gradient(
+      from 210deg at var(--mx, 50%) var(--my, 50%),
+      rgba(168, 85, 247, 0.25),
+      rgba(34, 211, 238, 0.25),
+      rgba(244, 114, 182, 0.25),
+      rgba(251, 191, 36, 0.25),
+      rgba(168, 85, 247, 0.25)
+    );
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  transition: opacity 250ms ease;
+}
+
+.holo-card:hover .holo-foil {
+  opacity: 0.95;
+}
+
+.holo-prism {
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.06) 0 2px,
+      transparent 2px 6px
+    ),
+    repeating-linear-gradient(
+      65deg,
+      rgba(255, 255, 255, 0.04) 0 2px,
+      transparent 2px 5px
+    );
+}
+
+.holo-sheen {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  animation: holoSheen 1.6s ease-in-out;
+}
+
+@keyframes holoSpin {
+  to { --holo-angle: 360deg; }
+}
+
+@property --holo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes holoSheen {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
