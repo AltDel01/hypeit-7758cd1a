@@ -540,6 +540,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
+        {/* Mode banner: shows which workflow the user entered from the homepage hero */}
+        {dispatchCategory && CATEGORY_MAP[dispatchCategory] && (
+          <ModeBanner category={dispatchCategory} />
+        )}
+
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
