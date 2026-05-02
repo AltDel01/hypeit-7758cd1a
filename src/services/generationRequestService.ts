@@ -322,3 +322,93 @@ export async function fetchUserGenerationRequests(): Promise<GenerationRequest[]
     return [];
   }
 }
+
+// ─── Auto-fulfill dispatcher ────────────────────────────────────────────────
+
+interface DispatchParams {
+  requestId: string;
+  category: GenerationCategory;
+  model: string;
+  prompt: string;
+  size?: string;
+  referenceImageUrls?: string[];
+  firstFrameUrl?: string;
+  sourceVideoUrl?: string;
+  faceImageUrl?: string;
+}
+
+export function aspectRatioToSize(ratio: string): string {
+  switch (ratio) {
+    case "1:1": return "1024*1024";
+    case "16:9": return "1280*720";
+    case "9:16": return "720*1280";
+    case "4:3": return "1024*768";
+    case "21:9": return "1680*720";
+    default: return "1024*1024";
+  }
+}
+
+/**
+ * Routes the request to the correct edge function based on category.
+ * Returns immediately. Failure is silently logged; the edge function will
+ * mark `auto_failed=true` so the manual editor queue takes over.
+ */
+async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
+  if (p.category === "image-gen" || p.category === "image-edit-instruction") {
+    const { error } = await supabase.functions.invoke("qwen-image", {
+      body: {
+        requestId: p.requestId,
+        mode: p.category === "image-gen" ? "gen" : "edit",
+        prompt: p.prompt,
+        model: p.model,
+        size: p.size,
+        referenceImageUrls: p.referenceImageUrls,
+      },
+    });
+    if (error) console.error("[qwen-image] invoke error", error);
+    return;
+  }
+
+  if (
+    p.category === "video-t2v" ||
+    p.category === "video-i2v" ||
+    p.category === "video-r2v" ||
+    p.category === "video-face-swap"
+  ) {
+    const { error } = await supabase.functions.invoke("wan-video", {
+      body: {
+        requestId: p.requestId,
+        category: p.category,
+        prompt: p.prompt,
+        model: p.model,
+        size: p.size,
+        firstFrameUrl: p.firstFrameUrl,
+        referenceImageUrls: p.referenceImageUrls,
+        sourceVideoUrl: p.sourceVideoUrl,
+        faceImageUrl: p.faceImageUrl,
+      },
+    });
+    if (error) console.error("[wan-video] invoke error", error);
+    return;
+  }
+  // Decompose (coming soon) and manual categories: no dispatch.
+}
+
+/**
+ * Poll a Wan video task. Returns the latest status payload.
+ * Call repeatedly (e.g. every 10s) from the dashboard until status is
+ * 'completed' or 'failed'.
+ */
+export async function pollVideoRequest(requestId: string): Promise<{
+  status: "pending" | "completed" | "failed";
+  resultUrl?: string;
+}> {
+  const { data, error } = await supabase.functions.invoke("wan-video-poll", {
+    body: { requestId },
+  });
+  if (error) {
+    console.error("[wan-video-poll] invoke error", error);
+    return { status: "pending" };
+  }
+  return data as any;
+}
