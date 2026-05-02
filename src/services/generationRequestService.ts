@@ -1,4 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  GenerationCategory,
+  CATEGORY_MAP,
+  pickModel,
+} from "@/config/generationCategories";
 
 export interface GenerationRequest {
   id: string;
@@ -17,6 +22,11 @@ export interface GenerationRequest {
   assigned_to: string | null;
   assigned_to_name: string | null;
   assigned_at: string | null;
+  category?: GenerationCategory | null;
+  auto_provider?: string | null;
+  auto_model?: string | null;
+  auto_failed?: boolean | null;
+  provider_task_id?: string | null;
 }
 
 export interface CreateGenerationRequestParams {
@@ -25,6 +35,13 @@ export interface CreateGenerationRequestParams {
   aspectRatio?: string;
   referenceImageUrl?: string;
   creditsUsed?: number;
+  /** Optional: explicit category. Falls back to image-gen / video-edit-manual. */
+  category?: GenerationCategory;
+  /** Optional: extra inputs for video modes (i2v, r2v, face-swap). */
+  firstFrameUrl?: string;
+  referenceImageUrls?: string[];
+  sourceVideoUrl?: string;
+  faceImageUrl?: string;
 }
 
 /**
