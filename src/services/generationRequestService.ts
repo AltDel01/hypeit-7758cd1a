@@ -79,6 +79,15 @@ export async function createGenerationRequest(
       return null;
     }
 
+    // Resolve category. Default: image -> image-gen, video -> video-edit-manual.
+    const category: GenerationCategory =
+      params.category ||
+      (params.requestType === "image" ? "image-gen" : "video-edit-manual");
+
+    const tier = (profile as any)?.subscription_tier || "free";
+    const autoModel = pickModel(category, tier);
+    const meta = CATEGORY_MAP[category];
+
     // Insert generation request
     const { data: request, error } = await supabase
       .from("generation_requests")
@@ -92,6 +101,9 @@ export async function createGenerationRequest(
         reference_image_url: params.referenceImageUrl || null,
         status: "new",
         credits_used: creditsUsed,
+        category,
+        auto_provider: meta.provider,
+        auto_model: autoModel,
       })
       .select()
       .single();
@@ -99,6 +111,22 @@ export async function createGenerationRequest(
     if (error) {
       console.error("Error creating generation request:", error);
       return null;
+    }
+
+    // Auto-fulfill via the right edge function. Manual categories are skipped
+    // and stay in the editor queue (existing behavior).
+    if (meta.provider && autoModel) {
+      dispatchAutoFulfill({
+        requestId: (request as any).id,
+        category,
+        model: autoModel,
+        prompt: params.prompt,
+        referenceImageUrls: params.referenceImageUrls || (params.referenceImageUrl ? [params.referenceImageUrl] : undefined),
+        firstFrameUrl: params.firstFrameUrl,
+        sourceVideoUrl: params.sourceVideoUrl,
+        faceImageUrl: params.faceImageUrl,
+        size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
+      }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
     // Send notification email (fire and forget)
