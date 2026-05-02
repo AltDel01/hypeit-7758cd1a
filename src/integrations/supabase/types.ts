@@ -207,6 +207,10 @@ export type Database = {
           assigned_at: string | null
           assigned_to: string | null
           assigned_to_name: string | null
+          auto_failed: boolean
+          auto_model: string | null
+          auto_provider: string | null
+          category: string | null
           completed_at: string | null
           created_at: string | null
           credits_used: number
@@ -215,8 +219,10 @@ export type Database = {
           editor_warn_5min_at: string | null
           id: string
           prompt: string
+          provider_task_id: string | null
           reference_image_url: string | null
           request_type: string
+          result_layers: Json | null
           result_url: string | null
           stale_notified_at: string | null
           status: string | null
@@ -232,6 +238,10 @@ export type Database = {
           assigned_at?: string | null
           assigned_to?: string | null
           assigned_to_name?: string | null
+          auto_failed?: boolean
+          auto_model?: string | null
+          auto_provider?: string | null
+          category?: string | null
           completed_at?: string | null
           created_at?: string | null
           credits_used?: number
@@ -240,8 +250,10 @@ export type Database = {
           editor_warn_5min_at?: string | null
           id?: string
           prompt: string
+          provider_task_id?: string | null
           reference_image_url?: string | null
           request_type: string
+          result_layers?: Json | null
           result_url?: string | null
           stale_notified_at?: string | null
           status?: string | null
@@ -257,6 +269,10 @@ export type Database = {
           assigned_at?: string | null
           assigned_to?: string | null
           assigned_to_name?: string | null
+          auto_failed?: boolean
+          auto_model?: string | null
+          auto_provider?: string | null
+          category?: string | null
           completed_at?: string | null
           created_at?: string | null
           credits_used?: number
@@ -265,8 +281,10 @@ export type Database = {
           editor_warn_5min_at?: string | null
           id?: string
           prompt?: string
+          provider_task_id?: string | null
           reference_image_url?: string | null
           request_type?: string
+          result_layers?: Json | null
           result_url?: string | null
           stale_notified_at?: string | null
           status?: string | null

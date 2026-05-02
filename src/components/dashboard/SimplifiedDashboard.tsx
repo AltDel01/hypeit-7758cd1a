@@ -18,6 +18,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
+import { HeroMode, heroModeToCategory, GenerationCategory, CATEGORY_MAP } from '@/config/generationCategories';
+import { useSearchParams } from 'react-router-dom';
+import ModeBanner from './ModeBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { loadEditorState, clearEditorState, UploadedFile } from '@/hooks/useEditorState';
 import {
@@ -126,6 +129,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   });
 
   const remainingCredits = (profileData?.monthly_generation_limit || 25) - (profileData?.generations_this_month || 0);
+
+  // Read ?mode= from URL (set by PokemonChooserHero) to pre-configure the workspace.
+  const [searchParams] = useSearchParams();
+  const heroMode = (searchParams.get('mode') as HeroMode | null) || null;
+  const dispatchCategory: GenerationCategory | undefined = heroMode
+    ? heroModeToCategory(heroMode)
+    : undefined;
+
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
@@ -196,7 +207,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: dispatchCategory })
         .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
@@ -358,7 +369,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: dispatchCategory });
       if (result) {
         hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
@@ -464,7 +475,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: dispatchCategory });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
@@ -506,7 +517,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setIsSubmitting(false);
         return;
       }
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: dispatchCategory });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
@@ -530,6 +541,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
+        {/* Mode banner: shows which workflow the user entered from the homepage hero */}
+        {dispatchCategory && CATEGORY_MAP[dispatchCategory] && (
+          <ModeBanner category={dispatchCategory} />
+        )}
+
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">

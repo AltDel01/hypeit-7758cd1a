@@ -1,4 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  GenerationCategory,
+  CATEGORY_MAP,
+  pickModel,
+} from "@/config/generationCategories";
 
 export interface GenerationRequest {
   id: string;
@@ -17,6 +22,11 @@ export interface GenerationRequest {
   assigned_to: string | null;
   assigned_to_name: string | null;
   assigned_at: string | null;
+  category?: GenerationCategory | null;
+  auto_provider?: string | null;
+  auto_model?: string | null;
+  auto_failed?: boolean | null;
+  provider_task_id?: string | null;
 }
 
 export interface CreateGenerationRequestParams {
@@ -25,6 +35,13 @@ export interface CreateGenerationRequestParams {
   aspectRatio?: string;
   referenceImageUrl?: string;
   creditsUsed?: number;
+  /** Optional: explicit category. Falls back to image-gen / video-edit-manual. */
+  category?: GenerationCategory;
+  /** Optional: extra inputs for video modes (i2v, r2v, face-swap). */
+  firstFrameUrl?: string;
+  referenceImageUrls?: string[];
+  sourceVideoUrl?: string;
+  faceImageUrl?: string;
 }
 
 /**
@@ -62,6 +79,15 @@ export async function createGenerationRequest(
       return null;
     }
 
+    // Resolve category. Default: image -> image-gen, video -> video-edit-manual.
+    const category: GenerationCategory =
+      params.category ||
+      (params.requestType === "image" ? "image-gen" : "video-edit-manual");
+
+    const tier = (profile as any)?.subscription_tier || "free";
+    const autoModel = pickModel(category, tier);
+    const meta = CATEGORY_MAP[category];
+
     // Insert generation request
     const { data: request, error } = await supabase
       .from("generation_requests")
@@ -75,6 +101,9 @@ export async function createGenerationRequest(
         reference_image_url: params.referenceImageUrl || null,
         status: "new",
         credits_used: creditsUsed,
+        category,
+        auto_provider: meta.provider,
+        auto_model: autoModel,
       })
       .select()
       .single();
@@ -82,6 +111,22 @@ export async function createGenerationRequest(
     if (error) {
       console.error("Error creating generation request:", error);
       return null;
+    }
+
+    // Auto-fulfill via the right edge function. Manual categories are skipped
+    // and stay in the editor queue (existing behavior).
+    if (meta.provider && autoModel) {
+      dispatchAutoFulfill({
+        requestId: (request as any).id,
+        category,
+        model: autoModel,
+        prompt: params.prompt,
+        referenceImageUrls: params.referenceImageUrls || (params.referenceImageUrl ? [params.referenceImageUrl] : undefined),
+        firstFrameUrl: params.firstFrameUrl,
+        sourceVideoUrl: params.sourceVideoUrl,
+        faceImageUrl: params.faceImageUrl,
+        size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
+      }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
     // Send notification email (fire and forget)
@@ -276,4 +321,94 @@ export async function fetchUserGenerationRequests(): Promise<GenerationRequest[]
     console.error("Error in fetchUserGenerationRequests:", error);
     return [];
   }
+}
+
+// ─── Auto-fulfill dispatcher ────────────────────────────────────────────────
+
+interface DispatchParams {
+  requestId: string;
+  category: GenerationCategory;
+  model: string;
+  prompt: string;
+  size?: string;
+  referenceImageUrls?: string[];
+  firstFrameUrl?: string;
+  sourceVideoUrl?: string;
+  faceImageUrl?: string;
+}
+
+export function aspectRatioToSize(ratio: string): string {
+  switch (ratio) {
+    case "1:1": return "1024*1024";
+    case "16:9": return "1280*720";
+    case "9:16": return "720*1280";
+    case "4:3": return "1024*768";
+    case "21:9": return "1680*720";
+    default: return "1024*1024";
+  }
+}
+
+/**
+ * Routes the request to the correct edge function based on category.
+ * Returns immediately. Failure is silently logged; the edge function will
+ * mark `auto_failed=true` so the manual editor queue takes over.
+ */
+async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
+  if (p.category === "image-gen" || p.category === "image-edit-instruction") {
+    const { error } = await supabase.functions.invoke("qwen-image", {
+      body: {
+        requestId: p.requestId,
+        mode: p.category === "image-gen" ? "gen" : "edit",
+        prompt: p.prompt,
+        model: p.model,
+        size: p.size,
+        referenceImageUrls: p.referenceImageUrls,
+      },
+    });
+    if (error) console.error("[qwen-image] invoke error", error);
+    return;
+  }
+
+  if (
+    p.category === "video-t2v" ||
+    p.category === "video-i2v" ||
+    p.category === "video-r2v" ||
+    p.category === "video-face-swap"
+  ) {
+    const { error } = await supabase.functions.invoke("wan-video", {
+      body: {
+        requestId: p.requestId,
+        category: p.category,
+        prompt: p.prompt,
+        model: p.model,
+        size: p.size,
+        firstFrameUrl: p.firstFrameUrl,
+        referenceImageUrls: p.referenceImageUrls,
+        sourceVideoUrl: p.sourceVideoUrl,
+        faceImageUrl: p.faceImageUrl,
+      },
+    });
+    if (error) console.error("[wan-video] invoke error", error);
+    return;
+  }
+  // Decompose (coming soon) and manual categories: no dispatch.
+}
+
+/**
+ * Poll a Wan video task. Returns the latest status payload.
+ * Call repeatedly (e.g. every 10s) from the dashboard until status is
+ * 'completed' or 'failed'.
+ */
+export async function pollVideoRequest(requestId: string): Promise<{
+  status: "pending" | "completed" | "failed";
+  resultUrl?: string;
+}> {
+  const { data, error } = await supabase.functions.invoke("wan-video-poll", {
+    body: { requestId },
+  });
+  if (error) {
+    console.error("[wan-video-poll] invoke error", error);
+    return { status: "pending" };
+  }
+  return data as any;
 }
