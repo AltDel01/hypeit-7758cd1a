@@ -206,7 +206,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost })
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: dispatchCategory })
         .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
@@ -368,7 +368,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: dispatchCategory });
       if (result) {
         hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
@@ -474,7 +474,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: dispatchCategory });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
@@ -516,7 +516,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setIsSubmitting(false);
         return;
       }
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: dispatchCategory });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
