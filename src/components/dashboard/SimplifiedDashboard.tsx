@@ -128,6 +128,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   });
 
   const remainingCredits = (profileData?.monthly_generation_limit || 25) - (profileData?.generations_this_month || 0);
+
+  // Read ?mode= from URL (set by PokemonChooserHero) to pre-configure the workspace.
+  const [searchParams] = useSearchParams();
+  const heroMode = (searchParams.get('mode') as HeroMode | null) || null;
+  const dispatchCategory: GenerationCategory | undefined = heroMode
+    ? heroModeToCategory(heroMode)
+    : undefined;
+
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
