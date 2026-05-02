@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
 import { HeroMode, heroModeToCategory, GenerationCategory, CATEGORY_MAP } from '@/config/generationCategories';
 import { useSearchParams } from 'react-router-dom';
+import ModeBanner from './ModeBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { loadEditorState, clearEditorState, UploadedFile } from '@/hooks/useEditorState';
 import {
