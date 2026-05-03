@@ -15,6 +15,7 @@ const aiCreatorDemoVideo = '';
 const aiEditDemoVideo = '';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
