@@ -134,9 +134,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   // Read ?mode= from URL (set by PokemonChooserHero) to pre-configure the workspace.
   const [searchParams] = useSearchParams();
   const heroMode = (searchParams.get('mode') as HeroMode | null) || null;
-  const dispatchCategory: GenerationCategory | undefined = heroMode
-    ? heroModeToCategory(heroMode)
-    : undefined;
+  const initialCategory = heroMode ? heroModeToCategory(heroMode) : undefined;
+  const [activeCategory, setActiveCategory] = useState<GenerationCategory | undefined>(initialCategory);
+
+  useEffect(() => {
+    if (initialCategory) {
+      setActiveCategory(initialCategory);
+    }
+  }, [heroMode]);
 
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
