@@ -130,7 +130,7 @@ const PokemonChooserHero: React.FC = () => {
         </div>
 
         <p className="mt-10 text-xs text-white/40">
-          Image and video generation powered by Alibaba Qwen and Wan. Video editing is hand crafted by our editors.
+          {" "}
         </p>
       </div>
     </section>

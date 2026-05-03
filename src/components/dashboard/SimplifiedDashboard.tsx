@@ -15,6 +15,7 @@ const aiCreatorDemoVideo = '';
 const aiEditDemoVideo = '';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { createGenerationRequest } from '@/services/generationRequestService';
@@ -133,9 +134,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   // Read ?mode= from URL (set by PokemonChooserHero) to pre-configure the workspace.
   const [searchParams] = useSearchParams();
   const heroMode = (searchParams.get('mode') as HeroMode | null) || null;
-  const dispatchCategory: GenerationCategory | undefined = heroMode
-    ? heroModeToCategory(heroMode)
-    : undefined;
+  const initialCategory = heroMode ? heroModeToCategory(heroMode) : undefined;
+  const [activeCategory, setActiveCategory] = useState<GenerationCategory | undefined>(initialCategory);
+
+  useEffect(() => {
+    if (initialCategory) {
+      setActiveCategory(initialCategory);
+    }
+  }, [heroMode]);
 
   const [prompt, setPrompt] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
@@ -207,7 +213,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: dispatchCategory })
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: activeCategory })
         .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
@@ -369,7 +375,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: activeCategory });
       if (result) {
         hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
@@ -475,7 +481,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: activeCategory });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
@@ -517,7 +523,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setIsSubmitting(false);
         return;
       }
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: activeCategory });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
@@ -542,8 +548,27 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
         {/* Mode banner: shows which workflow the user entered from the homepage hero */}
-        {dispatchCategory && CATEGORY_MAP[dispatchCategory] && (
-          <ModeBanner category={dispatchCategory} />
+        {activeCategory && CATEGORY_MAP[activeCategory] && (
+          <div className="space-y-4">
+            <ModeBanner category={activeCategory} />
+            
+            {(heroMode === 'image-edit' || activeCategory?.startsWith('image-edit')) && (
+              <Tabs 
+                value={activeCategory} 
+                onValueChange={(val) => setActiveCategory(val as GenerationCategory)}
+                className="w-full"
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-800/50">
+                  <TabsTrigger value="image-edit-instruction" className="text-xs">
+                    Image Editing
+                  </TabsTrigger>
+                  <TabsTrigger value="image-edit-decompose" className="text-xs">
+                    Decompose Editing
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+          </div>
         )}
 
         {/* Header */}
