@@ -549,7 +549,26 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
         {/* Mode banner: shows which workflow the user entered from the homepage hero */}
         {activeCategory && CATEGORY_MAP[activeCategory] && (
-          <ModeBanner category={activeCategory} />
+          <div className="space-y-4">
+            <ModeBanner category={activeCategory} />
+            
+            {(heroMode === 'image-edit' || activeCategory?.startsWith('image-edit')) && (
+              <Tabs 
+                value={activeCategory} 
+                onValueChange={(val) => setActiveCategory(val as GenerationCategory)}
+                className="w-full"
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-800/50">
+                  <TabsTrigger value="image-edit-instruction" className="text-xs">
+                    Image Editing
+                  </TabsTrigger>
+                  <TabsTrigger value="image-edit-decompose" className="text-xs">
+                    Decompose Editing
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+          </div>
         )}
 
         {/* Header */}
