@@ -213,7 +213,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const cost = calculateCreditCost({ activeMode: mode, selectedFeatures: loadedFeatures, resolution: savedState.selectedResolution || '', duration: savedState.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: dispatchCategory })
+      createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: cost.totalCost, category: activeCategory })
         .then((result) => {
           onRequestCreated?.();
           setIsAutoProcessing(false);
@@ -375,7 +375,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = loadedFiles.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const autoSubmitCost = calculateCreditCost({ activeMode: null, selectedFeatures: loadedFeatures, resolution: savedState?.selectedResolution || '', duration: savedState?.selectedDuration || '', prompt: loadedPrompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: autoSubmitCost.totalCost, category: activeCategory });
       if (result) {
         hasSubmittedInSession.current = true;
         setSubmittedRequestId(result.id);
@@ -481,7 +481,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       const allFiles = uploadedFileUrls.filter(f => ['video', 'image', 'audio', 'document'].includes(f.type));
       const referenceUrl = joinStoredAttachmentUrls(allFiles.map(f => f.storagePath || f.url));
       const specialCost = calculateCreditCost({ activeMode: currentMode, selectedFeatures, resolution: selectedResolution, duration: selectedDuration, prompt: prompt, requestType: 'video' });
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: specialCost.totalCost, category: activeCategory });
       onRequestCreated?.();
       setIsAutoProcessing(false);
       setShowSubmittedConfirmation(true);
@@ -523,7 +523,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         setIsSubmitting(false);
         return;
       }
-      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: dispatchCategory });
+      const result = await createGenerationRequest({ requestType: 'video', prompt: fullPrompt, referenceImageUrl: referenceUrl, creditsUsed: submitCost.totalCost, category: activeCategory });
       if (result) {
         onRequestCreated?.();
         setIsSubmitting(false);
@@ -548,8 +548,8 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
         {/* Mode banner: shows which workflow the user entered from the homepage hero */}
-        {dispatchCategory && CATEGORY_MAP[dispatchCategory] && (
-          <ModeBanner category={dispatchCategory} />
+        {activeCategory && CATEGORY_MAP[activeCategory] && (
+          <ModeBanner category={activeCategory} />
         )}
 
         {/* Header */}
