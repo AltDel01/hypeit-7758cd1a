@@ -39,7 +39,7 @@ const PokemonChooserHero: React.FC = () => {
 
         {/* Cards row */}
         <div
-          className="mt-14 flex flex-col items-stretch justify-center gap-12 md:flex-row md:gap-24 lg:gap-32"
+          className="mt-14 flex flex-col items-center justify-center gap-12 md:flex-row md:gap-10 lg:gap-16"
           onMouseLeave={() => setActive(null)}
         >
           {/* IMAGE column */}
@@ -68,7 +68,7 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'image'}
             onActivate={() => setActive('image')}
             children1={
-              <HoloCard size="md" tint="violet" onClick={() => goTo('image-gen')}>
+              <HoloCard size="lg" tint="violet" onClick={() => goTo('image-gen')}>
                 <Wand2 className="h-10 w-10 text-[#e9dcff]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Image Generation</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -77,7 +77,7 @@ const PokemonChooserHero: React.FC = () => {
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="pink" onClick={() => goTo('image-edit')}>
+              <HoloCard size="lg" tint="pink" onClick={() => goTo('image-edit')}>
                 <Pencil className="h-10 w-10 text-[#ffd9ec]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Image Editing</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -113,7 +113,7 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'video'}
             onActivate={() => setActive('video')}
             children1={
-              <HoloCard size="md" tint="cyan" onClick={() => goTo('video-t2v')}>
+              <HoloCard size="lg" tint="cyan" onClick={() => goTo('video-t2v')}>
                 <Wand2 className="h-10 w-10 text-[#cffafe]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Video Generation</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -122,7 +122,7 @@ const PokemonChooserHero: React.FC = () => {
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="amber" onClick={() => goTo('video-edit')}>
+              <HoloCard size="lg" tint="amber" onClick={() => goTo('video-edit')}>
                 <Pencil className="h-10 w-10 text-amber-200" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Video Editing</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
