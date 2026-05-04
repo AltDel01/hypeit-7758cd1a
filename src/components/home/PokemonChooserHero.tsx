@@ -39,7 +39,7 @@ const PokemonChooserHero: React.FC = () => {
 
         {/* Cards row */}
         <div
-          className="mt-14 flex flex-col items-stretch justify-center gap-12 md:flex-row md:gap-24 lg:gap-32"
+          className="mt-14 flex flex-col items-center justify-center gap-12 md:gap-10 lg:flex-row lg:gap-20"
           onMouseLeave={() => setActive(null)}
         >
           {/* IMAGE column */}
@@ -68,7 +68,7 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'image'}
             onActivate={() => setActive('image')}
             children1={
-              <HoloCard size="md" tint="violet" onClick={() => goTo('image-gen')}>
+              <HoloCard size="lg" tint="violet" onClick={() => goTo('image-gen')}>
                 <Wand2 className="h-10 w-10 text-[#e9dcff]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Image Generation</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -77,7 +77,7 @@ const PokemonChooserHero: React.FC = () => {
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="pink" onClick={() => goTo('image-edit')}>
+              <HoloCard size="lg" tint="pink" onClick={() => goTo('image-edit')}>
                 <Pencil className="h-10 w-10 text-[#ffd9ec]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Image Editing</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -113,7 +113,7 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'video'}
             onActivate={() => setActive('video')}
             children1={
-              <HoloCard size="md" tint="cyan" onClick={() => goTo('video-t2v')}>
+              <HoloCard size="lg" tint="cyan" onClick={() => goTo('video-t2v')}>
                 <Wand2 className="h-10 w-10 text-[#cffafe]" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Video Generation</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -122,7 +122,7 @@ const PokemonChooserHero: React.FC = () => {
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="amber" onClick={() => goTo('video-edit')}>
+              <HoloCard size="lg" tint="amber" onClick={() => goTo('video-edit')}>
                 <Pencil className="h-10 w-10 text-amber-200" strokeWidth={1.5} />
                 <div className="mt-3 text-base font-semibold text-white">Video Editing</div>
                 <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
@@ -160,17 +160,21 @@ const CardColumn: React.FC<CardColumnProps> = ({
   children1,
   children2,
 }) => {
+  const splitDirection = side === 'left' ? -1 : 1;
+  const restingShift = otherActive
+    ? side === 'left'
+      ? 'clamp(-4rem, -5.8vw, -3.5rem)'
+      : 'clamp(3.5rem, 5.8vw, 4rem)'
+    : '0rem';
+
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center transition-all duration-500',
-        expanded && side === 'left' && '-translate-x-4 md:-translate-x-8 lg:-translate-x-12',
-        expanded && side === 'right' && 'translate-x-4 md:translate-x-8 lg:translate-x-12',
-        otherActive && side === 'left' && '-translate-x-6 md:-translate-x-10 lg:-translate-x-14',
-        otherActive && side === 'right' && 'translate-x-6 md:translate-x-10 lg:translate-x-14'
+        'relative flex shrink-0 items-center justify-center transition-[width,transform] duration-500 ease-out',
+        expanded ? 'w-[420px] md:w-[560px] lg:w-[530px] xl:w-[650px]' : 'w-[270px] md:w-[290px] xl:w-[320px]'
       )}
       onMouseEnter={onActivate}
-      style={{ minHeight: 460 }}
+      style={{ minHeight: 460, transform: `translateX(${restingShift})` }}
     >
       <div
         className={cn(
@@ -189,7 +193,7 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 origin-bottom-right',
-            expanded ? '-translate-x-[60%] -translate-y-2 rotate-[-12deg] md:-translate-x-[68%] lg:-translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? '-translate-x-12 -translate-y-1 rotate-[-8deg] md:-translate-x-14 lg:-translate-x-16 xl:-translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
         >
           {children1}
@@ -197,8 +201,9 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 delay-75 origin-bottom-left absolute',
-            expanded ? 'translate-x-[60%] translate-y-2 rotate-[12deg] md:translate-x-[68%] lg:translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? 'translate-x-12 translate-y-3 rotate-[8deg] md:translate-x-14 lg:translate-x-16 xl:translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
+          style={{ left: expanded ? `calc(50% + ${splitDirection * 28}px)` : '50%', transform: expanded ? undefined : 'translateX(-50%)' }}
         >
           {children2}
         </div>
