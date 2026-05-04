@@ -39,11 +39,13 @@ const PokemonChooserHero: React.FC = () => {
 
         {/* Cards row */}
         <div
-          className="mt-14 flex flex-col items-stretch justify-center gap-12 md:flex-row md:gap-16"
+          className="mt-14 flex flex-col items-stretch justify-center gap-12 md:flex-row md:gap-24 lg:gap-32"
           onMouseLeave={() => setActive(null)}
         >
           {/* IMAGE column */}
           <CardColumn
+            side="left"
+            otherActive={active === 'video'}
             primary={
               <HoloCard
                 size="lg"
@@ -66,19 +68,19 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'image'}
             onActivate={() => setActive('image')}
             children1={
-              <HoloCard size="lg" tint="violet" onClick={() => goTo('image-gen')}>
-                <Wand2 className="h-12 w-12 text-[#e9dcff]" strokeWidth={1.5} />
-                <div className="mt-4 text-xl font-bold text-white">Image Generation</div>
-                <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
+              <HoloCard size="md" tint="violet" onClick={() => goTo('image-gen')}>
+                <Wand2 className="h-10 w-10 text-[#e9dcff]" strokeWidth={1.5} />
+                <div className="mt-3 text-base font-semibold text-white">Image Generation</div>
+                <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
                   Text to Image
                 </div>
               </HoloCard>
             }
             children2={
-              <HoloCard size="lg" tint="pink" onClick={() => goTo('image-edit')}>
-                <Pencil className="h-12 w-12 text-[#ffd9ec]" strokeWidth={1.5} />
-                <div className="mt-4 text-xl font-bold text-white">Image Editing</div>
-                <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
+              <HoloCard size="md" tint="pink" onClick={() => goTo('image-edit')}>
+                <Pencil className="h-10 w-10 text-[#ffd9ec]" strokeWidth={1.5} />
+                <div className="mt-3 text-base font-semibold text-white">Image Editing</div>
+                <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
                   Instruction or Decompose
                 </div>
               </HoloCard>
@@ -87,6 +89,8 @@ const PokemonChooserHero: React.FC = () => {
 
           {/* VIDEO column */}
           <CardColumn
+            side="right"
+            otherActive={active === 'image'}
             primary={
               <HoloCard
                 size="lg"
@@ -109,19 +113,19 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'video'}
             onActivate={() => setActive('video')}
             children1={
-              <HoloCard size="lg" tint="cyan" onClick={() => goTo('video-t2v')}>
-                <Wand2 className="h-12 w-12 text-[#cffafe]" strokeWidth={1.5} />
-                <div className="mt-4 text-xl font-bold text-white">Video Generation</div>
-                <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
+              <HoloCard size="md" tint="cyan" onClick={() => goTo('video-t2v')}>
+                <Wand2 className="h-10 w-10 text-[#cffafe]" strokeWidth={1.5} />
+                <div className="mt-3 text-base font-semibold text-white">Video Generation</div>
+                <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
                   T2V, I2V, R2V, Face Swap
                 </div>
               </HoloCard>
             }
             children2={
-              <HoloCard size="lg" tint="amber" onClick={() => goTo('video-edit')}>
-                <Pencil className="h-12 w-12 text-amber-200" strokeWidth={1.5} />
-                <div className="mt-4 text-xl font-bold text-white">Video Editing</div>
-                <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
+              <HoloCard size="md" tint="amber" onClick={() => goTo('video-edit')}>
+                <Pencil className="h-10 w-10 text-amber-200" strokeWidth={1.5} />
+                <div className="mt-3 text-base font-semibold text-white">Video Editing</div>
+                <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
                   Manual editor crafted
                 </div>
               </HoloCard>
