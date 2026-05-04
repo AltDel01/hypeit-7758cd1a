@@ -161,13 +161,13 @@ const CardColumn: React.FC<CardColumnProps> = ({
   children2,
 }) => {
   const splitDirection = side === 'left' ? -1 : 1;
-  const restingShift = otherActive ? (side === 'left' ? '-15rem' : '15rem') : '0rem';
+  const restingShift = otherActive ? (side === 'left' ? '-2rem' : '2rem') : '0rem';
 
   return (
     <div
       className={cn(
         'relative flex shrink-0 items-center justify-center transition-[width,transform] duration-500 ease-out',
-        expanded ? 'w-[430px] md:w-[590px] lg:w-[650px]' : 'w-[280px] md:w-[320px]'
+        expanded ? 'w-[420px] md:w-[560px] lg:w-[600px] xl:w-[650px]' : 'w-[270px] md:w-[290px] xl:w-[320px]'
       )}
       onMouseEnter={onActivate}
       style={{ minHeight: 460, transform: `translateX(${restingShift})` }}
@@ -189,7 +189,7 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 origin-bottom-right',
-            expanded ? '-translate-x-14 -translate-y-1 rotate-[-8deg] md:-translate-x-16 lg:-translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? '-translate-x-12 -translate-y-1 rotate-[-8deg] md:-translate-x-14 lg:-translate-x-16 xl:-translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
         >
           {children1}
@@ -197,9 +197,9 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 delay-75 origin-bottom-left absolute',
-            expanded ? 'translate-x-14 translate-y-3 rotate-[8deg] md:translate-x-16 lg:translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? 'translate-x-12 translate-y-3 rotate-[8deg] md:translate-x-14 lg:translate-x-16 xl:translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
-          style={{ left: expanded ? `calc(50% + ${splitDirection * 36}px)` : '50%', transform: expanded ? undefined : 'translateX(-50%)' }}
+          style={{ left: expanded ? `calc(50% + ${splitDirection * 28}px)` : '50%', transform: expanded ? undefined : 'translateX(-50%)' }}
         >
           {children2}
         </div>
