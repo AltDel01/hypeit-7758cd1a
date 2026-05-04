@@ -58,7 +58,7 @@ const HoloCard: React.FC<HoloCardProps> = ({
     setHovered(false);
   }, []);
 
-  const sizeClass = size === 'lg' ? 'w-[280px] h-[380px] md:w-[320px] md:h-[440px]' : 'w-[180px] h-[240px] md:w-[210px] md:h-[280px]';
+  const sizeClass = size === 'lg' ? 'w-[270px] h-[366px] md:w-[290px] md:h-[394px] xl:w-[320px] xl:h-[440px]' : 'w-[180px] h-[240px] md:w-[210px] md:h-[280px]';
 
   return (
     <div
