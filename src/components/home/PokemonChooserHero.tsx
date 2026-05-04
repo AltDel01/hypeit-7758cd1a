@@ -147,25 +147,35 @@ interface CardColumnProps {
 
 const CardColumn: React.FC<CardColumnProps> = ({ primary, expanded, onActivate, children1, children2 }) => {
   return (
-    <div className="relative flex flex-col items-center" onMouseEnter={onActivate}>
+    <div className="relative flex items-center justify-center" onMouseEnter={onActivate} style={{ minHeight: 460 }}>
       <div
         className={cn(
           'transition-all duration-500',
-          expanded ? 'opacity-0 scale-95 -translate-y-4 pointer-events-none absolute inset-x-0' : 'opacity-100 scale-100'
+          expanded ? 'opacity-0 scale-95 pointer-events-none absolute' : 'opacity-100 scale-100 relative'
         )}
       >
         {primary}
       </div>
       <div
         className={cn(
-          'flex flex-col gap-4 sm:flex-row sm:gap-5 transition-all duration-500',
-          expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none absolute'
+          'transition-all duration-500 absolute inset-0 flex items-center justify-center',
+          expanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
       >
-        <div className={cn('transition-all duration-500', expanded ? 'translate-x-0' : 'translate-x-6')}>
+        <div
+          className={cn(
+            'transition-all duration-500 origin-bottom-right',
+            expanded ? '-translate-x-[55%] -rotate-[10deg]' : 'translate-x-0 rotate-0'
+          )}
+        >
           {children1}
         </div>
-        <div className={cn('transition-all duration-500 delay-75', expanded ? 'translate-x-0' : '-translate-x-6')}>
+        <div
+          className={cn(
+            'transition-all duration-500 delay-75 origin-bottom-left absolute',
+            expanded ? 'translate-x-[55%] rotate-[10deg]' : 'translate-x-0 rotate-0'
+          )}
+        >
           {children2}
         </div>
       </div>
