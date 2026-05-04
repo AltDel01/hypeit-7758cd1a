@@ -161,7 +161,11 @@ const CardColumn: React.FC<CardColumnProps> = ({
   children2,
 }) => {
   const splitDirection = side === 'left' ? -1 : 1;
-  const restingShift = otherActive ? (side === 'left' ? '-2rem' : '2rem') : '0rem';
+  const restingShift = otherActive
+    ? side === 'left'
+      ? 'clamp(-8rem, -7vw, -4rem)'
+      : 'clamp(4rem, 7vw, 8rem)'
+    : '0rem';
 
   return (
     <div
