@@ -142,6 +142,8 @@ const PokemonChooserHero: React.FC = () => {
 };
 
 interface CardColumnProps {
+  side: 'left' | 'right';
+  otherActive: boolean;
   primary: React.ReactNode;
   expanded: boolean;
   onActivate: () => void;
@@ -149,9 +151,27 @@ interface CardColumnProps {
   children2: React.ReactNode;
 }
 
-const CardColumn: React.FC<CardColumnProps> = ({ primary, expanded, onActivate, children1, children2 }) => {
+const CardColumn: React.FC<CardColumnProps> = ({
+  side,
+  otherActive,
+  primary,
+  expanded,
+  onActivate,
+  children1,
+  children2,
+}) => {
   return (
-    <div className="relative flex items-center justify-center" onMouseEnter={onActivate} style={{ minHeight: 460 }}>
+    <div
+      className={cn(
+        'relative flex items-center justify-center transition-all duration-500',
+        expanded && side === 'left' && '-translate-x-4 md:-translate-x-8 lg:-translate-x-12',
+        expanded && side === 'right' && 'translate-x-4 md:translate-x-8 lg:translate-x-12',
+        otherActive && side === 'left' && '-translate-x-6 md:-translate-x-10 lg:-translate-x-14',
+        otherActive && side === 'right' && 'translate-x-6 md:translate-x-10 lg:translate-x-14'
+      )}
+      onMouseEnter={onActivate}
+      style={{ minHeight: 460 }}
+    >
       <div
         className={cn(
           'transition-all duration-500',
@@ -169,7 +189,7 @@ const CardColumn: React.FC<CardColumnProps> = ({ primary, expanded, onActivate, 
         <div
           className={cn(
             'transition-all duration-500 origin-bottom-right',
-            expanded ? '-translate-x-[55%] -rotate-[10deg]' : 'translate-x-0 rotate-0'
+            expanded ? '-translate-x-[60%] -translate-y-2 rotate-[-12deg] md:-translate-x-[68%] lg:-translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
           )}
         >
           {children1}
@@ -177,7 +197,7 @@ const CardColumn: React.FC<CardColumnProps> = ({ primary, expanded, onActivate, 
         <div
           className={cn(
             'transition-all duration-500 delay-75 origin-bottom-left absolute',
-            expanded ? 'translate-x-[55%] rotate-[10deg]' : 'translate-x-0 rotate-0'
+            expanded ? 'translate-x-[60%] translate-y-2 rotate-[12deg] md:translate-x-[68%] lg:translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
           )}
         >
           {children2}
