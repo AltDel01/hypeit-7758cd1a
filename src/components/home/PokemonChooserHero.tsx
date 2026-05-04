@@ -66,18 +66,18 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'image'}
             onActivate={() => setActive('image')}
             children1={
-              <HoloCard size="md" tint="violet" onClick={() => goTo('image-gen')}>
-                <Wand2 className="h-9 w-9 text-[#e9dcff]" strokeWidth={1.5} />
-                <div className="mt-3 text-base font-semibold text-white">Image Generation</div>
+              <HoloCard size="lg" tint="violet" onClick={() => goTo('image-gen')}>
+                <Wand2 className="h-12 w-12 text-[#e9dcff]" strokeWidth={1.5} />
+                <div className="mt-4 text-xl font-bold text-white">Image Generation</div>
                 <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
                   Text to Image
                 </div>
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="pink" onClick={() => goTo('image-edit')}>
-                <Pencil className="h-9 w-9 text-[#ffd9ec]" strokeWidth={1.5} />
-                <div className="mt-3 text-base font-semibold text-white">Image Editing</div>
+              <HoloCard size="lg" tint="pink" onClick={() => goTo('image-edit')}>
+                <Pencil className="h-12 w-12 text-[#ffd9ec]" strokeWidth={1.5} />
+                <div className="mt-4 text-xl font-bold text-white">Image Editing</div>
                 <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
                   Instruction or Decompose
                 </div>
@@ -109,18 +109,18 @@ const PokemonChooserHero: React.FC = () => {
             expanded={active === 'video'}
             onActivate={() => setActive('video')}
             children1={
-              <HoloCard size="md" tint="cyan" onClick={() => goTo('video-t2v')}>
-                <Wand2 className="h-9 w-9 text-[#cffafe]" strokeWidth={1.5} />
-                <div className="mt-3 text-base font-semibold text-white">Video Generation</div>
+              <HoloCard size="lg" tint="cyan" onClick={() => goTo('video-t2v')}>
+                <Wand2 className="h-12 w-12 text-[#cffafe]" strokeWidth={1.5} />
+                <div className="mt-4 text-xl font-bold text-white">Video Generation</div>
                 <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
                   T2V, I2V, R2V, Face Swap
                 </div>
               </HoloCard>
             }
             children2={
-              <HoloCard size="md" tint="amber" onClick={() => goTo('video-edit')}>
-                <Pencil className="h-9 w-9 text-amber-200" strokeWidth={1.5} />
-                <div className="mt-3 text-base font-semibold text-white">Video Editing</div>
+              <HoloCard size="lg" tint="amber" onClick={() => goTo('video-edit')}>
+                <Pencil className="h-12 w-12 text-amber-200" strokeWidth={1.5} />
+                <div className="mt-4 text-xl font-bold text-white">Video Editing</div>
                 <div className="mt-1 text-[11px] uppercase tracking-widest text-white/50">
                   Manual editor crafted
                 </div>
@@ -147,25 +147,35 @@ interface CardColumnProps {
 
 const CardColumn: React.FC<CardColumnProps> = ({ primary, expanded, onActivate, children1, children2 }) => {
   return (
-    <div className="relative flex flex-col items-center" onMouseEnter={onActivate}>
+    <div className="relative flex items-center justify-center" onMouseEnter={onActivate} style={{ minHeight: 460 }}>
       <div
         className={cn(
           'transition-all duration-500',
-          expanded ? 'opacity-0 scale-95 -translate-y-4 pointer-events-none absolute inset-x-0' : 'opacity-100 scale-100'
+          expanded ? 'opacity-0 scale-95 pointer-events-none absolute' : 'opacity-100 scale-100 relative'
         )}
       >
         {primary}
       </div>
       <div
         className={cn(
-          'flex flex-col gap-4 sm:flex-row sm:gap-5 transition-all duration-500',
-          expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none absolute'
+          'transition-all duration-500 absolute inset-0 flex items-center justify-center',
+          expanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
       >
-        <div className={cn('transition-all duration-500', expanded ? 'translate-x-0' : 'translate-x-6')}>
+        <div
+          className={cn(
+            'transition-all duration-500 origin-bottom-right',
+            expanded ? '-translate-x-[55%] -rotate-[10deg]' : 'translate-x-0 rotate-0'
+          )}
+        >
           {children1}
         </div>
-        <div className={cn('transition-all duration-500 delay-75', expanded ? 'translate-x-0' : '-translate-x-6')}>
+        <div
+          className={cn(
+            'transition-all duration-500 delay-75 origin-bottom-left absolute',
+            expanded ? 'translate-x-[55%] rotate-[10deg]' : 'translate-x-0 rotate-0'
+          )}
+        >
           {children2}
         </div>
       </div>
