@@ -160,17 +160,17 @@ const CardColumn: React.FC<CardColumnProps> = ({
   children1,
   children2,
 }) => {
+  const splitDirection = side === 'left' ? -1 : 1;
+  const restingShift = otherActive ? (side === 'left' ? '-15rem' : '15rem') : '0rem';
+
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center transition-all duration-500',
-        expanded && side === 'left' && '-translate-x-4 md:-translate-x-8 lg:-translate-x-12',
-        expanded && side === 'right' && 'translate-x-4 md:translate-x-8 lg:translate-x-12',
-        otherActive && side === 'left' && '-translate-x-6 md:-translate-x-10 lg:-translate-x-14',
-        otherActive && side === 'right' && 'translate-x-6 md:translate-x-10 lg:translate-x-14'
+        'relative flex shrink-0 items-center justify-center transition-[width,transform] duration-500 ease-out',
+        expanded ? 'w-[430px] md:w-[590px] lg:w-[650px]' : 'w-[280px] md:w-[320px]'
       )}
       onMouseEnter={onActivate}
-      style={{ minHeight: 460 }}
+      style={{ minHeight: 460, transform: `translateX(${restingShift})` }}
     >
       <div
         className={cn(
@@ -189,7 +189,7 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 origin-bottom-right',
-            expanded ? '-translate-x-[60%] -translate-y-2 rotate-[-12deg] md:-translate-x-[68%] lg:-translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? '-translate-x-14 -translate-y-1 rotate-[-8deg] md:-translate-x-16 lg:-translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
         >
           {children1}
@@ -197,8 +197,9 @@ const CardColumn: React.FC<CardColumnProps> = ({
         <div
           className={cn(
             'transition-all duration-500 delay-75 origin-bottom-left absolute',
-            expanded ? 'translate-x-[60%] translate-y-2 rotate-[12deg] md:translate-x-[68%] lg:translate-x-[72%]' : 'translate-x-0 translate-y-0 rotate-0'
+            expanded ? 'translate-x-14 translate-y-3 rotate-[8deg] md:translate-x-16 lg:translate-x-20' : 'translate-x-0 translate-y-0 rotate-0'
           )}
+          style={{ left: expanded ? `calc(50% + ${splitDirection * 36}px)` : '50%', transform: expanded ? undefined : 'translateX(-50%)' }}
         >
           {children2}
         </div>
