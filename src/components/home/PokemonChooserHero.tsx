@@ -39,7 +39,7 @@ const PokemonChooserHero: React.FC = () => {
 
         {/* Cards row */}
         <div
-          className="mt-14 flex flex-col items-center justify-center gap-12 md:flex-row md:gap-10 lg:gap-16"
+          className="mt-14 flex flex-col items-center justify-center gap-12 md:gap-10 lg:flex-row lg:gap-20"
           onMouseLeave={() => setActive(null)}
         >
           {/* IMAGE column */}
@@ -163,15 +163,15 @@ const CardColumn: React.FC<CardColumnProps> = ({
   const splitDirection = side === 'left' ? -1 : 1;
   const restingShift = otherActive
     ? side === 'left'
-      ? 'clamp(-8rem, -7vw, -4rem)'
-      : 'clamp(4rem, 7vw, 8rem)'
+      ? 'clamp(-4rem, -5.8vw, -3.5rem)'
+      : 'clamp(3.5rem, 5.8vw, 4rem)'
     : '0rem';
 
   return (
     <div
       className={cn(
         'relative flex shrink-0 items-center justify-center transition-[width,transform] duration-500 ease-out',
-        expanded ? 'w-[420px] md:w-[560px] lg:w-[600px] xl:w-[650px]' : 'w-[270px] md:w-[290px] xl:w-[320px]'
+        expanded ? 'w-[420px] md:w-[560px] lg:w-[530px] xl:w-[650px]' : 'w-[270px] md:w-[290px] xl:w-[320px]'
       )}
       onMouseEnter={onActivate}
       style={{ minHeight: 460, transform: `translateX(${restingShift})` }}
