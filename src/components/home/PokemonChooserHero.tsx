@@ -161,11 +161,17 @@ const CardColumn: React.FC<CardColumnProps> = ({
   children2,
 }) => {
   const splitDirection = side === 'left' ? -1 : 1;
-  const restingShift = otherActive
+  // When THIS column is expanded, push the split cluster outward (away from the other main card).
+  // When the OTHER column is expanded, push this resting main card outward as well.
+  const shift = expanded
     ? side === 'left'
-      ? 'clamp(-4rem, -5.8vw, -3.5rem)'
-      : 'clamp(3.5rem, 5.8vw, 4rem)'
-    : '0rem';
+      ? 'clamp(-9rem, -11vw, -6rem)'
+      : 'clamp(6rem, 11vw, 9rem)'
+    : otherActive
+      ? side === 'left'
+        ? 'clamp(-7rem, -9vw, -5rem)'
+        : 'clamp(5rem, 9vw, 7rem)'
+      : '0rem';
 
   return (
     <div
@@ -174,7 +180,7 @@ const CardColumn: React.FC<CardColumnProps> = ({
         expanded ? 'w-[420px] md:w-[560px] lg:w-[530px] xl:w-[650px]' : 'w-[270px] md:w-[290px] xl:w-[320px]'
       )}
       onMouseEnter={onActivate}
-      style={{ minHeight: 460, transform: `translateX(${restingShift})` }}
+      style={{ minHeight: 460, transform: `translateX(${shift})` }}
     >
       <div
         className={cn(
