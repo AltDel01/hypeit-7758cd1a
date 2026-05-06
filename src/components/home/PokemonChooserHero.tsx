@@ -174,7 +174,7 @@ const CardColumn: React.FC<CardColumnProps> = ({
       : 'clamp(2rem, 4vw, 3rem)'
     : otherActive
       ? side === 'left'
-        ? 'clamp(-2rem, -4vw, -3rem)'
+        ? 'clamp(-4rem, -4vw, -2rem)'
         : 'clamp(2rem, 4vw, 3rem)'
       : '0rem';
 
