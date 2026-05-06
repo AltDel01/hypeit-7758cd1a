@@ -163,18 +163,16 @@ const CardColumn: React.FC<CardColumnProps> = ({
   const splitDirection = side === 'left' ? -1 : 1;
   // When THIS column is expanded, push the split cluster outward (away from the other main card).
   // When the OTHER column is expanded, push this resting main card outward as well.
-  // Only the IMAGE (left) column gets the extra outward push.
-  // VIDEO (right) column keeps its original modest offset so its split cards never go out of bounds.
-  // Only the IMAGE (left) column gets an extra outward push to use the empty
-  // left-side space. The VIDEO (right) column and the resting IMAGE card when
-  // video is expanded keep a modest, balanced offset so nothing goes out of bounds.
+  // Only the IMAGE (left) column gets an extra outward push when it expands.
+  // When VIDEO expands, keep both columns close to their natural positions so
+  // the video split cards stay balanced and closer to the resting IMAGE card.
   const shift = expanded
     ? side === 'left'
       ? 'clamp(-9rem, -11vw, -6rem)'
-      : 'clamp(2rem, 4vw, 3rem)'
+      : '0rem'
     : otherActive
       ? side === 'left'
-        ? 'clamp(-4rem, -4vw, -2rem)'
+        ? '0rem'
         : 'clamp(2rem, 4vw, 3rem)'
       : '0rem';
 
