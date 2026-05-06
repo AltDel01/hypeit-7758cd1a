@@ -163,14 +163,16 @@ const CardColumn: React.FC<CardColumnProps> = ({
   const splitDirection = side === 'left' ? -1 : 1;
   // When THIS column is expanded, push the split cluster outward (away from the other main card).
   // When the OTHER column is expanded, push this resting main card outward as well.
+  // Only the IMAGE (left) column gets the extra outward push.
+  // VIDEO (right) column keeps its original modest offset so its split cards never go out of bounds.
   const shift = expanded
     ? side === 'left'
       ? 'clamp(-9rem, -11vw, -6rem)'
-      : 'clamp(6rem, 11vw, 9rem)'
+      : 'clamp(2rem, 4vw, 3rem)'
     : otherActive
       ? side === 'left'
         ? 'clamp(-7rem, -9vw, -5rem)'
-        : 'clamp(5rem, 9vw, 7rem)'
+        : 'clamp(2rem, 4vw, 3rem)'
       : '0rem';
 
   return (
