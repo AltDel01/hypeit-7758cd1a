@@ -46,6 +46,7 @@ const durationOptions = [
   { value: '', label: 'Duration' },
   { value: '5s', label: '5s' },
   { value: '10s', label: '10s' },
+  { value: '15s', label: '15s' },
 ];
 const examplePrompts = [
   'A cinematic shot of a city skyline at sunset',
