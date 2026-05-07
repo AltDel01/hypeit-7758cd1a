@@ -288,11 +288,10 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url, submittedRequestId, isAutoProcessing]);
 
   // Simple polling fallback — polls the DB every 3s until request is completed with resolved URL
-  // This is the ONLY fallback mechanism; the parent's realtime subscription is the primary
+  // Also kicks the wan-video-poll edge function for video tasks so DashScope results get fetched.
   useEffect(() => {
     if (!submittedRequestId) return;
 
-    // Don't poll if already resolved
     const isTerminal = submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed';
     if (isTerminal && resolvedResultUrl) return;
 
@@ -301,6 +300,19 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     const poll = async () => {
       if (!isActive) return;
       try {
+        // Kick the wan-video-poll for in-progress video tasks (no-op for image)
+        if (
+          submittedRequest?.request_type === 'video' &&
+          submittedRequest?.auto_provider === 'wan' &&
+          submittedRequest?.provider_task_id &&
+          submittedRequest?.status !== 'completed' &&
+          submittedRequest?.status !== 'failed'
+        ) {
+          supabaseClient.functions.invoke('wan-video-poll', {
+            body: { requestId: submittedRequestId },
+          }).catch((e) => console.error('wan-video-poll invoke error', e));
+        }
+
         const { data, error } = await supabaseClient
           .from('generation_requests')
           .select('*')
@@ -315,15 +327,13 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         if (!data || !isActive) return;
 
         const current = data as GenerationRequest;
-        
-        // Update state if anything changed
+
         setSubmittedRequest(prev => {
           if (prev?.status === current.status && prev?.result_url === current.result_url) return prev;
           console.log('Poll detected change:', { oldStatus: prev?.status, newStatus: current.status, resultUrl: current.result_url });
           return current;
         });
 
-        // Resolve URL if completed
         if (current.status === 'completed' && current.result_url) {
           const url = await resolveResultUrl(current.result_url);
           if (url && isActive) {
@@ -339,15 +349,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       }
     };
 
-    // Poll immediately, then every 3 seconds
     poll();
-    const intervalId = setInterval(poll, 3000);
+    const intervalId = setInterval(poll, 5000);
 
     return () => {
       isActive = false;
       clearInterval(intervalId);
     };
-  }, [submittedRequestId, submittedRequest?.status, resolvedResultUrl]);
+  }, [submittedRequestId, submittedRequest?.status, submittedRequest?.request_type, submittedRequest?.auto_provider, submittedRequest?.provider_task_id, resolvedResultUrl]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
@@ -547,11 +556,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
-        {/* Mode banner: shows which workflow the user entered from the homepage hero */}
+        {/* Image-edit sub-tabs (foundation model banner intentionally hidden) */}
         {activeCategory && CATEGORY_MAP[activeCategory] && (
           <div className="space-y-4">
-            <ModeBanner category={activeCategory} />
-            
             {(heroMode === 'image-edit' || activeCategory?.startsWith('image-edit')) && (
               <Tabs 
                 value={activeCategory} 
@@ -983,7 +990,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             {/* Generate Button */}
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
-              disabled={isSubmitting || isAutoProcessing}
+              disabled={
+                isSubmitting ||
+                isAutoProcessing ||
+                (!!submittedRequest && submittedRequest.status !== 'completed' && submittedRequest.status !== 'failed')
+              }
               className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
               style={(() => {
                 if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
@@ -994,7 +1005,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
               })()}
             >
-              {(isSubmitting || isAutoProcessing) && !resolvedResultUrl ? (
+              {((isSubmitting || isAutoProcessing) || (!!submittedRequest && submittedRequest.status !== 'completed' && submittedRequest.status !== 'failed')) && !resolvedResultUrl ? (
                 <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
               ) : (() => {
                 if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
