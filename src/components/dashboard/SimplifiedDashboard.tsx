@@ -288,11 +288,10 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   }, [latestRequest?.id, latestRequest?.status, latestRequest?.result_url, submittedRequestId, isAutoProcessing]);
 
   // Simple polling fallback — polls the DB every 3s until request is completed with resolved URL
-  // This is the ONLY fallback mechanism; the parent's realtime subscription is the primary
+  // Also kicks the wan-video-poll edge function for video tasks so DashScope results get fetched.
   useEffect(() => {
     if (!submittedRequestId) return;
 
-    // Don't poll if already resolved
     const isTerminal = submittedRequest?.status === 'completed' || submittedRequest?.status === 'failed';
     if (isTerminal && resolvedResultUrl) return;
 
@@ -301,6 +300,19 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
     const poll = async () => {
       if (!isActive) return;
       try {
+        // Kick the wan-video-poll for in-progress video tasks (no-op for image)
+        if (
+          submittedRequest?.request_type === 'video' &&
+          submittedRequest?.auto_provider === 'wan' &&
+          submittedRequest?.provider_task_id &&
+          submittedRequest?.status !== 'completed' &&
+          submittedRequest?.status !== 'failed'
+        ) {
+          supabaseClient.functions.invoke('wan-video-poll', {
+            body: { requestId: submittedRequestId },
+          }).catch((e) => console.error('wan-video-poll invoke error', e));
+        }
+
         const { data, error } = await supabaseClient
           .from('generation_requests')
           .select('*')
@@ -315,15 +327,13 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
         if (!data || !isActive) return;
 
         const current = data as GenerationRequest;
-        
-        // Update state if anything changed
+
         setSubmittedRequest(prev => {
           if (prev?.status === current.status && prev?.result_url === current.result_url) return prev;
           console.log('Poll detected change:', { oldStatus: prev?.status, newStatus: current.status, resultUrl: current.result_url });
           return current;
         });
 
-        // Resolve URL if completed
         if (current.status === 'completed' && current.result_url) {
           const url = await resolveResultUrl(current.result_url);
           if (url && isActive) {
@@ -339,15 +349,14 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
       }
     };
 
-    // Poll immediately, then every 3 seconds
     poll();
-    const intervalId = setInterval(poll, 3000);
+    const intervalId = setInterval(poll, 5000);
 
     return () => {
       isActive = false;
       clearInterval(intervalId);
     };
-  }, [submittedRequestId, submittedRequest?.status, resolvedResultUrl]);
+  }, [submittedRequestId, submittedRequest?.status, submittedRequest?.request_type, submittedRequest?.auto_provider, submittedRequest?.provider_task_id, resolvedResultUrl]);
 
   const handleAutoSubmit = async (
     loadedPrompt: string,
