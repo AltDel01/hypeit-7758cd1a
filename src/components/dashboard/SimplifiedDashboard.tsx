@@ -1005,7 +1005,7 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
                 return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
               })()}
             >
-              {(isSubmitting || isAutoProcessing) && !resolvedResultUrl ? (
+              {((isSubmitting || isAutoProcessing) || (!!submittedRequest && submittedRequest.status !== 'completed' && submittedRequest.status !== 'failed')) && !resolvedResultUrl ? (
                 <div className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /><span className="hidden sm:inline">Processing...</span></div>
               ) : (() => {
                 if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
