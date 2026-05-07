@@ -68,6 +68,37 @@ serve(async (req) => {
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
 
+  // Resolve storage: refs to signed HTTPS URLs DashScope can fetch
+  const resolveUrl = async (u?: string): Promise<string | undefined> => {
+    if (!u) return undefined;
+    if (!u.startsWith('storage:')) return u;
+    const rest = u.slice('storage:'.length);
+    const slash = rest.indexOf('/');
+    if (slash < 0) return undefined;
+    const bucket = rest.slice(0, slash);
+    const path = rest.slice(slash + 1);
+    const { data, error } = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+    if (error || !data?.signedUrl) {
+      console.error('[wan-video] sign url failed', bucket, path, error);
+      return undefined;
+    }
+    return data.signedUrl;
+  };
+  const resolveUrls = async (arr?: string[]): Promise<string[] | undefined> => {
+    if (!arr?.length) return undefined;
+    const out: string[] = [];
+    for (const u of arr) {
+      const r = await resolveUrl(u);
+      if (r) out.push(r);
+    }
+    return out;
+  };
+
+  const firstFrameUrl = await resolveUrl(body.firstFrameUrl);
+  const referenceImageUrls = await resolveUrls(body.referenceImageUrls);
+  const sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
+  const faceImageUrl = await resolveUrl(body.faceImageUrl);
+
   // Build endpoint + payload by category
   let endpoint: string;
   let input: Record<string, unknown> = {};
@@ -82,23 +113,23 @@ serve(async (req) => {
       input = { prompt: body.prompt };
       break;
     case 'video-i2v':
-      if (!body.firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
+      if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
-      input = { prompt: body.prompt, media: [body.firstFrameUrl] };
+      input = { prompt: body.prompt, media: [firstFrameUrl] };
       break;
     case 'video-r2v':
-      if (!body.referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
+      if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
-      input = { prompt: body.prompt, ref_images_url: body.referenceImageUrls.slice(0, 3) };
+      input = { prompt: body.prompt, ref_images_url: referenceImageUrls.slice(0, 3) };
       break;
     case 'video-face-swap':
-      if (!body.sourceVideoUrl || !body.faceImageUrl) {
+      if (!sourceVideoUrl || !faceImageUrl) {
         return genericError(400, 'Face swap requires sourceVideoUrl and faceImageUrl');
       }
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
       input = {
-        video_url: body.sourceVideoUrl,
-        image_url: body.faceImageUrl,
+        video_url: sourceVideoUrl,
+        image_url: faceImageUrl,
       };
       break;
     default:
