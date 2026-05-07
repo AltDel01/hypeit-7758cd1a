@@ -41,6 +41,9 @@ export interface CreateGenerationRequestParams {
   firstFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
+  /** Optional video params */
+  duration?: number;
+  resolution?: string;
   faceImageUrl?: string;
 }
 
