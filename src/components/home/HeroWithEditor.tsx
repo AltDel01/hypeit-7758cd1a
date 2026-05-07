@@ -151,6 +151,13 @@ const editingFeatures = [{
   description: 'Translate audio to any language'
 }];
 const examplePrompts = ['Add captions with trending font style', 'Create smooth transitions between scenes', 'Enhance colors and add cinematic look', 'Add upbeat background music', 'Generate viral short from this video'];
+type VideoMode = 'video-t2v' | 'video-i2v' | 'video-r2v';
+const videoModes: { id: VideoMode; label: string; icon: any; description: string }[] = [
+  { id: 'video-t2v', label: 'Text to Video', icon: Wand2, description: 'Generate a video from a prompt' },
+  { id: 'video-i2v', label: 'Image to Video', icon: Image, description: 'Animate from a starting image' },
+  { id: 'video-r2v', label: 'Reference to Video', icon: Layers, description: 'Generate using reference images' },
+];
+
 const HeroWithEditor: React.FC = () => {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
@@ -159,6 +166,7 @@ const HeroWithEditor: React.FC = () => {
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeMode, setActiveMode] = useState<string | null>(null);
+  const [videoMode, setVideoMode] = useState<VideoMode>('video-t2v');
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('');
