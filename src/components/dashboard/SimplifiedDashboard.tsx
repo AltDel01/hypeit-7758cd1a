@@ -990,7 +990,11 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
             {/* Generate Button */}
             <Button
               onClick={isSpecialMode ? handleSpecialModeSubmit : handleSubmitInternal}
-              disabled={isSubmitting || isAutoProcessing}
+              disabled={
+                isSubmitting ||
+                isAutoProcessing ||
+                (!!submittedRequest && submittedRequest.status !== 'completed' && submittedRequest.status !== 'failed')
+              }
               className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
               style={(() => {
                 if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
