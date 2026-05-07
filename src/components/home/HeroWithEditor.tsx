@@ -216,6 +216,19 @@ const HeroWithEditor: React.FC = () => {
     
     
     try {
+      // Validate mode-specific upload requirements
+      const imageFiles = uploadedVideos.filter(f => f.type.startsWith('image/'));
+      if (videoMode === 'video-i2v' && imageFiles.length === 0) {
+        toast.error('Image to Video requires a starting image');
+        setIsProcessing(false);
+        return;
+      }
+      if (videoMode === 'video-r2v' && imageFiles.length === 0) {
+        toast.error('Reference to Video requires at least one reference image');
+        setIsProcessing(false);
+        return;
+      }
+
       // Check if user is logged in when files need to be uploaded
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
