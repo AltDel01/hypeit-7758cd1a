@@ -33,6 +33,7 @@ import FAQ from "./pages/FAQ";
 import InviteRedirect from "./pages/InviteRedirect";
 import Explainer from "./pages/Explainer";
 import Careers from "./pages/Careers";
+import HeroPreview from "./pages/HeroPreview";
 import CareerApply from "./pages/CareerApply";
 import React from "react";
 
@@ -81,6 +82,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
+      <Route path="/hero-preview" element={<CustomErrorBoundary><HeroPreview /></CustomErrorBoundary>} />
       <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/enterprise" element={<CustomErrorBoundary><Enterprise /></CustomErrorBoundary>} />

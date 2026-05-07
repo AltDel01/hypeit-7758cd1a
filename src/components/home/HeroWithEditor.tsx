@@ -151,6 +151,13 @@ const editingFeatures = [{
   description: 'Translate audio to any language'
 }];
 const examplePrompts = ['Add captions with trending font style', 'Create smooth transitions between scenes', 'Enhance colors and add cinematic look', 'Add upbeat background music', 'Generate viral short from this video'];
+type VideoMode = 'video-t2v' | 'video-i2v' | 'video-r2v';
+const videoModes: { id: VideoMode; label: string; icon: any; description: string }[] = [
+  { id: 'video-t2v', label: 'Text to Video', icon: Wand2, description: 'Generate a video from a prompt' },
+  { id: 'video-i2v', label: 'Image to Video', icon: Image, description: 'Animate from a starting image' },
+  { id: 'video-r2v', label: 'Reference to Video', icon: Layers, description: 'Generate using reference images' },
+];
+
 const HeroWithEditor: React.FC = () => {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
@@ -159,6 +166,7 @@ const HeroWithEditor: React.FC = () => {
   const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeMode, setActiveMode] = useState<string | null>(null);
+  const [videoMode, setVideoMode] = useState<VideoMode>('video-t2v');
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('');
@@ -208,6 +216,19 @@ const HeroWithEditor: React.FC = () => {
     
     
     try {
+      // Validate mode-specific upload requirements
+      const imageFiles = uploadedVideos.filter(f => f.type.startsWith('image/'));
+      if (videoMode === 'video-i2v' && imageFiles.length === 0) {
+        toast.error('Image to Video requires a starting image');
+        setIsProcessing(false);
+        return;
+      }
+      if (videoMode === 'video-r2v' && imageFiles.length === 0) {
+        toast.error('Reference to Video requires at least one reference image');
+        setIsProcessing(false);
+        return;
+      }
+
       // Check if user is logged in when files need to be uploaded
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
@@ -309,7 +330,7 @@ const HeroWithEditor: React.FC = () => {
       
       // Dismiss ALL toasts before navigating so nothing persists on dashboard
       toast.dismiss();
-      navigate('/dashboard');
+      navigate(`/dashboard?mode=${videoMode}`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to prepare request. Please try again.');
@@ -336,40 +357,34 @@ const HeroWithEditor: React.FC = () => {
         </h1>
         <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">Chat to transform your raw footage into viral-worthy content with AI-powered editing</p>
 
-        {/* Editing Feature Buttons - Scrollable on mobile */}
+        {/* Video Mode Selector */}
         <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
-            {editingFeatures.slice(0, 6).map(feature => {
-              const config = FEATURE_MODE_MAP[feature.id];
-              const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
-              return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
-                <feature.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                {feature.label}
-              </button>;
+            {videoModes.map(mode => {
+              const isActive = videoMode === mode.id;
+              const Icon = mode.icon;
+              return (
+                <button
+                  key={mode.id}
+                  onClick={() => setVideoMode(mode.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                    isActive
+                      ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
+                      : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  {mode.label}
+                </button>
+              );
             })}
           </div>
-        </div>
-        {/* Second row - Hidden on mobile for cleaner look */}
-        <div className="hidden md:flex flex-wrap justify-center gap-2 mb-6 w-full max-w-4xl">
-          {editingFeatures.slice(6).map(feature => {
-            const config = FEATURE_MODE_MAP[feature.id];
-            const isActive = config ? activeMode === config.mode : selectedFeatures.includes(feature.id);
-            return <button key={feature.id} onClick={() => handleFeatureClick(feature.id)} className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", isActive && config ? `bg-gradient-to-r text-white shadow-lg` : isActive ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30" : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50")} style={isActive && config ? { backgroundImage: `linear-gradient(to right, ${config.colorFrom}, ${config.colorTo})` } : undefined}>
-              <feature.icon className="w-4 h-4" />
-              {feature.label}
-            </button>;
-          })}
         </div>
 
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
-          {/* AI Clip Button */}
-          <AiClipButton
-            className="mb-3"
-            onAiClip={() => setActiveMode(prev => prev === 'aiclip' ? null : 'aiclip')}
-            onRetentionEditing={() => setActiveMode(prev => prev === 'retention' ? null : 'retention')}
-            onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
-          />
+          {/* AI editing modes hidden on homepage hero, focus on video generation */}
           <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
             (() => {
               if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
@@ -496,25 +511,28 @@ const HeroWithEditor: React.FC = () => {
             {/* Bottom Actions */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between pt-3 md:pt-4 border-t border-gray-700/50 gap-3 md:gap-0">
               <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
-                {/* Media Upload */}
-                <input type="file" ref={videoInputRef} onChange={handleVideoUpload} accept="video/*,audio/*,image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" multiple className="hidden" />
-                <button onClick={() => videoInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
-                  <div className="flex items-center gap-0.5">
-                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
-                    <Image className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
-                  </div>
-                  <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Media</span>
-                </button>
-
-                {/* Voice / Reference Upload (audio + video for AI avatar reference) */}
-                <input type="file" ref={audioInputRef} onChange={handleAudioUpload} accept="audio/*,video/*" multiple className="hidden" />
-                <button onClick={() => audioInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
-                  <div className="flex items-center gap-0.5">
-                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
-                    <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
-                  </div>
-                  <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">Voice</span>
-                </button>
+                {/* Image Upload — only relevant for I2V / R2V modes */}
+                {videoMode !== 'video-t2v' && (
+                  <>
+                    <input
+                      type="file"
+                      ref={videoInputRef}
+                      onChange={handleVideoUpload}
+                      accept="image/*"
+                      multiple={videoMode === 'video-r2v'}
+                      className="hidden"
+                    />
+                    <button onClick={() => videoInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
+                      <div className="flex items-center gap-0.5">
+                        <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
+                        <Image className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
+                      </div>
+                      <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">
+                        {videoMode === 'video-i2v' ? 'Image' : 'Refs'}
+                      </span>
+                    </button>
+                  </>
+                )}
 
                 <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
 
