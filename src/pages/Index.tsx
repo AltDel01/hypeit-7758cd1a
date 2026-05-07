@@ -13,7 +13,7 @@ const Index = () => {
     <div className="min-h-screen bg-black">
       <Navbar />
       <main>
-        <PokemonChooserHero />
+        <HeroWithEditor />
         <CoreFeatures />
         <PlatformBenefits />
         <HowItWorks />
