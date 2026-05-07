@@ -82,6 +82,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
+      <Route path="/hero-preview" element={<CustomErrorBoundary><HeroPreview /></CustomErrorBoundary>} />
       <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
       <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/enterprise" element={<CustomErrorBoundary><Enterprise /></CustomErrorBoundary>} />
