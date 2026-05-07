@@ -32,6 +32,7 @@ interface RequestBody {
   sourceVideoUrl?: string;
   faceImageUrl?: string;
   size?: string;
+  resolution?: string;
   duration?: number;
 }
 
