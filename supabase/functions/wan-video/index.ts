@@ -32,6 +32,7 @@ interface RequestBody {
   sourceVideoUrl?: string;
   faceImageUrl?: string;
   size?: string;
+  resolution?: string;
   duration?: number;
 }
 
@@ -99,42 +100,50 @@ serve(async (req) => {
   const sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
   const faceImageUrl = await resolveUrl(body.faceImageUrl);
 
-  // Build endpoint + payload by category
-  let endpoint: string;
+  // Build endpoint + payload by category. Wan2.7 uses unified
+  // video-generation/video-synthesis endpoint with `media: [{type, url}]`.
+  let endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
   let input: Record<string, unknown> = {};
+  // Clamp duration: Wan2.7 supports 2-15 seconds.
+  const rawDuration = body.duration ?? 5;
+  const duration = Math.max(2, Math.min(15, Math.round(rawDuration)));
   const parameters: Record<string, unknown> = {
-    size: body.size || '1280*720',
-    duration: body.duration ?? 5,
+    resolution: (body as any).resolution || '1080P',
+    duration,
   };
 
   switch (body.category) {
     case 'video-t2v':
-      endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
       input = { prompt: body.prompt };
       break;
     case 'video-i2v':
       if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
-      endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
-      input = { prompt: body.prompt, img_url: firstFrameUrl };
+      input = {
+        prompt: body.prompt,
+        media: [{ type: 'first_frame', url: firstFrameUrl }],
+      };
       break;
     case 'video-r2v':
       if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
-      endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
-      input = { prompt: body.prompt, ref_images_url: referenceImageUrls.slice(0, 3) };
+      input = {
+        prompt: body.prompt,
+        media: referenceImageUrls.slice(0, 3).map((url) => ({
+          type: 'reference_image',
+          url,
+        })),
+      };
       break;
     case 'video-face-swap':
       if (!sourceVideoUrl || !faceImageUrl) {
         return genericError(400, 'Face swap requires sourceVideoUrl and faceImageUrl');
       }
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
-      input = {
-        video_url: sourceVideoUrl,
-        image_url: faceImageUrl,
-      };
+      input = { video_url: sourceVideoUrl, image_url: faceImageUrl };
       break;
     default:
       return genericError(400, 'Unknown category');
   }
+  console.log('[wan-video] dispatch', body.category, body.model, JSON.stringify(input).slice(0, 300));
 
   const payload = { model: body.model, input, parameters };
 

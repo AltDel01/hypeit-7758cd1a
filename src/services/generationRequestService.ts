@@ -41,6 +41,9 @@ export interface CreateGenerationRequestParams {
   firstFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
+  /** Optional video params */
+  duration?: number;
+  resolution?: string;
   faceImageUrl?: string;
 }
 
@@ -126,6 +129,8 @@ export async function createGenerationRequest(
         sourceVideoUrl: params.sourceVideoUrl,
         faceImageUrl: params.faceImageUrl,
         size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
+        duration: params.duration,
+        resolution: params.resolution,
       }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
@@ -335,6 +340,8 @@ interface DispatchParams {
   firstFrameUrl?: string;
   sourceVideoUrl?: string;
   faceImageUrl?: string;
+  duration?: number;
+  resolution?: string;
 }
 
 export function aspectRatioToSize(ratio: string): string {
@@ -386,6 +393,8 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
         referenceImageUrls: p.referenceImageUrls,
         sourceVideoUrl: p.sourceVideoUrl,
         faceImageUrl: p.faceImageUrl,
+        duration: p.duration,
+        resolution: p.resolution,
       },
     });
     if (error) console.error("[wan-video] invoke error", error);

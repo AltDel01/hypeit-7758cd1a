@@ -46,6 +46,7 @@ const durationOptions = [
   { value: '', label: 'Duration' },
   { value: '5s', label: '5s' },
   { value: '10s', label: '10s' },
+  { value: '15s', label: '15s' },
 ];
 const examplePrompts = [
   'A cinematic shot of a city skyline at sunset',
@@ -206,6 +207,9 @@ const HeroWithEditor: React.FC = () => {
 
       const referenceImageUrl = joinStoredAttachmentUrls(storageRefs);
 
+      const parsedDuration = selectedDuration
+        ? parseInt(String(selectedDuration).replace(/[^0-9]/g, ''), 10) || undefined
+        : undefined;
       const request = await createGenerationRequest({
         requestType: 'video',
         prompt: fullPrompt,
@@ -214,6 +218,8 @@ const HeroWithEditor: React.FC = () => {
         category: videoMode,
         firstFrameUrl: videoMode === 'video-i2v' ? storageRefs[0] : undefined,
         referenceImageUrls: videoMode === 'video-r2v' ? storageRefs : undefined,
+        duration: parsedDuration,
+        resolution: selectedResolution || undefined,
       });
 
       if (!request) {
