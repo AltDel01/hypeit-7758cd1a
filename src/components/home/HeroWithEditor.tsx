@@ -1,15 +1,15 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image, Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff, Languages, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image, Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff, Languages, Loader2, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { saveEditorState, UploadedFile } from '@/hooks/useEditorState';
 import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import AiClipButton from '@/components/shared/AiClipButton';
-import { FEATURE_MODE_MAP, getConfigByMode, isFeatureMode } from '@/config/featureModes';
+import { createGenerationRequest, pollVideoRequest, GenerationRequest } from '@/services/generationRequestService';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
 
 
 const frameOptions = [{
