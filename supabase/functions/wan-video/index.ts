@@ -114,8 +114,8 @@ serve(async (req) => {
       break;
     case 'video-i2v':
       if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
-      endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
-      input = { prompt: body.prompt, media: [firstFrameUrl] };
+      endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
+      input = { prompt: body.prompt, img_url: firstFrameUrl };
       break;
     case 'video-r2v':
       if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
