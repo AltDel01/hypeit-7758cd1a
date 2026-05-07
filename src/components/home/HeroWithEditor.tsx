@@ -330,7 +330,7 @@ const HeroWithEditor: React.FC = () => {
       
       // Dismiss ALL toasts before navigating so nothing persists on dashboard
       toast.dismiss();
-      navigate('/dashboard');
+      navigate(`/dashboard?mode=${videoMode}`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to prepare request. Please try again.');
