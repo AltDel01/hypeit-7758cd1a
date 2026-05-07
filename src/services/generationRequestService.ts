@@ -393,6 +393,8 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
         referenceImageUrls: p.referenceImageUrls,
         sourceVideoUrl: p.sourceVideoUrl,
         faceImageUrl: p.faceImageUrl,
+        duration: p.duration,
+        resolution: p.resolution,
       },
     });
     if (error) console.error("[wan-video] invoke error", error);
