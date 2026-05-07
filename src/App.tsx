@@ -33,6 +33,7 @@ import FAQ from "./pages/FAQ";
 import InviteRedirect from "./pages/InviteRedirect";
 import Explainer from "./pages/Explainer";
 import Careers from "./pages/Careers";
+import HeroPreview from "./pages/HeroPreview";
 import CareerApply from "./pages/CareerApply";
 import React from "react";
 
