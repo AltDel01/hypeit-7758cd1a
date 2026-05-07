@@ -1,363 +1,260 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Sparkles, Smartphone, Scissors, Captions, Film, Layers, Wand2, Image, Video, X, ZoomIn, AudioLines, Plus, ChevronDown, Timer, MessageCircleOff, Languages, Loader2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  Sparkles, Film, Wand2, Image as ImageIcon, Layers, X, Plus,
+  ChevronDown, Timer, Loader2, ExternalLink,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { createGenerationRequest, pollVideoRequest, GenerationRequest } from '@/services/generationRequestService';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  createGenerationRequest, pollVideoRequest, GenerationRequest,
+} from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
+const aspectRatioOptions = [
+  { value: '', label: 'Ratio', width: 14, height: 14 },
+  { value: '16:9', label: '16:9', width: 20, height: 11 },
+  { value: '9:16', label: '9:16', width: 11, height: 20 },
+  { value: '4:3', label: '4:3', width: 16, height: 12 },
+  { value: '1:1', label: '1:1', width: 14, height: 14 },
+  { value: '21:9', label: '21:9', width: 21, height: 9 },
+];
+const resolutionOptions = [
+  { value: '', label: 'Quality' },
+  { value: '4K', label: '4K' },
+  { value: '1080P', label: '1080P' },
+  { value: '720P', label: '720P' },
+  { value: '480P', label: '480P' },
+];
+const frameOptions = [
+  { value: '', label: 'Frame' },
+  { value: 'first-last', label: 'First and last frames' },
+  { value: 'keyframes', label: 'Keyframes only' },
+  { value: 'all', label: 'All frames' },
+  { value: 'custom', label: 'Custom selection' },
+];
+const durationOptions = [
+  { value: '', label: 'Duration' },
+  { value: '5s', label: '5s' },
+  { value: '10s', label: '10s' },
+];
+const examplePrompts = [
+  'A cinematic shot of a city skyline at sunset',
+  'Smooth dolly zoom into a coffee cup on a desk',
+  'A neon-lit alley with rain reflections',
+  'Slow motion waves crashing on a tropical beach',
+  'A futuristic spaceship flying through clouds',
+];
 
-const frameOptions = [{
-  value: '',
-  label: 'Frame'
-}, {
-  value: 'first-last',
-  label: 'First and last frames'
-}, {
-  value: 'keyframes',
-  label: 'Keyframes only'
-}, {
-  value: 'all',
-  label: 'All frames'
-}, {
-  value: 'custom',
-  label: 'Custom selection'
-}];
-const aspectRatioOptions = [{
-  value: '',
-  label: 'Ratio',
-  width: 14,
-  height: 14
-}, {
-  value: '16:9',
-  label: '16:9',
-  width: 20,
-  height: 11
-}, {
-  value: '9:16',
-  label: '9:16',
-  width: 11,
-  height: 20
-}, {
-  value: '4:3',
-  label: '4:3',
-  width: 16,
-  height: 12
-}, {
-  value: '1:1',
-  label: '1:1',
-  width: 14,
-  height: 14
-}, {
-  value: '21:9',
-  label: '21:9',
-  width: 21,
-  height: 9
-}];
-const resolutionOptions = [{
-  value: '',
-  label: 'Quality'
-}, {
-  value: '4K',
-  label: '4K'
-}, {
-  value: '1080P',
-  label: '1080P'
-}, {
-  value: '720P',
-  label: '720P'
-}, {
-  value: '480P',
-  label: '480P'
-}];
-const durationOptions = [{
-  value: '',
-  label: 'Duration'
-}, {
-  value: '5s',
-  label: '5s'
-}, {
-  value: '10s',
-  label: '10s'
-}, {
-  value: '15s',
-  label: '15s'
-}, {
-  value: '30s',
-  label: '30s'
-}, {
-  value: '60s',
-  label: '60s'
-}];
-const editingFeatures = [{
-  id: 'ai-edit',
-  label: 'AI Edit',
-  icon: Sparkles,
-  description: 'Smart auto-edit with effects & transitions'
-}, {
-  id: 'iphone-quality',
-  label: 'iPhone Quality',
-  icon: Smartphone,
-  description: 'Upscale to HD quality'
-}, {
-  id: 'trim',
-  label: 'Trim',
-  icon: Scissors,
-  description: 'Cut and trim clips'
-}, {
-  id: 'caption',
-  label: 'Caption',
-  icon: Captions,
-  description: 'Add AI captions'
-}, {
-  id: 'b-roll',
-  label: 'B-roll',
-  icon: Film,
-  description: 'Add stock footage'
-}, {
-  id: 'transitions',
-  label: 'Transitions',
-  icon: Layers,
-  description: 'Add smooth transitions'
-}, {
-  id: 'effects',
-  label: 'Effects',
-  icon: Wand2,
-  description: 'Apply visual effects'
-}, {
-  id: 'zoom',
-  label: 'Zoom',
-  icon: ZoomIn,
-  description: 'Add dynamic zoom effects'
-}, {
-  id: 'thumbnail',
-  label: 'Thumbnail Generator',
-  icon: Image,
-  description: 'Create eye-catching thumbnails'
-}, {
-  id: 'censor-word',
-  label: 'Censor Word',
-  icon: MessageCircleOff,
-  description: 'Automatically censor profanity'
-}, {
-  id: 'change-language',
-  label: 'Language Dubbing',
-  icon: Languages,
-  description: 'Translate audio to any language'
-}];
-const examplePrompts = ['Add captions with trending font style', 'Create smooth transitions between scenes', 'Enhance colors and add cinematic look', 'Add upbeat background music', 'Generate viral short from this video'];
 type VideoMode = 'video-t2v' | 'video-i2v' | 'video-r2v';
-const videoModes: { id: VideoMode; label: string; icon: any; description: string }[] = [
-  { id: 'video-t2v', label: 'Text to Video', icon: Wand2, description: 'Generate a video from a prompt' },
-  { id: 'video-i2v', label: 'Image to Video', icon: Image, description: 'Animate from a starting image' },
-  { id: 'video-r2v', label: 'Reference to Video', icon: Layers, description: 'Generate using reference images' },
+const videoModes: { id: VideoMode; label: string; icon: any }[] = [
+  { id: 'video-t2v', label: 'Text to Video', icon: Wand2 },
+  { id: 'video-i2v', label: 'Image to Video', icon: ImageIcon },
+  { id: 'video-r2v', label: 'Reference to Video', icon: Layers },
 ];
 
 const HeroWithEditor: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
   const [prompt, setPrompt] = useState('');
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
-  const [uploadedAudio, setUploadedAudio] = useState<File[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [activeMode, setActiveMode] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [videoMode, setVideoMode] = useState<VideoMode>('video-t2v');
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
   const [selectedFrames, setSelectedFrames] = useState('');
   const [selectedAspectRatio, setSelectedAspectRatio] = useState('');
   const [selectedResolution, setSelectedResolution] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
   const [startTimestamp, setStartTimestamp] = useState('00:00');
   const [endTimestamp, setEndTimestamp] = useState('00:00');
-  const handleFeatureClick = (featureId: string) => {
-    const config = FEATURE_MODE_MAP[featureId];
-    if (config) {
-      setActiveMode(prev => prev === config.mode ? null : config.mode);
-      return;
-    }
-    setSelectedFeatures(prev => prev.includes(featureId) ? prev.filter(id => id !== featureId) : [...prev, featureId]);
-  };
-  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setUploadedVideos(prev => [...prev, ...newFiles]);
-      const count = newFiles.length;
-      toast.success(`${count} file${count > 1 ? 's' : ''} added`);
-    }
-  };
-  const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setUploadedAudio(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} audio/video file(s) added`);
-    }
-  };
-  const removeVideo = (index: number) => {
-    setUploadedVideos(prev => prev.filter((_, i) => i !== index));
-  };
-  const removeAudio = (index: number) => {
-    setUploadedAudio(prev => prev.filter((_, i) => i !== index));
-  };
-  const handleCreate = async () => {
-    if (!prompt.trim() && uploadedVideos.length === 0 && uploadedAudio.length === 0) {
-      toast.error('Please enter a prompt or upload media');
-      return;
-    }
 
-    setIsProcessing(true);
-    
-    
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRequest, setSubmittedRequest] = useState<GenerationRequest | null>(null);
+  const [resolvedResultUrl, setResolvedResultUrlState] = useState<string | null>(null);
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Restore prompt + mode after auth round-trip
+  useEffect(() => {
     try {
-      // Validate mode-specific upload requirements
-      const imageFiles = uploadedVideos.filter(f => f.type.startsWith('image/'));
-      if (videoMode === 'video-i2v' && imageFiles.length === 0) {
-        toast.error('Image to Video requires a starting image');
-        setIsProcessing(false);
-        return;
+      const raw = localStorage.getItem('homepagePromptDraft');
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft?.prompt) setPrompt(draft.prompt);
+        if (draft?.videoMode) setVideoMode(draft.videoMode);
+        if (draft?.selectedAspectRatio) setSelectedAspectRatio(draft.selectedAspectRatio);
+        if (draft?.selectedResolution) setSelectedResolution(draft.selectedResolution);
+        if (draft?.selectedDuration) setSelectedDuration(draft.selectedDuration);
+        localStorage.removeItem('homepagePromptDraft');
       }
-      if (videoMode === 'video-r2v' && imageFiles.length === 0) {
-        toast.error('Reference to Video requires at least one reference image');
-        setIsProcessing(false);
-        return;
-      }
+    } catch {}
+  }, []);
 
-      // Check if user is logged in when files need to be uploaded
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        toast.error('Authentication error. Please sign in again.');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if ((uploadedVideos.length > 0 || uploadedAudio.length > 0) && !user) {
-        toast.error('Please sign in to upload files');
-        setIsProcessing(false);
-        return;
-      }
+  // Polling: while a Wan video request is in-flight, kick wan-video-poll every 5s
+  useEffect(() => {
+    if (!submittedRequest) return;
+    const isTerminal = submittedRequest.status === 'completed' || submittedRequest.status === 'failed';
+    if (isTerminal) return;
 
-      const uploadedFiles: UploadedFile[] = [];
+    let active = true;
+    const poll = async () => {
+      try {
+        if (
+          submittedRequest.request_type === 'video' &&
+          submittedRequest.auto_provider === 'wan' &&
+          submittedRequest.provider_task_id
+        ) {
+          await pollVideoRequest(submittedRequest.id);
+        }
+        const { data } = await supabase
+          .from('generation_requests')
+          .select('*')
+          .eq('id', submittedRequest.id)
+          .maybeSingle();
+        if (!active || !data) return;
+        const current = data as GenerationRequest;
+        setSubmittedRequest(current);
+        if (current.status === 'completed' && current.result_url) {
+          const url = await resolveResultUrl(current.result_url);
+          if (url && active) setResolvedResultUrlState(url);
+        }
+      } catch (e) {
+        console.error('homepage poll error', e);
+      }
+    };
 
-      // Upload videos to storage
-      for (const file of uploadedVideos) {
-        const fileName = `${user!.id}/${Date.now()}-${file.name}`;
-        console.log('Uploading video:', fileName);
-        
-        const { error, data } = await supabase.storage
+    poll();
+    const id = setInterval(poll, 5000);
+    return () => { active = false; clearInterval(id); };
+  }, [submittedRequest?.id, submittedRequest?.status]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const list = Array.from(files);
+    if (videoMode === 'video-i2v') {
+      setUploadedImages(list.slice(0, 1));
+    } else {
+      setUploadedImages(prev => [...prev, ...list].slice(0, 3));
+    }
+    toast.success(`${list.length} image${list.length > 1 ? 's' : ''} added`);
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleExampleClick = (example: string) => setPrompt(example);
+
+  const isInProgress = !!submittedRequest && submittedRequest.status !== 'completed' && submittedRequest.status !== 'failed';
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please describe your video');
+      return;
+    }
+    if (videoMode === 'video-i2v' && uploadedImages.length === 0) {
+      toast.error('Image to Video requires a starting image');
+      return;
+    }
+    if (videoMode === 'video-r2v' && uploadedImages.length === 0) {
+      toast.error('Reference to Video requires at least one reference image');
+      return;
+    }
+
+    if (!user) {
+      // Persist draft, send to signup, return to homepage after auth
+      localStorage.setItem('homepagePromptDraft', JSON.stringify({
+        prompt, videoMode, selectedAspectRatio, selectedResolution, selectedDuration,
+      }));
+      localStorage.setItem('authRedirectPath', '/');
+      navigate('/signup');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Upload reference images if needed
+      const storageRefs: string[] = [];
+      for (const file of uploadedImages) {
+        const fileName = `${user.id}/${Date.now()}-${file.name}`;
+        const { error: upErr, data: upData } = await supabase.storage
           .from('product-images')
           .upload(fileName, file);
-        
-        if (error) {
-          console.error('Video upload error:', error);
-          throw new Error(`Failed to upload ${file.name}: ${error.message}`);
+        if (upErr || !upData) {
+          throw new Error(`Upload failed for ${file.name}`);
         }
-        
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from('product-images')
-          .createSignedUrl(fileName, 3600);
-        
-        if (signedUrlError || !signedUrlData?.signedUrl) {
-          throw new Error(`Failed to get signed URL for ${file.name}`);
-        }
-        
-        console.log('Uploaded video, signed URL obtained');
-        uploadedFiles.push({
-          name: file.name,
-          url: signedUrlData.signedUrl,
-          type: 'video'
-        });
+        storageRefs.push(`storage:product-images/${upData.path}`);
       }
 
-      // Upload audio to storage
-      for (const file of uploadedAudio) {
-        const fileName = `${user!.id}/${Date.now()}-${file.name}`;
-        console.log('Uploading audio:', fileName);
-        
-        const { error } = await supabase.storage
-          .from('product-images')
-          .upload(fileName, file);
-        
-        if (error) {
-          console.error('Audio upload error:', error);
-          throw new Error(`Failed to upload ${file.name}: ${error.message}`);
-        }
-        
-        const { data: audioSignedUrlData, error: audioSignedUrlError } = await supabase.storage
-          .from('product-images')
-          .createSignedUrl(fileName, 3600);
-        
-        if (audioSignedUrlError || !audioSignedUrlData?.signedUrl) {
-          throw new Error(`Failed to get signed URL for ${file.name}`);
-        }
-        
-        console.log('Uploaded audio, signed URL obtained');
-        uploadedFiles.push({
-          name: file.name,
-          url: audioSignedUrlData.signedUrl,
-          type: 'audio'
-        });
-      }
-      
-      console.log('Saving uploaded files to state:', uploadedFiles);
+      const fullPrompt = (() => {
+        let p = prompt.trim();
+        if (selectedAspectRatio) p += ` | Aspect: ${selectedAspectRatio}`;
+        if (selectedResolution) p += ` | Resolution: ${selectedResolution}`;
+        if (selectedDuration) p += ` | Duration: ${selectedDuration}`;
+        if (startTimestamp !== '00:00' || endTimestamp !== '00:00') p += ` | Timeline: ${startTimestamp}-${endTimestamp}`;
+        return p;
+      })();
 
-      // Save current editor state to localStorage
-      saveEditorState({
-        prompt,
-        selectedFeatures,
-        selectedAspectRatio,
-        selectedResolution,
-        selectedDuration,
-        selectedFrames,
-        startTimestamp,
-        endTimestamp,
-        uploadedFiles,
-        autoSubmit: !activeMode,
-        aiClipMode: activeMode === 'aiclip',
-        retentionMode: activeMode === 'retention',
-        creatorMode: activeMode === 'creator',
-        aiEditMode: activeMode === 'aiedit',
-        featureMode: isFeatureMode(activeMode) ? activeMode : null,
+      const referenceImageUrl = joinStoredAttachmentUrls(storageRefs);
+
+      const request = await createGenerationRequest({
+        requestType: 'video',
+        prompt: fullPrompt,
+        aspectRatio: selectedAspectRatio || undefined,
+        referenceImageUrl,
+        category: videoMode,
+        firstFrameUrl: videoMode === 'video-i2v' ? storageRefs[0] : undefined,
+        referenceImageUrls: videoMode === 'video-r2v' ? storageRefs : undefined,
       });
-      
-      // Dismiss ALL toasts before navigating so nothing persists on dashboard
-      toast.dismiss();
-      navigate(`/dashboard?mode=${videoMode}`);
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to prepare request. Please try again.');
+
+      if (!request) {
+        toast.error('Could not create request. Check your credits.');
+        return;
+      }
+
+      setSubmittedRequest(request);
+      setResolvedResultUrlState(null);
+      toast.success('Generation started');
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Failed to start generation');
     } finally {
-      setIsProcessing(false);
+      setIsSubmitting(false);
     }
   };
-  const handleExampleClick = (example: string) => {
-    setPrompt(example);
+
+  const reset = () => {
+    setSubmittedRequest(null);
+    setResolvedResultUrlState(null);
   };
-  return <section className="relative min-h-0 md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center px-3 md:px-4 pt-14 pb-4 md:py-16 overflow-hidden">
-      {/* Background gradient effects */}
+
+  return (
+    <section className="relative min-h-0 md:min-h-[90vh] flex flex-col items-center justify-start md:justify-center px-3 md:px-4 pt-14 pb-4 md:py-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
       <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px]" />
       <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-600/20 rounded-full blur-[100px] md:blur-[120px]" />
-      
+
       <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto w-full">
-        {/* Hero Title */}
         <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-1 md:mb-3 leading-tight px-2">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
             Create Stop<br className="md:hidden" />
             <span className="hidden md:inline"> </span>Scrolling Content
           </span>
         </h1>
-        <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">Chat to transform your raw footage into viral-worthy content with AI-powered editing</p>
+        <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">
+          Generate viral video in seconds with AI. Just describe what you want.
+        </p>
 
-        {/* Video Mode Selector */}
+        {/* Mode tabs */}
         <div className="w-full mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex md:flex-wrap md:justify-center gap-2 px-2 md:px-0 min-w-max md:min-w-0">
             {videoModes.map(mode => {
@@ -366,12 +263,12 @@ const HeroWithEditor: React.FC = () => {
               return (
                 <button
                   key={mode.id}
-                  onClick={() => setVideoMode(mode.id)}
+                  onClick={() => { setVideoMode(mode.id); setUploadedImages([]); }}
                   className={cn(
-                    "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                    'flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap',
                     isActive
-                      ? "bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30"
-                      : "bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50"
+                      ? 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white shadow-lg shadow-purple-500/30'
+                      : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-700/50'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -384,112 +281,45 @@ const HeroWithEditor: React.FC = () => {
 
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
-          {/* AI editing modes hidden on homepage hero, focus on video generation */}
-          <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
-            (() => {
-              if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
-              if (activeMode === 'retention') return 'border-[#ff6b6b]/60 shadow-lg shadow-[#ff6b6b]/10';
-              if (activeMode === 'creator') return 'border-[#38d9f5]/60 shadow-lg shadow-[#38d9f5]/10';
-              const mc = getConfigByMode(activeMode || '');
-              if (mc) return `border-[${mc.color}]/60 shadow-lg`;
-              return 'border-gray-700/50';
-            })()
-          }`} style={(() => {
-            if (['aiclip', 'retention', 'creator'].includes(activeMode || '')) return undefined;
-            const mc = getConfigByMode(activeMode || '');
-            if (mc) return { borderColor: `${mc.color}66`, boxShadow: `0 10px 15px -3px ${mc.color}1a` };
-            return undefined;
-          })()}>
-            {/* Active Mode Banner — AI Clip / Retention / Creator */}
-            {activeMode === 'aiclip' && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#a259ff]/10 border border-[#a259ff]/30">
-                <Scissors className="w-3.5 h-3.5 text-[#d966ff]" />
-                <span className="text-xs text-[#d966ff] font-medium">AI Clip mode active — generate viral clips from your video</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
-              </div>
-            )}
-            {activeMode === 'retention' && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/30">
-                <Sparkles className="w-3.5 h-3.5 text-[#ff9a3c]" />
-                <span className="text-xs text-[#ff9a3c] font-medium">Retention Editing mode active — boost watch time with smart cuts</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
-              </div>
-            )}
-            {activeMode === 'creator' && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#38d9f5]/10 border border-[#38d9f5]/30">
-                <Sparkles className="w-3.5 h-3.5 text-[#38d9f5]" />
-                <span className="text-xs text-[#38d9f5] font-medium">AI Creator mode active — promote everything with AI-generated content</span>
-                <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
-              </div>
-            )}
-            {/* Dynamic Feature Mode Banner */}
-            {activeMode && !['aiclip', 'retention', 'creator'].includes(activeMode) && (() => {
-              const mc = getConfigByMode(activeMode);
-              if (!mc) return null;
-              const IconComp = mc.icon;
-              return (
-                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg border" style={{ backgroundColor: `${mc.color}1a`, borderColor: `${mc.color}4d` }}>
-                  <IconComp className="w-3.5 h-3.5" style={{ color: mc.color }} />
-                  <span className="text-xs font-medium" style={{ color: mc.color }}>{mc.label} mode active — {mc.description}</span>
-                  <button onClick={() => setActiveMode(null)} className="ml-auto text-gray-500 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
-                </div>
-              );
-            })()}
-            {/* Media Preview — shows image/video/doc previews */}
-            {uploadedVideos.length > 0 && (
+          <div className="relative bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm">
+            {/* Image previews */}
+            {uploadedImages.length > 0 && (
               <div className="mb-3 md:mb-4 flex flex-wrap gap-2">
-                {uploadedVideos.map((file, index) => {
-                  const isImage = file.type.startsWith('image/');
-                  const isVideo = file.type.startsWith('video/');
-                  return (
-                    <div key={index} className={`relative rounded-lg overflow-hidden bg-black mb-2 ${isImage ? 'inline-block' : 'w-full aspect-video'}`}>
-                      {isImage ? (
-                        <img src={URL.createObjectURL(file)} alt={file.name} className="max-h-40 max-w-full object-contain rounded-lg" />
-                      ) : isVideo ? (
-                        <video src={URL.createObjectURL(file)} controls className="w-full h-full object-contain" />
-                      ) : (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg text-xs text-gray-300">
-                          <Film className="w-4 h-4 text-gray-400" />
-                          <span className="truncate max-w-[180px]">{file.name}</span>
-                        </div>
-                      )}
-                      <button onClick={() => removeVideo(index)} className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  );
-                })}
+                {uploadedImages.map((file, index) => (
+                  <div key={index} className="relative rounded-lg overflow-hidden bg-black inline-block">
+                    <img src={URL.createObjectURL(file)} alt={file.name} className="max-h-32 max-w-full object-contain rounded-lg" />
+                    <button onClick={() => removeImage(index)} className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
-            {/* Voice/Reference Files Tags */}
-            {uploadedAudio.length > 0 && <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
-                {uploadedAudio.map((file, index) => <div key={index} className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-800 rounded-lg text-xs md:text-sm">
-                    <AudioLines className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
-                    <span className="text-gray-300 max-w-[100px] md:max-w-[150px] truncate">{file.name}</span>
-                    <button onClick={() => removeAudio(index)} className="text-gray-500 hover:text-white transition-colors">
-                      <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    </button>
-                  </div>)}
-              </div>}
+            <Textarea
+              value={prompt}
+              onChange={e => setPrompt(e.target.value)}
+              placeholder="Describe what you want to create, generate, or edit..."
+              className="min-h-[80px] md:min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
+            />
 
-            {/* Textarea */}
-            <Textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Describe what you want to create, generate, or edit..." className="min-h-[80px] md:min-h-[120px] bg-transparent border-none text-white placeholder:text-gray-500 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base" />
-
-            {/* Example Prompts - Scrollable on mobile */}
+            {/* Example prompts */}
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 mt-2 mb-3 md:mb-4">
               <div className="flex md:flex-wrap gap-2 min-w-max md:min-w-0">
-                {examplePrompts.slice(0, 3).map((example, index) => <button key={index} onClick={() => handleExampleClick(example)} className="px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200 whitespace-nowrap">
+                {examplePrompts.slice(0, 3).map((example, index) => (
+                  <button key={index} onClick={() => handleExampleClick(example)} className="px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all whitespace-nowrap">
                     {example}
-                  </button>)}
-                {/* Show remaining prompts on desktop only */}
-                {examplePrompts.slice(3).map((example, index) => <button key={index + 3} onClick={() => handleExampleClick(example)} className="hidden md:block px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all duration-200">
+                  </button>
+                ))}
+                {examplePrompts.slice(3).map((example, index) => (
+                  <button key={index + 3} onClick={() => handleExampleClick(example)} className="hidden md:block px-3 py-1.5 rounded-full text-xs bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 transition-all">
                     {example}
-                  </button>)}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Timestamp Selection - Hidden on mobile */}
+            {/* Timeline */}
             <div className="hidden md:flex items-center gap-4 py-3 border-t border-gray-700/50">
               <div className="flex items-center gap-2">
                 <Timer className="w-4 h-4 text-gray-400" />
@@ -500,7 +330,7 @@ const HeroWithEditor: React.FC = () => {
                   <span className="text-xs text-gray-500">Start</span>
                   <input type="text" value={startTimestamp} onChange={e => setStartTimestamp(e.target.value)} placeholder="00:00" className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50" />
                 </div>
-                <span className="text-gray-500">—</span>
+                <span className="text-gray-500">to</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs text-gray-500">End</span>
                   <input type="text" value={endTimestamp} onChange={e => setEndTimestamp(e.target.value)} placeholder="00:15" className="w-16 px-2 py-1 text-sm text-center bg-gray-800/80 border border-gray-700/50 rounded-md text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50" />
@@ -511,38 +341,35 @@ const HeroWithEditor: React.FC = () => {
             {/* Bottom Actions */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between pt-3 md:pt-4 border-t border-gray-700/50 gap-3 md:gap-0">
               <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
-                {/* Image Upload — only relevant for I2V / R2V modes */}
                 {videoMode !== 'video-t2v' && (
                   <>
                     <input
                       type="file"
-                      ref={videoInputRef}
-                      onChange={handleVideoUpload}
+                      ref={imageInputRef}
+                      onChange={handleImageUpload}
                       accept="image/*"
                       multiple={videoMode === 'video-r2v'}
                       className="hidden"
                     />
-                    <button onClick={() => videoInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all duration-200 group flex-shrink-0">
+                    <button onClick={() => imageInputRef.current?.click()} className="flex flex-col items-center justify-center gap-0.5 md:gap-1 w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 hover:border-gray-600 transition-all group flex-shrink-0">
                       <div className="flex items-center gap-0.5">
                         <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400 group-hover:text-white" />
-                        <Image className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
+                        <ImageIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-white" />
                       </div>
                       <span className="text-[8px] md:text-[10px] text-gray-400 group-hover:text-white">
                         {videoMode === 'video-i2v' ? 'Image' : 'Refs'}
                       </span>
                     </button>
+                    <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
                   </>
                 )}
 
-                <div className="w-px h-8 md:h-10 bg-gray-700/50 mx-0.5 md:mx-1 flex-shrink-0" />
-
-                {/* Aspect Ratio - Simplified for mobile */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
                       <div className="border border-gray-500 rounded-sm" style={{
                         width: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.width || 14) * 0.7,
-                        height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 14) * 0.7
+                        height: (aspectRatioOptions.find(a => a.value === selectedAspectRatio)?.height || 14) * 0.7,
                       }} />
                       <span className="hidden sm:inline">{selectedAspectRatio || 'Ratio'}</span>
                       <ChevronDown className="w-3 h-3 text-gray-500" />
@@ -550,7 +377,7 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                     {aspectRatioOptions.filter(o => o.value !== '').map(option => (
-                      <DropdownMenuItem key={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn("flex items-center gap-3 cursor-pointer", selectedAspectRatio === option.value && "bg-purple-500/20")}>
+                      <DropdownMenuItem key={option.value} onClick={() => setSelectedAspectRatio(option.value)} className={cn('flex items-center gap-3 cursor-pointer', selectedAspectRatio === option.value && 'bg-purple-500/20')}>
                         <div className="border border-gray-400 rounded-sm" style={{ width: option.width, height: option.height }} />
                         <span className="text-gray-200">{option.label}</span>
                       </DropdownMenuItem>
@@ -558,7 +385,6 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Resolution - Hidden on small mobile */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
@@ -568,14 +394,13 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                     {resolutionOptions.filter(o => o.value !== '').map(option => (
-                      <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn("cursor-pointer", selectedResolution === option.value && "bg-purple-500/20")}>
+                      <DropdownMenuItem key={option.value} onClick={() => setSelectedResolution(option.value)} className={cn('cursor-pointer', selectedResolution === option.value && 'bg-purple-500/20')}>
                         <span className="text-gray-200">{option.label}</span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Frame Selection */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
@@ -586,14 +411,13 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                     {frameOptions.filter(o => o.value !== '').map(option => (
-                      <DropdownMenuItem key={option.value} onClick={() => setSelectedFrames(option.value)} className={cn("cursor-pointer", selectedFrames === option.value && "bg-purple-500/20")}>
+                      <DropdownMenuItem key={option.value} onClick={() => setSelectedFrames(option.value)} className={cn('cursor-pointer', selectedFrames === option.value && 'bg-purple-500/20')}>
                         <span className="text-gray-200">{option.label}</span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Duration Selection */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/50 hover:bg-gray-700/80 transition-all text-xs md:text-sm text-gray-300 flex-shrink-0">
@@ -604,7 +428,7 @@ const HeroWithEditor: React.FC = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="bg-gray-800 border-gray-700">
                     {durationOptions.filter(o => o.value !== '').map(option => (
-                      <DropdownMenuItem key={option.value} onClick={() => setSelectedDuration(option.value)} className={cn("cursor-pointer", selectedDuration === option.value && "bg-purple-500/20")}>
+                      <DropdownMenuItem key={option.value} onClick={() => setSelectedDuration(option.value)} className={cn('cursor-pointer', selectedDuration === option.value && 'bg-purple-500/20')}>
                         <span className="text-gray-200">{option.label}</span>
                       </DropdownMenuItem>
                     ))}
@@ -612,38 +436,74 @@ const HeroWithEditor: React.FC = () => {
                 </DropdownMenu>
               </div>
 
-              {/* Create / Generate Button - always navigates to dashboard */}
               <Button
-                onClick={handleCreate}
-                disabled={isProcessing}
+                onClick={handleGenerate}
+                disabled={isSubmitting || isInProgress}
                 className="px-4 md:px-6 py-2 md:py-2.5 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-xs md:text-sm flex-shrink-0"
-                style={(() => {
-                  if (activeMode === 'aiclip') return { backgroundImage: 'linear-gradient(to right, #a259ff, #d966ff)' };
-                  if (activeMode === 'retention') return { backgroundImage: 'linear-gradient(to right, #ff6b6b, #ff9a3c)' };
-                  if (activeMode === 'creator') return { backgroundImage: 'linear-gradient(to right, #38d9f5, #4f8eff)' };
-                  const mc = getConfigByMode(activeMode || '');
-                  if (mc) return { backgroundImage: `linear-gradient(to right, ${mc.colorFrom}, ${mc.colorTo})` };
-                  return { backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' };
-                })()}
+                style={{ backgroundImage: 'linear-gradient(to right, #8c52ff, #b616d6)' }}
               >
-                {isProcessing ? (
+                {isSubmitting || isInProgress ? (
                   <div className="flex items-center justify-center gap-1.5">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="hidden sm:inline">Uploading...</span>
+                    <span>{isSubmitting ? 'Submitting...' : 'Generating...'}</span>
                   </div>
-                ) : (() => {
-                  if (activeMode === 'aiclip') return <div className="flex items-center justify-center gap-1.5"><Scissors className="w-3.5 h-3.5" /><span>AI Clip</span></div>;
-                  if (activeMode === 'retention') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Retention Edit</span></div>;
-                  if (activeMode === 'creator') return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>AI Creator</span></div>;
-                  const mc = getConfigByMode(activeMode || '');
-                  if (mc) { const IconComp = mc.icon; return <div className="flex items-center justify-center gap-1.5"><IconComp className="w-3.5 h-3.5" /><span>{mc.label}</span></div>; }
-                  return <div className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /><span>Generate</span></div>;
-                })()}
+                ) : (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Generate</span>
+                  </div>
+                )}
               </Button>
             </div>
           </div>
+
+          {/* Result panel */}
+          {submittedRequest && (
+            <div className="mt-4 md:mt-6 bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-4 md:p-6 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  {submittedRequest.status === 'completed' ? (
+                    <Sparkles className="w-4 h-4 text-green-400" />
+                  ) : submittedRequest.status === 'failed' ? (
+                    <X className="w-4 h-4 text-red-400" />
+                  ) : (
+                    <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                  )}
+                  <span className="text-sm text-white font-medium capitalize">
+                    {submittedRequest.status === 'completed' ? 'Completed' :
+                     submittedRequest.status === 'failed' ? 'An editor will take over' :
+                     'Processing'}
+                  </span>
+                </div>
+                <button onClick={reset} className="text-gray-500 hover:text-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {submittedRequest.status === 'completed' && resolvedResultUrl ? (
+                <video src={resolvedResultUrl} controls className="w-full rounded-lg bg-black" />
+              ) : submittedRequest.status === 'failed' ? (
+                <p className="text-sm text-gray-400">
+                  Auto-generation could not finish. Your request was handed to a human editor and will appear in your dashboard history shortly.
+                </p>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-sm">
+                  <Loader2 className="w-6 h-6 animate-spin mb-2 text-purple-400" />
+                  Generating your video. This usually takes 1 to 3 minutes.
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center justify-end">
+                <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-purple-300 hover:text-white">
+                  View in history <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HeroWithEditor;
