@@ -547,11 +547,9 @@ const SimplifiedDashboard = ({ onRequestCreated, latestRequest }: SimplifiedDash
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-4xl space-y-6 flex-shrink-0">
-        {/* Mode banner: shows which workflow the user entered from the homepage hero */}
+        {/* Image-edit sub-tabs (foundation model banner intentionally hidden) */}
         {activeCategory && CATEGORY_MAP[activeCategory] && (
           <div className="space-y-4">
-            <ModeBanner category={activeCategory} />
-            
             {(heroMode === 'image-edit' || activeCategory?.startsWith('image-edit')) && (
               <Tabs 
                 value={activeCategory} 
