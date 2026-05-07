@@ -129,6 +129,8 @@ export async function createGenerationRequest(
         sourceVideoUrl: params.sourceVideoUrl,
         faceImageUrl: params.faceImageUrl,
         size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
+        duration: params.duration,
+        resolution: params.resolution,
       }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
