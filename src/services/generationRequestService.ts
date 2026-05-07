@@ -340,6 +340,8 @@ interface DispatchParams {
   firstFrameUrl?: string;
   sourceVideoUrl?: string;
   faceImageUrl?: string;
+  duration?: number;
+  resolution?: string;
 }
 
 export function aspectRatioToSize(ratio: string): string {
