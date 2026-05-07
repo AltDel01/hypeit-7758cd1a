@@ -384,13 +384,7 @@ const HeroWithEditor: React.FC = () => {
 
         {/* Prompt Box */}
         <div className="w-full max-w-4xl px-1 md:px-0">
-          {/* AI Clip Button */}
-          <AiClipButton
-            className="mb-3"
-            onAiClip={() => setActiveMode(prev => prev === 'aiclip' ? null : 'aiclip')}
-            onRetentionEditing={() => setActiveMode(prev => prev === 'retention' ? null : 'retention')}
-            onAiCreator={() => setActiveMode(prev => prev === 'creator' ? null : 'creator')}
-          />
+          {/* AI editing modes hidden on homepage hero, focus on video generation */}
           <div className={`relative bg-gray-900/80 border rounded-xl md:rounded-2xl p-3 md:p-5 backdrop-blur-sm transition-all duration-300 ${
             (() => {
               if (activeMode === 'aiclip') return 'border-[#a259ff]/60 shadow-lg shadow-[#a259ff]/10';
