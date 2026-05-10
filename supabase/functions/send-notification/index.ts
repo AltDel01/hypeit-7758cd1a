@@ -85,7 +85,37 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const payload: NotificationPayload = await req.json();
-    
+
+    // Service-role client to mint signed URLs for private storage refs
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const resolveAttachmentLinks = async (raw?: string | null): Promise<string[]> => {
+      if (!raw) return [];
+      const parts = raw.includes("||")
+        ? raw.split("||")
+        : raw.split(/,(?=(?:storage:|https?:\/\/))/g);
+      const urls: string[] = [];
+      for (const item of parts.map((p) => p.trim()).filter(Boolean)) {
+        if (item.startsWith("storage:")) {
+          const without = item.slice("storage:".length);
+          const slash = without.indexOf("/");
+          if (slash === -1) continue;
+          const bucket = without.slice(0, slash);
+          const path = without.slice(slash + 1);
+          const { data, error } = await adminClient.storage
+            .from(bucket)
+            .createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (!error && data?.signedUrl) urls.push(data.signedUrl);
+        } else {
+          urls.push(item);
+        }
+      }
+      return urls;
+    };
+
     let subject: string;
     let htmlContent: string;
 
