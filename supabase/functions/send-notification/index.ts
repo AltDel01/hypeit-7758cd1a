@@ -85,7 +85,37 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const payload: NotificationPayload = await req.json();
-    
+
+    // Service-role client to mint signed URLs for private storage refs
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const resolveAttachmentLinks = async (raw?: string | null): Promise<string[]> => {
+      if (!raw) return [];
+      const parts = raw.includes("||")
+        ? raw.split("||")
+        : raw.split(/,(?=(?:storage:|https?:\/\/))/g);
+      const urls: string[] = [];
+      for (const item of parts.map((p) => p.trim()).filter(Boolean)) {
+        if (item.startsWith("storage:")) {
+          const without = item.slice("storage:".length);
+          const slash = without.indexOf("/");
+          if (slash === -1) continue;
+          const bucket = without.slice(0, slash);
+          const path = without.slice(slash + 1);
+          const { data, error } = await adminClient.storage
+            .from(bucket)
+            .createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (!error && data?.signedUrl) urls.push(data.signedUrl);
+        } else {
+          urls.push(item);
+        }
+      }
+      return urls;
+    };
+
     let subject: string;
     let htmlContent: string;
 
@@ -116,7 +146,12 @@ const handler = async (req: Request): Promise<Response> => {
               ${payload.prompt}
             </div>
             ${payload.aspectRatio ? `<p><strong>Aspect Ratio:</strong> ${payload.aspectRatio}</p>` : ""}
-            ${payload.referenceImageUrl ? `<p><strong>Attachment:</strong></p><div style="margin: 8px 0;"><a href="${payload.referenceImageUrl}" style="color: #7c3aed; text-decoration: underline;">View Attached File</a></div>` : "<p><em>No file attached</em></p>"}
+            ${await (async () => {
+              const links = await resolveAttachmentLinks(payload.referenceImageUrl);
+              if (links.length === 0) return "<p><em>No file attached</em></p>";
+              return `<p><strong>Attachment${links.length > 1 ? "s" : ""}:</strong></p>` +
+                links.map((u, i) => `<div style="margin: 8px 0;"><a href="${u}" style="color: #7c3aed; text-decoration: underline;">View Attached File ${links.length > 1 ? i + 1 : ""}</a></div>`).join("");
+            })()}
             <p><strong>Request Time:</strong> ${new Date(payload.timestamp).toLocaleString()}</p>
           </div>
           <p style="color: #6b7280; margin-top: 20px;">View and manage this request in the admin dashboard.</p>
