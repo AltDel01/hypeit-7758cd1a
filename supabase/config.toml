@@ -22,6 +22,9 @@ verify_jwt = false
 [functions.send-result-ready]
 verify_jwt = false
 
+[functions.chat-router]
+verify_jwt = false
+
 [auth]
 # Allow users to sign in without email verification
 disable_signup = false

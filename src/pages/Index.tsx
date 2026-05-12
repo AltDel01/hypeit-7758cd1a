@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import HeroWithEditor from '@/components/home/HeroWithEditor';
+import ChatComposer from '@/components/home/ChatComposer';
 import CoreFeatures from '@/components/home/CoreFeatures';
 import PlatformBenefits from '@/components/home/PlatformBenefits';
 import HowItWorks from '@/components/home/HowItWorks';
@@ -13,7 +13,7 @@ const Index = () => {
     <div className="min-h-screen bg-black">
       <Navbar />
       <main>
-        <HeroWithEditor />
+        <ChatComposer />
         <CoreFeatures />
         <PlatformBenefits />
         <HowItWorks />
