@@ -1,69 +1,126 @@
 ## Goal
 
-- The homepage prompt box (T2V / I2V / R2V tabs, prompt, suggestion chips, timeline, Ratio/Quality/Frame/Duration, Generate) becomes the single canonical prompt UI.
-- The dashboard no longer shows a prompt box. It becomes a history / projects view.
-- Generate runs directly from the homepage (calls the existing `qwen-image` / `wan-video` edge functions and polls via `wan-video-poll`). No more redirect-then-resubmit on the dashboard.
+Turn the homepage prompt box into a **single multimodal conversation surface** where the user can:
+1. **Brainstorm** ideas with an LLM (chat: "what kind of content should I post for a coffee brand?")
+2. **Generate an image** from the same box ("ok, make me a hero shot of a latte at sunset")
+3. **Generate a video** from the same box ("now animate it, 9:16, 10s")
+4. Keep going in the same thread, with full context carried across turns.
 
-## Changes
+No more T2V / I2V / R2V tabs, no navigation to other pages. One box, one thread, mixed outputs (text bubbles, image bubbles, video bubbles).
 
-### 1. Homepage prompt box (`src/components/home/HeroWithEditor.tsx`)
+## How it works (UX)
 
-- Keep the existing simplified UI (T2V / I2V / R2V tabs, prompt, chips, timeline, Ratio/Quality/Frame/Duration, Generate). No editing tools, no special modes, no Media/Voice, no credits badge, no foundation-model banner.
-- Wire Generate to submit directly:
-  - If user is not signed in: redirect to `/signup` and resume after auth (reuse the existing `authRedirectPath` + localStorage state-persistence pattern).
-  - If signed in: pre-flight credit check, insert a row in `generation_requests`, then invoke `wan-video` with the selected model:
-    - T2V → `wan2.7-t2v` (category `video-t2v`)
-    - I2V → `wan2.7-i2v` (category `video-i2v`, requires uploaded first frame)
-    - R2V → `wan2.7-r2v` (category `video-r2v`, requires reference image[s])
-  - After submission, start the same client-side polling loop currently used in `SimplifiedDashboard` (calls `wan-video-poll` every ~5s until `completed` / `failed`).
-  - Disable the Generate button while a request is in-flight (status not `completed` / `failed`) to prevent the duplicate-request bug we already fixed in the dashboard.
-- Show inline progress + result (video player) directly on the homepage below the prompt box. On completion, also surface a "View in history" link to `/dashboard`.
-- Keep the homepage marketing sections (CoreFeatures, PlatformBenefits, etc.) below.
+```text
+┌─────────────────────────────────────────┐
+│  Conversation thread                    │
+│  ───────────────────────                │
+│  You: ideas for a coffee brand reel?    │
+│  AI:  Here are 5 angles… [text]         │
+│  You: make angle 2 as a 9:16 video      │
+│  AI:  [video player, 9:16, 10s]         │
+│  You: same scene but as a poster        │
+│  AI:  [image, 1080x1350]                │
+├─────────────────────────────────────────┤
+│  [📎] [prompt textarea........] [Send]  │
+│  Mode: Auto ▾ (Auto / Chat / Image /    │
+│                Video)                   │
+│  Optional: ratio · duration · quality   │
+│  (only shown when Image/Video chosen    │
+│  or auto-detected)                      │
+└─────────────────────────────────────────┘
+```
 
-### 2. Dashboard becomes history-only (`src/pages/Dashboard.tsx`, `src/components/dashboard/SimplifiedDashboard.tsx`)
+- **Mode = Auto** by default. An **intent router** (LLM) decides per turn whether the user wants to chat, generate an image, or generate a video, based on the message + any attached image.
+- User can override the router by picking Chat / Image / Video manually.
+- Attached image + "animate this" → I2V automatically. Attached image + "edit / restyle" → image edit. No image + "make a video of…" → T2V.
+- Generation params (ratio, duration, quality) appear inline only when relevant, with sensible defaults so the user doesn't have to touch them.
 
-- Remove the entire prompt composer block from `SimplifiedDashboard`: textarea, tool row (AI Edit / iPhone Quality / Trim / Caption / B-roll / Transitions / Effects / Zoom / Thumbnail Generator / Censor Word / Language Dubbing), special modes (AI Clip / Retention Editing / AI Creator), Media + Voice uploaders, suggestion chips, timeline, Ratio/Quality/Frame/Duration, credits badge, Generate button, ModeBanner, foundation-model badge.
-- Remove the homepage→dashboard auto-submit handoff (the localStorage `pendingGeneration` resume code path) since generation now happens on the homepage.
-- Keep and make primary on the dashboard:
-  - Generation history list (`GenerationHistory`)
-  - Recent activity / request detail view (`RequestDetailView`, `ReviewFeedbackBox`)
-  - Projects showcase (`ProjectsShowcase`)
-  - Usage metrics (`UsageMetrics`)
-  - Sidebar (`DashboardSidebar`) and header
-- Add a prominent "Create new" CTA in the dashboard header that links back to `/` (homepage prompt box) so users can start a new generation from history view.
-- Delete now-unused dashboard-only pieces: `ModeBanner.tsx`, `QuickActions.tsx` if it only points to the removed composer, `CreditCostPreview.tsx` if it was tied to the composer (verify before removing; otherwise keep).
+## Architecture
 
-### 3. Shared logic extraction
+### 1. New page-level component: `ChatComposer`
 
-To avoid duplicating the submission + polling logic, extract it from `SimplifiedDashboard.tsx` into a hook:
+Replaces the current T2V/I2V/R2V tabbed box in `src/components/home/HeroWithEditor.tsx`.
 
-- New file: `src/hooks/useVideoGeneration.ts`
-  - Inputs: `{ mode: 't2v' | 'i2v' | 'r2v', prompt, firstFrame?, refImages?, ratio, quality, frame, duration }`
-  - Returns: `{ submit, isSubmitting, currentRequest, progressStatus, resultUrl, error, reset }`
-  - Encapsulates: credit pre-check → insert `generation_requests` row → invoke `wan-video` → 5s polling of `wan-video-poll` → final state.
-- Use this hook in the new homepage prompt box. The dashboard does not need it anymore.
+- Renders a scrollable message list + a single composer at the bottom.
+- Message types: `text`, `image`, `video`, `pending` (with progress).
+- Composer: textarea, attach button, mode selector, send button, contextual params row.
+- Reuses existing styling tokens; no new design system work.
 
-### 4. State persistence cleanup
+### 2. New hook: `useMultimodalChat`
 
-- Remove the homepage→dashboard `pendingGeneration` localStorage handshake described in `mem://workflow/state-persistence-homepage-to-dashboard`.
-- Replace with: auth-redirect persistence only (so an unauthenticated user clicking Generate resumes their prompt + selected mode after signup, still on the homepage).
-- Update memory `state-persistence-homepage-to-dashboard` to reflect the new flow (homepage-only).
+`src/hooks/useMultimodalChat.ts`
 
-### 5. Memory updates
+State:
+- `messages: Message[]` (persisted in `localStorage` per session, optionally in DB later)
+- `isStreaming`, `pendingGenerationId`
 
-- Update `mem://dashboard/prompt-interface` → describe dashboard as history-only; prompt interface lives on homepage.
-- Update `mem://workflow/state-persistence-homepage-to-dashboard` → rename/repoint to homepage-local persistence.
-- Add a new core rule: "Generation prompt UI lives only on the homepage (`/`). The dashboard (`/dashboard`) is history + projects + usage only."
+Actions:
+- `send(text, attachments, modeOverride?)` →
+  1. Append user message.
+  2. Call **intent router edge function** with `{ messages, latestText, hasAttachment }` → `{ intent: 'chat' | 'image' | 'video', params: {...} }`.
+  3. Branch:
+     - `chat` → stream tokens from `chat` edge function (Lovable AI Gateway, `google/gemini-3-flash-preview`), append assistant text bubble token-by-token.
+     - `image` → call existing `qwen-image` edge function, append `pending` bubble, swap to `image` bubble on completion.
+     - `video` → call existing `wan-video` edge function with the right model (`wan2.7-t2v` / `wan2.7-i2v` / `wan2.7-r2v`), poll via `wan-video-poll`, swap `pending` → `video` on completion.
 
-## Out of scope
+### 3. New edge function: `chat-router`
 
-- No changes to edge functions (`wan-video`, `wan-video-poll`, `qwen-image`).
-- No changes to the editing-tools feature surface elsewhere (Features page, etc.).
-- No changes to admin/editor flows.
+`supabase/functions/chat-router/index.ts`
+
+- Single endpoint that does both:
+  - **Intent classification** (tool-calling on Lovable AI Gateway, returns structured JSON: `{intent, prompt, ratio, duration, useAttachmentAsFirstFrame}`).
+  - **Chat streaming** (when intent = chat) using SSE, same pattern as the AI Gateway chat snippet in our knowledge base.
+- Always sees the full conversation history so brainstorm context carries over to generation prompts ("make angle 2 as a video" resolves correctly).
+- JWT-validated; errors (429 / 402) surfaced to client with toasts.
+
+### 4. Reuse existing generation infra
+
+- **Image**: existing `qwen-image` edge function — no changes.
+- **Video**: existing `wan-video` + `wan-video-poll` — no changes. The composer just calls them with model + params chosen by the router.
+- **Credits**: existing pre-flight credit check + post-completion deduction trigger continues to apply to image/video turns. Chat turns are free (LLM router + chat are cheap; we can add a tiny credit cost later if needed).
+- **Reference media**: existing `storage:product-images/...` pattern for attachments, so admin/editor view + email links keep working.
+
+### 5. Dashboard
+
+- Dashboard stays as history-only (per existing plan). Each generation turn still creates a `generation_requests` row, so it shows up in history exactly like today.
+- Chat turns are NOT written to `generation_requests` (kept local to the thread).
+
+### 6. Mode selector + params
+
+- `Auto | Chat | Image | Video` segmented control under the textarea.
+- When Image: show ratio + quality.
+- When Video: show ratio + duration (2–15s) + quality + (if attachment) "use as first frame" toggle.
+- When Auto: hidden until router decides; user can still tweak before resend.
+
+## Files to add / change
+
+**Add**
+- `src/components/home/ChatComposer.tsx` — UI shell (thread + composer).
+- `src/components/home/chat/MessageBubble.tsx` — renders text / image / video / pending.
+- `src/components/home/chat/ComposerInput.tsx` — textarea + attach + mode + params.
+- `src/hooks/useMultimodalChat.ts` — orchestration.
+- `supabase/functions/chat-router/index.ts` — intent + chat streaming.
+
+**Change**
+- `src/components/home/HeroWithEditor.tsx` — replace the T2V/I2V/R2V tabbed box with `<ChatComposer />`. Keep marketing sections below.
+- `src/services/generationRequestService.ts` — small helper so the hook can create a `generation_requests` row from an intent-routed prompt (image or video) without duplicating logic.
+- `mem://dashboard/prompt-interface` — update: prompt UI is now a multimodal chat thread, not a tabbed form.
+
+**Unchanged**
+- `wan-video`, `wan-video-poll`, `qwen-image`, `send-notification`, admin/editor flows, dashboard history/projects.
 
 ## Acceptance
 
-- Homepage shows exactly the box in image-190 and Generate works end-to-end (submit → polling → inline video result).
-- `/dashboard` shows no prompt composer at all, just history / projects / usage with a "Create new" link to `/`.
-- No duplicate request when clicking Generate twice (button disabled while in-flight).
-- Unauthenticated Generate click → signup → returns to homepage with prompt + mode restored, ready to submit.
+- Single box on `/` handles brainstorm chat, image generation, and video generation in one continuous thread.
+- Auto-routing picks the right action ≥ 90% of the time on common phrasings; manual override always works.
+- Attaching an image + "animate this, 9:16, 10s" produces an I2V via `wan-video` with `wan2.7-i2v`, no tab switching.
+- Each image/video turn still appears in `/dashboard` history with correct credit deduction.
+- Unauthenticated send still redirects to signup and resumes the thread on return.
+
+## Open questions
+
+1. Should chat turns be **persisted across sessions** (DB table `chat_threads` + `chat_messages`) or only kept in `localStorage` for now? Persisting enables "resume a brainstorm later" and admin visibility, but adds schema + RLS work.
+2. Should chat turns **cost credits** (e.g. 1 credit/turn) or stay free to encourage brainstorming?
+3. Do you want **inline editing of generated assets** in-thread (e.g. "make it warmer", "extend by 5s") routed automatically, or keep edits as a follow-up generation only?
+
+If you want, I can default to: localStorage-only chat, free chat turns, auto-routed follow-up edits — and we revisit persistence after the UX is validated.
