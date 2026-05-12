@@ -86,13 +86,14 @@ const ChatComposer: React.FC = () => {
       <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-600/20 rounded-full blur-[100px] md:blur-[120px]" />
 
       <div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto w-full">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-1 md:mb-3 leading-tight px-2">
+        <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-1 md:mb-3 leading-tight px-2">
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-            Brainstorm. Generate. Repeat.
+            Create Stop<br className="md:hidden" />
+            <span className="hidden md:inline"> </span>Scrolling Content
           </span>
         </h1>
-        <p className="text-sm sm:text-base md:text-lg text-gray-400 text-center mb-4 md:mb-6 px-4">
-          Chat to plan ideas, then generate images or videos in the same place.
+        <p className="text-sm sm:text-base md:text-xl text-gray-400 text-center mb-4 md:mb-6 px-4">
+          Generate viral video in seconds with AI. Just describe what you want.
         </p>
 
         {/* Thread */}
