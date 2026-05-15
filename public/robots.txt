@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /editor
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /login
+Disallow: /signup
+Disallow: /invite
+
+Sitemap: https://viralin.ai/sitemap.xml

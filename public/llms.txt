@@ -1,0 +1,15 @@
+# Viralin
+
+> Viralin is an AI-powered platform that helps creators generate viral videos, images, and brand content in minutes.
+
+## Pages
+
+- [Home](/): Generate viral content with a single multimodal prompt.
+- [Features](/features): AI editing tools and capabilities overview.
+- [Pricing](/pricing): Credit-based plans (Free, Starter, Pro, Specialist).
+- [Enterprise](/enterprise): Custom plans and demos for teams.
+- [Virality Strategy](/virality): Generate a tailored virality plan.
+- [Brand Identity](/brand-identity): Build a complete brand identity kit.
+- [Analytics](/analytics): Creator and content performance insights.
+- [FAQ](/faq): Common questions about credits, plans, and generations.
+- [Careers](/careers): Open roles at Viralin.
