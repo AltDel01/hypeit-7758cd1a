@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Seo from '@/components/seo/Seo';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroBackground from '@/components/enterprise/HeroBackground';
@@ -155,6 +156,11 @@ const Enterprise = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Enterprise, Scale Viral Content with Viralin"
+        description="Custom AI content workflows for brands and agencies. Book a demo to see Viralin Enterprise in action."
+        path="/enterprise"
+      />
       <Navbar />
       <main>
         {/* Hero */}
