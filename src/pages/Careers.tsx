@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Seo from '@/components/seo/Seo';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -95,6 +96,11 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
 const Careers = () => {
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Careers at Viralin, Build the Future of Content"
+        description="Join Viralin and shape the next generation of AI-native creative tools. Open roles across product, design, and engineering."
+        path="/careers"
+      />
       <Navbar />
       <main className="pt-24 pb-20">
         {/* Header */}

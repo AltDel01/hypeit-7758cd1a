@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Seo from '@/components/seo/Seo';
 import Navbar from '@/components/layout/Navbar';
 import { PDFGenerator } from '@/components/brand/pdf/PDFGenerator';
 import { useBrandIdentityForm } from '@/hooks/useBrandIdentityForm';
@@ -30,6 +31,11 @@ const BrandIdentity = () => {
 
   return (
     <AuroraBackground>
+      <Seo
+        title="Brand Identity Builder, Viralin"
+        description="Generate a complete AI-powered brand identity kit, colors, fonts, voice, and visuals, in minutes."
+        path="/brand-identity"
+      />
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 p-6 md:p-8 relative z-10">

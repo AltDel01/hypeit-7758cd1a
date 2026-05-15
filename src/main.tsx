@@ -2,6 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client'
 import * as Sentry from "@sentry/react";
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
 
@@ -34,7 +35,9 @@ const appRoot = document.getElementById("app");
 if (appRoot) {
   createRoot(appRoot).render(
     <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
-      <App />
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
     </Sentry.ErrorBoundary>
   );
 }

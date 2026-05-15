@@ -1,4 +1,5 @@
 import React from 'react';
+import Seo from '@/components/seo/Seo';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import FooterMenu from '@/components/layout/FooterMenu';
@@ -78,8 +79,25 @@ const faqItems = [
 ];
 
 const FAQ: React.FC = () => {
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.flatMap((s) =>
+      s.questions.map((q) => ({
+        '@type': 'Question',
+        name: q.q,
+        acceptedAnswer: { '@type': 'Answer', text: q.a },
+      })),
+    ),
+  };
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo
+        title="FAQ, Viralin Credits, Plans, and Generations"
+        description="Answers to common questions about Viralin credits, pricing tiers, generation costs, and account security."
+        path="/faq"
+        jsonLd={faqJsonLd}
+      />
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-24">
         <div className="text-center mb-16">
