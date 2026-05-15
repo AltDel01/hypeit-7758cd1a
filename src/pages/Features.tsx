@@ -4,6 +4,7 @@ import { ArrowRight, Sparkles, CheckCircle, Play, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import Seo from '@/components/seo/Seo';
 import CapabilitiesGrid from '@/components/features/CapabilitiesGrid';
 import ToolsShowcase from '@/components/features/ToolsShowcase';
 import FinalCTA from '@/components/home/FinalCTA';
@@ -11,6 +12,11 @@ import FinalCTA from '@/components/home/FinalCTA';
 const Features: React.FC = () => {
   return (
     <div className="min-h-screen bg-black">
+      <Seo
+        title="Features, AI Editing Tools by Viralin"
+        description="Explore Viralin's AI editing tools for short-form video, image generation, captions, b-roll, and brand-ready outputs."
+        path="/features"
+      />
       <Navbar />
       <main>
         {/* Hero */}
