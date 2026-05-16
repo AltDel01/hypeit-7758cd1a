@@ -24,7 +24,7 @@ const Tools = () => {
       <Seo
         title="Tools, Sequence Gen, Ad Copy, Viral Predictor | Viralin AI"
         description="Run multi-prompt image and video generation, generate 15 ad campaigns from a URL, and predict virality with neural-inspired scoring."
-        canonicalPath="/tools"
+        path="/tools"
       />
       <Navbar />
 
