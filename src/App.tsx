@@ -35,6 +35,7 @@ import Explainer from "./pages/Explainer";
 import Careers from "./pages/Careers";
 import HeroPreview from "./pages/HeroPreview";
 import CareerApply from "./pages/CareerApply";
+import Tools from "./pages/Tools";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -141,6 +142,7 @@ const AppRoutes = () => {
       <Route path="/careers" element={<CustomErrorBoundary><Careers /></CustomErrorBoundary>} />
       <Route path="/careers/apply" element={<CustomErrorBoundary><CareerApply /></CustomErrorBoundary>} />
       <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
+      <Route path="/tools" element={<CustomErrorBoundary><Tools /></CustomErrorBoundary>} />
       <Route path="/invite/:code" element={<InviteRedirect />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
