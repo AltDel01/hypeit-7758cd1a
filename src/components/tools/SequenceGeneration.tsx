@@ -182,7 +182,7 @@ const SequenceGeneration = () => {
         <div>
           <h2 className="text-xl font-bold text-white">Sequence Generation</h2>
           <p className="text-sm text-muted-foreground">
-            Run 6+ prompts in parallel. Supports T2I, I2I, T2V, I2V, R2V via Alibaba DashScope.
+            Run 6+ prompts in parallel.
           </p>
         </div>
         <div className="flex gap-2">
