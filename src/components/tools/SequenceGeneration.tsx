@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { createGenerationRequest } from '@/services/generationRequestService';
+import { createGenerationRequest, pollVideoRequest } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
 import { toast } from 'sonner';
