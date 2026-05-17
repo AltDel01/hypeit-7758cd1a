@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { createGenerationRequest } from '@/services/generationRequestService';
+import { createGenerationRequest, pollVideoRequest } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
 import { toast } from 'sonner';
@@ -139,6 +139,10 @@ const SequenceGeneration = () => {
 
     const poll = async () => {
       try {
+        // For video requests, kick the DashScope poller so the DB row advances.
+        if (box.kind === 'video') {
+          await pollVideoRequest(request.id).catch(() => {});
+        }
         const { data } = await supabase
           .from('generation_requests').select('*').eq('id', request.id).maybeSingle();
         if (!data) { setTimeout(poll, 5000); return; }
