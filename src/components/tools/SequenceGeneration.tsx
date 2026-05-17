@@ -139,6 +139,10 @@ const SequenceGeneration = () => {
 
     const poll = async () => {
       try {
+        // For video requests, kick the DashScope poller so the DB row advances.
+        if (box.kind === 'video') {
+          await pollVideoRequest(request.id).catch(() => {});
+        }
         const { data } = await supabase
           .from('generation_requests').select('*').eq('id', request.id).maybeSingle();
         if (!data) { setTimeout(poll, 5000); return; }
