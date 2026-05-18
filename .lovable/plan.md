@@ -1,126 +1,117 @@
+
 ## Goal
 
-Turn the homepage prompt box into a **single multimodal conversation surface** where the user can:
-1. **Brainstorm** ideas with an LLM (chat: "what kind of content should I post for a coffee brand?")
-2. **Generate an image** from the same box ("ok, make me a hero shot of a latte at sunset")
-3. **Generate a video** from the same box ("now animate it, 9:16, 10s")
-4. Keep going in the same thread, with full context carried across turns.
+Extend `/tools` with three new tabs and one shared upgrade, inspired by Open-Generative-AI, but keeping the current Alibaba DashScope backend. Lipsync (not in DashScope) goes through fal.ai. Cinema and Workflow reuse existing T2V/I2V endpoints with structured prompt augmentation. Multi-image input replaces the current 4-file limit on the existing Sequence Generation boxes too.
 
-No more T2V / I2V / R2V tabs, no navigation to other pages. One box, one thread, mixed outputs (text bubbles, image bubbles, video bubbles).
-
-## How it works (UX)
+## New `/tools` tab layout
 
 ```text
-┌─────────────────────────────────────────┐
-│  Conversation thread                    │
-│  ───────────────────────                │
-│  You: ideas for a coffee brand reel?    │
-│  AI:  Here are 5 angles… [text]         │
-│  You: make angle 2 as a 9:16 video      │
-│  AI:  [video player, 9:16, 10s]         │
-│  You: same scene but as a poster        │
-│  AI:  [image, 1080x1350]                │
-├─────────────────────────────────────────┤
-│  [📎] [prompt textarea........] [Send]  │
-│  Mode: Auto ▾ (Auto / Chat / Image /    │
-│                Video)                   │
-│  Optional: ratio · duration · quality   │
-│  (only shown when Image/Video chosen    │
-│  or auto-detected)                      │
-└─────────────────────────────────────────┘
+[Sequence Gen] [Ad Copy] [Viral Predictor] [Lip Sync] [Cinema] [Workflow]
 ```
 
-- **Mode = Auto** by default. An **intent router** (LLM) decides per turn whether the user wants to chat, generate an image, or generate a video, based on the message + any attached image.
-- User can override the router by picking Chat / Image / Video manually.
-- Attached image + "animate this" → I2V automatically. Attached image + "edit / restyle" → image edit. No image + "make a video of…" → T2V.
-- Generation params (ratio, duration, quality) appear inline only when relevant, with sensible defaults so the user doesn't have to touch them.
+All three new tabs sit alongside the existing ones, no replacement.
 
-## Architecture
+---
 
-### 1. New page-level component: `ChatComposer`
+## 1. Lip Sync Studio (new tab)
 
-Replaces the current T2V/I2V/R2V tabbed box in `src/components/home/HeroWithEditor.tsx`.
+Two modes via toggle:
+- **Portrait + Audio → Talking Video** (default)
+- **Video + Audio → Lipsynced Video**
 
-- Renders a scrollable message list + a single composer at the bottom.
-- Message types: `text`, `image`, `video`, `pending` (with progress).
-- Composer: textarea, attach button, mode selector, send button, contextual params row.
-- Reuses existing styling tokens; no new design system work.
+Inputs:
+- image OR video uploader (mode-dependent)
+- audio uploader (mp3/wav/m4a, required)
+- optional prompt (motion guidance)
+- resolution: 480p / 720p / 1080p
+- model picker: 3 to 5 fal.ai models (Sync Lipsync, LatentSync, Veed Lipsync, Infinite Talk image, Infinite Talk V2V)
 
-### 2. New hook: `useMultimodalChat`
+Backend: new edge function `fal-lipsync` that submits to fal.ai `queue` API and a poller `fal-lipsync-poll`. Result lands in the same `generation_requests` table with `category='video-lipsync'` so it shows up in dashboard history and credit tracking just like every other generation.
 
-`src/hooks/useMultimodalChat.ts`
+Requires one new secret: `FAL_API_KEY`. I will request it via the secrets tool right before deploying the function.
 
-State:
-- `messages: Message[]` (persisted in `localStorage` per session, optionally in DB later)
-- `isStreaming`, `pendingGenerationId`
+## 2. Cinema Studio (new tab)
 
-Actions:
-- `send(text, attachments, modeOverride?)` →
-  1. Append user message.
-  2. Call **intent router edge function** with `{ messages, latestText, hasAttachment }` → `{ intent: 'chat' | 'image' | 'video', params: {...} }`.
-  3. Branch:
-     - `chat` → stream tokens from `chat` edge function (Lovable AI Gateway, `google/gemini-3-flash-preview`), append assistant text bubble token-by-token.
-     - `image` → call existing `qwen-image` edge function, append `pending` bubble, swap to `image` bubble on completion.
-     - `video` → call existing `wan-video` edge function with the right model (`wan2.7-t2v` / `wan2.7-i2v` / `wan2.7-r2v`), poll via `wan-video-poll`, swap `pending` → `video` on completion.
+Single-prompt UI on top of the existing T2V/I2V Wan endpoints (no new provider). Adds pro camera controls that get appended to the prompt with the existing bracketed-tag convention (`mem://infrastructure/prompt-parsing-logic`):
 
-### 3. New edge function: `chat-router`
+- Shot type: wide / medium / close-up / macro / extreme close-up
+- Lens: 24mm / 35mm / 50mm / 85mm / 135mm
+- Aperture: f/1.4 / f/2.8 / f/5.6 / f/8
+- Camera move: static / dolly / pan / orbit / handheld
+- Lighting: golden hour / neon / studio softbox / hard rim
+- Film stock: digital / 16mm / 35mm / anamorphic
 
-`supabase/functions/chat-router/index.ts`
+Final prompt sent to `wan-video`:
+```text
+[Cinema] user prompt | Shot: close-up | Lens: 85mm | Aperture: f/1.4 | Move: dolly-in | Light: golden hour | Stock: anamorphic | Aspect: 21:9 | Duration: 5s
+```
 
-- Single endpoint that does both:
-  - **Intent classification** (tool-calling on Lovable AI Gateway, returns structured JSON: `{intent, prompt, ratio, duration, useAttachmentAsFirstFrame}`).
-  - **Chat streaming** (when intent = chat) using SSE, same pattern as the AI Gateway chat snippet in our knowledge base.
-- Always sees the full conversation history so brainstorm context carries over to generation prompts ("make angle 2 as a video" resolves correctly).
-- JWT-validated; errors (429 / 402) surfaced to client with toasts.
+No new edge function, no new secret. Just a new React component that composes the prompt and calls `createGenerationRequest({ category: 'video-t2v' | 'video-i2v' })`.
 
-### 4. Reuse existing generation infra
+## 3. Workflow Studio (new tab)
 
-- **Image**: existing `qwen-image` edge function — no changes.
-- **Video**: existing `wan-video` + `wan-video-poll` — no changes. The composer just calls them with model + params chosen by the router.
-- **Credits**: existing pre-flight credit check + post-completion deduction trigger continues to apply to image/video turns. Chat turns are free (LLM router + chat are cheap; we can add a tiny credit cost later if needed).
-- **Reference media**: existing `storage:product-images/...` pattern for attachments, so admin/editor view + email links keep working.
+Stripped-down chainer, not a full node-graph editor. Linear pipeline of 2 to 4 steps:
 
-### 5. Dashboard
+```text
+Step 1: T2I  →  Step 2: I2V  →  Step 3: Lipsync (optional)
+```
 
-- Dashboard stays as history-only (per existing plan). Each generation turn still creates a `generation_requests` row, so it shows up in history exactly like today.
-- Chat turns are NOT written to `generation_requests` (kept local to the thread).
+UI:
+- Step list with `+ Add step` (max 4)
+- Each step picks a stage type (T2I / I2I / T2V / I2V / Lipsync) and inherits the previous step's `result_url` as its input
+- "Run workflow" submits step 1, then a frontend orchestrator waits for `status='completed'` on `generation_requests` before submitting step n+1 with the previous result as `firstFrameUrl` or `referenceImageUrl`
+- Persist workflow definitions in a new table `tool_workflows` so users can save & rerun
+- Save each run in `tool_workflow_runs` (one row per execution, references the underlying `generation_requests.id` per step)
 
-### 6. Mode selector + params
+New tables (RLS scoped to `user_id`):
+- `tool_workflows(name, steps jsonb, user_id)`
+- `tool_workflow_runs(workflow_id, step_request_ids uuid[], status, user_id)`
 
-- `Auto | Chat | Image | Video` segmented control under the textarea.
-- When Image: show ratio + quality.
-- When Video: show ratio + duration (2–15s) + quality + (if attachment) "use as first frame" toggle.
-- When Auto: hidden until router decides; user can still tweak before resend.
+No node-graph library, no react-flow. Plain vertical list, drag-to-reorder via `@dnd-kit/sortable` (already in tree).
 
-## Files to add / change
+## 4. Multi-image input + upload history (shared upgrade)
 
-**Add**
-- `src/components/home/ChatComposer.tsx` — UI shell (thread + composer).
-- `src/components/home/chat/MessageBubble.tsx` — renders text / image / video / pending.
-- `src/components/home/chat/ComposerInput.tsx` — textarea + attach + mode + params.
-- `src/hooks/useMultimodalChat.ts` — orchestration.
-- `supabase/functions/chat-router/index.ts` — intent + chat streaming.
+Applies to Sequence Generation, Lip Sync, Cinema, Workflow.
 
-**Change**
-- `src/components/home/HeroWithEditor.tsx` — replace the T2V/I2V/R2V tabbed box with `<ChatComposer />`. Keep marketing sections below.
-- `src/services/generationRequestService.ts` — small helper so the hook can create a `generation_requests` row from an intent-routed prompt (image or video) without duplicating logic.
-- `mem://dashboard/prompt-interface` — update: prompt UI is now a multimodal chat thread, not a tabbed form.
+- Bump per-box reference cap from 4 → 14
+- New "Upload Library" drawer: lists every file the user has previously uploaded to the `product-images` bucket, scoped by `user_id` folder
+- Click to attach to current box without re-uploading
+- Storage path stays `${user_id}/${filename}`, listed via `supabase.storage.from('product-images').list(user_id)`
 
-**Unchanged**
-- `wan-video`, `wan-video-poll`, `qwen-image`, `send-notification`, admin/editor flows, dashboard history/projects.
+No schema changes for this part, only frontend.
 
-## Acceptance
+---
 
-- Single box on `/` handles brainstorm chat, image generation, and video generation in one continuous thread.
-- Auto-routing picks the right action ≥ 90% of the time on common phrasings; manual override always works.
-- Attaching an image + "animate this, 9:16, 10s" produces an I2V via `wan-video` with `wan2.7-i2v`, no tab switching.
-- Each image/video turn still appears in `/dashboard` history with correct credit deduction.
-- Unauthenticated send still redirects to signup and resumes the thread on return.
+## Files to create / edit
 
-## Open questions
+```text
+src/pages/Tools.tsx                                  edit: add 3 tabs
+src/components/tools/LipSyncStudio.tsx               new
+src/components/tools/CinemaStudio.tsx                new
+src/components/tools/WorkflowStudio.tsx              new
+src/components/tools/shared/UploadLibrary.tsx        new
+src/components/tools/shared/MultiImagePicker.tsx     new
+src/components/tools/SequenceGeneration.tsx         edit: use MultiImagePicker, cap 14
+src/services/falLipsyncService.ts                    new (frontend invoke wrapper)
+src/services/workflowService.ts                      new
+supabase/functions/fal-lipsync/index.ts              new
+supabase/functions/fal-lipsync-poll/index.ts         new
+supabase/config.toml                                 edit: register 2 new functions
+```
 
-1. Should chat turns be **persisted across sessions** (DB table `chat_threads` + `chat_messages`) or only kept in `localStorage` for now? Persisting enables "resume a brainstorm later" and admin visibility, but adds schema + RLS work.
-2. Should chat turns **cost credits** (e.g. 1 credit/turn) or stay free to encourage brainstorming?
-3. Do you want **inline editing of generated assets** in-thread (e.g. "make it warmer", "extend by 5s") routed automatically, or keep edits as a follow-up generation only?
+Migration (one call):
+- `tool_workflows`, `tool_workflow_runs` tables + RLS
+- new enum value or string for `generation_requests.category`: `video-lipsync`
 
-If you want, I can default to: localStorage-only chat, free chat turns, auto-routed follow-up edits — and we revisit persistence after the UX is validated.
+Secrets: `FAL_API_KEY` (requested via secrets tool before deploying lipsync functions).
+
+## Out of scope (explicit)
+
+- Muapi.ai integration (not chosen)
+- 50+ model picker (not chosen)
+- Local sd.cpp / Wan2GP (impossible in hosted web app)
+- Full node-graph editor (replaced by linear chainer)
+
+## Credit cost
+
+Each step in Workflow Studio is a normal `generation_requests` row, so existing variable-credit logic (`mem://pricing/variable-credit-system`) and trigger-based deduction (`mem://infrastructure/credit-tracking-architecture`) apply automatically. Lipsync gets a flat baseline cost matched to T2V tier.
