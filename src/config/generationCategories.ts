@@ -14,6 +14,7 @@ export type GenerationCategory =
   | 'video-i2v'
   | 'video-r2v'
   | 'video-face-swap'
+  | 'video-lipsync'
   | 'video-edit-manual';
 
 export type AutoProvider = 'qwen' | 'wan' | 'hf-layered' | null;
