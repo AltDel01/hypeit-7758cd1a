@@ -126,6 +126,18 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     baseCredits: 300,
     proCredits: 300,
   },
+  'video-lipsync': {
+    category: 'video-lipsync',
+    label: 'Lip Sync',
+    requestType: 'video',
+    provider: 'wan',
+    modelDefault: 'videoretalk',
+    modelPro: 'videoretalk',
+    enabled: true,
+    async: true,
+    baseCredits: 200,
+    proCredits: 200,
+  },
   'video-edit-manual': {
     category: 'video-edit-manual',
     label: 'Video Editing',
