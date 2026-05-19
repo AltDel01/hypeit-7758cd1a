@@ -14,6 +14,7 @@ export type GenerationCategory =
   | 'video-i2v'
   | 'video-r2v'
   | 'video-face-swap'
+  | 'video-lipsync'
   | 'video-edit-manual';
 
 export type AutoProvider = 'qwen' | 'wan' | 'hf-layered' | null;
@@ -124,6 +125,18 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     async: true,
     baseCredits: 300,
     proCredits: 300,
+  },
+  'video-lipsync': {
+    category: 'video-lipsync',
+    label: 'Lip Sync',
+    requestType: 'video',
+    provider: 'wan',
+    modelDefault: 'videoretalk',
+    modelPro: 'videoretalk',
+    enabled: true,
+    async: true,
+    baseCredits: 200,
+    proCredits: 200,
   },
   'video-edit-manual': {
     category: 'video-edit-manual',
