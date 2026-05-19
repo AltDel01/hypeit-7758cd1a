@@ -135,6 +135,8 @@ export async function createGenerationRequest(
         size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
         duration: params.duration,
         resolution: params.resolution,
+        audioUrl: params.audioUrl,
+        lipsyncMode: params.lipsyncMode,
       }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
