@@ -466,6 +466,74 @@ export type Database = {
           },
         ]
       }
+      tool_workflow_runs: {
+        Row: {
+          created_at: string
+          current_step: number
+          id: string
+          status: string
+          step_request_ids: string[]
+          updated_at: string
+          user_id: string
+          workflow_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          status?: string
+          step_request_ids?: string[]
+          updated_at?: string
+          user_id: string
+          workflow_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          status?: string
+          step_request_ids?: string[]
+          updated_at?: string
+          user_id?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "tool_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_workflows: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          steps: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          steps?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
