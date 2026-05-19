@@ -408,6 +408,21 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
     if (error) console.error("[wan-video] invoke error", error);
     return;
   }
+
+  if (p.category === "video-lipsync") {
+    const { error } = await supabase.functions.invoke("dashscope-lipsync", {
+      body: {
+        requestId: p.requestId,
+        prompt: p.prompt,
+        mode: p.lipsyncMode || (p.sourceVideoUrl ? 'video' : 'portrait'),
+        portraitUrl: p.firstFrameUrl,
+        sourceVideoUrl: p.sourceVideoUrl,
+        audioUrl: p.audioUrl,
+      },
+    });
+    if (error) console.error("[dashscope-lipsync] invoke error", error);
+    return;
+  }
   // Decompose (coming soon) and manual categories: no dispatch.
 }
 
