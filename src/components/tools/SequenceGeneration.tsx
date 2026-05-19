@@ -174,7 +174,7 @@ const SequenceGeneration = () => {
   const onAddReferences = (id: string, files: FileList | null) => {
     if (!files?.length) return;
     setBoxes((prev) => prev.map((b) => b.id === id
-      ? { ...b, references: [...b.references, ...Array.from(files)].slice(0, 4) } : b));
+      ? { ...b, references: [...b.references, ...Array.from(files)].slice(0, 14) } : b));
   };
   const removeRef = (id: string, idx: number) =>
     setBoxes((prev) => prev.map((b) => b.id === id
