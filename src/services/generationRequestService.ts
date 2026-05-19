@@ -37,7 +37,7 @@ export interface CreateGenerationRequestParams {
   creditsUsed?: number;
   /** Optional: explicit category. Falls back to image-gen / video-edit-manual. */
   category?: GenerationCategory;
-  /** Optional: extra inputs for video modes (i2v, r2v, face-swap). */
+  /** Optional: extra inputs for video modes (i2v, r2v, face-swap, lipsync). */
   firstFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
@@ -45,6 +45,10 @@ export interface CreateGenerationRequestParams {
   duration?: number;
   resolution?: string;
   faceImageUrl?: string;
+  /** Lip sync: storage:bucket/path or https url for audio track */
+  audioUrl?: string;
+  /** Lip sync: 'portrait' (image+audio→talking) or 'video' (video+audio→relipsynced) */
+  lipsyncMode?: 'portrait' | 'video';
 }
 
 /**
