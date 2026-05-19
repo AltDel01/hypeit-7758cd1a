@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layers, Megaphone, Brain } from 'lucide-react';
+import { Layers, Megaphone, Brain, Mic2, Camera, Workflow } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -7,13 +7,19 @@ import Seo from '@/components/seo/Seo';
 import SequenceGeneration from '@/components/tools/SequenceGeneration';
 import AdCopyGenerator from '@/components/tools/AdCopyGenerator';
 import ViralPredictor from '@/components/tools/ViralPredictor';
+import LipSyncStudio from '@/components/tools/LipSyncStudio';
+import CinemaStudio from '@/components/tools/CinemaStudio';
+import WorkflowStudio from '@/components/tools/WorkflowStudio';
 
-type Tab = 'sequence' | 'adcopy' | 'predictor';
+type Tab = 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: 'sequence', label: 'Sequence Generation', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Viral Predictor', icon: Brain },
+  { id: 'lipsync', label: 'Lip Sync', icon: Mic2 },
+  { id: 'cinema', label: 'Cinema', icon: Camera },
+  { id: 'workflow', label: 'Workflow', icon: Workflow },
 ];
 
 const Tools = () => {
@@ -22,8 +28,8 @@ const Tools = () => {
   return (
     <div className="min-h-screen bg-background text-white flex flex-col">
       <Seo
-        title="Tools, Sequence Gen, Ad Copy, Viral Predictor | Viralin AI"
-        description="Run multi-prompt image and video generation, generate 15 ad campaigns from a URL, and predict virality with neural-inspired scoring."
+        title="Tools, Sequence Gen, Lip Sync, Cinema, Workflow | Viralin AI"
+        description="Batch image and video generation, lip sync studio, cinematic shot composer, and chained AI workflows, all powered by Alibaba DashScope."
         path="/tools"
       />
       <Navbar />
@@ -32,7 +38,7 @@ const Tools = () => {
         <header className="mb-6 md:mb-8">
           <h1 className="text-3xl md:text-5xl font-black animate-gradient-text mb-2">Tools</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Production-grade utilities. Generate in batches, write campaigns from a single URL, and predict virality before you spend.
+            Production-grade utilities. Batch generations, lip sync, cinematic shots, and multi-step pipelines.
           </p>
         </header>
 
@@ -57,6 +63,9 @@ const Tools = () => {
           {active === 'sequence' && <SequenceGeneration />}
           {active === 'adcopy' && <AdCopyGenerator />}
           {active === 'predictor' && <ViralPredictor />}
+          {active === 'lipsync' && <LipSyncStudio />}
+          {active === 'cinema' && <CinemaStudio />}
+          {active === 'workflow' && <WorkflowStudio />}
         </div>
       </main>
 
