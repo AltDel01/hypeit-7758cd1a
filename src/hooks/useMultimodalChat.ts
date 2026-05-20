@@ -132,7 +132,8 @@ export function useMultimodalChat() {
     intent: 'image' | 'video',
     prompt: string,
     storageRefs: string[],
-    routed: { ratio?: string; duration?: number; useAttachmentAsFirstFrame?: boolean },
+    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean },
+    audioRef?: string,
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -152,18 +153,22 @@ export function useMultimodalChat() {
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
       });
     } else {
-      const isI2V = storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false;
-      const isR2V = storageRefs.length > 1;
-      const category = isR2V ? 'video-r2v' : isI2V ? 'video-i2v' : 'video-t2v';
+      const isLipsync = !!audioRef && storageRefs.length >= 1;
+      const isI2V = !isLipsync && storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false;
+      const isR2V = !isLipsync && storageRefs.length > 1;
+      const category = isLipsync ? 'video-lipsync' : isR2V ? 'video-r2v' : isI2V ? 'video-i2v' : 'video-t2v';
       request = await createGenerationRequest({
         requestType: 'video',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
         category,
-        firstFrameUrl: category === 'video-i2v' ? storageRefs[0] : undefined,
+        firstFrameUrl: (category === 'video-i2v' || category === 'video-lipsync') ? storageRefs[0] : undefined,
         referenceImageUrls: category === 'video-r2v' ? storageRefs : undefined,
         duration: routed.duration,
+        resolution: routed.resolution,
+        audioUrl: audioRef,
+        lipsyncMode: isLipsync ? 'portrait' : undefined,
       });
     }
 
@@ -226,6 +231,7 @@ export function useMultimodalChat() {
     text: string,
     attachments: File[],
     modeOverride: ChatMode = 'auto',
+    videoOpts?: { ratio?: string; duration?: number; resolution?: string; audioFile?: File | null },
   ) => {
     if (!text.trim() && attachments.length === 0) return;
     setIsBusy(true);
@@ -255,9 +261,22 @@ export function useMultimodalChat() {
       }
     }
 
+    // 2b. Upload optional audio (voice) file for video mode
+    let audioRef: string | undefined;
+    if (user && videoOpts?.audioFile) {
+      try {
+        const f = videoOpts.audioFile;
+        const fileName = `${user.id}/audio-${Date.now()}-${f.name}`;
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, f);
+        if (!error && data) audioRef = `storage:product-images/${data.path}`;
+      } catch (e) { console.error('audio upload fail', e); }
+    }
+
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
-    let routed: { prompt?: string; ratio?: string; duration?: number; useAttachmentAsFirstFrame?: boolean } = {};
+    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean } = {};
 
     if (modeOverride !== 'auto') {
       intent = modeOverride;
@@ -287,6 +306,13 @@ export function useMultimodalChat() {
       }
     }
 
+    // Merge explicit video options (user-selected) over routed values
+    if (intent === 'video' && videoOpts) {
+      if (videoOpts.ratio) routed.ratio = videoOpts.ratio;
+      if (videoOpts.duration) routed.duration = videoOpts.duration;
+      if (videoOpts.resolution) routed.resolution = videoOpts.resolution;
+    }
+
     // 4. Reserve assistant message
     const assistantMsg: ChatMessage = {
       id: uid(),
@@ -309,6 +335,7 @@ export function useMultimodalChat() {
             (routed.prompt && routed.prompt.trim()) || text,
             storageRefs,
             routed,
+            audioRef,
           );
         }
       }

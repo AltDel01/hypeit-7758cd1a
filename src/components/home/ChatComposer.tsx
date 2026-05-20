@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2,
+  Film, MessageSquare, Wand2, Trash2, Mic, Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +31,13 @@ const ChatComposer: React.FC = () => {
   const [text, setText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [mode, setMode] = useState<ChatMode>('auto');
+  const [ratio, setRatio] = useState<string>('16:9');
+  const [duration, setDuration] = useState<number>(5);
+  const [resolution, setResolution] = useState<string>('720p');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [showVideoOpts, setShowVideoOpts] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,9 +73,11 @@ const ChatComposer: React.FC = () => {
     }
     const t = text;
     const f = files;
+    const a = audioFile;
     setText('');
     setFiles([]);
-    await send(t, f, mode);
+    setAudioFile(null);
+    await send(t, f, mode, mode === 'video' ? { ratio, duration, resolution, audioFile: a } : undefined);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -157,6 +165,70 @@ const ChatComposer: React.FC = () => {
               </div>
             )}
 
+            {mode === 'video' && showVideoOpts && (
+              <div className="mb-3 p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Aspect ratio</label>
+                  <div className="flex gap-1 flex-wrap">
+                    {['16:9', '9:16', '1:1', '4:3'].map(r => (
+                      <button
+                        key={r}
+                        onClick={() => setRatio(r)}
+                        className={cn(
+                          'px-2 py-1 rounded text-xs border',
+                          ratio === r ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{r}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Duration</label>
+                  <div className="flex gap-1 flex-wrap">
+                    {[5, 10].map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setDuration(d)}
+                        className={cn(
+                          'px-2 py-1 rounded text-xs border',
+                          duration === d ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{d}s</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Resolution</label>
+                  <div className="flex gap-1 flex-wrap">
+                    {['480p', '720p', '1080p'].map(res => (
+                      <button
+                        key={res}
+                        onClick={() => setResolution(res)}
+                        className={cn(
+                          'px-2 py-1 rounded text-xs border',
+                          resolution === res ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{res}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {mode === 'video' && audioFile && (
+              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800/40 border border-gray-700/50">
+                <Mic className="w-4 h-4 text-[#8c52ff]" />
+                <span className="text-xs text-gray-300 truncate flex-1">{audioFile.name}</span>
+                <button
+                  onClick={() => setAudioFile(null)}
+                  className="p-1 rounded hover:bg-gray-700/50 text-gray-400"
+                  title="Remove audio"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center justify-between pt-3 border-t border-gray-700/50 gap-2 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 <input
@@ -166,6 +238,13 @@ const ChatComposer: React.FC = () => {
                   accept="image/*"
                   className="hidden"
                   onChange={onPickFiles}
+                />
+                <input
+                  type="file"
+                  ref={audioRef}
+                  accept="audio/*"
+                  className="hidden"
+                  onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
                 />
                 <button
                   onClick={() => fileRef.current?.click()}
@@ -182,7 +261,10 @@ const ChatComposer: React.FC = () => {
                     return (
                       <button
                         key={opt.id}
-                        onClick={() => setMode(opt.id)}
+                        onClick={() => {
+                          setMode(opt.id);
+                          if (opt.id === 'video') setShowVideoOpts(true);
+                        }}
                         className={cn(
                           'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all',
                           active ? 'bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white' : 'text-gray-400 hover:text-white',
@@ -194,6 +276,31 @@ const ChatComposer: React.FC = () => {
                     );
                   })}
                 </div>
+
+                {mode === 'video' && (
+                  <>
+                    <button
+                      onClick={() => setShowVideoOpts(s => !s)}
+                      className={cn(
+                        'p-2 rounded-lg border text-gray-300',
+                        showVideoOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                      )}
+                      title="Video options"
+                    >
+                      <Settings2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => audioRef.current?.click()}
+                      className={cn(
+                        'p-2 rounded-lg border text-gray-300',
+                        audioFile ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                      )}
+                      title="Upload voice / audio"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
 
               <Button
