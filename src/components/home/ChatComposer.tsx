@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2,
+  Film, MessageSquare, Wand2, Trash2, Mic, Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
