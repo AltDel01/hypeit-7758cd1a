@@ -73,9 +73,11 @@ const ChatComposer: React.FC = () => {
     }
     const t = text;
     const f = files;
+    const a = audioFile;
     setText('');
     setFiles([]);
-    await send(t, f, mode);
+    setAudioFile(null);
+    await send(t, f, mode, mode === 'video' ? { ratio, duration, resolution, audioFile: a } : undefined);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
