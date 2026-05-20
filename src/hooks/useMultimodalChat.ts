@@ -132,7 +132,8 @@ export function useMultimodalChat() {
     intent: 'image' | 'video',
     prompt: string,
     storageRefs: string[],
-    routed: { ratio?: string; duration?: number; useAttachmentAsFirstFrame?: boolean },
+    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean },
+    audioRef?: string,
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -152,18 +153,22 @@ export function useMultimodalChat() {
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
       });
     } else {
-      const isI2V = storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false;
-      const isR2V = storageRefs.length > 1;
-      const category = isR2V ? 'video-r2v' : isI2V ? 'video-i2v' : 'video-t2v';
+      const isLipsync = !!audioRef && storageRefs.length >= 1;
+      const isI2V = !isLipsync && storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false;
+      const isR2V = !isLipsync && storageRefs.length > 1;
+      const category = isLipsync ? 'video-lipsync' : isR2V ? 'video-r2v' : isI2V ? 'video-i2v' : 'video-t2v';
       request = await createGenerationRequest({
         requestType: 'video',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
         category,
-        firstFrameUrl: category === 'video-i2v' ? storageRefs[0] : undefined,
+        firstFrameUrl: (category === 'video-i2v' || category === 'video-lipsync') ? storageRefs[0] : undefined,
         referenceImageUrls: category === 'video-r2v' ? storageRefs : undefined,
         duration: routed.duration,
+        resolution: routed.resolution,
+        audioUrl: audioRef,
+        lipsyncMode: isLipsync ? 'portrait' : undefined,
       });
     }
 
