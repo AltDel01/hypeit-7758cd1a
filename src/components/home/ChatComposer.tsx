@@ -31,7 +31,13 @@ const ChatComposer: React.FC = () => {
   const [text, setText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [mode, setMode] = useState<ChatMode>('auto');
+  const [ratio, setRatio] = useState<string>('16:9');
+  const [duration, setDuration] = useState<number>(5);
+  const [resolution, setResolution] = useState<string>('720p');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [showVideoOpts, setShowVideoOpts] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
