@@ -231,6 +231,7 @@ export function useMultimodalChat() {
     text: string,
     attachments: File[],
     modeOverride: ChatMode = 'auto',
+    videoOpts?: { ratio?: string; duration?: number; resolution?: string; audioFile?: File | null },
   ) => {
     if (!text.trim() && attachments.length === 0) return;
     setIsBusy(true);
@@ -260,9 +261,22 @@ export function useMultimodalChat() {
       }
     }
 
+    // 2b. Upload optional audio (voice) file for video mode
+    let audioRef: string | undefined;
+    if (user && videoOpts?.audioFile) {
+      try {
+        const f = videoOpts.audioFile;
+        const fileName = `${user.id}/audio-${Date.now()}-${f.name}`;
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, f);
+        if (!error && data) audioRef = `storage:product-images/${data.path}`;
+      } catch (e) { console.error('audio upload fail', e); }
+    }
+
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
-    let routed: { prompt?: string; ratio?: string; duration?: number; useAttachmentAsFirstFrame?: boolean } = {};
+    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean } = {};
 
     if (modeOverride !== 'auto') {
       intent = modeOverride;
@@ -292,6 +306,13 @@ export function useMultimodalChat() {
       }
     }
 
+    // Merge explicit video options (user-selected) over routed values
+    if (intent === 'video' && videoOpts) {
+      if (videoOpts.ratio) routed.ratio = videoOpts.ratio;
+      if (videoOpts.duration) routed.duration = videoOpts.duration;
+      if (videoOpts.resolution) routed.resolution = videoOpts.resolution;
+    }
+
     // 4. Reserve assistant message
     const assistantMsg: ChatMessage = {
       id: uid(),
@@ -314,6 +335,7 @@ export function useMultimodalChat() {
             (routed.prompt && routed.prompt.trim()) || text,
             storageRefs,
             routed,
+            audioRef,
           );
         }
       }
