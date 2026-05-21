@@ -24,6 +24,30 @@ const examples = [
   'Make a 9:16 video of waves at golden hour',
 ];
 
+const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
+  { value: '16:9', w: 28, h: 16 },
+  { value: '9:16', w: 16, h: 28 },
+  { value: '1:1',  w: 22, h: 22 },
+  { value: '4:3',  w: 26, h: 20 },
+  { value: '3:4',  w: 20, h: 26 },
+];
+const DURATION_OPTIONS = [2, 4, 5, 8, 10, 12, 15];
+const RESOLUTION_OPTIONS = ['480P', '720P', '1080P'];
+const STYLE_OPTIONS = ['Cinematic', 'Vintage', 'Anime', 'Documentary', 'Commercial', 'Music Video', 'Horror', 'Sci-Fi'];
+const MOTION_OPTIONS = ['Static', 'Pan', 'Zoom In', 'Zoom Out', 'Tracking', 'Crane', 'Handheld', 'Dolly'];
+const INTENSITY_OPTIONS = [
+  { value: 'Subtle',   desc: 'Minimal movement' },
+  { value: 'Moderate', desc: 'Balanced motion' },
+  { value: 'Dynamic',  desc: 'Strong movement' },
+];
+const FRAME_OPTIONS = [
+  { value: 'first', label: 'First frame' },
+  { value: 'last',  label: 'Last frame' },
+  { value: 'both',  label: 'First & last' },
+];
+
+type VideoPanel = 'basics' | 'style' | 'motion';
+
 const ChatComposer: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -33,9 +57,14 @@ const ChatComposer: React.FC = () => {
   const [mode, setMode] = useState<ChatMode>('auto');
   const [ratio, setRatio] = useState<string>('16:9');
   const [duration, setDuration] = useState<number>(5);
-  const [resolution, setResolution] = useState<string>('720p');
+  const [resolution, setResolution] = useState<string>('720P');
+  const [style, setStyle] = useState<string>('Cinematic');
+  const [motion, setMotion] = useState<string>('Static');
+  const [intensity, setIntensity] = useState<string>('Moderate');
+  const [frame, setFrame] = useState<string>('first');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
+  const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -44,7 +73,6 @@ const ChatComposer: React.FC = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Restore draft after auth
   useEffect(() => {
     try {
       const raw = localStorage.getItem('homepageChatDraft');
@@ -62,16 +90,24 @@ const ChatComposer: React.FC = () => {
     setFiles(prev => [...prev, ...list].slice(0, 3));
   };
 
+  const buildVideoPrompt = (base: string) => {
+    const tags: string[] = [];
+    if (style) tags.push(`Style: ${style}`);
+    if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
+    if (intensity) tags.push(`Motion intensity: ${intensity}`);
+    if (frame && files.length > 0) tags.push(`Frame: ${frame === 'first' ? 'use as first frame' : frame === 'last' ? 'use as last frame' : 'use as first and last frame'}`);
+    return tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
+  };
+
   const handleSend = async () => {
     if (!text.trim() && files.length === 0) return;
-    // Require auth for image/video; allow chat without auth? Require auth always for simplicity.
     if (!user) {
       localStorage.setItem('homepageChatDraft', JSON.stringify({ text, mode }));
       localStorage.setItem('authRedirectPath', '/');
       navigate('/signup');
       return;
     }
-    const t = text;
+    const t = mode === 'video' ? buildVideoPrompt(text) : text;
     const f = files;
     const a = audioFile;
     setText('');
@@ -166,51 +202,163 @@ const ChatComposer: React.FC = () => {
             )}
 
             {mode === 'video' && showVideoOpts && (
-              <div className="mb-3 p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Aspect ratio</label>
-                  <div className="flex gap-1 flex-wrap">
-                    {['16:9', '9:16', '1:1', '4:3'].map(r => (
-                      <button
-                        key={r}
-                        onClick={() => setRatio(r)}
-                        className={cn(
-                          'px-2 py-1 rounded text-xs border',
-                          ratio === r ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
-                        )}
-                      >{r}</button>
-                    ))}
-                  </div>
+              <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50">
+                <div className="flex border-b border-gray-700/50">
+                  {(['basics', 'style', 'motion'] as VideoPanel[]).map(p => (
+                    <button
+                      key={p}
+                      onClick={() => setVideoPanel(p)}
+                      className={cn(
+                        'flex-1 px-3 py-2 text-xs font-medium capitalize transition-colors',
+                        videoPanel === p
+                          ? 'text-white bg-gray-900/60 border-b-2 border-[#8c52ff]'
+                          : 'text-gray-400 hover:text-gray-200',
+                      )}
+                    >
+                      {p === 'basics' ? 'Basics' : p === 'style' ? 'Style & Frame' : 'Motion'}
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Duration</label>
-                  <div className="flex gap-1 flex-wrap">
-                    {[5, 10].map(d => (
-                      <button
-                        key={d}
-                        onClick={() => setDuration(d)}
-                        className={cn(
-                          'px-2 py-1 rounded text-xs border',
-                          duration === d ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
-                        )}
-                      >{d}s</button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1">Resolution</label>
-                  <div className="flex gap-1 flex-wrap">
-                    {['480p', '720p', '1080p'].map(res => (
-                      <button
-                        key={res}
-                        onClick={() => setResolution(res)}
-                        className={cn(
-                          'px-2 py-1 rounded text-xs border',
-                          resolution === res ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
-                        )}
-                      >{res}</button>
-                    ))}
-                  </div>
+
+                <div className="p-3 space-y-3">
+                  {videoPanel === 'basics' && (
+                    <>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Aspect ratio</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {ASPECT_OPTIONS.map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setRatio(opt.value)}
+                              className={cn(
+                                'flex items-center gap-1.5 px-2 py-1 rounded text-xs border',
+                                ratio === opt.value
+                                  ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                                  : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  'block border rounded-sm',
+                                  ratio === opt.value ? 'border-white' : 'border-gray-500',
+                                )}
+                                style={{ width: opt.w, height: opt.h }}
+                              />
+                              {opt.value}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Duration</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {DURATION_OPTIONS.map(d => (
+                            <button
+                              key={d}
+                              onClick={() => setDuration(d)}
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border',
+                                duration === d ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >{d}s</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Resolution</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {RESOLUTION_OPTIONS.map(res => (
+                            <button
+                              key={res}
+                              onClick={() => setResolution(res)}
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border',
+                                resolution === res ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >{res}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {videoPanel === 'style' && (
+                    <>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Style</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {STYLE_OPTIONS.map(s => (
+                            <button
+                              key={s}
+                              onClick={() => setStyle(s)}
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border',
+                                style === s ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >{s}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">
+                          Frame selection {files.length === 0 && <span className="normal-case text-gray-600">(upload an image)</span>}
+                        </label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {FRAME_OPTIONS.map(f => (
+                            <button
+                              key={f.value}
+                              disabled={files.length === 0}
+                              onClick={() => setFrame(f.value)}
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border disabled:opacity-40 disabled:cursor-not-allowed',
+                                frame === f.value && files.length > 0
+                                  ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                                  : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >{f.label}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {videoPanel === 'motion' && (
+                    <>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Motion</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {MOTION_OPTIONS.map(m => (
+                            <button
+                              key={m}
+                              onClick={() => setMotion(m)}
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border',
+                                motion === m ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >{m}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Motion intensity</label>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {INTENSITY_OPTIONS.map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setIntensity(opt.value)}
+                              className={cn(
+                                'px-2 py-1.5 rounded text-xs border text-left',
+                                intensity === opt.value ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                              )}
+                            >
+                              <div className="font-medium">{opt.value}</div>
+                              <div className={cn('text-[10px]', intensity === opt.value ? 'text-white/80' : 'text-gray-500')}>{opt.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -253,6 +401,16 @@ const ChatComposer: React.FC = () => {
                 >
                   <Paperclip className="w-4 h-4" />
                 </button>
+                <button
+                  onClick={() => audioRef.current?.click()}
+                  className={cn(
+                    'p-2 rounded-lg border text-gray-300',
+                    audioFile ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                  )}
+                  title="Upload voice / audio"
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
 
                 <div className="flex items-center gap-1 bg-gray-800/60 border border-gray-700/50 rounded-lg p-0.5">
                   {modeOptions.map(opt => {
@@ -278,30 +436,19 @@ const ChatComposer: React.FC = () => {
                 </div>
 
                 {mode === 'video' && (
-                  <>
-                    <button
-                      onClick={() => setShowVideoOpts(s => !s)}
-                      className={cn(
-                        'p-2 rounded-lg border text-gray-300',
-                        showVideoOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
-                      )}
-                      title="Video options"
-                    >
-                      <Settings2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => audioRef.current?.click()}
-                      className={cn(
-                        'p-2 rounded-lg border text-gray-300',
-                        audioFile ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
-                      )}
-                      title="Upload voice / audio"
-                    >
-                      <Mic className="w-4 h-4" />
-                    </button>
-                  </>
+                  <button
+                    onClick={() => setShowVideoOpts(s => !s)}
+                    className={cn(
+                      'p-2 rounded-lg border text-gray-300',
+                      showVideoOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                    )}
+                    title="Video options"
+                  >
+                    <Settings2 className="w-4 h-4" />
+                  </button>
                 )}
               </div>
+
 
               <Button
                 onClick={handleSend}
