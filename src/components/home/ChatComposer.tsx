@@ -24,6 +24,30 @@ const examples = [
   'Make a 9:16 video of waves at golden hour',
 ];
 
+const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
+  { value: '16:9', w: 28, h: 16 },
+  { value: '9:16', w: 16, h: 28 },
+  { value: '1:1',  w: 22, h: 22 },
+  { value: '4:3',  w: 26, h: 20 },
+  { value: '3:4',  w: 20, h: 26 },
+];
+const DURATION_OPTIONS = [2, 4, 5, 8, 10, 12, 15];
+const RESOLUTION_OPTIONS = ['480P', '720P', '1080P'];
+const STYLE_OPTIONS = ['Cinematic', 'Vintage', 'Anime', 'Documentary', 'Commercial', 'Music Video', 'Horror', 'Sci-Fi'];
+const MOTION_OPTIONS = ['Static', 'Pan', 'Zoom In', 'Zoom Out', 'Tracking', 'Crane', 'Handheld', 'Dolly'];
+const INTENSITY_OPTIONS = [
+  { value: 'Subtle',   desc: 'Minimal movement' },
+  { value: 'Moderate', desc: 'Balanced motion' },
+  { value: 'Dynamic',  desc: 'Strong movement' },
+];
+const FRAME_OPTIONS = [
+  { value: 'first', label: 'First frame' },
+  { value: 'last',  label: 'Last frame' },
+  { value: 'both',  label: 'First & last' },
+];
+
+type VideoPanel = 'basics' | 'style' | 'motion';
+
 const ChatComposer: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -33,9 +57,14 @@ const ChatComposer: React.FC = () => {
   const [mode, setMode] = useState<ChatMode>('auto');
   const [ratio, setRatio] = useState<string>('16:9');
   const [duration, setDuration] = useState<number>(5);
-  const [resolution, setResolution] = useState<string>('720p');
+  const [resolution, setResolution] = useState<string>('720P');
+  const [style, setStyle] = useState<string>('Cinematic');
+  const [motion, setMotion] = useState<string>('Static');
+  const [intensity, setIntensity] = useState<string>('Moderate');
+  const [frame, setFrame] = useState<string>('first');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
+  const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -44,7 +73,6 @@ const ChatComposer: React.FC = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Restore draft after auth
   useEffect(() => {
     try {
       const raw = localStorage.getItem('homepageChatDraft');
@@ -62,16 +90,24 @@ const ChatComposer: React.FC = () => {
     setFiles(prev => [...prev, ...list].slice(0, 3));
   };
 
+  const buildVideoPrompt = (base: string) => {
+    const tags: string[] = [];
+    if (style) tags.push(`Style: ${style}`);
+    if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
+    if (intensity) tags.push(`Motion intensity: ${intensity}`);
+    if (frame && files.length > 0) tags.push(`Frame: ${frame === 'first' ? 'use as first frame' : frame === 'last' ? 'use as last frame' : 'use as first and last frame'}`);
+    return tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
+  };
+
   const handleSend = async () => {
     if (!text.trim() && files.length === 0) return;
-    // Require auth for image/video; allow chat without auth? Require auth always for simplicity.
     if (!user) {
       localStorage.setItem('homepageChatDraft', JSON.stringify({ text, mode }));
       localStorage.setItem('authRedirectPath', '/');
       navigate('/signup');
       return;
     }
-    const t = text;
+    const t = mode === 'video' ? buildVideoPrompt(text) : text;
     const f = files;
     const a = audioFile;
     setText('');
