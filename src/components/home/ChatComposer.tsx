@@ -91,12 +91,12 @@ const ChatComposer: React.FC = () => {
     if (style) tags.push(`Style: ${style}`);
     if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
     if (intensity) tags.push(`Motion intensity: ${intensity}`);
-    if (frame && files.length > 0) tags.push(`Frame: ${frame === 'first' ? 'use as first frame' : frame === 'last' ? 'use as last frame' : 'use as first and last frame'}`);
     return tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
   };
 
   const handleSend = async () => {
-    if (!text.trim() && files.length === 0) return;
+    const hasInput = text.trim() || files.length > 0 || firstFrameFile || lastFrameFile;
+    if (!hasInput) return;
     if (!user) {
       localStorage.setItem('homepageChatDraft', JSON.stringify({ text, mode }));
       localStorage.setItem('authRedirectPath', '/');
@@ -106,10 +106,21 @@ const ChatComposer: React.FC = () => {
     const t = mode === 'video' ? buildVideoPrompt(text) : text;
     const f = files;
     const a = audioFile;
+    const ff = firstFrameFile;
+    const lf = lastFrameFile;
     setText('');
     setFiles([]);
     setAudioFile(null);
-    await send(t, f, mode, mode === 'video' ? { ratio, duration, resolution, audioFile: a } : undefined);
+    setFirstFrameFile(null);
+    setLastFrameFile(null);
+    await send(
+      t,
+      f,
+      mode,
+      mode === 'video'
+        ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
+        : undefined,
+    );
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
