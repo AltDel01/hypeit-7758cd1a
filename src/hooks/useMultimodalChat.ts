@@ -134,6 +134,8 @@ export function useMultimodalChat() {
     storageRefs: string[],
     routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean },
     audioRef?: string,
+    firstFrameRef?: string,
+    lastFrameRef?: string,
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -153,17 +155,28 @@ export function useMultimodalChat() {
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
       });
     } else {
-      const isLipsync = !!audioRef && storageRefs.length >= 1;
-      const isI2V = !isLipsync && storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false;
-      const isR2V = !isLipsync && storageRefs.length > 1;
-      const category = isLipsync ? 'video-lipsync' : isR2V ? 'video-r2v' : isI2V ? 'video-i2v' : 'video-t2v';
+      const hasFirst = !!firstFrameRef;
+      const hasLast = !!lastFrameRef;
+      const isKf2v = hasFirst && hasLast;
+      const isLipsync = !isKf2v && !!audioRef && (hasFirst || storageRefs.length >= 1);
+      const isI2V = !isKf2v && !isLipsync && (hasFirst || (storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false));
+      const isR2V = !isKf2v && !isLipsync && !isI2V && storageRefs.length > 1;
+      const category = isKf2v ? 'video-kf2v'
+        : isLipsync ? 'video-lipsync'
+        : isR2V ? 'video-r2v'
+        : isI2V ? 'video-i2v'
+        : 'video-t2v';
+
+      const firstFrame = firstFrameRef || (isI2V && !hasFirst ? storageRefs[0] : undefined);
+
       request = await createGenerationRequest({
         requestType: 'video',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
         category,
-        firstFrameUrl: (category === 'video-i2v' || category === 'video-lipsync') ? storageRefs[0] : undefined,
+        firstFrameUrl: (category === 'video-i2v' || category === 'video-kf2v' || category === 'video-lipsync') ? firstFrame : undefined,
+        lastFrameUrl: category === 'video-kf2v' ? lastFrameRef : undefined,
         referenceImageUrls: category === 'video-r2v' ? storageRefs : undefined,
         duration: routed.duration,
         resolution: routed.resolution,
@@ -171,6 +184,7 @@ export function useMultimodalChat() {
         lipsyncMode: isLipsync ? 'portrait' : undefined,
       });
     }
+
 
     if (!request) {
       update(assistantId, { kind: 'error', content: 'Could not start generation. Check your credits.' });
