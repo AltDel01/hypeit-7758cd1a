@@ -479,7 +479,54 @@ const ChatComposer: React.FC = () => {
   );
 };
 
-const MessageBubble: React.FC<{ m: ReturnType<typeof useMultimodalChat>['messages'][number] }> = ({ m }) => {
+const FrameSlot: React.FC<{
+  label: string;
+  file: File | null;
+  onPick: (f: File) => void;
+  onClear: () => void;
+}> = ({ label, file, onPick, onClear }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="relative">
+      <input
+        type="file"
+        ref={inputRef}
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onPick(f);
+          e.target.value = '';
+        }}
+      />
+      {file ? (
+        <div className="relative h-24 rounded-lg overflow-hidden border border-[#8c52ff]/50 bg-black">
+          <img src={URL.createObjectURL(file)} alt={label} className="w-full h-full object-cover" />
+          <div className="absolute inset-x-0 bottom-0 px-1.5 py-0.5 text-[10px] text-white bg-black/60 backdrop-blur-sm">
+            {label}
+          </div>
+          <button
+            onClick={onClear}
+            className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-white hover:bg-black/90"
+            title="Remove"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => inputRef.current?.click()}
+          className="h-24 w-full rounded-lg border border-dashed border-gray-700/60 hover:border-[#8c52ff] bg-gray-900/40 text-gray-400 hover:text-white text-xs flex flex-col items-center justify-center gap-1 transition-colors"
+        >
+          <Paperclip className="w-4 h-4" />
+          <span>{label}</span>
+          <span className="text-[9px] text-gray-600">Click to upload</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
   const isUser = m.role === 'user';
   return (
     <div className={cn('flex w-full mb-3', isUser ? 'justify-end' : 'justify-start')}>
