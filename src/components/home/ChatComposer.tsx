@@ -40,11 +40,6 @@ const INTENSITY_OPTIONS = [
   { value: 'Moderate', desc: 'Balanced motion' },
   { value: 'Dynamic',  desc: 'Strong movement' },
 ];
-const FRAME_OPTIONS = [
-  { value: 'first', label: 'First frame' },
-  { value: 'last',  label: 'Last frame' },
-  { value: 'both',  label: 'First & last' },
-];
 
 type VideoPanel = 'basics' | 'style' | 'motion';
 
