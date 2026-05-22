@@ -24,10 +24,11 @@ import {
 
 interface RequestBody {
   requestId: string;
-  category: 'video-t2v' | 'video-i2v' | 'video-r2v' | 'video-face-swap';
+  category: 'video-t2v' | 'video-i2v' | 'video-kf2v' | 'video-r2v' | 'video-face-swap';
   prompt: string;
   model: string;
   firstFrameUrl?: string;
+  lastFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
   faceImageUrl?: string;
