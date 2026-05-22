@@ -103,6 +103,18 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     baseCredits: 250,
     proCredits: 250,
   },
+  'video-kf2v': {
+    category: 'video-kf2v',
+    label: 'Keyframe to Video',
+    requestType: 'video',
+    provider: 'wan',
+    modelDefault: 'wan2.2-kf2v-plus',
+    modelPro: 'wan2.2-kf2v-plus',
+    enabled: true,
+    async: true,
+    baseCredits: 280,
+    proCredits: 280,
+  },
   'video-r2v': {
     category: 'video-r2v',
     label: 'Reference to Video',
