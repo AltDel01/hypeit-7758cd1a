@@ -346,6 +346,7 @@ interface DispatchParams {
   size?: string;
   referenceImageUrls?: string[];
   firstFrameUrl?: string;
+  lastFrameUrl?: string;
   sourceVideoUrl?: string;
   faceImageUrl?: string;
   duration?: number;
@@ -360,6 +361,7 @@ export function aspectRatioToSize(ratio: string): string {
     case "16:9": return "1280*720";
     case "9:16": return "720*1280";
     case "4:3": return "1024*768";
+    case "3:4": return "768*1024";
     case "21:9": return "1680*720";
     default: return "1024*1024";
   }
@@ -389,6 +391,7 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
   if (
     p.category === "video-t2v" ||
     p.category === "video-i2v" ||
+    p.category === "video-kf2v" ||
     p.category === "video-r2v" ||
     p.category === "video-face-swap"
   ) {
@@ -400,6 +403,7 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
         model: p.model,
         size: p.size,
         firstFrameUrl: p.firstFrameUrl,
+        lastFrameUrl: p.lastFrameUrl,
         referenceImageUrls: p.referenceImageUrls,
         sourceVideoUrl: p.sourceVideoUrl,
         faceImageUrl: p.faceImageUrl,
