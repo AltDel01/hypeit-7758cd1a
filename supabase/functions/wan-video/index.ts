@@ -24,10 +24,11 @@ import {
 
 interface RequestBody {
   requestId: string;
-  category: 'video-t2v' | 'video-i2v' | 'video-r2v' | 'video-face-swap';
+  category: 'video-t2v' | 'video-i2v' | 'video-kf2v' | 'video-r2v' | 'video-face-swap';
   prompt: string;
   model: string;
   firstFrameUrl?: string;
+  lastFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
   faceImageUrl?: string;
@@ -96,6 +97,7 @@ serve(async (req) => {
   };
 
   const firstFrameUrl = await resolveUrl(body.firstFrameUrl);
+  const lastFrameUrl = await resolveUrl(body.lastFrameUrl);
   const referenceImageUrls = await resolveUrls(body.referenceImageUrls);
   const sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
   const faceImageUrl = await resolveUrl(body.faceImageUrl);
@@ -121,6 +123,18 @@ serve(async (req) => {
       input = {
         prompt: body.prompt,
         media: [{ type: 'first_frame', url: firstFrameUrl }],
+      };
+      break;
+    case 'video-kf2v':
+      if (!firstFrameUrl || !lastFrameUrl) {
+        return genericError(400, 'KF2V requires both firstFrameUrl and lastFrameUrl');
+      }
+      input = {
+        prompt: body.prompt,
+        media: [
+          { type: 'first_frame', url: firstFrameUrl },
+          { type: 'last_frame', url: lastFrameUrl },
+        ],
       };
       break;
     case 'video-r2v':

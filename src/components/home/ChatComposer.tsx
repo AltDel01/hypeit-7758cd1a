@@ -40,11 +40,6 @@ const INTENSITY_OPTIONS = [
   { value: 'Moderate', desc: 'Balanced motion' },
   { value: 'Dynamic',  desc: 'Strong movement' },
 ];
-const FRAME_OPTIONS = [
-  { value: 'first', label: 'First frame' },
-  { value: 'last',  label: 'Last frame' },
-  { value: 'both',  label: 'First & last' },
-];
 
 type VideoPanel = 'basics' | 'style' | 'motion';
 
@@ -61,7 +56,8 @@ const ChatComposer: React.FC = () => {
   const [style, setStyle] = useState<string>('Cinematic');
   const [motion, setMotion] = useState<string>('Static');
   const [intensity, setIntensity] = useState<string>('Moderate');
-  const [frame, setFrame] = useState<string>('first');
+  const [firstFrameFile, setFirstFrameFile] = useState<File | null>(null);
+  const [lastFrameFile, setLastFrameFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
@@ -95,12 +91,12 @@ const ChatComposer: React.FC = () => {
     if (style) tags.push(`Style: ${style}`);
     if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
     if (intensity) tags.push(`Motion intensity: ${intensity}`);
-    if (frame && files.length > 0) tags.push(`Frame: ${frame === 'first' ? 'use as first frame' : frame === 'last' ? 'use as last frame' : 'use as first and last frame'}`);
     return tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
   };
 
   const handleSend = async () => {
-    if (!text.trim() && files.length === 0) return;
+    const hasInput = text.trim() || files.length > 0 || firstFrameFile || lastFrameFile;
+    if (!hasInput) return;
     if (!user) {
       localStorage.setItem('homepageChatDraft', JSON.stringify({ text, mode }));
       localStorage.setItem('authRedirectPath', '/');
@@ -110,10 +106,21 @@ const ChatComposer: React.FC = () => {
     const t = mode === 'video' ? buildVideoPrompt(text) : text;
     const f = files;
     const a = audioFile;
+    const ff = firstFrameFile;
+    const lf = lastFrameFile;
     setText('');
     setFiles([]);
     setAudioFile(null);
-    await send(t, f, mode, mode === 'video' ? { ratio, duration, resolution, audioFile: a } : undefined);
+    setFirstFrameFile(null);
+    setLastFrameFile(null);
+    await send(
+      t,
+      f,
+      mode,
+      mode === 'video'
+        ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
+        : undefined,
+    );
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -301,23 +308,25 @@ const ChatComposer: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">
-                          Frame selection {files.length === 0 && <span className="normal-case text-gray-600">(upload an image)</span>}
+                          Keyframes <span className="normal-case text-gray-600">(upload 1 image = animate from it · upload both = interpolate between them)</span>
                         </label>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {FRAME_OPTIONS.map(f => (
-                            <button
-                              key={f.value}
-                              disabled={files.length === 0}
-                              onClick={() => setFrame(f.value)}
-                              className={cn(
-                                'px-2.5 py-1 rounded text-xs border disabled:opacity-40 disabled:cursor-not-allowed',
-                                frame === f.value && files.length > 0
-                                  ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
-                                  : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
-                              )}
-                            >{f.label}</button>
-                          ))}
+                        <div className="grid grid-cols-2 gap-2">
+                          <FrameSlot
+                            label="First frame"
+                            file={firstFrameFile}
+                            onPick={setFirstFrameFile}
+                            onClear={() => setFirstFrameFile(null)}
+                          />
+                          <FrameSlot
+                            label="Last frame"
+                            file={lastFrameFile}
+                            onPick={setLastFrameFile}
+                            onClear={() => setLastFrameFile(null)}
+                          />
                         </div>
+                        {firstFrameFile && lastFrameFile && (
+                          <p className="mt-1.5 text-[10px] text-[#b616d6]">Keyframe-to-video mode (wan2.2-kf2v-plus)</p>
+                        )}
                       </div>
                     </>
                   )}
@@ -467,6 +476,54 @@ const ChatComposer: React.FC = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+const FrameSlot: React.FC<{
+  label: string;
+  file: File | null;
+  onPick: (f: File) => void;
+  onClear: () => void;
+}> = ({ label, file, onPick, onClear }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="relative">
+      <input
+        type="file"
+        ref={inputRef}
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onPick(f);
+          e.target.value = '';
+        }}
+      />
+      {file ? (
+        <div className="relative h-24 rounded-lg overflow-hidden border border-[#8c52ff]/50 bg-black">
+          <img src={URL.createObjectURL(file)} alt={label} className="w-full h-full object-cover" />
+          <div className="absolute inset-x-0 bottom-0 px-1.5 py-0.5 text-[10px] text-white bg-black/60 backdrop-blur-sm">
+            {label}
+          </div>
+          <button
+            onClick={onClear}
+            className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-white hover:bg-black/90"
+            title="Remove"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => inputRef.current?.click()}
+          className="h-24 w-full rounded-lg border border-dashed border-gray-700/60 hover:border-[#8c52ff] bg-gray-900/40 text-gray-400 hover:text-white text-xs flex flex-col items-center justify-center gap-1 transition-colors"
+        >
+          <Paperclip className="w-4 h-4" />
+          <span>{label}</span>
+          <span className="text-[9px] text-gray-600">Click to upload</span>
+        </button>
+      )}
+    </div>
   );
 };
 
