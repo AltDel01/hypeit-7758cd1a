@@ -131,6 +131,7 @@ export async function createGenerationRequest(
         prompt: params.prompt,
         referenceImageUrls: params.referenceImageUrls || (params.referenceImageUrl ? [params.referenceImageUrl] : undefined),
         firstFrameUrl: params.firstFrameUrl,
+        lastFrameUrl: params.lastFrameUrl,
         sourceVideoUrl: params.sourceVideoUrl,
         faceImageUrl: params.faceImageUrl,
         size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
