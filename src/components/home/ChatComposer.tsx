@@ -56,7 +56,8 @@ const ChatComposer: React.FC = () => {
   const [style, setStyle] = useState<string>('Cinematic');
   const [motion, setMotion] = useState<string>('Static');
   const [intensity, setIntensity] = useState<string>('Moderate');
-  const [frame, setFrame] = useState<string>('first');
+  const [firstFrameFile, setFirstFrameFile] = useState<File | null>(null);
+  const [lastFrameFile, setLastFrameFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
