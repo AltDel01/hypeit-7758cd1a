@@ -245,48 +245,61 @@ export function useMultimodalChat() {
     text: string,
     attachments: File[],
     modeOverride: ChatMode = 'auto',
-    videoOpts?: { ratio?: string; duration?: number; resolution?: string; audioFile?: File | null },
+    videoOpts?: {
+      ratio?: string;
+      duration?: number;
+      resolution?: string;
+      audioFile?: File | null;
+      firstFrameFile?: File | null;
+      lastFrameFile?: File | null;
+    },
   ) => {
-    if (!text.trim() && attachments.length === 0) return;
+    if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
 
     // 1. Append user message
+    const allPreviews: File[] = [
+      ...attachments,
+      ...(videoOpts?.firstFrameFile ? [videoOpts.firstFrameFile] : []),
+      ...(videoOpts?.lastFrameFile ? [videoOpts.lastFrameFile] : []),
+    ];
     const userMsg: ChatMessage = {
       id: uid(),
       role: 'user',
       kind: 'text',
       content: text,
-      attachments: attachments.map(f => ({ name: f.name, previewUrl: URL.createObjectURL(f) })),
+      attachments: allPreviews.map(f => ({ name: f.name, previewUrl: URL.createObjectURL(f) })),
     };
     setMessages(prev => [...prev, userMsg]);
 
-    // 2. Upload attachments to storage if signed in (needed for image/video)
+    const uploadFile = async (file: File, prefix = ''): Promise<string | undefined> => {
+      if (!user) return undefined;
+      try {
+        const fileName = `${user.id}/${prefix}${Date.now()}-${file.name}`;
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file);
+        if (error || !data) return undefined;
+        return `storage:product-images/${data.path}`;
+      } catch (e) { console.error('upload fail', e); return undefined; }
+    };
+
+    // 2. Upload attachments (paperclip)
     const storageRefs: string[] = [];
     if (user && attachments.length) {
       for (const file of attachments) {
-        try {
-          const fileName = `${user.id}/${Date.now()}-${file.name}`;
-          const { data, error } = await supabase.storage
-            .from('product-images')
-            .upload(fileName, file);
-          if (error || !data) continue;
-          storageRefs.push(`storage:product-images/${data.path}`);
-        } catch (e) { console.error('upload fail', e); }
+        const r = await uploadFile(file);
+        if (r) storageRefs.push(r);
       }
     }
 
-    // 2b. Upload optional audio (voice) file for video mode
+    // 2b. Upload optional audio + keyframe files for video mode
     let audioRef: string | undefined;
-    if (user && videoOpts?.audioFile) {
-      try {
-        const f = videoOpts.audioFile;
-        const fileName = `${user.id}/audio-${Date.now()}-${f.name}`;
-        const { data, error } = await supabase.storage
-          .from('product-images')
-          .upload(fileName, f);
-        if (!error && data) audioRef = `storage:product-images/${data.path}`;
-      } catch (e) { console.error('audio upload fail', e); }
-    }
+    let firstFrameRef: string | undefined;
+    let lastFrameRef: string | undefined;
+    if (user && videoOpts?.audioFile) audioRef = await uploadFile(videoOpts.audioFile, 'audio-');
+    if (user && videoOpts?.firstFrameFile) firstFrameRef = await uploadFile(videoOpts.firstFrameFile, 'first-');
+    if (user && videoOpts?.lastFrameFile) lastFrameRef = await uploadFile(videoOpts.lastFrameFile, 'last-');
 
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
@@ -320,6 +333,9 @@ export function useMultimodalChat() {
       }
     }
 
+    // If user provided keyframes, force video intent
+    if (firstFrameRef || lastFrameRef) intent = 'video';
+
     // Merge explicit video options (user-selected) over routed values
     if (intent === 'video' && videoOpts) {
       if (videoOpts.ratio) routed.ratio = videoOpts.ratio;
@@ -350,6 +366,8 @@ export function useMultimodalChat() {
             storageRefs,
             routed,
             audioRef,
+            firstFrameRef,
+            lastFrameRef,
           );
         }
       }
