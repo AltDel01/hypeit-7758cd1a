@@ -308,23 +308,25 @@ const ChatComposer: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">
-                          Frame selection {files.length === 0 && <span className="normal-case text-gray-600">(upload an image)</span>}
+                          Keyframes <span className="normal-case text-gray-600">(upload 1 image = animate from it · upload both = interpolate between them)</span>
                         </label>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {FRAME_OPTIONS.map(f => (
-                            <button
-                              key={f.value}
-                              disabled={files.length === 0}
-                              onClick={() => setFrame(f.value)}
-                              className={cn(
-                                'px-2.5 py-1 rounded text-xs border disabled:opacity-40 disabled:cursor-not-allowed',
-                                frame === f.value && files.length > 0
-                                  ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
-                                  : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
-                              )}
-                            >{f.label}</button>
-                          ))}
+                        <div className="grid grid-cols-2 gap-2">
+                          <FrameSlot
+                            label="First frame"
+                            file={firstFrameFile}
+                            onPick={setFirstFrameFile}
+                            onClear={() => setFirstFrameFile(null)}
+                          />
+                          <FrameSlot
+                            label="Last frame"
+                            file={lastFrameFile}
+                            onPick={setLastFrameFile}
+                            onClear={() => setLastFrameFile(null)}
+                          />
                         </div>
+                        {firstFrameFile && lastFrameFile && (
+                          <p className="mt-1.5 text-[10px] text-[#b616d6]">Keyframe-to-video mode (wan2.2-kf2v-plus)</p>
+                        )}
                       </div>
                     </>
                   )}
