@@ -37,8 +37,9 @@ export interface CreateGenerationRequestParams {
   creditsUsed?: number;
   /** Optional: explicit category. Falls back to image-gen / video-edit-manual. */
   category?: GenerationCategory;
-  /** Optional: extra inputs for video modes (i2v, r2v, face-swap, lipsync). */
+  /** Optional: extra inputs for video modes (i2v, kf2v, r2v, face-swap, lipsync). */
   firstFrameUrl?: string;
+  lastFrameUrl?: string;
   referenceImageUrls?: string[];
   sourceVideoUrl?: string;
   /** Optional video params */
