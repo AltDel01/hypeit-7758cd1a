@@ -12,6 +12,7 @@ export type GenerationCategory =
   | 'image-edit-decompose'
   | 'video-t2v'
   | 'video-i2v'
+  | 'video-kf2v'
   | 'video-r2v'
   | 'video-face-swap'
   | 'video-lipsync'
