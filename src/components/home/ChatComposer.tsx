@@ -527,6 +527,7 @@ const FrameSlot: React.FC<{
   );
 };
 
+const MessageBubble: React.FC<{ m: ReturnType<typeof useMultimodalChat>['messages'][number] }> = ({ m }) => {
   const isUser = m.role === 'user';
   return (
     <div className={cn('flex w-full mb-3', isUser ? 'justify-end' : 'justify-start')}>
