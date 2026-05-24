@@ -137,6 +137,7 @@ const ChatComposer: React.FC = () => {
   };
 
   return (
+    <>
     <section className="relative min-h-[90vh] flex flex-col items-center justify-start px-3 md:px-4 pt-14 pb-4 md:py-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
       <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px]" />
