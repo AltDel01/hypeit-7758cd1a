@@ -356,6 +356,7 @@ interface DispatchParams {
   resolution?: string;
   audioUrl?: string;
   lipsyncMode?: 'portrait' | 'video';
+  maskUrl?: string;
 }
 
 export function aspectRatioToSize(ratio: string): string {
