@@ -68,6 +68,18 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     baseCredits: 80,
     proCredits: 80,
   },
+  'image-inpaint': {
+    category: 'image-inpaint',
+    label: 'Mask Inpaint / Erase',
+    requestType: 'image',
+    provider: 'qwen',
+    modelDefault: 'wanx2.1-imageedit',
+    modelPro: 'wanx2.1-imageedit',
+    enabled: true,
+    async: true,
+    baseCredits: 80,
+    proCredits: 80,
+  },
   'image-edit-decompose': {
     category: 'image-edit-decompose',
     label: 'Decompose Editing',
