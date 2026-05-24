@@ -136,6 +136,7 @@ export function useMultimodalChat() {
     audioRef?: string,
     firstFrameRef?: string,
     lastFrameRef?: string,
+    maskRef?: string,
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -146,13 +147,15 @@ export function useMultimodalChat() {
     let request: GenerationRequest | null = null;
 
     if (intent === 'image') {
+      const isInpaint = !!maskRef && storageRefs.length >= 1;
       request = await createGenerationRequest({
         requestType: 'image',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
-        category: storageRefs.length ? 'image-edit-instruction' : 'image-gen',
+        category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
+        maskUrl: isInpaint ? maskRef : undefined,
       });
     } else {
       const hasFirst = !!firstFrameRef;
