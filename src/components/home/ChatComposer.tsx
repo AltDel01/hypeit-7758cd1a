@@ -111,11 +111,13 @@ const ChatComposer: React.FC = () => {
     const a = audioFile;
     const ff = firstFrameFile;
     const lf = lastFrameFile;
+    const mf = maskFile;
     setText('');
     setFiles([]);
     setAudioFile(null);
     setFirstFrameFile(null);
     setLastFrameFile(null);
+    setMaskFile(null);
     await send(
       t,
       f,
@@ -123,6 +125,7 @@ const ChatComposer: React.FC = () => {
       mode === 'video'
         ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
         : undefined,
+      mode === 'image' && mf ? { maskFile: mf } : undefined,
     );
   };
 
