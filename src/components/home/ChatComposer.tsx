@@ -60,6 +60,8 @@ const ChatComposer: React.FC = () => {
   const [firstFrameFile, setFirstFrameFile] = useState<File | null>(null);
   const [lastFrameFile, setLastFrameFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [maskFile, setMaskFile] = useState<File | null>(null);
+  const [inpaintOpen, setInpaintOpen] = useState(false);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
   const fileRef = useRef<HTMLInputElement>(null);
