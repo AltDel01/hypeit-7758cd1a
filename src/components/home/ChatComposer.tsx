@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2, Mic, Settings2,
+  Film, MessageSquare, Wand2, Trash2, Mic, Settings2, Eraser,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMultimodalChat, ChatMode } from '@/hooks/useMultimodalChat';
+import InpaintDialog from './InpaintDialog';
 import ReactMarkdown from 'react-markdown';
 
 const modeOptions: { id: ChatMode; label: string; icon: any }[] = [
