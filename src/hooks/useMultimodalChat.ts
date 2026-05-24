@@ -256,6 +256,9 @@ export function useMultimodalChat() {
       firstFrameFile?: File | null;
       lastFrameFile?: File | null;
     },
+    imageOpts?: {
+      maskFile?: File | null;
+    },
   ) => {
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
