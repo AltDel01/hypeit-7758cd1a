@@ -504,6 +504,7 @@ const ChatComposer: React.FC = () => {
         image={files[0] || null}
         onApply={(mask) => setMaskFile(mask)}
       />
+    </>
   );
 };
 
