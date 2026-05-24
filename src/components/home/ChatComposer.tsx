@@ -187,6 +187,21 @@ const ChatComposer: React.FC = () => {
                     >
                       <X className="w-3 h-3" />
                     </button>
+                    {mode === 'image' && files.length === 1 && (
+                      <button
+                        onClick={() => setInpaintOpen(true)}
+                        className={cn(
+                          'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md text-[10px] inline-flex items-center gap-1 border backdrop-blur-sm',
+                          maskFile
+                            ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                            : 'bg-black/70 text-white border-white/20 hover:bg-black/90',
+                        )}
+                        title="Erase / inpaint a region"
+                      >
+                        <Eraser className="w-3 h-3" />
+                        {maskFile ? 'Mask set' : 'Erase area'}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
