@@ -303,9 +303,14 @@ export function useMultimodalChat() {
     let audioRef: string | undefined;
     let firstFrameRef: string | undefined;
     let lastFrameRef: string | undefined;
+    let maskRef: string | undefined;
     if (user && videoOpts?.audioFile) audioRef = await uploadFile(videoOpts.audioFile, 'audio-');
     if (user && videoOpts?.firstFrameFile) firstFrameRef = await uploadFile(videoOpts.firstFrameFile, 'first-');
     if (user && videoOpts?.lastFrameFile) lastFrameRef = await uploadFile(videoOpts.lastFrameFile, 'last-');
+    if (user && imageOpts?.maskFile) maskRef = await uploadFile(imageOpts.maskFile, 'mask-');
+
+    // If a mask is provided, force image intent (inpaint)
+    const hasMask = !!maskRef;
 
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
