@@ -9,6 +9,7 @@
 export type GenerationCategory =
   | 'image-gen'
   | 'image-edit-instruction'
+  | 'image-inpaint'
   | 'image-edit-decompose'
   | 'video-t2v'
   | 'video-i2v'
@@ -64,6 +65,18 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     modelPro: 'qwen-image-2.0-pro',
     enabled: true,
     async: false,
+    baseCredits: 80,
+    proCredits: 80,
+  },
+  'image-inpaint': {
+    category: 'image-inpaint',
+    label: 'Mask Inpaint / Erase',
+    requestType: 'image',
+    provider: 'qwen',
+    modelDefault: 'wanx2.1-imageedit',
+    modelPro: 'wanx2.1-imageedit',
+    enabled: true,
+    async: true,
     baseCredits: 80,
     proCredits: 80,
   },

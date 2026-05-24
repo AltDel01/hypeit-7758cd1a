@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2, Mic, Settings2,
+  Film, MessageSquare, Wand2, Trash2, Mic, Settings2, Eraser,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMultimodalChat, ChatMode } from '@/hooks/useMultimodalChat';
+import InpaintDialog from './InpaintDialog';
 import ReactMarkdown from 'react-markdown';
 
 const modeOptions: { id: ChatMode; label: string; icon: any }[] = [
@@ -59,6 +60,8 @@ const ChatComposer: React.FC = () => {
   const [firstFrameFile, setFirstFrameFile] = useState<File | null>(null);
   const [lastFrameFile, setLastFrameFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [maskFile, setMaskFile] = useState<File | null>(null);
+  const [inpaintOpen, setInpaintOpen] = useState(false);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -108,11 +111,13 @@ const ChatComposer: React.FC = () => {
     const a = audioFile;
     const ff = firstFrameFile;
     const lf = lastFrameFile;
+    const mf = maskFile;
     setText('');
     setFiles([]);
     setAudioFile(null);
     setFirstFrameFile(null);
     setLastFrameFile(null);
+    setMaskFile(null);
     await send(
       t,
       f,
@@ -120,6 +125,7 @@ const ChatComposer: React.FC = () => {
       mode === 'video'
         ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
         : undefined,
+      mode === 'image' && mf ? { maskFile: mf } : undefined,
     );
   };
 
@@ -131,6 +137,7 @@ const ChatComposer: React.FC = () => {
   };
 
   return (
+    <>
     <section className="relative min-h-[90vh] flex flex-col items-center justify-start px-3 md:px-4 pt-14 pb-4 md:py-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black" />
       <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px]" />
@@ -181,6 +188,21 @@ const ChatComposer: React.FC = () => {
                     >
                       <X className="w-3 h-3" />
                     </button>
+                    {mode === 'image' && files.length === 1 && (
+                      <button
+                        onClick={() => setInpaintOpen(true)}
+                        className={cn(
+                          'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md text-[10px] inline-flex items-center gap-1 border backdrop-blur-sm',
+                          maskFile
+                            ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                            : 'bg-black/70 text-white border-white/20 hover:bg-black/90',
+                        )}
+                        title="Erase / inpaint a region"
+                      >
+                        <Eraser className="w-3 h-3" />
+                        {maskFile ? 'Mask set' : 'Erase area'}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -475,7 +497,14 @@ const ChatComposer: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+      <InpaintDialog
+        open={inpaintOpen}
+        onOpenChange={setInpaintOpen}
+        image={files[0] || null}
+        onApply={(mask) => setMaskFile(mask)}
+      />
+    </>
   );
 };
 

@@ -136,6 +136,7 @@ export function useMultimodalChat() {
     audioRef?: string,
     firstFrameRef?: string,
     lastFrameRef?: string,
+    maskRef?: string,
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -146,13 +147,15 @@ export function useMultimodalChat() {
     let request: GenerationRequest | null = null;
 
     if (intent === 'image') {
+      const isInpaint = !!maskRef && storageRefs.length >= 1;
       request = await createGenerationRequest({
         requestType: 'image',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
-        category: storageRefs.length ? 'image-edit-instruction' : 'image-gen',
+        category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
+        maskUrl: isInpaint ? maskRef : undefined,
       });
     } else {
       const hasFirst = !!firstFrameRef;
@@ -253,6 +256,9 @@ export function useMultimodalChat() {
       firstFrameFile?: File | null;
       lastFrameFile?: File | null;
     },
+    imageOpts?: {
+      maskFile?: File | null;
+    },
   ) => {
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
@@ -297,9 +303,14 @@ export function useMultimodalChat() {
     let audioRef: string | undefined;
     let firstFrameRef: string | undefined;
     let lastFrameRef: string | undefined;
+    let maskRef: string | undefined;
     if (user && videoOpts?.audioFile) audioRef = await uploadFile(videoOpts.audioFile, 'audio-');
     if (user && videoOpts?.firstFrameFile) firstFrameRef = await uploadFile(videoOpts.firstFrameFile, 'first-');
     if (user && videoOpts?.lastFrameFile) lastFrameRef = await uploadFile(videoOpts.lastFrameFile, 'last-');
+    if (user && imageOpts?.maskFile) maskRef = await uploadFile(imageOpts.maskFile, 'mask-');
+
+    // If a mask is provided, force image intent (inpaint)
+    const hasMask = !!maskRef;
 
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
@@ -335,6 +346,8 @@ export function useMultimodalChat() {
 
     // If user provided keyframes, force video intent
     if (firstFrameRef || lastFrameRef) intent = 'video';
+    // If user provided a mask, force image intent (inpaint)
+    if (hasMask) intent = 'image';
 
     // Merge explicit video options (user-selected) over routed values
     if (intent === 'video' && videoOpts) {
@@ -368,6 +381,7 @@ export function useMultimodalChat() {
             audioRef,
             firstFrameRef,
             lastFrameRef,
+            maskRef,
           );
         }
       }

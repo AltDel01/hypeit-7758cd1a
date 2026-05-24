@@ -50,6 +50,8 @@ export interface CreateGenerationRequestParams {
   audioUrl?: string;
   /** Lip sync: 'portrait' (image+audio→talking) or 'video' (video+audio→relipsynced) */
   lipsyncMode?: 'portrait' | 'video';
+  /** Mask inpaint: storage:bucket/path or https url for the binary mask PNG */
+  maskUrl?: string;
 }
 
 /**
@@ -139,6 +141,7 @@ export async function createGenerationRequest(
         resolution: params.resolution,
         audioUrl: params.audioUrl,
         lipsyncMode: params.lipsyncMode,
+        maskUrl: params.maskUrl,
       }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
@@ -353,6 +356,7 @@ interface DispatchParams {
   resolution?: string;
   audioUrl?: string;
   lipsyncMode?: 'portrait' | 'video';
+  maskUrl?: string;
 }
 
 export function aspectRatioToSize(ratio: string): string {
@@ -385,6 +389,20 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
       },
     });
     if (error) console.error("[qwen-image] invoke error", error);
+    return;
+  }
+
+  if (p.category === "image-inpaint") {
+    const { error } = await supabase.functions.invoke("dashscope-inpaint", {
+      body: {
+        requestId: p.requestId,
+        prompt: p.prompt,
+        model: p.model,
+        baseImageUrl: p.referenceImageUrls?.[0],
+        maskImageUrl: p.maskUrl,
+      },
+    });
+    if (error) console.error("[dashscope-inpaint] invoke error", error);
     return;
   }
 
