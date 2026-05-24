@@ -392,6 +392,20 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
     return;
   }
 
+  if (p.category === "image-inpaint") {
+    const { error } = await supabase.functions.invoke("dashscope-inpaint", {
+      body: {
+        requestId: p.requestId,
+        prompt: p.prompt,
+        model: p.model,
+        baseImageUrl: p.referenceImageUrls?.[0],
+        maskImageUrl: p.maskUrl,
+      },
+    });
+    if (error) console.error("[dashscope-inpaint] invoke error", error);
+    return;
+  }
+
   if (
     p.category === "video-t2v" ||
     p.category === "video-i2v" ||
