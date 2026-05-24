@@ -50,6 +50,8 @@ export interface CreateGenerationRequestParams {
   audioUrl?: string;
   /** Lip sync: 'portrait' (image+audio→talking) or 'video' (video+audio→relipsynced) */
   lipsyncMode?: 'portrait' | 'video';
+  /** Mask inpaint: storage:bucket/path or https url for the binary mask PNG */
+  maskUrl?: string;
 }
 
 /**
