@@ -141,6 +141,7 @@ export async function createGenerationRequest(
         resolution: params.resolution,
         audioUrl: params.audioUrl,
         lipsyncMode: params.lipsyncMode,
+        maskUrl: params.maskUrl,
       }).catch((e) => console.error("[auto-fulfill] dispatch failed", e));
     }
 
