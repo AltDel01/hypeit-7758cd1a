@@ -9,6 +9,7 @@
 export type GenerationCategory =
   | 'image-gen'
   | 'image-edit-instruction'
+  | 'image-inpaint'
   | 'image-edit-decompose'
   | 'video-t2v'
   | 'video-i2v'
