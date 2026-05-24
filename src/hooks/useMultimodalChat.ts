@@ -381,6 +381,7 @@ export function useMultimodalChat() {
             audioRef,
             firstFrameRef,
             lastFrameRef,
+            maskRef,
           );
         }
       }
