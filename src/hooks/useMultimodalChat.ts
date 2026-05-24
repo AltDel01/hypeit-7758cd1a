@@ -346,6 +346,8 @@ export function useMultimodalChat() {
 
     // If user provided keyframes, force video intent
     if (firstFrameRef || lastFrameRef) intent = 'video';
+    // If user provided a mask, force image intent (inpaint)
+    if (hasMask) intent = 'image';
 
     // Merge explicit video options (user-selected) over routed values
     if (intent === 'video' && videoOpts) {
