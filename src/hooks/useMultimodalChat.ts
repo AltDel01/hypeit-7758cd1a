@@ -283,10 +283,13 @@ export function useMultimodalChat() {
       try {
         const fileName = `${user.id}/${prefix}${Date.now()}-${file.name}`;
         const { data, error } = await supabase.storage
-          .from('product-images')
+          .from('Product Images')
           .upload(fileName, file);
-        if (error || !data) return undefined;
-        return `storage:product-images/${data.path}`;
+        if (error || !data) {
+          console.error('upload error', error);
+          return undefined;
+        }
+        return `storage:Product Images/${data.path}`;
       } catch (e) { console.error('upload fail', e); return undefined; }
     };
 
