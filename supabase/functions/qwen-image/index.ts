@@ -67,12 +67,33 @@ serve(async (req) => {
     return genericError(404, 'Request not found');
   }
 
+  // Resolve storage: refs to signed HTTPS URLs DashScope can fetch
+  const resolveUrl = async (u: string): Promise<string | undefined> => {
+    if (!u.startsWith('storage:')) return u;
+    const rest = u.slice('storage:'.length);
+    const slash = rest.indexOf('/');
+    if (slash < 0) return undefined;
+    const bucket = rest.slice(0, slash);
+    const path = rest.slice(slash + 1);
+    const { data, error } = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+    if (error || !data?.signedUrl) {
+      console.error('[qwen-image] sign url failed', bucket, path, error);
+      return undefined;
+    }
+    return data.signedUrl;
+  };
+
   // Build DashScope payload
   // Multimodal generation endpoint supports both text->image and edit (with image refs)
   const content: any[] = [];
   if (body.mode === 'edit' && body.referenceImageUrls) {
     for (const url of body.referenceImageUrls.slice(0, 3)) {
-      content.push({ image: url });
+      const resolved = await resolveUrl(url);
+      if (!resolved) {
+        await markFailed(admin, body.requestId, body.model);
+        return genericError(400, 'Could not resolve reference image');
+      }
+      content.push({ image: resolved });
     }
   }
   content.push({ text: body.prompt });
