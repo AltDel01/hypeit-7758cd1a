@@ -178,10 +178,10 @@ serve(async (req) => {
         const buf = new Uint8Array(await imgRes.arrayBuffer());
         const path = `${userId}/${body.requestId}.png`;
         const { error: upErr } = await admin.storage
-          .from('Generated Images')
+          .from('generated-images')
           .upload(path, buf, { contentType: 'image/png', upsert: true });
         if (!upErr) {
-          storedUrl = `storage:Generated Images/${path}`;
+          storedUrl = `storage:generated-images/${path}`;
         } else {
           console.error('[dashscope-inpaint] storage upload failed', upErr);
         }

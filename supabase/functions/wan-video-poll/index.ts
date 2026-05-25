@@ -107,10 +107,10 @@ serve(async (req) => {
           const buf = new Uint8Array(await vRes.arrayBuffer());
           const path = `${userId}/${body.requestId}.mp4`;
           const { error: upErr } = await admin.storage
-            .from('Generated Images')
+            .from('generated-images')
             .upload(path, buf, { contentType: 'video/mp4', upsert: true });
           if (!upErr) {
-            storedUrl = `storage:Generated Images/${path}`;
+            storedUrl = `storage:generated-images/${path}`;
           }
         }
       } catch (e) {
