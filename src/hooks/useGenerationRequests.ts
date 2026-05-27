@@ -102,12 +102,39 @@ export const useGenerationRequests = (userId: string | undefined) => {
     // Start polling after initial delay
     timeoutId = setTimeout(poll, pollInterval);
 
+    // Background poll for in-progress wan video requests (catches results
+    // when user navigates away from the chat composer before completion).
+    const videoPollInterval = setInterval(async () => {
+      try {
+        const stuck = await fetchUserGenerationRequests();
+        const pending = stuck.filter(
+          (r) =>
+            r.request_type === 'video' &&
+            (r as any).auto_provider === 'wan' &&
+            (r as any).provider_task_id &&
+            (r.status === 'in-progress' || r.status === 'new') &&
+            !r.result_url
+        );
+        for (const r of pending) {
+          try {
+            await pollVideoRequest(r.id);
+          } catch (e) {
+            console.warn('[video-poll] failed for', r.id, e);
+          }
+        }
+      } catch (e) {
+        console.warn('[video-poll] scan failed', e);
+      }
+    }, 10000);
+
     return () => {
       isActive = false;
       clearTimeout(timeoutId);
+      clearInterval(videoPollInterval);
       supabase.removeChannel(channel);
     };
   }, [userId]);
+
 
   return {
     requests,
