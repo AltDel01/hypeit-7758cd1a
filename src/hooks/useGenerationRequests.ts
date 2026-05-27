@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  GenerationRequest, 
-  fetchUserGenerationRequests 
+import {
+  GenerationRequest,
+  fetchUserGenerationRequests,
+  pollVideoRequest,
 } from '@/services/generationRequestService';
+
 
 export const useGenerationRequests = (userId: string | undefined) => {
   const [requests, setRequests] = useState<GenerationRequest[]>([]);
