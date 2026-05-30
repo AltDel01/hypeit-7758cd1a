@@ -25,6 +25,8 @@ interface RequestBody {
   prompt: string;
   model: string; // e.g. 'qwen-image-2.0' or 'qwen-image-2.0-pro'
   size?: string; // e.g. '1024*1024'
+  n?: number; // number of images to generate (1-4)
+  promptExtend?: boolean; // auto-enhance the prompt
   referenceImageUrls?: string[]; // for edit
 }
 
