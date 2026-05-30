@@ -542,6 +542,7 @@ const ChatComposer: React.FC = () => {
                         onClick={() => {
                           setMode(opt.id);
                           if (opt.id === 'video') setShowVideoOpts(true);
+                          if (opt.id === 'image') setShowImageOpts(true);
                         }}
                         className={cn(
                           'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all',
