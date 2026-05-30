@@ -52,6 +52,12 @@ export interface CreateGenerationRequestParams {
   lipsyncMode?: 'portrait' | 'video';
   /** Mask inpaint: storage:bucket/path or https url for the binary mask PNG */
   maskUrl?: string;
+  /** Image gen: explicit DashScope size override (e.g. '1280*720') */
+  size?: string;
+  /** Image gen: number of images to generate (1-4) */
+  imageCount?: number;
+  /** Image gen: auto-enhance the prompt */
+  promptExtend?: boolean;
 }
 
 /**
@@ -78,8 +84,10 @@ export async function createGenerationRequest(
     const userName = profile?.display_name || user.email?.split("@")[0] || "Unknown";
     const userEmail = profile?.email || user.email || "";
 
-    // Check credit balance before inserting
-    const creditsUsed = params.creditsUsed || 50;
+    // Check credit balance before inserting. Image batches cost per image.
+    const imageCount = Math.min(4, Math.max(1, Math.floor(params.imageCount ?? 1)));
+    const baseCredits = params.creditsUsed || 50;
+    const creditsUsed = params.requestType === "image" ? baseCredits * imageCount : baseCredits;
     const remaining = (profile as any)?.monthly_generation_limit 
       ? ((profile as any).monthly_generation_limit - ((profile as any).generations_this_month || 0))
       : 500;
@@ -136,7 +144,9 @@ export async function createGenerationRequest(
         lastFrameUrl: params.lastFrameUrl,
         sourceVideoUrl: params.sourceVideoUrl,
         faceImageUrl: params.faceImageUrl,
-        size: params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined,
+        size: params.size || (params.aspectRatio ? aspectRatioToSize(params.aspectRatio) : undefined),
+        imageCount,
+        promptExtend: params.promptExtend,
         duration: params.duration,
         resolution: params.resolution,
         audioUrl: params.audioUrl,
@@ -357,6 +367,8 @@ interface DispatchParams {
   audioUrl?: string;
   lipsyncMode?: 'portrait' | 'video';
   maskUrl?: string;
+  imageCount?: number;
+  promptExtend?: boolean;
 }
 
 export function aspectRatioToSize(ratio: string): string {
@@ -385,6 +397,8 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
         prompt: p.prompt,
         model: p.model,
         size: p.size,
+        n: p.imageCount,
+        promptExtend: p.promptExtend,
         referenceImageUrls: p.referenceImageUrls,
       },
     });

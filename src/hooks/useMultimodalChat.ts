@@ -19,11 +19,26 @@ export interface ChatMessage {
   content: string; // text content or status
   attachments?: { name: string; previewUrl: string }[]; // user uploads (preview only)
   resultUrl?: string;
+  resultUrls?: string[]; // multiple images for batch image generation
   requestId?: string; // generation_requests.id for image/video
   status?: 'processing' | 'completed' | 'failed';
 }
 
 const STORAGE_KEY = 'viralin_chat_thread_v1';
+
+/** Map aspect ratio + resolution tier to a DashScope size string (W*H). */
+function imageSize(ratio: string, resolution: string): string {
+  const is2K = resolution === '2K';
+  const map: Record<string, [string, string]> = {
+    '1:1':  ['1024*1024', '1664*1664'],
+    '16:9': ['1280*720', '1920*1080'],
+    '9:16': ['720*1280', '1080*1920'],
+    '4:3':  ['1024*768', '1664*1248'],
+    '3:4':  ['768*1024', '1248*1664'],
+  };
+  const pair = map[ratio] || map['1:1'];
+  return is2K ? pair[1] : pair[0];
+}
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -132,7 +147,7 @@ export function useMultimodalChat() {
     intent: 'image' | 'video',
     prompt: string,
     storageRefs: string[],
-    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean },
+    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean; imageCount?: number; promptExtend?: boolean; imageSize?: string },
     audioRef?: string,
     firstFrameRef?: string,
     lastFrameRef?: string,
@@ -156,6 +171,9 @@ export function useMultimodalChat() {
         category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
         maskUrl: isInpaint ? maskRef : undefined,
+        size: routed.imageSize,
+        imageCount: routed.imageCount,
+        promptExtend: routed.promptExtend,
       });
     } else {
       const hasFirst = !!firstFrameRef;
@@ -219,11 +237,20 @@ export function useMultimodalChat() {
         const cur = data as GenerationRequest;
         if (cur.status === 'completed' && cur.result_url) {
           const url = await resolveResultUrl(cur.result_url);
+          const rawImages: string[] = Array.isArray((cur as any).result_images)
+            ? (cur as any).result_images
+            : [];
+          const resolvedImages = rawImages.length
+            ? (await Promise.all(rawImages.map((u) => resolveResultUrl(u)))).map((r, i) => r || rawImages[i])
+            : [];
           update(assistantId, {
             kind: intent,
             status: 'completed',
             resultUrl: url || cur.result_url,
-            content: intent === 'image' ? 'Here is your image.' : 'Here is your video.',
+            resultUrls: resolvedImages.length > 1 ? resolvedImages : undefined,
+            content: intent === 'image'
+              ? (resolvedImages.length > 1 ? `Here are your ${resolvedImages.length} images.` : 'Here is your image.')
+              : 'Here is your video.',
           });
           return;
         }
@@ -258,6 +285,10 @@ export function useMultimodalChat() {
     },
     imageOpts?: {
       maskFile?: File | null;
+      ratio?: string;
+      resolution?: string;
+      count?: number;
+      promptExtend?: boolean;
     },
   ) => {
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
@@ -317,7 +348,7 @@ export function useMultimodalChat() {
 
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
-    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean } = {};
+    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean; imageCount?: number; promptExtend?: boolean; imageSize?: string } = {};
 
     if (modeOverride !== 'auto') {
       intent = modeOverride;
@@ -357,6 +388,16 @@ export function useMultimodalChat() {
       if (videoOpts.ratio) routed.ratio = videoOpts.ratio;
       if (videoOpts.duration) routed.duration = videoOpts.duration;
       if (videoOpts.resolution) routed.resolution = videoOpts.resolution;
+    }
+
+    // Merge explicit image options (user-selected)
+    if (intent === 'image' && imageOpts) {
+      const ratio = imageOpts.ratio || routed.ratio || '1:1';
+      const resolution = imageOpts.resolution || '1K';
+      routed.ratio = ratio;
+      routed.imageSize = imageSize(ratio, resolution);
+      routed.imageCount = imageOpts.count;
+      routed.promptExtend = imageOpts.promptExtend;
     }
 
     // 4. Reserve assistant message

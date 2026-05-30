@@ -34,6 +34,15 @@ const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
 ];
 const DURATION_OPTIONS = [2, 4, 5, 8, 10, 12, 15];
 const RESOLUTION_OPTIONS = ['480P', '720P', '1080P'];
+const IMAGE_ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
+  { value: '1:1',  w: 22, h: 22 },
+  { value: '16:9', w: 28, h: 16 },
+  { value: '9:16', w: 16, h: 28 },
+  { value: '4:3',  w: 26, h: 20 },
+  { value: '3:4',  w: 20, h: 26 },
+];
+const IMAGE_RESOLUTION_OPTIONS = ['1K', '2K'];
+const IMAGE_COUNT_OPTIONS = [1, 2, 3, 4];
 const STYLE_OPTIONS = ['Cinematic', 'Vintage', 'Anime', 'Documentary', 'Commercial', 'Music Video', 'Horror', 'Sci-Fi'];
 const MOTION_OPTIONS = ['Static', 'Pan', 'Zoom In', 'Zoom Out', 'Tracking', 'Crane', 'Handheld', 'Dolly'];
 const INTENSITY_OPTIONS = [
@@ -64,6 +73,11 @@ const ChatComposer: React.FC = () => {
   const [inpaintOpen, setInpaintOpen] = useState(false);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
+  const [showImageOpts, setShowImageOpts] = useState(false);
+  const [imgRatio, setImgRatio] = useState<string>('1:1');
+  const [imgResolution, setImgResolution] = useState<string>('1K');
+  const [imgCount, setImgCount] = useState<number>(1);
+  const [imgPromptExtend, setImgPromptExtend] = useState<boolean>(true);
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -125,7 +139,9 @@ const ChatComposer: React.FC = () => {
       mode === 'video'
         ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
         : undefined,
-      mode === 'image' && mf ? { maskFile: mf } : undefined,
+      mode === 'image'
+        ? { maskFile: mf, ratio: imgRatio, resolution: imgResolution, count: imgCount, promptExtend: imgPromptExtend }
+        : undefined,
     );
   };
 
@@ -229,6 +245,79 @@ const ChatComposer: React.FC = () => {
                 ))}
               </div>
             )}
+
+            {mode === 'image' && showImageOpts && (
+              <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50 p-3 space-y-3">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Aspect ratio</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_ASPECT_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setImgRatio(opt.value)}
+                        className={cn(
+                          'flex items-center gap-1.5 px-2 py-1 rounded text-xs border',
+                          imgRatio === opt.value
+                            ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                            : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >
+                        <span
+                          className={cn('block border rounded-sm', imgRatio === opt.value ? 'border-white' : 'border-gray-500')}
+                          style={{ width: opt.w, height: opt.h }}
+                        />
+                        {opt.value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Resolution</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_RESOLUTION_OPTIONS.map(res => (
+                      <button
+                        key={res}
+                        onClick={() => setImgResolution(res)}
+                        className={cn(
+                          'px-2.5 py-1 rounded text-xs border',
+                          imgResolution === res ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{res}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Number of images</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_COUNT_OPTIONS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setImgCount(c)}
+                        className={cn(
+                          'px-2.5 py-1 rounded text-xs border',
+                          imgCount === c ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{c}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Prompt enhancement</label>
+                  <button
+                    onClick={() => setImgPromptExtend(v => !v)}
+                    className={cn(
+                      'px-2.5 py-1 rounded text-xs border inline-flex items-center gap-1.5',
+                      imgPromptExtend ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                    )}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {imgPromptExtend ? 'On' : 'Off'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+
 
             {mode === 'video' && showVideoOpts && (
               <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50">
@@ -453,6 +542,7 @@ const ChatComposer: React.FC = () => {
                         onClick={() => {
                           setMode(opt.id);
                           if (opt.id === 'video') setShowVideoOpts(true);
+                          if (opt.id === 'image') setShowImageOpts(true);
                         }}
                         className={cn(
                           'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all',
@@ -474,6 +564,19 @@ const ChatComposer: React.FC = () => {
                       showVideoOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
                     )}
                     title="Video options"
+                  >
+                    <Settings2 className="w-4 h-4" />
+                  </button>
+                )}
+
+                {mode === 'image' && (
+                  <button
+                    onClick={() => setShowImageOpts(s => !s)}
+                    className={cn(
+                      'p-2 rounded-lg border text-gray-300',
+                      showImageOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                    )}
+                    title="Image options"
                   >
                     <Settings2 className="w-4 h-4" />
                   </button>
@@ -599,9 +702,17 @@ const MessageBubble: React.FC<{ m: ReturnType<typeof useMultimodalChat>['message
 
         {m.kind === 'image' && m.resultUrl && (
           <div>
-            <img src={m.resultUrl} alt="generated" className="rounded-lg max-w-full" />
+            {m.resultUrls && m.resultUrls.length > 1 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {m.resultUrls.map((u, i) => (
+                  <img key={i} src={u} alt={`generated ${i + 1}`} className="rounded-lg w-full" />
+                ))}
+              </div>
+            ) : (
+              <img src={m.resultUrl} alt="generated" className="rounded-lg max-w-full" />
+            )}
             <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-gray-400 inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Image ready</span>
+              <span className="text-xs text-gray-400 inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> {m.resultUrls && m.resultUrls.length > 1 ? `${m.resultUrls.length} images ready` : 'Image ready'}</span>
               <Link to="/dashboard" className="text-xs text-purple-300 hover:text-white inline-flex items-center gap-1">
                 View in history <ExternalLink className="w-3 h-3" />
               </Link>

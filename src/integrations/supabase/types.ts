@@ -222,6 +222,7 @@ export type Database = {
           provider_task_id: string | null
           reference_image_url: string | null
           request_type: string
+          result_images: Json | null
           result_layers: Json | null
           result_url: string | null
           stale_notified_at: string | null
@@ -253,6 +254,7 @@ export type Database = {
           provider_task_id?: string | null
           reference_image_url?: string | null
           request_type: string
+          result_images?: Json | null
           result_layers?: Json | null
           result_url?: string | null
           stale_notified_at?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           provider_task_id?: string | null
           reference_image_url?: string | null
           request_type?: string
+          result_images?: Json | null
           result_layers?: Json | null
           result_url?: string | null
           stale_notified_at?: string | null
