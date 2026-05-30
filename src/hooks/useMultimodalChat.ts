@@ -147,7 +147,7 @@ export function useMultimodalChat() {
     intent: 'image' | 'video',
     prompt: string,
     storageRefs: string[],
-    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean },
+    routed: { ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean; imageCount?: number; promptExtend?: boolean; imageSize?: string },
     audioRef?: string,
     firstFrameRef?: string,
     lastFrameRef?: string,
@@ -171,6 +171,9 @@ export function useMultimodalChat() {
         category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
         maskUrl: isInpaint ? maskRef : undefined,
+        size: routed.imageSize,
+        imageCount: routed.imageCount,
+        promptExtend: routed.promptExtend,
       });
     } else {
       const hasFirst = !!firstFrameRef;
