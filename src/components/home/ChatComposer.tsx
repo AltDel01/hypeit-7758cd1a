@@ -551,8 +551,9 @@ const ChatComposer: React.FC = () => {
                     );
                   })}
                   </div>
+                </div>
 
-                  <div className="hidden sm:block" />
+                <div className="hidden sm:block" />
 
 
               <Button
