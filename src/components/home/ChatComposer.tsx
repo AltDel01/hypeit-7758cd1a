@@ -73,6 +73,11 @@ const ChatComposer: React.FC = () => {
   const [inpaintOpen, setInpaintOpen] = useState(false);
   const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
+  const [showImageOpts, setShowImageOpts] = useState(false);
+  const [imgRatio, setImgRatio] = useState<string>('1:1');
+  const [imgResolution, setImgResolution] = useState<string>('1K');
+  const [imgCount, setImgCount] = useState<number>(1);
+  const [imgPromptExtend, setImgPromptExtend] = useState<boolean>(true);
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
