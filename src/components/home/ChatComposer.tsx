@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2, Mic, Settings2, Eraser,
+  Film, MessageSquare, Wand2, Trash2, Mic, Eraser,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -71,9 +71,7 @@ const ChatComposer: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [maskFile, setMaskFile] = useState<File | null>(null);
   const [inpaintOpen, setInpaintOpen] = useState(false);
-  const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
-  const [showImageOpts, setShowImageOpts] = useState(false);
   const [imgRatio, setImgRatio] = useState<string>('1:1');
   const [imgResolution, setImgResolution] = useState<string>('1K');
   const [imgCount, setImgCount] = useState<number>(1);
@@ -246,7 +244,7 @@ const ChatComposer: React.FC = () => {
               </div>
             )}
 
-            {mode === 'image' && showImageOpts && (
+            {mode === 'image' && (
               <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50 p-3 space-y-3">
                 <div>
                   <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Aspect ratio</label>
@@ -319,7 +317,7 @@ const ChatComposer: React.FC = () => {
 
 
 
-            {mode === 'video' && showVideoOpts && (
+            {mode === 'video' && (
               <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50">
                 <div className="flex border-b border-gray-700/50">
                   {(['basics', 'style', 'motion'] as VideoPanel[]).map(p => (
@@ -541,8 +539,6 @@ const ChatComposer: React.FC = () => {
                         key={opt.id}
                         onClick={() => {
                           setMode(opt.id);
-                          if (opt.id === 'video') setShowVideoOpts(true);
-                          if (opt.id === 'image') setShowImageOpts(true);
                         }}
                         className={cn(
                           'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all',
@@ -554,34 +550,10 @@ const ChatComposer: React.FC = () => {
                       </button>
                     );
                   })}
+                  </div>
                 </div>
 
-                {mode === 'video' && (
-                  <button
-                    onClick={() => setShowVideoOpts(s => !s)}
-                    className={cn(
-                      'p-2 rounded-lg border text-gray-300',
-                      showVideoOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
-                    )}
-                    title="Video options"
-                  >
-                    <Settings2 className="w-4 h-4" />
-                  </button>
-                )}
-
-                {mode === 'image' && (
-                  <button
-                    onClick={() => setShowImageOpts(s => !s)}
-                    className={cn(
-                      'p-2 rounded-lg border text-gray-300',
-                      showImageOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
-                    )}
-                    title="Image options"
-                  >
-                    <Settings2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+                <div className="hidden sm:block" />
 
 
               <Button
