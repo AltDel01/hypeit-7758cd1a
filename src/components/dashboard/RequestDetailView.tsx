@@ -367,7 +367,38 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </div>
         )}
 
-        {request.status === 'completed' && resolvedUrl && (
+        {request.status === 'completed' && resultMediaKind !== 'video' && resolvedImages.length > 1 && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Results ({resolvedImages.length})</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {resolvedImages.map((imgUrl, idx) => (
+                <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
+                  <img
+                    src={imgUrl}
+                    alt={`Result ${idx + 1}`}
+                    className="w-full max-h-72 object-contain"
+                    loading="lazy"
+                  />
+                  <div className="flex items-center justify-between gap-2 p-3 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Image {idx + 1}</span>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(imgUrl, idx)} className="gap-1">
+                        <Download className="h-3 w-3" />
+                        Download
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => window.open(imgUrl, '_blank')} className="gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        Open
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {request.status === 'completed' && resolvedUrl && !(resultMediaKind !== 'video' && resolvedImages.length > 1) && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
@@ -387,7 +418,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
               )}
 
               <div className="flex gap-2 mt-3">
-                <Button onClick={handleDownload} className="gap-2">
+                <Button onClick={() => handleDownload()} className="gap-2">
                   <Download className="h-4 w-4" />
                   Download
                 </Button>
