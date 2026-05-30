@@ -132,43 +132,63 @@ serve(async (req) => {
     }
 
     const json = await upstream.json();
-    // Try common shapes for image url
-    const imageUrl: string | undefined =
-      json?.output?.choices?.[0]?.message?.content?.[0]?.image ||
-      json?.output?.results?.[0]?.url ||
-      json?.output?.url;
+    // Collect all image urls from common response shapes
+    const rawUrls: string[] = [];
+    const choices = json?.output?.choices;
+    if (Array.isArray(choices)) {
+      for (const choice of choices) {
+        const parts = choice?.message?.content;
+        if (Array.isArray(parts)) {
+          for (const part of parts) {
+            if (part?.image) rawUrls.push(part.image);
+          }
+        }
+      }
+    }
+    if (Array.isArray(json?.output?.results)) {
+      for (const r of json.output.results) {
+        if (r?.url) rawUrls.push(r.url);
+      }
+    }
+    if (rawUrls.length === 0 && json?.output?.url) rawUrls.push(json.output.url);
 
-    if (!imageUrl) {
+    if (rawUrls.length === 0) {
       console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
       await markFailed(admin, body.requestId, body.model);
       return genericError(502, 'Generation failed, an editor will take over');
     }
 
-    // Download and upload to Supabase Storage
-    let storedUrl = imageUrl;
-    try {
-      const imgRes = await fetch(imageUrl);
-      if (imgRes.ok) {
-        const buf = new Uint8Array(await imgRes.arrayBuffer());
-        const path = `${userId}/${body.requestId}.png`;
-        const { error: upErr } = await admin.storage
-          .from('generated-images')
-          .upload(path, buf, { contentType: 'image/png', upsert: true });
-        if (!upErr) {
-          storedUrl = `storage:generated-images/${path}`;
-        } else {
-          console.error('[qwen-image] storage upload failed', upErr);
+    // Download and upload each image to Supabase Storage
+    const storedUrls: string[] = [];
+    for (let i = 0; i < rawUrls.length; i++) {
+      const imageUrl = rawUrls[i];
+      let storedUrl = imageUrl;
+      try {
+        const imgRes = await fetch(imageUrl);
+        if (imgRes.ok) {
+          const buf = new Uint8Array(await imgRes.arrayBuffer());
+          const path = `${userId}/${body.requestId}-${i}.png`;
+          const { error: upErr } = await admin.storage
+            .from('generated-images')
+            .upload(path, buf, { contentType: 'image/png', upsert: true });
+          if (!upErr) {
+            storedUrl = `storage:generated-images/${path}`;
+          } else {
+            console.error('[qwen-image] storage upload failed', upErr);
+          }
         }
+      } catch (e) {
+        console.error('[qwen-image] storage download failed', e);
       }
-    } catch (e) {
-      console.error('[qwen-image] storage download failed', e);
+      storedUrls.push(storedUrl);
     }
 
     const { error: updErr } = await admin
       .from('generation_requests')
       .update({
         status: 'completed',
-        result_url: storedUrl,
+        result_url: storedUrls[0],
+        result_images: storedUrls,
         completed_at: new Date().toISOString(),
         auto_provider: 'qwen',
         auto_model: body.model,
