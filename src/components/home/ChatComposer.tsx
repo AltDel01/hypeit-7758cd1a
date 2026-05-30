@@ -246,6 +246,79 @@ const ChatComposer: React.FC = () => {
               </div>
             )}
 
+            {mode === 'image' && showImageOpts && (
+              <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50 p-3 space-y-3">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Aspect ratio</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_ASPECT_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setImgRatio(opt.value)}
+                        className={cn(
+                          'flex items-center gap-1.5 px-2 py-1 rounded text-xs border',
+                          imgRatio === opt.value
+                            ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                            : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >
+                        <span
+                          className={cn('block border rounded-sm', imgRatio === opt.value ? 'border-white' : 'border-gray-500')}
+                          style={{ width: opt.w, height: opt.h }}
+                        />
+                        {opt.value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Resolution</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_RESOLUTION_OPTIONS.map(res => (
+                      <button
+                        key={res}
+                        onClick={() => setImgResolution(res)}
+                        className={cn(
+                          'px-2.5 py-1 rounded text-xs border',
+                          imgResolution === res ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{res}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Number of images</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {IMAGE_COUNT_OPTIONS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setImgCount(c)}
+                        className={cn(
+                          'px-2.5 py-1 rounded text-xs border',
+                          imgCount === c ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                        )}
+                      >{c}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Prompt enhancement</label>
+                  <button
+                    onClick={() => setImgPromptExtend(v => !v)}
+                    className={cn(
+                      'px-2.5 py-1 rounded text-xs border inline-flex items-center gap-1.5',
+                      imgPromptExtend ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
+                    )}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {imgPromptExtend ? 'On' : 'Off'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+
+
             {mode === 'video' && showVideoOpts && (
               <div className="mb-3 rounded-lg bg-gray-800/40 border border-gray-700/50">
                 <div className="flex border-b border-gray-700/50">
