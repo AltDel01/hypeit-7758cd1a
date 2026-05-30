@@ -1,56 +1,78 @@
 ## Goal
 
-Add a **mask-based erase / inpaint** mode to the Image feature so users can paint over regions (like the colored event boxes on the calendar screenshot) and have Alibaba DashScope cleanly remove and fill them, instead of relying only on text-instruction editing.
+When "Image" is selected in the homepage composer, show a DashScope-style options panel with: **Aspect ratio**, **Resolution (quality)**, **Number of images**, and **Prompt enhancement**. A single generation request can return multiple images, all stored and viewable.
 
-## User flow
+## What exists today
 
-1. User selects **Image** mode in the homepage prompt box and attaches an image via the paperclip.
-2. A new **"Erase / Inpaint"** button appears next to the attachment thumbnail (only when exactly one image is attached).
-3. Clicking it opens a mask-painting dialog (reuses the existing `MaskDrawingCanvas` component already in `src/components/stable-diffusion/`):
-   - Brush + eraser + clear + brush-size controls
-   - Live overlay on the uploaded image
-4. User paints over the colored boxes, optionally types an instruction (e.g. "remove, keep grid background"), clicks **Apply**.
-5. The mask PNG + source image + prompt are sent to a new edge function which calls DashScope's image-edit/inpaint endpoint.
-6. Result is stored in `Generated Images` bucket and rendered in the chat thread like any other image result.
+- `ChatComposer` has a rich options panel only for `video`; `image` mode only supports an optional inpaint mask.
+- Image generation flows: `ChatComposer.send()` → `useMultimodalChat` → `createGenerationRequest` → `qwen-image` edge function (DashScope), which hardcodes `n: 1` and stores a single `result_url`.
+- `generation_requests` stores one `result_url`. There is an unused `result_layers` jsonb, but we'll add a dedicated array column for clarity.
 
-## Technical plan
+## Plan
 
-**1. New category `image-inpaint`**
-- Add to `src/config/generationCategories.ts`, model: `wanx-image-edit` (DashScope image-edit endpoint supports mask-based local edits). Fall back to `qwen-image-edit-2.0` if mask param unsupported.
+### 1. Database (migration)
+Add a column to hold multiple image URLs:
+- `result_images jsonb` (nullable, default null) on `generation_requests` — array of `storage:bucket/path` strings.
+- `result_url` stays as the first image for backward compatibility (history thumbnails, feedback box, etc.).
 
-**2. New edge function `dashscope-inpaint`** (`supabase/functions/dashscope-inpaint/index.ts`)
-- Auth via JWT (matching existing `qwen-image` pattern).
-- Inputs: `requestId`, `imageUrl`, `maskUrl`, `prompt`.
-- Calls DashScope `image-edit` task with `function: "description_edit_with_mask"` (or `inpainting` task on `wanx-v1`), passing `base_image_url` + `mask_image_url`.
-- Polls the async task, downloads result, uploads to `Generated Images`, updates `generation_requests`.
-- Generic error responses, `auto_failed=true` fallback for editor queue (matches existing pattern).
+No new RLS needed (existing row policies cover the table).
 
-**3. Frontend**
-- New component `src/components/home/InpaintDialog.tsx` wrapping `MaskDrawingCanvas` in a `Dialog`. Exports `(imageFile, maskFile, prompt) => void` on apply.
-- `ChatComposer.tsx`: when Image mode + exactly 1 attachment, show an "Erase area" button on the attachment thumbnail that opens the dialog.
-- `useMultimodalChat.ts`: extend `send(...)` with optional `maskFile`. When present, upload it (prefix `mask-`) and force `category: 'image-inpaint'`.
-- `generationRequestService.ts`: accept `maskUrl` field, route to `dashscope-inpaint` function when category is `image-inpaint`.
+### 2. `qwen-image` edge function
+- Accept new body fields: `n` (1-4, clamped), `promptExtend` (boolean), and continue accepting `size`.
+- Set `parameters.n = n` and `parameters.prompt_extend = promptExtend`.
+- Collect **all** returned image URLs from the response, download + upload each to the `generated-images` bucket (`{userId}/{requestId}-{i}.png`).
+- Update the row with `result_images` = full array and `result_url` = first image.
+- Keep the existing failure path (auto_failed → manual queue).
 
-**4. Storage**
-- Reuse existing `Product Images` bucket for the user-uploaded mask (private, same as other refs). No new bucket needed.
+### 3. Service layer (`generationRequestService.ts`)
+- Extend `CreateGenerationRequestParams` and the dispatcher with `size` (explicit), `imageCount`, `promptExtend`.
+- Build `size` from a new helper that combines aspect ratio + resolution tier (1K / 2K).
+- Pass `n` and `promptExtend` to the `qwen-image` invoke.
+- Multiply credit cost by the number of images (n × base cost) for image-gen.
 
-**5. Credits**
-- Same cost as `image-edit-instruction` (no new pricing entry needed).
+### 4. `useMultimodalChat.ts`
+- Expand `imageOpts` to `{ maskFile?, ratio?, resolution?, count?, promptExtend? }`.
+- Forward these to `createGenerationRequest`.
+- On completion, read `result_images` and expose them on the chat message (e.g. `resultUrls: string[]`) in addition to `resultUrl`.
 
-## Out of scope
+### 5. `ChatComposer.tsx`
+- Add image option state: `imgRatio` (default 1:1), `imgResolution` (default 1K), `imgCount` (default 1), `imgPromptExtend` (default on).
+- Add an image options panel mirroring the video panel styling (brand `#8C52FF`, semantic tokens), shown when `mode === 'image'` via the existing Settings2 toggle button (reuse the gear, show it for image too).
+  - Aspect ratio: 1:1, 16:9, 9:16, 4:3, 3:4 (visual chips like video).
+  - Resolution: 1K, 2K chips.
+  - Number of images: 1, 2, 3, 4 chips.
+  - Prompt enhancement: a toggle chip.
+- Pass the values through `send(..., imageOpts)`.
 
-- No new bucket, no schema migration (existing `generation_requests` columns cover it via the existing `reference_image_urls` array, with the mask as the second entry, or via a JSON metadata field already present).
-- No changes to Auto / Chat / Video routing.
+### 6. Result display (multi-image)
+- `RequestDetailView`: when `result_images` has more than one entry, render a responsive grid of images, each with its own download/open; fall back to the single-image view otherwise.
+- Chat `MessageBubble` (image kind): render a small grid when multiple `resultUrls` exist, else the single image.
 
-## Files to add / edit
+## Technical details
 
-- `supabase/functions/dashscope-inpaint/index.ts` (new)
-- `src/components/home/InpaintDialog.tsx` (new)
-- `src/components/home/ChatComposer.tsx` (edit)
-- `src/hooks/useMultimodalChat.ts` (edit)
-- `src/services/generationRequestService.ts` (edit)
-- `src/config/generationCategories.ts` (edit)
+Resolution/size mapping (DashScope `size` = `W*H`):
 
-## Expected result on the calendar screenshot
+```text
+ratio   1K            2K
+1:1     1024*1024     1664*1664
+16:9    1280*720      1920*1080
+9:16    720*1280      1080*1920
+4:3     1024*768      1664*1248
+3:4     768*1024      1248*1664
+```
+Values are clamped to DashScope's supported pixel range; if a 2K size is rejected the edge function logs and the manual queue takes over (existing behavior).
 
-User paints over each colored event block → DashScope inpaints them with the surrounding gray grid cell background → output is a clean empty calendar grid.
+Credit cost: `image-gen` base (50) × `imageCount`, checked against remaining balance before insert (existing check in `createGenerationRequest`).
+
+Files touched:
+- `supabase/functions/qwen-image/index.ts`
+- `src/services/generationRequestService.ts`
+- `src/hooks/useMultimodalChat.ts`
+- `src/components/home/ChatComposer.tsx`
+- `src/components/dashboard/RequestDetailView.tsx`
+- one DB migration (add `result_images`)
+
+## Verification
+- Build passes.
+- Select Image, open options, set 2 images + 2K + 16:9 + prompt enhancement on, send.
+- Confirm request is created, edge function returns multiple images, both render in the chat and in dashboard history detail, and credits deduct by count.
