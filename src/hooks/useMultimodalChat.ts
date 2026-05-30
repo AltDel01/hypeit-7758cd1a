@@ -348,7 +348,7 @@ export function useMultimodalChat() {
 
     // 3. Decide intent
     let intent: 'chat' | 'image' | 'video' = 'chat';
-    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean } = {};
+    let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean; imageCount?: number; promptExtend?: boolean; imageSize?: string } = {};
 
     if (modeOverride !== 'auto') {
       intent = modeOverride;
