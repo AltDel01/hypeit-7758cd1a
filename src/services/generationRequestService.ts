@@ -52,6 +52,12 @@ export interface CreateGenerationRequestParams {
   lipsyncMode?: 'portrait' | 'video';
   /** Mask inpaint: storage:bucket/path or https url for the binary mask PNG */
   maskUrl?: string;
+  /** Image gen: explicit DashScope size override (e.g. '1280*720') */
+  size?: string;
+  /** Image gen: number of images to generate (1-4) */
+  imageCount?: number;
+  /** Image gen: auto-enhance the prompt */
+  promptExtend?: boolean;
 }
 
 /**
