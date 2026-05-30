@@ -77,7 +77,7 @@ const CinemaStudio = () => {
       <div>
         <h2 className="text-xl font-bold text-white">Cinema Studio</h2>
         <p className="text-sm text-muted-foreground">
-          Pro camera controls layered on Wan 2.7 T2V. Compose the shot, then describe it.
+          Pro camera controls layer.  Compose the shot, then describe it.
         </p>
       </div>
 
