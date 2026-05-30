@@ -19,6 +19,7 @@ export interface ChatMessage {
   content: string; // text content or status
   attachments?: { name: string; previewUrl: string }[]; // user uploads (preview only)
   resultUrl?: string;
+  resultUrls?: string[]; // multiple images for batch image generation
   requestId?: string; // generation_requests.id for image/video
   status?: 'processing' | 'completed' | 'failed';
 }
