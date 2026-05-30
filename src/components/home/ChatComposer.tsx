@@ -702,9 +702,17 @@ const MessageBubble: React.FC<{ m: ReturnType<typeof useMultimodalChat>['message
 
         {m.kind === 'image' && m.resultUrl && (
           <div>
-            <img src={m.resultUrl} alt="generated" className="rounded-lg max-w-full" />
+            {m.resultUrls && m.resultUrls.length > 1 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {m.resultUrls.map((u, i) => (
+                  <img key={i} src={u} alt={`generated ${i + 1}`} className="rounded-lg w-full" />
+                ))}
+              </div>
+            ) : (
+              <img src={m.resultUrl} alt="generated" className="rounded-lg max-w-full" />
+            )}
             <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-gray-400 inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Image ready</span>
+              <span className="text-xs text-gray-400 inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> {m.resultUrls && m.resultUrls.length > 1 ? `${m.resultUrls.length} images ready` : 'Image ready'}</span>
               <Link to="/dashboard" className="text-xs text-purple-300 hover:text-white inline-flex items-center gap-1">
                 View in history <ExternalLink className="w-3 h-3" />
               </Link>
