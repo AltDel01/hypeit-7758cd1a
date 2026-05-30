@@ -163,8 +163,8 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
     }
   };
 
-  const handleDownload = async () => {
-    const url = resolvedUrl;
+  const handleDownload = async (overrideUrl?: string, index?: number) => {
+    const url = overrideUrl || resolvedUrl;
     if (!url) return;
     
     try {
