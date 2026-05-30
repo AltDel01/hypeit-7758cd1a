@@ -139,7 +139,9 @@ const ChatComposer: React.FC = () => {
       mode === 'video'
         ? { ratio, duration, resolution, audioFile: a, firstFrameFile: ff, lastFrameFile: lf }
         : undefined,
-      mode === 'image' && mf ? { maskFile: mf } : undefined,
+      mode === 'image'
+        ? { maskFile: mf, ratio: imgRatio, resolution: imgResolution, count: imgCount, promptExtend: imgPromptExtend }
+        : undefined,
     );
   };
 
