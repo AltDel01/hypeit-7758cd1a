@@ -16,6 +16,7 @@ export interface GenerationRequest {
   status: "new" | "in-progress" | "completed" | "failed";
   reference_image_url: string | null;
   result_url: string | null;
+  result_images?: string[] | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;
