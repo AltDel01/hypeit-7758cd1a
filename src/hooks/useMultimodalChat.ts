@@ -25,6 +25,20 @@ export interface ChatMessage {
 
 const STORAGE_KEY = 'viralin_chat_thread_v1';
 
+/** Map aspect ratio + resolution tier to a DashScope size string (W*H). */
+function imageSize(ratio: string, resolution: string): string {
+  const is2K = resolution === '2K';
+  const map: Record<string, [string, string]> = {
+    '1:1':  ['1024*1024', '1664*1664'],
+    '16:9': ['1280*720', '1920*1080'],
+    '9:16': ['720*1280', '1080*1920'],
+    '4:3':  ['1024*768', '1664*1248'],
+    '3:4':  ['768*1024', '1248*1664'],
+  };
+  const pair = map[ratio] || map['1:1'];
+  return is2K ? pair[1] : pair[0];
+}
+
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
