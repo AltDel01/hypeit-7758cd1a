@@ -568,6 +568,19 @@ const ChatComposer: React.FC = () => {
                     <Settings2 className="w-4 h-4" />
                   </button>
                 )}
+
+                {mode === 'image' && (
+                  <button
+                    onClick={() => setShowImageOpts(s => !s)}
+                    className={cn(
+                      'p-2 rounded-lg border text-gray-300',
+                      showImageOpts ? 'bg-[#8c52ff]/20 border-[#8c52ff]/50' : 'bg-gray-800/80 border-gray-700/50 hover:bg-gray-700/80',
+                    )}
+                    title="Image options"
+                  >
+                    <Settings2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
 
 
