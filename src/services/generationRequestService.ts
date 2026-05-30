@@ -84,8 +84,10 @@ export async function createGenerationRequest(
     const userName = profile?.display_name || user.email?.split("@")[0] || "Unknown";
     const userEmail = profile?.email || user.email || "";
 
-    // Check credit balance before inserting
-    const creditsUsed = params.creditsUsed || 50;
+    // Check credit balance before inserting. Image batches cost per image.
+    const imageCount = Math.min(4, Math.max(1, Math.floor(params.imageCount ?? 1)));
+    const baseCredits = params.creditsUsed || 50;
+    const creditsUsed = params.requestType === "image" ? baseCredits * imageCount : baseCredits;
     const remaining = (profile as any)?.monthly_generation_limit 
       ? ((profile as any).monthly_generation_limit - ((profile as any).generations_this_month || 0))
       : 500;
