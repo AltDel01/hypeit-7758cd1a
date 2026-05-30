@@ -1,19 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Menu, X, History } from 'lucide-react';
+import { ArrowLeft, X, History, Layers, Megaphone, Brain, Mic2, Camera, Workflow } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
-import SimplifiedDashboard from '@/components/dashboard/SimplifiedDashboard';
 import GenerationHistory from '@/components/dashboard/GenerationHistory';
 import RequestDetailView from '@/components/dashboard/RequestDetailView';
+import SequenceGeneration from '@/components/tools/SequenceGeneration';
+import AdCopyGenerator from '@/components/tools/AdCopyGenerator';
+import ViralPredictor from '@/components/tools/ViralPredictor';
+import LipSyncStudio from '@/components/tools/LipSyncStudio';
+import CinemaStudio from '@/components/tools/CinemaStudio';
+import WorkflowStudio from '@/components/tools/WorkflowStudio';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGenerationRequests } from '@/hooks/useGenerationRequests';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 import { GenerationRequest } from '@/services/generationRequestService';
 import { supabase } from '@/integrations/supabase/client';
 
 export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
+
+type ToolId = 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
+
+const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
+  { id: 'sequence', label: 'Sequence', icon: Layers },
+  { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
+  { id: 'predictor', label: 'Predictor', icon: Brain },
+  { id: 'lipsync', label: 'Lip Sync', icon: Mic2 },
+  { id: 'cinema', label: 'Cinema', icon: Camera },
+  { id: 'workflow', label: 'Workflow', icon: Workflow },
+];
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -22,12 +38,11 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTool, setActiveTool] = useState<ToolId>('sequence');
   const [feedbackMap, setFeedbackMap] = useState<FeedbackMap>({});
-  
-  const { requests, isLoading, refresh } = useGenerationRequests(user?.id);
 
-  // Batch-fetch all review feedback for user's requests
+  const { requests, isLoading } = useGenerationRequests(user?.id);
+
   const fetchFeedbackMap = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
@@ -47,10 +62,8 @@ const Dashboard = () => {
     fetchFeedbackMap();
   }, [fetchFeedbackMap, requests]);
 
-  // Redirect if not authenticated
   React.useEffect(() => {
     if (!user) {
-      // Save current URL (with query params like ?request=id) so user returns here after login
       const currentUrl = window.location.pathname + window.location.search;
       sessionStorage.setItem('postLoginRedirect', currentUrl);
       sessionStorage.setItem('authRedirectPending', '1');
@@ -58,13 +71,13 @@ const Dashboard = () => {
     }
   }, [user, navigate]);
 
-  // Auto-select request from URL query param (e.g. ?request=<id>)
   useEffect(() => {
     const requestId = searchParams.get('request');
     if (requestId && requests.length > 0 && !selectedRequest) {
       const match = requests.find((r) => r.id === requestId);
       if (match) {
         setSelectedRequest(match);
+        setHistoryOpen(true);
         setSearchParams({}, { replace: true });
       }
     }
@@ -72,34 +85,31 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!selectedRequest) return;
-
-    const updatedSelectedRequest = requests.find((request) => request.id === selectedRequest.id);
-    if (updatedSelectedRequest && updatedSelectedRequest !== selectedRequest) {
-      setSelectedRequest(updatedSelectedRequest);
+    const updated = requests.find((r) => r.id === selectedRequest.id);
+    if (updated && updated !== selectedRequest) {
+      setSelectedRequest(updated);
     }
   }, [requests, selectedRequest]);
 
   const handleSelectRequest = (request: GenerationRequest) => {
     setSelectedRequest(request);
-    if (isMobile) {
-      setHistoryOpen(false);
-    }
-  };
-
-  const handleRequestCreated = () => {
-    refresh();
-    setSelectedRequest(null);
+    if (isMobile) setHistoryOpen(false);
   };
 
   if (!user) return null;
 
   const HistoryPanel = (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-border">
-        <h2 className="font-semibold text-foreground">History</h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          {requests.length} generation{requests.length !== 1 ? 's' : ''}
-        </p>
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div>
+          <h2 className="font-semibold text-foreground">History</h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            {requests.length} generation{requests.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setHistoryOpen(false)} className="h-8 w-8">
+          <X size={18} />
+        </Button>
       </div>
       <div className="flex-1 overflow-hidden">
         <GenerationHistory
@@ -116,101 +126,76 @@ const Dashboard = () => {
   return (
     <AuroraBackground>
       <div className="flex min-h-screen w-full">
-        {/* Desktop Sidebar - Collapsible */}
-        {!isMobile && (
-          <aside className={`border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300 overflow-hidden flex-shrink-0 ${sidebarOpen ? 'w-72' : 'w-14'}`}>
-            {/* Header with toggle */}
-            <div className="p-4 border-b border-border flex items-center gap-3">
-              {sidebarOpen ? (
-                <>
-                  <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                    <ArrowLeft size={20} />
-                  </Link>
-                  <Link to="/" className="flex items-center flex-1">
-                    <img 
-                      src="/lovable-uploads/viralin-logo.png" 
-                      alt="Viralin Logo" 
-                      className="h-7 w-auto"
-                    />
-                  </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setSidebarOpen(false)}
-                    className="h-8 w-8"
-                  >
-                    <X size={18} />
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => setSidebarOpen(true)}
-                  className="h-8 w-8 mx-auto"
-                >
-                  <Menu size={20} />
-                </Button>
+        {/* Canva-style permanent rail */}
+        <nav className="w-20 flex-shrink-0 border-r border-border bg-card/40 backdrop-blur-sm flex flex-col items-center py-4 gap-2">
+          <Link to="/" className="mb-1 text-muted-foreground hover:text-foreground transition-colors" title="Home">
+            <img src="/lovable-uploads/viralin-logo.png" alt="Viralin" className="h-7 w-7 object-contain" />
+          </Link>
+
+          {/* History toggle (collapsable) */}
+          <button
+            onClick={() => setHistoryOpen((v) => !v)}
+            className={cn(
+              'flex flex-col items-center gap-1 w-16 py-2 rounded-xl transition-all',
+              historyOpen ? 'bg-[#8C52FF]/20 text-[#8C52FF]' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+            )}
+            title="History"
+          >
+            <History className="w-5 h-5" />
+            <span className="text-[10px] font-medium">History</span>
+          </button>
+
+          <div className="w-10 h-px bg-border my-1" />
+
+          {/* Permanent tool features */}
+          {TOOLS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => {
+                setActiveTool(t.id);
+                setSelectedRequest(null);
+              }}
+              className={cn(
+                'flex flex-col items-center gap-1 w-16 py-2 rounded-xl transition-all',
+                activeTool === t.id && !selectedRequest
+                  ? 'bg-[#8C52FF]/20 text-[#8C52FF]'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
               )}
-            </div>
-            {sidebarOpen && HistoryPanel}
+              title={t.label}
+            >
+              <t.icon className="w-5 h-5" />
+              <span className="text-[10px] font-medium leading-tight text-center">{t.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Collapsible history panel */}
+        {historyOpen && (
+          <aside className="w-72 flex-shrink-0 border-r border-border bg-card/30 backdrop-blur-sm overflow-hidden">
+            {HistoryPanel}
           </aside>
         )}
 
-        {/* Main Content */}
+        {/* Main content */}
         <main className="flex-1 overflow-auto">
-          {/* Mobile Header */}
-          {isMobile && (
-            <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="flex items-center gap-3">
-                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                  <ArrowLeft size={20} />
-                </Link>
-                <Link to="/" className="flex items-center">
-                  <img 
-                    src="/lovable-uploads/viralin-logo.png" 
-                    alt="Viralin Logo" 
-                    className="h-7 w-auto"
-                  />
-                </Link>
-              </div>
-              
-              {/* History Sheet Trigger */}
-              <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="relative">
-                    <History className="h-5 w-5" />
-                    {requests.length > 0 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-                        {requests.length > 9 ? '9+' : requests.length}
-                      </span>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 p-0">
-                  {HistoryPanel}
-                </SheetContent>
-              </Sheet>
-            </header>
-          )}
-
-          {/* Content Area */}
           <div className="container mx-auto px-4 py-6 md:px-6 md:py-8 space-y-6">
-            {/* Show selected request detail or prompt interface */}
             {selectedRequest ? (
               <div className="space-y-4">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setSelectedRequest(null)}
-                  className="gap-2"
-                >
+                <Button variant="ghost" onClick={() => setSelectedRequest(null)} className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Create
+                  Back to Tools
                 </Button>
                 <RequestDetailView request={selectedRequest} onFeedbackSubmitted={fetchFeedbackMap} />
               </div>
             ) : (
-              <SimplifiedDashboard onRequestCreated={handleRequestCreated} latestRequest={requests.length > 0 ? requests[0] : null} />
+              <div className="animate-fade-in">
+                {activeTool === 'sequence' && <SequenceGeneration />}
+                {activeTool === 'adcopy' && <AdCopyGenerator />}
+                {activeTool === 'predictor' && <ViralPredictor />}
+                {activeTool === 'lipsync' && <LipSyncStudio />}
+                {activeTool === 'cinema' && <CinemaStudio />}
+                {activeTool === 'workflow' && <WorkflowStudio />}
+              </div>
             )}
           </div>
         </main>
