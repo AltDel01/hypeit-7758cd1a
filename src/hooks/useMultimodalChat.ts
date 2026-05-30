@@ -390,6 +390,16 @@ export function useMultimodalChat() {
       if (videoOpts.resolution) routed.resolution = videoOpts.resolution;
     }
 
+    // Merge explicit image options (user-selected)
+    if (intent === 'image' && imageOpts) {
+      const ratio = imageOpts.ratio || routed.ratio || '1:1';
+      const resolution = imageOpts.resolution || '1K';
+      routed.ratio = ratio;
+      routed.imageSize = imageSize(ratio, resolution);
+      routed.imageCount = imageOpts.count;
+      routed.promptExtend = imageOpts.promptExtend;
+    }
+
     // 4. Reserve assistant message
     const assistantMsg: ChatMessage = {
       id: uid(),
