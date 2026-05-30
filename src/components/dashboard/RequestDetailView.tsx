@@ -67,6 +67,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [resolvedImages, setResolvedImages] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<ResolvedAttachmentItem[]>([]);
   const [resultMediaKind, setResultMediaKind] = useState<MediaKind>('file');
 
