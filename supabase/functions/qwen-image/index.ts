@@ -100,6 +100,8 @@ serve(async (req) => {
   }
   content.push({ text: body.prompt });
 
+  const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
+
   const payload = {
     model: body.model,
     input: {
@@ -107,7 +109,8 @@ serve(async (req) => {
     },
     parameters: {
       size: body.size || '1024*1024',
-      n: 1,
+      n: imageCount,
+      prompt_extend: body.promptExtend ?? false,
     },
   };
 
