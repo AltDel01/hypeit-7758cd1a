@@ -285,6 +285,10 @@ export function useMultimodalChat() {
     },
     imageOpts?: {
       maskFile?: File | null;
+      ratio?: string;
+      resolution?: string;
+      count?: number;
+      promptExtend?: boolean;
     },
   ) => {
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
