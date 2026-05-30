@@ -67,6 +67,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [resolvedImages, setResolvedImages] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<ResolvedAttachmentItem[]>([]);
   const [resultMediaKind, setResultMediaKind] = useState<MediaKind>('file');
 
@@ -96,6 +97,26 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       active = false;
     };
   }, [request.result_url]);
+
+  useEffect(() => {
+    let active = true;
+
+    const resolveImages = async () => {
+      const images = Array.isArray(request.result_images) ? request.result_images : [];
+      if (images.length === 0) {
+        if (active) setResolvedImages([]);
+        return;
+      }
+      const resolved = await Promise.all(images.map((url) => resolveResultUrl(url)));
+      if (active) setResolvedImages(resolved.filter((u): u is string => Boolean(u)));
+    };
+
+    resolveImages();
+
+    return () => {
+      active = false;
+    };
+  }, [request.result_images]);
 
   useEffect(() => {
     const resolveAttachments = async () => {
@@ -142,8 +163,8 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
     }
   };
 
-  const handleDownload = async () => {
-    const url = resolvedUrl;
+  const handleDownload = async (overrideUrl?: string, index?: number) => {
+    const url = overrideUrl || resolvedUrl;
     if (!url) return;
     
     try {
@@ -154,7 +175,8 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       a.href = blobUrl;
       const mediaKind = resultMediaKind || 'image';
       const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
-      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
+      const suffix = typeof index === 'number' ? `-${index + 1}` : '';
+      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}${suffix}.${extension}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
@@ -345,7 +367,38 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </div>
         )}
 
-        {request.status === 'completed' && resolvedUrl && (
+        {request.status === 'completed' && resultMediaKind !== 'video' && resolvedImages.length > 1 && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Results ({resolvedImages.length})</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {resolvedImages.map((imgUrl, idx) => (
+                <div key={idx} className="rounded-lg border border-border overflow-hidden bg-background/50">
+                  <img
+                    src={imgUrl}
+                    alt={`Result ${idx + 1}`}
+                    className="w-full max-h-72 object-contain"
+                    loading="lazy"
+                  />
+                  <div className="flex items-center justify-between gap-2 p-3 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Image {idx + 1}</span>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(imgUrl, idx)} className="gap-1">
+                        <Download className="h-3 w-3" />
+                        Download
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => window.open(imgUrl, '_blank')} className="gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        Open
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {request.status === 'completed' && resolvedUrl && !(resultMediaKind !== 'video' && resolvedImages.length > 1) && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Result</h3>
             <div className="relative group">
@@ -365,7 +418,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
               )}
 
               <div className="flex gap-2 mt-3">
-                <Button onClick={handleDownload} className="gap-2">
+                <Button onClick={() => handleDownload()} className="gap-2">
                   <Download className="h-4 w-4" />
                   Download
                 </Button>
