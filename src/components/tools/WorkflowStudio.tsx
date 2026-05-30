@@ -168,7 +168,7 @@ const WorkflowStudio = () => {
             <WorkflowIcon className="w-5 h-5 text-[#8C52FF]" /> Workflow Studio
           </h2>
           <p className="text-sm text-muted-foreground">
-            Chain Wan and EMO steps. Each step feeds the next.
+            Generate with chain steps. Each step feeds the next.
           </p>
         </div>
         <div className="flex gap-2">
