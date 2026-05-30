@@ -275,6 +275,27 @@ const SequenceGeneration = () => {
                   </SelectContent>
                 </Select>
 
+                {box.kind === 'image' && (
+                  <>
+                    <Select value={box.imageResolution} onValueChange={(v) => update(box.id, { imageResolution: v })}>
+                      <SelectTrigger className="h-8 w-[64px] bg-slate-950/50 border-slate-700 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700">
+                        {IMAGE_RESOLUTIONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={String(box.imageCount)} onValueChange={(v) => update(box.id, { imageCount: parseInt(v, 10) })}>
+                      <SelectTrigger className="h-8 w-[76px] bg-slate-950/50 border-slate-700 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700">
+                        {IMAGE_COUNTS.map((n) => <SelectItem key={n} value={String(n)}>{n} img</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
+
                 {box.kind === 'video' && (
                   <>
                     <Select
