@@ -175,7 +175,8 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       a.href = blobUrl;
       const mediaKind = resultMediaKind || 'image';
       const extension = mediaKind === 'video' ? 'mp4' : mediaKind === 'audio' ? 'mp3' : mediaKind === 'file' ? 'bin' : 'png';
-      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}.${extension}`;
+      const suffix = typeof index === 'number' ? `-${index + 1}` : '';
+      a.download = `viralin-${request.request_type}-${request.id.slice(0, 8)}${suffix}.${extension}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
