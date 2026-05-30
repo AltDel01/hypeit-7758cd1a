@@ -237,11 +237,20 @@ export function useMultimodalChat() {
         const cur = data as GenerationRequest;
         if (cur.status === 'completed' && cur.result_url) {
           const url = await resolveResultUrl(cur.result_url);
+          const rawImages: string[] = Array.isArray((cur as any).result_images)
+            ? (cur as any).result_images
+            : [];
+          const resolvedImages = rawImages.length
+            ? (await Promise.all(rawImages.map((u) => resolveResultUrl(u)))).map((r, i) => r || rawImages[i])
+            : [];
           update(assistantId, {
             kind: intent,
             status: 'completed',
             resultUrl: url || cur.result_url,
-            content: intent === 'image' ? 'Here is your image.' : 'Here is your video.',
+            resultUrls: resolvedImages.length > 1 ? resolvedImages : undefined,
+            content: intent === 'image'
+              ? (resolvedImages.length > 1 ? `Here are your ${resolvedImages.length} images.` : 'Here is your image.')
+              : 'Here is your video.',
           });
           return;
         }
