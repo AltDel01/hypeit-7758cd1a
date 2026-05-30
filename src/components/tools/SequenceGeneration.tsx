@@ -25,6 +25,8 @@ interface Box {
   ratio: string;
   duration: number;        // seconds, video only (2-15)
   resolution: string;      // 480P / 720P / 1080P
+  imageResolution: string; // 1K / 2K, image only
+  imageCount: number;      // 1-4, image only
   references: File[];      // 0 = T2I/T2V, 1 = I2I/I2V, 2+ = R2V
   audio?: File;            // optional audio for I2V/R2V
   status: Status;
@@ -35,14 +37,33 @@ interface Box {
 
 const RATIOS = ['1:1', '9:16', '16:9', '4:5', '3:4', '21:9'];
 const RESOLUTIONS = ['480P', '720P', '1080P'];
+const IMAGE_RESOLUTIONS = ['1K', '2K'];
+const IMAGE_COUNTS = [1, 2, 3, 4];
 const DURATIONS = [2, 3, 4, 5, 6, 8, 10, 12, 15];
+
+/** Map aspect ratio + resolution tier to a DashScope size string (W*H). */
+function imageSize(ratio: string, resolution: string): string {
+  const is2K = resolution === '2K';
+  const map: Record<string, [string, string]> = {
+    '1:1':  ['1024*1024', '1664*1664'],
+    '16:9': ['1280*720', '1920*1080'],
+    '9:16': ['720*1280', '1080*1920'],
+    '4:3':  ['1024*768', '1664*1248'],
+    '3:4':  ['768*1024', '1248*1664'],
+    '4:5':  ['1024*1280', '1248*1664'],
+    '21:9': ['1456*624', '1920*816'],
+  };
+  const pair = map[ratio] || map['1:1'];
+  return is2K ? pair[1] : pair[0];
+}
 
 function uid() { return Math.random().toString(36).slice(2); }
 
 function makeBox(): Box {
   return {
     id: uid(), prompt: '', kind: 'image', ratio: '1:1',
-    duration: 5, resolution: '1080P', references: [], status: 'idle',
+    duration: 5, resolution: '1080P', imageResolution: '1K', imageCount: 1,
+    references: [], status: 'idle',
   };
 }
 
@@ -93,6 +114,8 @@ const SequenceGeneration = () => {
         referenceImageUrl: refUrl,
         category: storageRefs.length ? 'image-edit-instruction' : 'image-gen',
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
+        size: imageSize(box.ratio, box.imageResolution),
+        imageCount: box.imageCount,
       });
     } else {
       const promptWithAudio = audioRef ? `${box.prompt}\n[audio: ${audioRef}]` : box.prompt;
@@ -251,6 +274,27 @@ const SequenceGeneration = () => {
                     {RATIOS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                   </SelectContent>
                 </Select>
+
+                {box.kind === 'image' && (
+                  <>
+                    <Select value={box.imageResolution} onValueChange={(v) => update(box.id, { imageResolution: v })}>
+                      <SelectTrigger className="h-8 w-[64px] bg-slate-950/50 border-slate-700 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700">
+                        {IMAGE_RESOLUTIONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={String(box.imageCount)} onValueChange={(v) => update(box.id, { imageCount: parseInt(v, 10) })}>
+                      <SelectTrigger className="h-8 w-[76px] bg-slate-950/50 border-slate-700 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700">
+                        {IMAGE_COUNTS.map((n) => <SelectItem key={n} value={String(n)}>{n} img</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
 
                 {box.kind === 'video' && (
                   <>
