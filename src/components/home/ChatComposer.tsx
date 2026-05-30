@@ -71,9 +71,7 @@ const ChatComposer: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [maskFile, setMaskFile] = useState<File | null>(null);
   const [inpaintOpen, setInpaintOpen] = useState(false);
-  const [showVideoOpts, setShowVideoOpts] = useState(false);
   const [videoPanel, setVideoPanel] = useState<VideoPanel>('basics');
-  const [showImageOpts, setShowImageOpts] = useState(false);
   const [imgRatio, setImgRatio] = useState<string>('1:1');
   const [imgResolution, setImgResolution] = useState<string>('1K');
   const [imgCount, setImgCount] = useState<number>(1);
