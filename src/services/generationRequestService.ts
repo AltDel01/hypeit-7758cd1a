@@ -397,6 +397,8 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
         prompt: p.prompt,
         model: p.model,
         size: p.size,
+        n: p.imageCount,
+        promptExtend: p.promptExtend,
         referenceImageUrls: p.referenceImageUrls,
       },
     });
