@@ -99,6 +99,26 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   }, [request.result_url]);
 
   useEffect(() => {
+    let active = true;
+
+    const resolveImages = async () => {
+      const images = Array.isArray(request.result_images) ? request.result_images : [];
+      if (images.length === 0) {
+        if (active) setResolvedImages([]);
+        return;
+      }
+      const resolved = await Promise.all(images.map((url) => resolveResultUrl(url)));
+      if (active) setResolvedImages(resolved.filter((u): u is string => Boolean(u)));
+    };
+
+    resolveImages();
+
+    return () => {
+      active = false;
+    };
+  }, [request.result_images]);
+
+  useEffect(() => {
     const resolveAttachments = async () => {
       if (!request.reference_image_url) {
         setAttachments([]);
