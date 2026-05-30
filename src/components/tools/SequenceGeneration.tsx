@@ -114,6 +114,8 @@ const SequenceGeneration = () => {
         referenceImageUrl: refUrl,
         category: storageRefs.length ? 'image-edit-instruction' : 'image-gen',
         referenceImageUrls: storageRefs.length ? storageRefs : undefined,
+        size: imageSize(box.ratio, box.imageResolution),
+        imageCount: box.imageCount,
       });
     } else {
       const promptWithAudio = audioRef ? `${box.prompt}\n[audio: ${audioRef}]` : box.prompt;
