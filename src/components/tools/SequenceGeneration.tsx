@@ -24,7 +24,7 @@ interface Box {
   kind: Kind;
   ratio: string;
   duration: number;        // seconds, video only (2-15)
-  resolution: string;      // 480P / 720P / 1080P
+  resolution: string;      // 720P / 1080P
   imageResolution: string; // 1K / 2K, image only
   imageCount: number;      // 1-4, image only
   references: File[];      // 0 = T2I/T2V, 1 = I2I/I2V, 2+ = R2V
