@@ -109,8 +109,13 @@ serve(async (req) => {
   // Clamp duration: Wan2.7 supports 2-15 seconds.
   const rawDuration = body.duration ?? 5;
   const duration = Math.max(2, Math.min(15, Math.round(rawDuration)));
+  // Wan2.x video models only accept '720P' or '1080P'. Normalize any
+  // unsupported value (e.g. legacy '480P' or '4K') so a request never gets
+  // rejected and stuck in processing.
+  const rawResolution = String((body as any).resolution || '1080P').toUpperCase();
+  const resolution = rawResolution === '720P' ? '720P' : '1080P';
   const parameters: Record<string, unknown> = {
-    resolution: (body as any).resolution || '1080P',
+    resolution,
     duration,
   };
 

@@ -24,7 +24,7 @@ interface Box {
   kind: Kind;
   ratio: string;
   duration: number;        // seconds, video only (2-15)
-  resolution: string;      // 480P / 720P / 1080P
+  resolution: string;      // 720P / 1080P
   imageResolution: string; // 1K / 2K, image only
   imageCount: number;      // 1-4, image only
   references: File[];      // 0 = T2I/T2V, 1 = I2I/I2V, 2+ = R2V
@@ -36,7 +36,7 @@ interface Box {
 }
 
 const RATIOS = ['1:1', '9:16', '16:9', '4:5', '3:4', '21:9'];
-const RESOLUTIONS = ['480P', '720P', '1080P'];
+const RESOLUTIONS = ['720P', '1080P'];
 const IMAGE_RESOLUTIONS = ['1K', '2K'];
 const IMAGE_COUNTS = [1, 2, 3, 4];
 const DURATIONS = [2, 3, 4, 5, 6, 8, 10, 12, 15];
