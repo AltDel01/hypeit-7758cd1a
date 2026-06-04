@@ -36,7 +36,7 @@ interface Box {
 }
 
 const RATIOS = ['1:1', '9:16', '16:9', '4:5', '3:4', '21:9'];
-const RESOLUTIONS = ['480P', '720P', '1080P'];
+const RESOLUTIONS = ['720P', '1080P'];
 const IMAGE_RESOLUTIONS = ['1K', '2K'];
 const IMAGE_COUNTS = [1, 2, 3, 4];
 const DURATIONS = [2, 3, 4, 5, 6, 8, 10, 12, 15];

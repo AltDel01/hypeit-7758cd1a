@@ -54,10 +54,8 @@ const aspectRatioOptions = [
 ];
 
 const resolutionOptions = [
-  { value: '4K', label: '4K' },
   { value: '1080P', label: '1080P' },
   { value: '720P', label: '720P' },
-  { value: '480P', label: '480P' },
 ];
 
 const durationOptions = [
