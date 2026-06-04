@@ -33,7 +33,7 @@ const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
   { value: '3:4',  w: 20, h: 26 },
 ];
 const DURATION_OPTIONS = [2, 4, 5, 8, 10, 12, 15];
-const RESOLUTION_OPTIONS = ['480P', '720P', '1080P'];
+const RESOLUTION_OPTIONS = ['720P', '1080P'];
 const IMAGE_ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
   { value: '1:1',  w: 22, h: 22 },
   { value: '16:9', w: 28, h: 16 },
