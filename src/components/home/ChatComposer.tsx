@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Send, Paperclip, X, Sparkles, Loader2, ExternalLink, Image as ImageIcon,
-  Film, MessageSquare, Wand2, Trash2, Mic, Eraser,
+  Film, MessageSquare, Trash2, Mic, Eraser,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,6 @@ import InpaintDialog from './InpaintDialog';
 import ReactMarkdown from 'react-markdown';
 
 const modeOptions: { id: ChatMode; label: string; icon: any }[] = [
-  { id: 'auto', label: 'Auto', icon: Wand2 },
   { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'image', label: 'Image', icon: ImageIcon },
   { id: 'video', label: 'Video', icon: Film },
@@ -59,7 +58,7 @@ const ChatComposer: React.FC = () => {
   const { messages, send, isBusy, clear } = useMultimodalChat();
   const [text, setText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
-  const [mode, setMode] = useState<ChatMode>('auto');
+  const [mode, setMode] = useState<ChatMode>('chat');
   const [ratio, setRatio] = useState<string>('16:9');
   const [duration, setDuration] = useState<number>(5);
   const [resolution, setResolution] = useState<string>('720P');
@@ -90,7 +89,7 @@ const ChatComposer: React.FC = () => {
       if (raw) {
         const d = JSON.parse(raw);
         if (d?.text) setText(d.text);
-        if (d?.mode) setMode(d.mode);
+        if (d?.mode && d.mode !== 'auto') setMode(d.mode);
         localStorage.removeItem('homepageChatDraft');
       }
     } catch {}
