@@ -58,7 +58,7 @@ const ChatComposer: React.FC = () => {
   const { messages, send, isBusy, clear } = useMultimodalChat();
   const [text, setText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
-  const [mode, setMode] = useState<ChatMode>('auto');
+  const [mode, setMode] = useState<ChatMode>('chat');
   const [ratio, setRatio] = useState<string>('16:9');
   const [duration, setDuration] = useState<number>(5);
   const [resolution, setResolution] = useState<string>('720P');
