@@ -13,7 +13,6 @@ import InpaintDialog from './InpaintDialog';
 import ReactMarkdown from 'react-markdown';
 
 const modeOptions: { id: ChatMode; label: string; icon: any }[] = [
-  { id: 'auto', label: 'Auto', icon: Wand2 },
   { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'image', label: 'Image', icon: ImageIcon },
   { id: 'video', label: 'Video', icon: Film },
