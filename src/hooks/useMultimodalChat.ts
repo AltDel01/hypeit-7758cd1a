@@ -10,7 +10,7 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
 import { toast } from 'sonner';
 
-export type ChatMode = 'auto' | 'chat' | 'image' | 'video';
+export type ChatMode = 'chat' | 'image' | 'video';
 
 export interface ChatMessage {
   id: string;
