@@ -274,7 +274,7 @@ export function useMultimodalChat() {
   const send = useCallback(async (
     text: string,
     attachments: File[],
-    modeOverride: ChatMode = 'auto',
+    modeOverride: ChatMode = 'chat',
     videoOpts?: {
       ratio?: string;
       duration?: number;
@@ -346,37 +346,10 @@ export function useMultimodalChat() {
     // If a mask is provided, force image intent (inpaint)
     const hasMask = !!maskRef;
 
-    // 3. Decide intent
-    let intent: 'chat' | 'image' | 'video' = 'chat';
+    // 3. Decide intent — user always picks the mode explicitly.
+    let intent: 'chat' | 'image' | 'video' = modeOverride;
     let routed: { prompt?: string; ratio?: string; duration?: number; resolution?: string; useAttachmentAsFirstFrame?: boolean; imageCount?: number; promptExtend?: boolean; imageSize?: string } = {};
-
-    if (modeOverride !== 'auto') {
-      intent = modeOverride;
-      routed.prompt = text;
-    } else {
-      try {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-router`;
-        const r = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
-            mode: 'route',
-            messages: [...buildHistory(), { role: 'user', content: text }],
-            hasAttachment: attachments.length > 0,
-          }),
-        });
-        if (r.ok) {
-          const j = await r.json();
-          intent = (j.intent as any) || 'chat';
-          routed = j;
-        }
-      } catch (e) {
-        console.error('route err', e);
-      }
-    }
+    routed.prompt = text;
 
     // If user provided keyframes, force video intent
     if (firstFrameRef || lastFrameRef) intent = 'video';
