@@ -89,7 +89,7 @@ const ChatComposer: React.FC = () => {
       if (raw) {
         const d = JSON.parse(raw);
         if (d?.text) setText(d.text);
-        if (d?.mode) setMode(d.mode);
+        if (d?.mode && d.mode !== 'auto') setMode(d.mode);
         localStorage.removeItem('homepageChatDraft');
       }
     } catch {}
