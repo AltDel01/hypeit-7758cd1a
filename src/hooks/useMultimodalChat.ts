@@ -290,6 +290,8 @@ export function useMultimodalChat() {
       count?: number;
       promptExtend?: boolean;
     },
+    /** Optional clean text to show in the chat bubble (without embedded settings). */
+    displayText?: string,
   ) => {
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
@@ -304,7 +306,7 @@ export function useMultimodalChat() {
       id: uid(),
       role: 'user',
       kind: 'text',
-      content: text,
+      content: displayText ?? text,
       attachments: allPreviews.map(f => ({ name: f.name, previewUrl: URL.createObjectURL(f) })),
     };
     setMessages(prev => [...prev, userMsg]);
