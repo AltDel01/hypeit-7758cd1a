@@ -91,9 +91,10 @@ serve(async (req) => {
       console.error('[wan-video] storage download failed', bucket, path, error?.message);
       return undefined;
     }
-    const bytes = new Uint8Array(await data.arrayBuffer());
+    const raw = new Uint8Array(await data.arrayBuffer());
     const filename = path.split('/').pop() || 'file';
-    const contentType = (data as any).type || 'application/octet-stream';
+    const rawType = (data as any).type || guessTypeFromExt(path);
+    const { bytes, contentType } = await normalizeImageForWan(raw, rawType);
     const ossUrl = await uploadToDashScopeOss(body.model, bytes, filename, contentType);
     usedOss = true;
     console.log('[wan-video] uploaded to DashScope OSS', filename, bytes.length, ossUrl.slice(0, 80));
