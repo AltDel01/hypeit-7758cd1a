@@ -70,7 +70,12 @@ serve(async (req) => {
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
 
-  // Resolve storage: refs to signed HTTPS URLs DashScope can fetch
+  // Resolve storage: refs to a public, token-less proxy URL that external
+  // providers (Alibaba/Wan) can reliably fetch. Signed URLs with query tokens
+  // are intermittently rejected by Wan's image validator ("can not read image").
+  const PROJECT_URL = Deno.env.get('SUPABASE_URL')!;
+  const toBase64Url = (s: string) =>
+    btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const resolveUrl = async (u?: string): Promise<string | undefined> => {
     if (!u) return undefined;
     if (!u.startsWith('storage:')) return u;
@@ -79,13 +84,11 @@ serve(async (req) => {
     if (slash < 0) return undefined;
     const bucket = rest.slice(0, slash);
     const path = rest.slice(slash + 1);
-    const { data, error } = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
-    if (error || !data?.signedUrl) {
-      console.error('[wan-video] sign url failed', bucket, path, error);
-      return undefined;
-    }
-    return data.signedUrl;
+    if (!bucket || !path) return undefined;
+    const p = toBase64Url(`${bucket}/${path}`);
+    return `${PROJECT_URL}/functions/v1/media-proxy?p=${p}`;
   };
+
   const resolveUrls = async (arr?: string[]): Promise<string[] | undefined> => {
     if (!arr?.length) return undefined;
     const out: string[] = [];
