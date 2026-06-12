@@ -48,6 +48,30 @@ interface RequestBody {
   duration?: number;
 }
 
+/**
+ * Extract a `| Key: value` setting from the recorded prompt metadata.
+ * The homepage composer embeds technical settings as a trailing pipe line
+ * (e.g. "...| Aspect: 16:9 | Resolution: 1080P | Duration: 15s").
+ */
+function parseSetting(prompt: string | undefined, key: string): string | undefined {
+  if (!prompt) return undefined;
+  const re = new RegExp(`\\|\\s*${key}\\s*:\\s*([^|\\n]+)`, 'i');
+  const m = prompt.match(re);
+  return m ? m[1].trim() : undefined;
+}
+
+/**
+ * Remove the trailing technical settings line so it is not sent to DashScope
+ * as part of the creative prompt. Keeps the base prompt and the
+ * "[Style | Camera | Motion intensity]" creative block intact.
+ */
+function cleanPromptForModel(prompt: string | undefined): string {
+  if (!prompt) return '';
+  return prompt
+    .replace(/\s*\|\s*(Aspect|Resolution|Duration|Timeline|First frame|Last frame)\s*:[^|\n]*/gi, '')
+    .trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -142,13 +166,19 @@ serve(async (req) => {
   // video-generation/video-synthesis endpoint with `media: [{type, url}]`.
   let endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`;
   let input: Record<string, unknown> = {};
-  // Clamp duration: Wan2.7 supports 2-15 seconds.
-  const rawDuration = body.duration ?? 5;
+  // Clean creative prompt (technical settings line removed) for the model.
+  const modelPrompt = cleanPromptForModel(body.prompt);
+  // Duration: prefer the explicit body value; fall back to the value recorded
+  // in the prompt metadata so it is never silently lost. Wan2.7 supports 2-15s.
+  const promptDuration = parseInt(parseSetting(body.prompt, 'Duration') || '', 10);
+  const rawDuration = body.duration ?? (Number.isFinite(promptDuration) ? promptDuration : 5);
   const duration = Math.max(2, Math.min(15, Math.round(rawDuration)));
   // Wan2.x video models only accept '720P' or '1080P'. Normalize any
   // unsupported value (e.g. legacy '480P' or '4K') so a request never gets
-  // rejected and stuck in processing.
-  const rawResolution = String((body as any).resolution || '1080P').toUpperCase();
+  // rejected and stuck in processing. Fall back to the prompt metadata too.
+  const rawResolution = String(
+    (body as any).resolution || parseSetting(body.prompt, 'Resolution') || '1080P'
+  ).toUpperCase();
   const resolution = rawResolution === '720P' ? '720P' : '1080P';
   const parameters: Record<string, unknown> = {
     resolution,
@@ -157,12 +187,12 @@ serve(async (req) => {
 
   switch (body.category) {
     case 'video-t2v':
-      input = { prompt: body.prompt };
+      input = { prompt: modelPrompt };
       break;
     case 'video-i2v':
       if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
       input = {
-        prompt: body.prompt,
+        prompt: modelPrompt,
         media: [{ type: 'first_frame', url: firstFrameUrl }],
       };
       break;
@@ -171,7 +201,7 @@ serve(async (req) => {
         return genericError(400, 'KF2V requires both firstFrameUrl and lastFrameUrl');
       }
       input = {
-        prompt: body.prompt,
+        prompt: modelPrompt,
         media: [
           { type: 'first_frame', url: firstFrameUrl },
           { type: 'last_frame', url: lastFrameUrl },
@@ -181,7 +211,7 @@ serve(async (req) => {
     case 'video-r2v':
       if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
       input = {
-        prompt: body.prompt,
+        prompt: modelPrompt,
         media: referenceImageUrls.slice(0, 3).map((url) => ({
           type: 'reference_image',
           url,
@@ -198,7 +228,11 @@ serve(async (req) => {
     default:
       return genericError(400, 'Unknown category');
   }
-  console.log('[wan-video] dispatch', body.category, body.model, JSON.stringify(input).slice(0, 300));
+  console.log(
+    '[wan-video] dispatch', body.category, body.model,
+    'duration=' + duration, 'resolution=' + resolution,
+    JSON.stringify(input).slice(0, 300)
+  );
 
   const payload = { model: body.model, input, parameters };
 
