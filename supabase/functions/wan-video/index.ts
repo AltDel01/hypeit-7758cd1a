@@ -86,7 +86,11 @@ serve(async (req) => {
     const path = rest.slice(slash + 1);
     if (!bucket || !path) return undefined;
     const p = toBase64Url(`${bucket}/${path}`);
-    return `${PROJECT_URL}/functions/v1/media-proxy?p=${p}`;
+    // Append the original file extension so strict external image validators
+    // (Alibaba/Wan) accept the URL — they reject extension-less query URLs.
+    const dot = path.lastIndexOf('.');
+    const ext = dot > 0 ? path.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : 'jpg';
+    return `${PROJECT_URL}/functions/v1/media-proxy/${p}.${ext || 'jpg'}`;
   };
 
   const resolveUrls = async (arr?: string[]): Promise<string[] | undefined> => {
