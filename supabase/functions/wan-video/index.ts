@@ -21,7 +21,17 @@ import {
   genericError,
   ok,
   uploadToDashScopeOss,
+  normalizeImageForWan,
 } from '../_shared/dashscope.ts';
+
+function guessTypeFromExt(path: string): string {
+  const ext = path.split('.').pop()?.toLowerCase() || '';
+  const map: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+    gif: 'image/gif', bmp: 'image/bmp', mp4: 'video/mp4', mov: 'video/quicktime',
+  };
+  return map[ext] || 'application/octet-stream';
+}
 
 interface RequestBody {
   requestId: string;
