@@ -24,13 +24,13 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return genericError(405, 'Method not allowed');
 
-  const expected = Deno.env.get('CRON_SECRET');
-  const provided = req.headers.get('x-cron-secret');
-  if (expected && provided !== expected) return genericError(401, 'Unauthorized');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const provided = (req.headers.get('authorization') || '').replace('Bearer ', '');
+  if (provided !== serviceKey) return genericError(401, 'Unauthorized');
 
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    serviceKey
   );
 
   const { data: stuck, error } = await admin
