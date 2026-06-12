@@ -27,6 +27,7 @@ serve(async (req) => {
   let body: {
     requestId?: string;
     checkTaskId?: string;
+    finalizeRequestId?: string;
     repairBucket?: string;
     repairPath?: string;
     dataBase64?: string;
