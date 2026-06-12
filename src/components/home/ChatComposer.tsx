@@ -153,6 +153,7 @@ const ChatComposer: React.FC = () => {
       mode === 'image'
         ? { maskFile: mf, ratio: imgRatio, resolution: imgResolution, count: imgCount, promptExtend: imgPromptExtend }
         : undefined,
+      text,
     );
   };
 
