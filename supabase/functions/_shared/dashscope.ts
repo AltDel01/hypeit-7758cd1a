@@ -33,6 +33,34 @@ export function asyncAuthHeaders(): Record<string, string> {
 }
 
 /**
+ * Wan's image validator rejects images with any side > 2000px (or < 360px),
+ * reporting it misleadingly as "can not read image". Downscale oversized
+ * images before upload. Returns { bytes, contentType } (JPEG when resized).
+ */
+export async function normalizeImageForWan(
+  bytes: Uint8Array,
+  contentType: string
+): Promise<{ bytes: Uint8Array; contentType: string }> {
+  if (!contentType.startsWith('image/')) return { bytes, contentType };
+  try {
+    const { Image } = await import('https://deno.land/x/imagescript@1.2.15/mod.ts');
+    const img = await Image.decode(bytes);
+    const MAX = 2000;
+    if (img.width <= MAX && img.height <= MAX) return { bytes, contentType };
+    const scale = Math.min(MAX / img.width, MAX / img.height);
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+    img.resize(w, h);
+    const out = await img.encodeJPEG(90);
+    console.log(`[dashscope] resized image ${bytes.length}B -> ${out.length}B (${w}x${h})`);
+    return { bytes: out, contentType: 'image/jpeg' };
+  } catch (e) {
+    console.error('[dashscope] image normalize failed, using original', e);
+    return { bytes, contentType };
+  }
+}
+
+/**
  * Upload a file to DashScope's own temporary OSS storage and return an
  * `oss://` URL. This is Alibaba's officially supported way to provide input
  * media; it avoids their image validator fetching external URLs (which is
