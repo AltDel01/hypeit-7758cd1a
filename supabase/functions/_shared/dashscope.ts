@@ -32,6 +32,51 @@ export function asyncAuthHeaders(): Record<string, string> {
   };
 }
 
+/**
+ * Upload a file to DashScope's own temporary OSS storage and return an
+ * `oss://` URL. This is Alibaba's officially supported way to provide input
+ * media; it avoids their image validator fetching external URLs (which is
+ * unreliable for Supabase storage/proxy links).
+ *
+ * Requests using the returned URL must include the header
+ * `X-DashScope-OssResourceResolve: enable`.
+ */
+export async function uploadToDashScopeOss(
+  model: string,
+  bytes: Uint8Array,
+  filename: string,
+  contentType: string
+): Promise<string> {
+  const polRes = await fetch(
+    `${DASHSCOPE_BASE}/api/v1/uploads?action=getPolicy&model=${encodeURIComponent(model)}`,
+    { headers: authHeaders() }
+  );
+  if (!polRes.ok) {
+    throw new Error(`getPolicy failed: ${polRes.status} ${await polRes.text()}`);
+  }
+  const pol = (await polRes.json())?.data;
+  if (!pol?.upload_host || !pol?.upload_dir) {
+    throw new Error('getPolicy returned invalid data');
+  }
+
+  const key = `${pol.upload_dir}/${Date.now()}-${filename}`;
+  const form = new FormData();
+  form.append('OSSAccessKeyId', pol.oss_access_key_id);
+  form.append('Signature', pol.signature);
+  form.append('policy', pol.policy);
+  form.append('x-oss-object-acl', pol.x_oss_object_acl);
+  form.append('x-oss-forbid-overwrite', pol.x_oss_forbid_overwrite);
+  form.append('key', key);
+  form.append('success_action_status', '200');
+  form.append('file', new Blob([bytes], { type: contentType }), filename);
+
+  const upRes = await fetch(pol.upload_host, { method: 'POST', body: form });
+  if (!upRes.ok) {
+    throw new Error(`OSS upload failed: ${upRes.status} ${await upRes.text()}`);
+  }
+  return `oss://${key}`;
+}
+
 export interface DashScopeAsyncCreateResponse {
   output?: { task_id?: string; task_status?: string };
   request_id?: string;
