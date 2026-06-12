@@ -71,12 +71,12 @@ serve(async (req) => {
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
 
-  // Resolve storage: refs to a public, token-less proxy URL that external
-  // providers (Alibaba/Wan) can reliably fetch. Signed URLs with query tokens
-  // are intermittently rejected by Wan's image validator ("can not read image").
-  const PROJECT_URL = Deno.env.get('SUPABASE_URL')!;
-  const toBase64Url = (s: string) =>
-    btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  // Resolve storage: refs by downloading the bytes and uploading them to
+  // DashScope's own OSS storage (oss:// URL). This is Alibaba's officially
+  // supported input method and avoids their validator fetching external URLs
+  // (signed Supabase URLs AND our public proxy were both rejected with
+  // "can not read image").
+  let usedOss = false;
   const resolveUrl = async (u?: string): Promise<string | undefined> => {
     if (!u) return undefined;
     if (!u.startsWith('storage:')) return u;
@@ -86,12 +86,18 @@ serve(async (req) => {
     const bucket = rest.slice(0, slash);
     const path = rest.slice(slash + 1);
     if (!bucket || !path) return undefined;
-    const p = toBase64Url(`${bucket}/${path}`);
-    // Append the original file extension so strict external image validators
-    // (Alibaba/Wan) accept the URL — they reject extension-less query URLs.
-    const dot = path.lastIndexOf('.');
-    const ext = dot > 0 ? path.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : 'jpg';
-    return `${PROJECT_URL}/functions/v1/media-proxy/${p}.${ext || 'jpg'}`;
+    const { data, error } = await admin.storage.from(bucket).download(path);
+    if (error || !data) {
+      console.error('[wan-video] storage download failed', bucket, path, error?.message);
+      return undefined;
+    }
+    const bytes = new Uint8Array(await data.arrayBuffer());
+    const filename = path.split('/').pop() || 'file';
+    const contentType = (data as any).type || 'application/octet-stream';
+    const ossUrl = await uploadToDashScopeOss(body.model, bytes, filename, contentType);
+    usedOss = true;
+    console.log('[wan-video] uploaded to DashScope OSS', filename, bytes.length, ossUrl.slice(0, 80));
+    return ossUrl;
   };
 
   const resolveUrls = async (arr?: string[]): Promise<string[] | undefined> => {
@@ -104,11 +110,22 @@ serve(async (req) => {
     return out;
   };
 
-  const firstFrameUrl = await resolveUrl(body.firstFrameUrl);
-  const lastFrameUrl = await resolveUrl(body.lastFrameUrl);
-  const referenceImageUrls = await resolveUrls(body.referenceImageUrls);
-  const sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
-  const faceImageUrl = await resolveUrl(body.faceImageUrl);
+  let firstFrameUrl: string | undefined;
+  let lastFrameUrl: string | undefined;
+  let referenceImageUrls: string[] | undefined;
+  let sourceVideoUrl: string | undefined;
+  let faceImageUrl: string | undefined;
+  try {
+    firstFrameUrl = await resolveUrl(body.firstFrameUrl);
+    lastFrameUrl = await resolveUrl(body.lastFrameUrl);
+    referenceImageUrls = await resolveUrls(body.referenceImageUrls);
+    sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
+    faceImageUrl = await resolveUrl(body.faceImageUrl);
+  } catch (e) {
+    console.error('[wan-video] OSS upload failed', e);
+    await markFailed(admin, body.requestId, body.model);
+    return genericError(502, 'Submission failed, an editor will take over');
+  }
 
   // Build endpoint + payload by category. Wan2.7 uses unified
   // video-generation/video-synthesis endpoint with `media: [{type, url}]`.
