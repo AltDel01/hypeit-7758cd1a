@@ -12,6 +12,7 @@ import {
   genericError,
   ok,
   uploadToDashScopeOss,
+  normalizeImageForWan,
 } from '../_shared/dashscope.ts';
 
 serve(async (req) => {
@@ -58,13 +59,17 @@ serve(async (req) => {
     console.error('[wan-resubmit] download failed', dlErr?.message);
     return genericError(500, 'Download failed');
   }
-  const bytes = new Uint8Array(await file.arrayBuffer());
+  const raw = new Uint8Array(await file.arrayBuffer());
   const model = row.auto_model || 'wan2.7-i2v';
+  const { bytes, contentType } = await normalizeImageForWan(
+    raw,
+    (file as any).type || 'image/jpeg'
+  );
   const ossUrl = await uploadToDashScopeOss(
     model,
     bytes,
     path.split('/').pop() || 'frame.jpg',
-    (file as any).type || 'image/jpeg'
+    contentType
   );
   console.log('[wan-resubmit] oss url', ossUrl.slice(0, 100));
 
