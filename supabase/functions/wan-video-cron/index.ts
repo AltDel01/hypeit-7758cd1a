@@ -3,8 +3,8 @@
  *
  * Runs unattended (no user session) so videos still get saved even when the
  * user has closed the page and client-side polling has stopped. Scheduled via
- * pg_cron. Protected by a shared secret header (X-Cron-Secret) so it can't be
- * abused from the public internet.
+ * pg_cron. Protected by requiring the service-role key in the Authorization
+ * header so it can't be abused from the public internet.
  *
  * For every request that is 'new' | 'in-progress' with a provider_task_id and
  * no result yet, it polls DashScope and, on SUCCEEDED, downloads the MP4 into
