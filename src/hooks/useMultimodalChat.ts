@@ -309,13 +309,40 @@ export function useMultimodalChat() {
     };
     setMessages(prev => [...prev, userMsg]);
 
+    // Re-encode images through a canvas before upload. This (a) repairs
+    // truncated/corrupt files (browsers decode them tolerantly, AI providers
+    // do not) and (b) downscales to <=2000px per side, which Wan requires.
+    const normalizeImage = async (file: File): Promise<File> => {
+      if (!file.type.startsWith('image/')) return file;
+      try {
+        const bmp = await createImageBitmap(file);
+        const MAX = 2000;
+        const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+        const w = Math.max(1, Math.round(bmp.width * scale));
+        const h = Math.max(1, Math.round(bmp.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return file;
+        ctx.drawImage(bmp, 0, 0, w, h);
+        bmp.close();
+        const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/jpeg', 0.92));
+        if (!blob) return file;
+        const base = file.name.replace(/\.[^.]+$/, '');
+        return new File([blob], `${base}.jpg`, { type: 'image/jpeg' });
+      } catch {
+        return file;
+      }
+    };
+
     const uploadFile = async (file: File, prefix = ''): Promise<string | undefined> => {
       if (!user) return undefined;
       try {
-        const fileName = `${user.id}/${prefix}${Date.now()}-${file.name}`;
+        const clean = await normalizeImage(file);
+        const fileName = `${user.id}/${prefix}${Date.now()}-${clean.name}`;
         const { data, error } = await supabase.storage
           .from('product-images')
-          .upload(fileName, file);
+          .upload(fileName, clean);
         if (error || !data) {
           console.error('upload error', error);
           return undefined;
