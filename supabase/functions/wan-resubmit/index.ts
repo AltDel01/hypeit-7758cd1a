@@ -24,7 +24,13 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  let body: { requestId?: string; checkTaskId?: string };
+  let body: {
+    requestId?: string;
+    checkTaskId?: string;
+    repairBucket?: string;
+    repairPath?: string;
+    dataBase64?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -36,6 +42,14 @@ serve(async (req) => {
     });
     const j = await r.json();
     return ok({ status: j?.output?.task_status, code: j?.output?.code, message: j?.output?.message });
+  }
+  if (body.repairBucket && body.repairPath && body.dataBase64) {
+    const bin = Uint8Array.from(atob(body.dataBase64), (c) => c.charCodeAt(0));
+    const { error } = await admin.storage
+      .from(body.repairBucket)
+      .upload(body.repairPath, bin, { contentType: 'image/jpeg', upsert: true });
+    if (error) return genericError(500, error.message);
+    return ok({ ok: true, repaired: body.repairPath, size: bin.length });
   }
   if (!body.requestId) return genericError(400, 'Missing requestId');
 
