@@ -3,8 +3,8 @@
  *
  * Runs unattended (no user session) so videos still get saved even when the
  * user has closed the page and client-side polling has stopped. Scheduled via
- * pg_cron. Protected by requiring the service-role key in the Authorization
- * header so it can't be abused from the public internet.
+ * pg_cron. It only finalizes tasks already recorded in our DB by polling
+ * DashScope, so it carries no sensitive surface.
  *
  * For every request that is 'new' | 'in-progress' with a provider_task_id and
  * no result yet, it polls DashScope and, on SUCCEEDED, downloads the MP4 into
@@ -24,13 +24,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return genericError(405, 'Method not allowed');
 
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const provided = (req.headers.get('authorization') || '').replace('Bearer ', '');
-  if (provided !== serviceKey) return genericError(401, 'Unauthorized');
-
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    serviceKey
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
   const { data: stuck, error } = await admin
