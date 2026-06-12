@@ -72,7 +72,7 @@ function cleanPromptForModel(prompt: string | undefined): string {
     .trim();
 }
 
-
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
