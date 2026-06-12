@@ -39,7 +39,18 @@ serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const p = url.searchParams.get('p');
+  // Support two URL shapes:
+  //  1) ?p=<base64url>            (legacy)
+  //  2) /media-proxy/<base64url>.<ext>  (preferred — ends with a real image
+  //     extension so strict external validators like Alibaba/Wan accept it)
+  let p = url.searchParams.get('p');
+  if (!p) {
+    const seg = url.pathname.split('/media-proxy/')[1];
+    if (seg) {
+      const dot = seg.lastIndexOf('.');
+      p = dot > 0 ? seg.slice(0, dot) : seg;
+    }
+  }
   if (!p) return new Response('Missing p', { status: 400 });
 
   const ref = decodeRef(p);
