@@ -20,6 +20,7 @@ import {
   getUserIdFromAuth,
   genericError,
   ok,
+  uploadToDashScopeOss,
 } from '../_shared/dashscope.ts';
 
 interface RequestBody {
