@@ -52,7 +52,46 @@ serve(async (req) => {
     if (error) return genericError(500, error.message);
     return ok({ ok: true, repaired: body.repairPath, size: bin.length });
   }
+  if (body.finalizeRequestId) {
+    const { data: r } = await admin
+      .from('generation_requests')
+      .select('id, user_id, provider_task_id, result_url')
+      .eq('id', body.finalizeRequestId)
+      .maybeSingle();
+    if (!r?.provider_task_id || r.result_url) return genericError(400, 'Not eligible');
+    const up = await fetch(`${DASHSCOPE_BASE}/api/v1/tasks/${r.provider_task_id}`, {
+      headers: asyncAuthHeaders(),
+    });
+    const j = await up.json();
+    if (j?.output?.task_status !== 'SUCCEEDED') {
+      return ok({ status: j?.output?.task_status });
+    }
+    const videoUrl =
+      j?.output?.video_url || j?.output?.results?.[0]?.video_url || j?.output?.results?.[0]?.url;
+    if (!videoUrl) return genericError(502, 'No video url');
+    let storedUrl = videoUrl;
+    const vRes = await fetch(videoUrl);
+    if (vRes.ok) {
+      const buf = new Uint8Array(await vRes.arrayBuffer());
+      const path = `${r.user_id}/${r.id}.mp4`;
+      const { error: upErr } = await admin.storage
+        .from('generated-images')
+        .upload(path, buf, { contentType: 'video/mp4', upsert: true });
+      if (!upErr) storedUrl = `storage:generated-images/${path}`;
+    }
+    await admin
+      .from('generation_requests')
+      .update({
+        status: 'completed',
+        result_url: storedUrl,
+        completed_at: new Date().toISOString(),
+        auto_failed: false,
+      })
+      .eq('id', r.id);
+    return ok({ ok: true, completed: r.id });
+  }
   if (!body.requestId) return genericError(400, 'Missing requestId');
+
 
   const { data: row } = await admin
     .from('generation_requests')
