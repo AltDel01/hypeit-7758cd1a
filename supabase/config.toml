@@ -34,6 +34,9 @@ verify_jwt = false
 [functions.media-proxy]
 verify_jwt = false
 
+[functions.wan-video-cron]
+verify_jwt = false
+
 [functions.wan-debug]
 verify_jwt = false
 
