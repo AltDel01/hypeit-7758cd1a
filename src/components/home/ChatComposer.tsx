@@ -101,11 +101,25 @@ const ChatComposer: React.FC = () => {
   };
 
   const buildVideoPrompt = (base: string) => {
+    // Creative direction is baked into the prompt so the model honors it.
     const tags: string[] = [];
     if (style) tags.push(`Style: ${style}`);
     if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
     if (intensity) tags.push(`Motion intensity: ${intensity}`);
-    return tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
+    let out = tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
+
+    // Technical settings recorded in the prompt using the pipe format that
+    // promptParser understands. This makes them visible in the request
+    // history and admin/editor views and included in the notification email.
+    // wan-video strips this trailing line before sending to DashScope.
+    const settings: string[] = [];
+    if (ratio) settings.push(`Aspect: ${ratio}`);
+    if (resolution) settings.push(`Resolution: ${resolution}`);
+    if (duration) settings.push(`Duration: ${duration}s`);
+    if (firstFrameFile) settings.push(`First frame: attached`);
+    if (lastFrameFile) settings.push(`Last frame: attached`);
+    if (settings.length) out += `\n| ${settings.join(' | ')}`;
+    return out;
   };
 
   const handleSend = async () => {
