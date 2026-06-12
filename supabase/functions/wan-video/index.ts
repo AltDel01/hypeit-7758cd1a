@@ -48,7 +48,31 @@ interface RequestBody {
   duration?: number;
 }
 
-serve(async (req) => {
+/**
+ * Extract a `| Key: value` setting from the recorded prompt metadata.
+ * The homepage composer embeds technical settings as a trailing pipe line
+ * (e.g. "...| Aspect: 16:9 | Resolution: 1080P | Duration: 15s").
+ */
+function parseSetting(prompt: string | undefined, key: string): string | undefined {
+  if (!prompt) return undefined;
+  const re = new RegExp(`\\|\\s*${key}\\s*:\\s*([^|\\n]+)`, 'i');
+  const m = prompt.match(re);
+  return m ? m[1].trim() : undefined;
+}
+
+/**
+ * Remove the trailing technical settings line so it is not sent to DashScope
+ * as part of the creative prompt. Keeps the base prompt and the
+ * "[Style | Camera | Motion intensity]" creative block intact.
+ */
+function cleanPromptForModel(prompt: string | undefined): string {
+  if (!prompt) return '';
+  return prompt
+    .replace(/\s*\|\s*(Aspect|Resolution|Duration|Timeline|First frame|Last frame)\s*:[^|\n]*/gi, '')
+    .trim();
+}
+
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
