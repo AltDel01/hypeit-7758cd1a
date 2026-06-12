@@ -192,9 +192,12 @@ serve(async (req) => {
   const payload = { model: body.model, input, parameters };
 
   try {
+    const headers: Record<string, string> = { ...asyncAuthHeaders() };
+    // Required when input media uses oss:// URLs uploaded to DashScope storage.
+    if (usedOss) headers['X-DashScope-OssResourceResolve'] = 'enable';
     const upstream = await fetch(endpoint, {
       method: 'POST',
-      headers: asyncAuthHeaders(),
+      headers,
       body: JSON.stringify(payload),
     });
 
