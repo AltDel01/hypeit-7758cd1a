@@ -23,11 +23,18 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  let body: { requestId?: string };
+  let body: { requestId?: string; checkTaskId?: string };
   try {
     body = await req.json();
   } catch {
     return genericError(400, 'Invalid JSON');
+  }
+  if (body.checkTaskId) {
+    const r = await fetch(`${DASHSCOPE_BASE}/api/v1/tasks/${body.checkTaskId}`, {
+      headers: asyncAuthHeaders(),
+    });
+    const j = await r.json();
+    return ok({ status: j?.output?.task_status, code: j?.output?.code, message: j?.output?.message });
   }
   if (!body.requestId) return genericError(400, 'Missing requestId');
 
