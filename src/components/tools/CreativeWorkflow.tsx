@@ -771,27 +771,30 @@ const CreativeWorkflow = () => {
               {/* 5. Distribution & scheduler */}
               <div className="rounded-lg bg-muted/40 p-2.5 space-y-2.5">
                 <div className="flex items-center justify-center gap-2">
-                  {(Object.keys(PLATFORM_META) as Platform[]).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => togglePlatform(day, p)}
-                      title={PLATFORM_META[p].label}
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all',
-                        day.platforms[p] ? PLATFORM_META[p].on : 'bg-muted text-muted-foreground/50 grayscale',
-                      )}
-                    >
-                      {PLATFORM_META[p].glyph}
-                    </button>
-                  ))}
+                  {(Object.keys(PLATFORM_META) as Platform[]).map((p) => {
+                    const Icon = PLATFORM_META[p].icon;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => togglePlatform(day, p)}
+                        title={PLATFORM_META[p].label}
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full transition-all',
+                          day.platforms[p] ? PLATFORM_META[p].on : 'bg-muted text-muted-foreground/50 grayscale',
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="flex items-center gap-2 rounded-md bg-background/60 px-2 py-1.5">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <input
-                    type="time"
+                    type="date"
                     value={day.time}
                     onChange={(e) => patchDay(day.id, { time: e.target.value })}
-                    className="w-full bg-transparent text-xs text-foreground outline-none"
+                    className="w-full bg-transparent text-xs text-foreground outline-none [color-scheme:dark]"
                   />
                 </div>
                 <Button
