@@ -168,7 +168,7 @@ const CreativeWorkflow = () => {
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke('brand-scan', {
-        body: { brandName, website, niche, social },
+        body: { brandName, website, social },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
