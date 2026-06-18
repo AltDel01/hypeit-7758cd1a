@@ -792,11 +792,12 @@ const CreativeWorkflow = () => {
                 <div className="flex items-center gap-2 rounded-md bg-background/60 px-2 py-1.5">
                   <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={day.time}
                     onChange={(e) => patchDay(day.id, { time: e.target.value })}
                     className="w-full bg-transparent text-xs text-foreground outline-none [color-scheme:dark]"
                   />
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
                 <Button
                   size="sm"
