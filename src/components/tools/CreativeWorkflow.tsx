@@ -734,40 +734,52 @@ const CreativeWorkflow = () => {
 
 /* ---------------- Sub-views ---------------- */
 
-const GeneratingPreview = () => {
+const IMAGE_STAGES = ['Composing scene...', 'Applying brand style...', 'Rendering...', 'Finalizing...'];
+
+const GeneratingPreview = ({ assetType }: { assetType: AssetType }) => {
+  const stages = assetType === 'video' ? STAGES : IMAGE_STAGES;
   const [stage, setStage] = useState(0);
   useEffect(() => {
     let i = 0;
     const t = setInterval(() => {
       i += 1;
-      if (i >= STAGES.length) { clearInterval(t); return; }
+      if (i >= stages.length) { clearInterval(t); return; }
       setStage(i);
     }, 600);
     return () => clearInterval(t);
-  }, []);
+  }, [stages.length]);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">
       <Loader2 className="h-6 w-6 animate-spin text-[#8C52FF]" />
-      <p className="text-[10px] text-muted-foreground animate-pulse">{STAGES[stage]}</p>
+      <p className="text-[10px] text-muted-foreground animate-pulse">{stages[stage]}</p>
+      {assetType === 'video' && (
+        <p className="text-[9px] text-muted-foreground/70">Video is queued for production</p>
+      )}
     </div>
   );
 };
 
-const MockPlayer = ({ assetType }: { assetType: AssetType }) => (
-  <div className="group relative flex h-full w-full items-end justify-center overflow-hidden bg-gradient-to-b from-[#8C52FF]/30 via-background to-black">
-    {assetType === 'video' && (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
-          <Play className="h-5 w-5 fill-white text-white" />
-        </div>
+const AssetPreview = ({ assetUrl, assetType }: { assetUrl: string | null; assetType: AssetType }) => {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (!assetUrl) { setUrl(null); return; }
+    resolveResultUrl(assetUrl).then((u) => { if (active) setUrl(u); });
+    return () => { active = false; };
+  }, [assetUrl]);
+
+  if (!url) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-[#8C52FF]" />
       </div>
-    )}
-    <div className="relative z-10 w-full p-2">
-      <span className="inline-block rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-[0_0_10px_rgba(140,82,255,0.8)]">
-        ✨ Glow up in 7 days ✨
-      </span>
-    </div>
-  </div>
-);
+    );
+  }
+
+  if (assetType === 'video') {
+    return <video src={url} controls className="h-full w-full object-cover" />;
+  }
+  return <img src={url} alt="Generated asset" className="h-full w-full object-cover" />;
+};
 
 export default CreativeWorkflow;
