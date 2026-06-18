@@ -276,7 +276,7 @@ const CreativeWorkflow = () => {
         {/* Identity */}
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Brand Name</label>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">Brand Name</label>
             <Input value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="e.g. Glowance" />
           </div>
           <div className="space-y-1.5">
