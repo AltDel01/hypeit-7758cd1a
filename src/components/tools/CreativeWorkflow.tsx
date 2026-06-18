@@ -287,25 +287,14 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
-        {/* Product + niche */}
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
-            <Input
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-              placeholder="e.g. AI Automated Skincare Branding Agency"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Competitor Niche / Category</label>
-            <Select value={niche} onValueChange={setNiche}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Product description */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
+          <Input
+            value={product}
+            onChange={(e) => setProduct(e.target.value)}
+            placeholder="e.g. AI Automated Skincare Branding Agency"
+          />
         </div>
 
         {/* Social links */}
@@ -403,7 +392,7 @@ const CreativeWorkflow = () => {
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            Ready when you are, we benchmark <span className="text-foreground font-medium">{niche}</span> and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>.
+            Ready when you are, we benchmark your industry and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>.
           </p>
           <Button
             onClick={handleStrategy}
