@@ -252,7 +252,7 @@ const CreativeWorkflow = () => {
           <CalendarRange className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">End-to-End Creative Workflow</h1>
+          <h1 className="text-2xl font-bold text-foreground">Creative Workflow</h1>
           <p className="text-sm text-muted-foreground">
             Ideation, scripting, generation and automated posting to TikTok, Instagram and Facebook, planned across a full week.
           </p>

@@ -24,7 +24,7 @@ export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
 
 const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
-  { id: 'calendar', label: 'Calendar', icon: CalendarRange },
+  { id: 'calendar', label: 'Posting', icon: CalendarRange },
   { id: 'sequence', label: 'Sequence', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Predictor', icon: Brain },
