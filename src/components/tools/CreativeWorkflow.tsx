@@ -429,6 +429,7 @@ const CreativeWorkflow = () => {
 
       {/* Brand profile funnel */}
       {showProfileForm && (
+      <>
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border space-y-4">
         {hasStrategy && editingProfile && (
           <div className="flex justify-end">
