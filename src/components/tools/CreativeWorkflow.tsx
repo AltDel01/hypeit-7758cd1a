@@ -696,7 +696,7 @@ const CreativeWorkflow = () => {
             <Card key={day.id} className="flex flex-col gap-3 p-3 bg-card/60 backdrop-blur-sm border-border">
               {/* 1. Day header */}
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-foreground">{day.day}</span>
+                <span className="font-semibold text-foreground">Day-{day.position + 1}</span>
                 <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', STATUS_STYLES[day.status])}>
                   {day.status}
                 </span>
