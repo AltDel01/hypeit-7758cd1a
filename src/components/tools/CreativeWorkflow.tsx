@@ -143,12 +143,23 @@ const STATUS_STYLES: Record<DayStatus, string> = {
 
 /* ---------------- Component ---------------- */
 
+const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
+
 const CreativeWorkflow = () => {
+  // Brand funnel intake
+  const [brandName, setBrandName] = useState('');
+  const [website, setWebsite] = useState('');
+  const [brandMessage, setBrandMessage] = useState('');
+  const [brandColor, setBrandColor] = useState('#8C52FF');
+  const [social, setSocial] = useState({ instagram: '', tiktok: '', facebook: '' });
+  const [ecommerce, setEcommerce] = useState({ tiktokshop: '', shopee: '', tokopedia: '' });
+
   const [product, setProduct] = useState('');
   const [niche, setNiche] = useState('Beauty');
   const [generating, setGenerating] = useState(false);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+
 
   const patchDay = (id: string, patch: Partial<DayPlan>) =>
     setDays((prev) => (prev ? prev.map((d) => (d.id === id ? { ...d, ...patch } : d)) : prev));
