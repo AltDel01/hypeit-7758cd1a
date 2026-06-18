@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, X, Play, Check,
+  Flame, X, Play, Check, Globe, Instagram, ShoppingBag, Link2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
