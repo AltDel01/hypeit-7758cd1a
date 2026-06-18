@@ -40,7 +40,7 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [activeTool, setActiveTool] = useState<ToolId>('sequence');
+  const [activeTool, setActiveTool] = useState<ToolId>('calendar');
   const [feedbackMap, setFeedbackMap] = useState<FeedbackMap>({});
 
   const { requests, isLoading } = useGenerationRequests(user?.id);
@@ -196,6 +196,7 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="animate-fade-in">
+                {activeTool === 'calendar' && <CreativeWorkflow />}
                 {activeTool === 'sequence' && <SequenceGeneration />}
                 {activeTool === 'adcopy' && <AdCopyGenerator />}
                 {activeTool === 'predictor' && <ViralPredictor />}
