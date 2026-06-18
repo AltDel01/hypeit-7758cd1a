@@ -232,6 +232,40 @@ const CreativeWorkflow = () => {
     if (persist) persistDay(id, patch);
   };
 
+  /* -------- Poll pending video requests until the editor delivers them -------- */
+  const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
+  useEffect(() => {
+    if (!hasPendingVideos) return;
+    const poll = async () => {
+      const pending = (days || []).filter((d) => d.genStage === 'generating' && d.requestId);
+      if (!pending.length) return;
+      const ids = pending.map((d) => d.requestId as string);
+      const { data: reqs } = await supabase
+        .from('generation_requests')
+        .select('id, status, result_url')
+        .in('id', ids);
+      if (!reqs) return;
+      for (const r of reqs) {
+        if (r.status === 'completed' && r.result_url) {
+          const day = pending.find((d) => d.requestId === r.id);
+          if (day) {
+            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready' }, false);
+            await supabase
+              .from('creative_days')
+              .update({ asset_url: r.result_url, gen_stage: 'ready' })
+              .eq('id', day.id);
+          }
+        }
+      }
+    };
+    const t = setInterval(poll, 6000);
+    poll();
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPendingVideos]);
+
+
+
   /* -------- Generate real strategy via AI + save -------- */
   const handleStrategy = async () => {
     if (!brandName.trim()) {
