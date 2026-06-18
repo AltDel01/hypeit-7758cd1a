@@ -795,13 +795,24 @@ const CreativeWorkflow = () => {
                 </div>
                 <Button
                   size="sm"
+                  variant="outline"
                   onClick={() => approve(day)}
                   disabled={day.status === 'Ready to Post' || day.status === 'Published'}
-                  className="h-8 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-xs disabled:opacity-60"
+                  className="h-8 w-full gap-1 text-xs disabled:opacity-60"
                 >
                   {day.status === 'Ready to Post' || day.status === 'Published'
                     ? <><Check className="h-3.5 w-3.5" /> Queued</>
                     : 'Approve to Queue'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handlePost(day)}
+                  disabled={day.status === 'Published'}
+                  className="h-8 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-xs disabled:opacity-60"
+                >
+                  {day.status === 'Published'
+                    ? <><Check className="h-3.5 w-3.5" /> Posted</>
+                    : <><Sparkles className="h-3.5 w-3.5" /> Post Now</>}
                 </Button>
               </div>
             </Card>
