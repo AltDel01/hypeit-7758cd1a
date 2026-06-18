@@ -273,10 +273,10 @@ const CreativeWorkflow = () => {
         concept: d.concept,
         hook: d.hook,
         body: d.body,
-        scenes: d.scenes,
+        scenes: d.scenes as unknown as Json,
         asset_type: d.assetType,
         gen_stage: 'idle',
-        platforms: { tiktok: true, instagram: i % 2 === 0, facebook: i % 3 === 0 },
+        platforms: { tiktok: true, instagram: i % 2 === 0, facebook: i % 3 === 0 } as unknown as Json,
         scheduled_time: DEFAULT_TIMES[i] || '16:30',
       }));
       const { data: inserted, error: dErr } = await supabase
