@@ -331,6 +331,7 @@ const CreativeWorkflow = () => {
         .select();
       if (dErr) throw dErr;
       setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
+      setEditingProfile(false);
 
       const linked = [...Object.values(social).filter(Boolean), ...Object.values(ecommerce).filter(Boolean)].length;
       toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
