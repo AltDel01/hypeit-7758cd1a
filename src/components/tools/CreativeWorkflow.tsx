@@ -635,8 +635,8 @@ const CreativeWorkflow = () => {
                       </Button>
                     </div>
                   )}
-                  {day.genStage === 'generating' && <GeneratingPreview />}
-                  {day.genStage === 'ready' && <MockPlayer assetType={day.assetType} />}
+                  {day.genStage === 'generating' && <GeneratingPreview assetType={day.assetType} />}
+                  {day.genStage === 'ready' && <AssetPreview assetUrl={day.assetUrl} assetType={day.assetType} />}
                 </div>
               </div>
 
