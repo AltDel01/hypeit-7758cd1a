@@ -114,12 +114,14 @@ export type Database = {
           body: string
           concept: string
           created_at: string
+          credits_used: number
           day: string
           gen_stage: string
           hook: string
           id: string
           platforms: Json
           position: number
+          request_id: string | null
           scenes: Json
           scheduled_time: string
           status: string
@@ -134,12 +136,14 @@ export type Database = {
           body?: string
           concept?: string
           created_at?: string
+          credits_used?: number
           day: string
           gen_stage?: string
           hook?: string
           id?: string
           platforms?: Json
           position?: number
+          request_id?: string | null
           scenes?: Json
           scheduled_time?: string
           status?: string
@@ -154,12 +158,14 @@ export type Database = {
           body?: string
           concept?: string
           created_at?: string
+          credits_used?: number
           day?: string
           gen_stage?: string
           hook?: string
           id?: string
           platforms?: Json
           position?: number
+          request_id?: string | null
           scenes?: Json
           scheduled_time?: string
           status?: string

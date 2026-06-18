@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, Play, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video,
+  Flame, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
+import { resolveResultUrl } from '@/utils/resolveResultUrl';
 
 /* ---------------- Types ---------------- */
 
@@ -43,7 +44,9 @@ interface DayPlan {
   genStage: GenStage;
   platforms: Record<Platform, boolean>;
   time: string;
+  requestId: string | null;
 }
+
 
 /* ---------------- Static config ---------------- */
 
@@ -83,7 +86,9 @@ interface DayRow {
   gen_stage: string;
   platforms: unknown;
   scheduled_time: string;
+  request_id: string | null;
 }
+
 
 const rowToDay = (r: DayRow): DayPlan => ({
   id: r.id,
@@ -100,6 +105,7 @@ const rowToDay = (r: DayRow): DayPlan => ({
   genStage: (r.gen_stage as GenStage) || 'idle',
   platforms: (r.platforms as Record<Platform, boolean>) || { tiktok: true, instagram: false, facebook: false },
   time: r.scheduled_time || '16:30',
+  requestId: r.request_id || null,
 });
 
 // Map local DayPlan field patch to DB column patch.
@@ -227,6 +233,40 @@ const CreativeWorkflow = () => {
     if (persist) persistDay(id, patch);
   };
 
+  /* -------- Poll pending video requests until the editor delivers them -------- */
+  const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
+  useEffect(() => {
+    if (!hasPendingVideos) return;
+    const poll = async () => {
+      const pending = (days || []).filter((d) => d.genStage === 'generating' && d.requestId);
+      if (!pending.length) return;
+      const ids = pending.map((d) => d.requestId as string);
+      const { data: reqs } = await supabase
+        .from('generation_requests')
+        .select('id, status, result_url')
+        .in('id', ids);
+      if (!reqs) return;
+      for (const r of reqs) {
+        if (r.status === 'completed' && r.result_url) {
+          const day = pending.find((d) => d.requestId === r.id);
+          if (day) {
+            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready' }, false);
+            await supabase
+              .from('creative_days')
+              .update({ asset_url: r.result_url, gen_stage: 'ready' })
+              .eq('id', day.id);
+          }
+        }
+      }
+    };
+    const t = setInterval(poll, 6000);
+    poll();
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPendingVideos]);
+
+
+
   /* -------- Generate real strategy via AI + save -------- */
   const handleStrategy = async () => {
     if (!brandName.trim()) {
@@ -252,7 +292,7 @@ const CreativeWorkflow = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl'>> = data.days;
+      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl' | 'requestId'>> = data.days;
 
       // Create the strategy record.
       const { data: strat, error: sErr } = await supabase
@@ -297,12 +337,40 @@ const CreativeWorkflow = () => {
     }
   };
 
-  const handleGenerateAsset = (day: DayPlan) => {
-    patchDay(day.id, { genStage: 'generating', status: 'Generating' });
-    setTimeout(() => {
-      patchDay(day.id, { genStage: 'ready', status: 'Draft' });
-    }, 3000);
+  const handleGenerateAsset = async (day: DayPlan) => {
+    patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
+        body: { dayId: day.id },
+      });
+      if (error) {
+        // Surface insufficient-credit / rate-limit messages from the function body.
+        let msg = 'Could not generate this asset. Try again.';
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const j = await ctx.json();
+            if (j?.error) msg = j.error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.assetType === 'image' && data?.assetUrl) {
+        patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' }, false);
+        toast.success(`Image generated for ${day.day}. ${data.creditsUsed} credits used.`);
+      } else if (data?.assetType === 'video') {
+        patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+        toast.success(`Video for ${day.day} is being produced. We'll update it here when it's ready.`);
+      }
+    } catch (e) {
+      console.error(e);
+      patchDay(day.id, { genStage: 'idle', status: 'Draft' }, false);
+      toast.error(e instanceof Error ? e.message : 'Could not generate this asset. Try again.');
+    }
   };
+
 
   const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
 
@@ -568,8 +636,8 @@ const CreativeWorkflow = () => {
                       </Button>
                     </div>
                   )}
-                  {day.genStage === 'generating' && <GeneratingPreview />}
-                  {day.genStage === 'ready' && <MockPlayer assetType={day.assetType} />}
+                  {day.genStage === 'generating' && <GeneratingPreview assetType={day.assetType} />}
+                  {day.genStage === 'ready' && <AssetPreview assetUrl={day.assetUrl} assetType={day.assetType} />}
                 </div>
               </div>
 
@@ -667,40 +735,52 @@ const CreativeWorkflow = () => {
 
 /* ---------------- Sub-views ---------------- */
 
-const GeneratingPreview = () => {
+const IMAGE_STAGES = ['Composing scene...', 'Applying brand style...', 'Rendering...', 'Finalizing...'];
+
+const GeneratingPreview = ({ assetType }: { assetType: AssetType }) => {
+  const stages = assetType === 'video' ? STAGES : IMAGE_STAGES;
   const [stage, setStage] = useState(0);
   useEffect(() => {
     let i = 0;
     const t = setInterval(() => {
       i += 1;
-      if (i >= STAGES.length) { clearInterval(t); return; }
+      if (i >= stages.length) { clearInterval(t); return; }
       setStage(i);
     }, 600);
     return () => clearInterval(t);
-  }, []);
+  }, [stages.length]);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">
       <Loader2 className="h-6 w-6 animate-spin text-[#8C52FF]" />
-      <p className="text-[10px] text-muted-foreground animate-pulse">{STAGES[stage]}</p>
+      <p className="text-[10px] text-muted-foreground animate-pulse">{stages[stage]}</p>
+      {assetType === 'video' && (
+        <p className="text-[9px] text-muted-foreground/70">Video is queued for production</p>
+      )}
     </div>
   );
 };
 
-const MockPlayer = ({ assetType }: { assetType: AssetType }) => (
-  <div className="group relative flex h-full w-full items-end justify-center overflow-hidden bg-gradient-to-b from-[#8C52FF]/30 via-background to-black">
-    {assetType === 'video' && (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
-          <Play className="h-5 w-5 fill-white text-white" />
-        </div>
+const AssetPreview = ({ assetUrl, assetType }: { assetUrl: string | null; assetType: AssetType }) => {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (!assetUrl) { setUrl(null); return; }
+    resolveResultUrl(assetUrl).then((u) => { if (active) setUrl(u); });
+    return () => { active = false; };
+  }, [assetUrl]);
+
+  if (!url) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-[#8C52FF]" />
       </div>
-    )}
-    <div className="relative z-10 w-full p-2">
-      <span className="inline-block rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-[0_0_10px_rgba(140,82,255,0.8)]">
-        ✨ Glow up in 7 days ✨
-      </span>
-    </div>
-  </div>
-);
+    );
+  }
+
+  if (assetType === 'video') {
+    return <video src={url} controls className="h-full w-full object-cover" />;
+  }
+  return <img src={url} alt="Generated asset" className="h-full w-full object-cover" />;
+};
 
 export default CreativeWorkflow;
