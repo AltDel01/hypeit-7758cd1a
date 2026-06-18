@@ -55,10 +55,10 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const DEFAULT_TIMES = ['16:30', '12:00', '18:45', '09:15', '20:00', '11:30', '17:00'];
 const STAGES = ['Cloning voice...', 'Rendering scenes...', 'Adding captions...', 'Color grading...', 'Finalizing export...'];
 
-const PLATFORM_META: Record<Platform, { label: string; on: string; glyph: string }> = {
-  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', glyph: 'TT' },
-  instagram: { label: 'Instagram Reels', on: 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white', glyph: 'IG' },
-  facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', glyph: 'f' },
+const PLATFORM_META: Record<Platform, { label: string; on: string; icon: LucideIcon }> = {
+  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', icon: Music2 },
+  instagram: { label: 'Instagram Reels', on: 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white', icon: Instagram },
+  facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', icon: Facebook },
 };
 
 const STATUS_STYLES: Record<DayStatus, string> = {
