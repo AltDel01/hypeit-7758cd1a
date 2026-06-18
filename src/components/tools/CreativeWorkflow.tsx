@@ -580,6 +580,8 @@ const CreativeWorkflow = () => {
           </Button>
         </div>
       </Card>
+      </>
+      )}
 
       {/* Empty state */}
       {!days && !generating && !loadingExisting && (
