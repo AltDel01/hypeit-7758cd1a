@@ -829,7 +829,7 @@ const CreativeWorkflow = () => {
         <DialogContent className="max-w-2xl border-border bg-card/80 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span>{scriptDay?.day} Script</span>
+              <span>Day-{(scriptDay?.position ?? 0) + 1} Script</span>
               {scriptDay && (
                 <Badge variant="secondary" className="text-[10px]">{scriptDay.concept}</Badge>
               )}
