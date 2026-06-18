@@ -1,62 +1,42 @@
+## Goal
 
-# Make Creative Workflow Functional
+Make the Brand Profile a **one-time setup**. Once a user has generated and saved a strategy, their next visit to Creative Workflow skips the whole intake form and shows the 7-day calendar immediately. They can still reopen the brand profile to edit it or regenerate.
 
-Today only the brand-scan step is real. Everything after it (strategy, scripts, asset generation, posting) is mock UI. This plan turns it into a working feature in phases, smallest-effort-highest-value first.
+## Answer: can Meta OAuth post to a user's Instagram / Facebook from us?
 
-## Two important realities to decide on first
+Yes, but with real conditions:
 
-**1. TikTok auto-posting is not a quick wire-up.** The TikTok connector authenticates ONE account (the workspace owner), not each of your users. For every user to auto-post to *their own* TikTok, we need per-user TikTok OAuth + TikTok's Content Posting API, which requires submitting your app for TikTok review/approval (days to weeks, and they must approve the "direct post" scope). So Phase 4 below builds the full pipeline but real publishing only switches on after TikTok approves your app.
+- **Instagram**: Posting on a user's behalf works **only for Instagram Business or Creator accounts that are linked to a Facebook Page**, via the Instagram Graph API (`/media` then `/media_publish`). It does **not** work for personal Instagram accounts.
+- **Facebook**: We can post to a **Facebook Page** the user manages (Pages API), not to a personal Facebook profile/timeline (Meta removed that ability years ago).
+- **Approval required**: Meta requires App Review for the permissions (`instagram_content_publish`, `pages_manage_posts`, `business_management`, etc.) and a Business Verification before it works for accounts other than your own test users. This takes time, similar to TikTok.
 
-**2. Storing Instagram/Facebook usernames + passwords is a serious security and policy risk.** Meta's terms forbid logging into accounts with stored passwords, and a leak would expose your users' accounts. I will build it as you asked (user enters IG/FB credentials, admin can view them to post manually) but with encryption at rest and strict admin-only access. I strongly recommend later replacing this with proper Meta OAuth. This caveat is acknowledged in the build.
+So Meta OAuth is the correct, policy-compliant path, but it can only auto-post to **IG Business/Creator accounts and Facebook Pages**, and only after Meta approves the app. Personal accounts can never be auto-posted to by any compliant method, which is also why the username/password approach is both against Meta's terms and limited. This is worth knowing before we build Phase 4.
+
+## What changes (this task)
+
+Only the `CreativeWorkflow.tsx` UI/flow. No database or edge function changes.
 
 ```text
-User fills Brand Profile ─► AI brand-scan (DONE)
-        │
-        ▼
-Generate 7-day strategy ─► AI returns concepts/hooks/scripts  ◄── Phase 1
-        │
-        ▼
-Per-day: choose Image or Video ─► AI generates asset, deduct credits  ◄── Phase 3
-        │
-        ▼
-Approve & schedule ─► saved to DB  ◄── Phase 2
-        │
-        ├─► TikTok: per-user OAuth + Content API (after approval)  ◄── Phase 4
-        └─► IG/FB: user enters login ─► encrypted ─► admin dashboard posts manually  ◄── Phase 4
+First visit (no saved strategy)        Return visit (strategy exists)
+┌────────────────────────────┐        ┌────────────────────────────┐
+│ Brand Profile form          │        │ Compact header:             │
+│ + scan + product            │  ───►  │  "Glowance · edit profile"  │
+│ + Generate Strategy button  │        │ 7-day calendar (immediately)│
+└────────────────────────────┘        └────────────────────────────┘
 ```
 
-## Phase 1 — Real AI strategy + scripts
-- New edge function `generate-strategy` (Lovable AI, `google/gemini-3-flash-preview`, JSON output). Input: brand name, product, brand message/tone, brand color, linked social/ecommerce channels. Output: 7 days, each with a benchmark rationale, concept, hook, body, 3 scenes (visual + voiceover), and a recommended asset type.
-- Default the week to **2 videos + 3 images** (per your spec); user can change each day's asset type in the day card.
-- Replace the `setTimeout` + static arrays in `handleStrategy` with a real call; keep the existing card UI.
+### Behavior
 
-## Phase 2 — Persistence (save to account)
-New tables (with GRANTs + RLS, user owns their rows; admins can read for the dashboard):
-- `creative_strategies` — one row per generated week (user_id, brand snapshot, created_at).
-- `creative_days` — one row per day (strategy_id, day, status, concept, hook, body, scenes jsonb, asset_type, asset_url, platforms jsonb, scheduled_time).
-Strategies reload on revisit; editing a day card updates the DB.
+1. On mount, the component already loads the most recent saved strategy. If one exists (days are present), render the **calendar directly** and **hide** the Brand Profile card and the "Generate Strategy" control bar.
+2. Add a small **brand summary bar** above the calendar showing the saved brand name (and product), with an **"Edit brand profile"** button.
+3. Clicking "Edit brand profile" reveals the existing Brand Profile form again (collapsed by default) so the user can update details and **Regenerate** the 7-day strategy. After regenerating, it collapses back to the calendar.
+4. First-time users (no saved strategy) see exactly today's flow: the full Brand Profile form and the generate button.
+5. While the initial load is still running, keep the existing "Loading your saved workflow..." state so the form doesn't flash before we know whether a strategy exists.
 
-## Phase 3 — Real asset generation with credit deduction
-- "Generate Asset" calls a new `generate-creative-asset` edge function:
-  - **Image** → image generation model, stored in a `creative-assets` storage bucket.
-  - **Video** → reuse the existing `generation_requests` editor-fulfillment pipeline (consistent with how the rest of the app produces video) OR a video model; the asset URL is saved on the day row.
-- Credit deduction reuses your existing credit system (keyword/variable cost, deducted on completion). Each generation cuts tokens, per your spec. Pre-check balance before allowing generation.
+### Technical notes
 
-## Phase 4 — Publishing
-**TikTok (build now, live after approval):**
-- Add per-user TikTok OAuth connect button. Store each user's TikTok token. Edge function `publish-tiktok` uses the Content Posting API to push the day's video at the scheduled time (a pg_cron scheduler checks due posts).
-- Until your TikTok app is approved, the button + queue work but publishing stays in "Pending approval" mode.
-
-**Instagram / Facebook (manual-by-staff):**
-- New table `social_credentials` (user_id, platform, account_name, encrypted_password, status). Encrypted at rest; RLS so only the owner can write and only admins can read.
-- A field in the day card / settings for the user to enter their IG/FB account name + password.
-- Admin dashboard section listing submitted credentials + the ready-to-post assets so staff can post manually and mark each day "Published".
-
-## What I'll do first
-If you approve, I'll start with **Phase 1 + Phase 2** (real strategy/scripts + saving), since that's the fastest path to a genuinely working workflow, then move through Phases 3 and 4. I'll also need you to connect the TikTok connector and confirm the IG/FB password-storage approach before Phase 4.
-
-## Technical notes
-- Edge functions: `generate-strategy`, `generate-creative-asset`, `publish-tiktok`, plus a cron-driven scheduler. All use `LOVABLE_API_KEY` (already set) and return generic client errors per project rules.
-- New storage bucket `creative-assets` (private, signed URLs).
-- Credentials stored only encrypted; never returned to non-admin clients.
-- Reuses existing credit deduction, user_roles/admin access, and the `storage:bucket/path` reference convention already in the app.
+- Drive this with a derived flag like `hasStrategy = !!days && days.length > 0` plus an `editingProfile` state (default `false`).
+- Show the Brand Profile `Card` and control-bar `Card` only when `!hasStrategy || editingProfile`.
+- Show the new summary bar only when `hasStrategy && !editingProfile`.
+- Reuse the existing `handleStrategy`; on success, set `editingProfile = false`.
+- No schema changes: "one-time" is enforced purely by the presence of a saved strategy for the user, which already persists in `creative_strategies` / `creative_days`.
