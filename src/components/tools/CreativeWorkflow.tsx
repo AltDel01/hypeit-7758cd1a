@@ -388,6 +388,78 @@ const CreativeWorkflow = () => {
     toast.success(`${day.day} approved to queue.`);
   };
 
+  /* -------- Skip Brand Profile: build a blank, fully editable 7-day week -------- */
+  const handleBlankWeek = async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) {
+      toast.error('Please sign in to build your workflow.');
+      return;
+    }
+    setGenerating(true);
+    setDays(null);
+    try {
+      const { data: strat, error: sErr } = await supabase
+        .from('creative_strategies')
+        .insert({
+          user_id: userId,
+          brand_name: brandName || 'My Brand',
+          product: product || '',
+          brand_message: brandMessage || '',
+          brand_color: brandColor,
+        })
+        .select()
+        .single();
+      if (sErr) throw sErr;
+      setStrategyId(strat.id);
+
+      const rows = DAYS.map((d, i) => ({
+        strategy_id: strat.id,
+        user_id: userId,
+        day: d,
+        position: i,
+        status: 'Draft',
+        benchmark: '',
+        concept: '',
+        hook: '',
+        body: '',
+        scenes: [] as unknown as Json,
+        asset_type: 'image',
+        gen_stage: 'idle',
+        platforms: { tiktok: true, instagram: false, facebook: false } as unknown as Json,
+        scheduled_time: DEFAULT_TIMES[i] || '16:30',
+      }));
+      const { data: inserted, error: dErr } = await supabase
+        .from('creative_days')
+        .insert(rows)
+        .select();
+      if (dErr) throw dErr;
+      setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
+      setEditingProfile(false);
+      toast.success('Blank 7-day week ready. Customize each day manually.');
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not build a blank week. Try again.');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /* -------- Post a single day to its selected social platforms -------- */
+  const handlePost = (day: DayPlan) => {
+    if (day.genStage !== 'ready' || !day.assetUrl) {
+      toast.error('Generate or add an asset before posting.');
+      return;
+    }
+    const targets = (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p]);
+    if (!targets.length) {
+      toast.error('Select at least one platform to post to.');
+      return;
+    }
+    patchDay(day.id, { status: 'Published' });
+    toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
