@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow } from 'lucide-react';
+import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import GenerationHistory from '@/components/dashboard/GenerationHistory';
 import RequestDetailView from '@/components/dashboard/RequestDetailView';
@@ -10,6 +10,7 @@ import ViralPredictor from '@/components/tools/ViralPredictor';
 import LipSyncStudio from '@/components/tools/LipSyncStudio';
 import CinemaStudio from '@/components/tools/CinemaStudio';
 import WorkflowStudio from '@/components/tools/WorkflowStudio';
+import CreativeWorkflow from '@/components/tools/CreativeWorkflow';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGenerationRequests } from '@/hooks/useGenerationRequests';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,9 +21,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 
-type ToolId = 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
+type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
 
 const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
+  { id: 'calendar', label: 'Calendar', icon: CalendarRange },
   { id: 'sequence', label: 'Sequence', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Predictor', icon: Brain },
@@ -38,7 +40,7 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   const [selectedRequest, setSelectedRequest] = useState<GenerationRequest | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [activeTool, setActiveTool] = useState<ToolId>('sequence');
+  const [activeTool, setActiveTool] = useState<ToolId>('calendar');
   const [feedbackMap, setFeedbackMap] = useState<FeedbackMap>({});
 
   const { requests, isLoading } = useGenerationRequests(user?.id);
@@ -194,6 +196,7 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="animate-fade-in">
+                {activeTool === 'calendar' && <CreativeWorkflow />}
                 {activeTool === 'sequence' && <SequenceGeneration />}
                 {activeTool === 'adcopy' && <AdCopyGenerator />}
                 {activeTool === 'predictor' && <ViralPredictor />}
