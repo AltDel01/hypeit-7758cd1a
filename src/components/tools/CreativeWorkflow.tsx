@@ -104,6 +104,7 @@ const rowToDay = (r: DayRow): DayPlan => ({
   genStage: (r.gen_stage as GenStage) || 'idle',
   platforms: (r.platforms as Record<Platform, boolean>) || { tiktok: true, instagram: false, facebook: false },
   time: r.scheduled_time || '16:30',
+  requestId: r.request_id || null,
 });
 
 // Map local DayPlan field patch to DB column patch.
