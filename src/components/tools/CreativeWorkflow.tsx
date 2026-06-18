@@ -153,12 +153,39 @@ const CreativeWorkflow = () => {
   const [brandColor, setBrandColor] = useState('#8C52FF');
   const [social, setSocial] = useState({ instagram: '', tiktok: '', facebook: '' });
   const [ecommerce, setEcommerce] = useState({ tiktokshop: '', shopee: '', tokopedia: '' });
+  const [scanning, setScanning] = useState(false);
+  const [scanned, setScanned] = useState(false);
 
   const [product, setProduct] = useState('');
   const [niche, setNiche] = useState('Beauty');
   const [generating, setGenerating] = useState(false);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+
+  const handleScan = async () => {
+    if (!brandName.trim() && !website.trim()) {
+      toast.error('Add your brand name or website first.');
+      return;
+    }
+    setScanning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('brand-scan', {
+        body: { brandName, website, niche, social },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.brandMessage) setBrandMessage(data.brandMessage);
+      if (data?.brandColor) setBrandColor(data.brandColor);
+      setScanned(true);
+      toast.success('Brand message and color auto-filled from your channels.');
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
+    } finally {
+      setScanning(false);
+    }
+  };
+
 
 
   const patchDay = (id: string, patch: Partial<DayPlan>) =>
