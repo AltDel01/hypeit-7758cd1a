@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
   Flame, X, Play, Check,
@@ -407,7 +407,7 @@ const CreativeWorkflow = () => {
 const GeneratingPreview = () => {
   const [stage, setStage] = useState(0);
   // advance through stages every ~600ms for the 3s window
-  useState(() => {
+  useEffect(() => {
     let i = 0;
     const t = setInterval(() => {
       i += 1;
@@ -415,7 +415,7 @@ const GeneratingPreview = () => {
       setStage(i);
     }, 600);
     return () => clearInterval(t);
-  });
+  }, []);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">
       <Loader2 className="h-6 w-6 animate-spin text-[#8C52FF]" />
