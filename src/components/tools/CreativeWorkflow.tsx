@@ -156,7 +156,6 @@ const CreativeWorkflow = () => {
   const [scanned, setScanned] = useState(false);
 
   const [product, setProduct] = useState('');
-  const [niche, setNiche] = useState('Beauty');
   const [generating, setGenerating] = useState(false);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
