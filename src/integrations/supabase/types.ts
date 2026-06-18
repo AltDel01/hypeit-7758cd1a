@@ -106,6 +106,110 @@ export type Database = {
         }
         Relationships: []
       }
+      creative_days: {
+        Row: {
+          asset_type: string
+          asset_url: string | null
+          benchmark: string
+          body: string
+          concept: string
+          created_at: string
+          day: string
+          gen_stage: string
+          hook: string
+          id: string
+          platforms: Json
+          position: number
+          scenes: Json
+          scheduled_time: string
+          status: string
+          strategy_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          asset_url?: string | null
+          benchmark?: string
+          body?: string
+          concept?: string
+          created_at?: string
+          day: string
+          gen_stage?: string
+          hook?: string
+          id?: string
+          platforms?: Json
+          position?: number
+          scenes?: Json
+          scheduled_time?: string
+          status?: string
+          strategy_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          asset_url?: string | null
+          benchmark?: string
+          body?: string
+          concept?: string
+          created_at?: string
+          day?: string
+          gen_stage?: string
+          hook?: string
+          id?: string
+          platforms?: Json
+          position?: number
+          scenes?: Json
+          scheduled_time?: string
+          status?: string
+          strategy_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_days_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "creative_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creative_strategies: {
+        Row: {
+          brand_color: string
+          brand_message: string
+          brand_name: string
+          created_at: string
+          id: string
+          product: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_color?: string
+          brand_message?: string
+          brand_name?: string
+          created_at?: string
+          id?: string
+          product?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_color?: string
+          brand_message?: string
+          brand_name?: string
+          created_at?: string
+          id?: string
+          product?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generated_images: {
         Row: {
           created_at: string | null

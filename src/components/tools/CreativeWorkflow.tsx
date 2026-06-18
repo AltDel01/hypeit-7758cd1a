@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, X, Play, Check, Globe, Instagram, ShoppingBag,
+  Flame, Play, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,85 +9,46 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
-import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 
 /* ---------------- Types ---------------- */
 
 type DayStatus = 'Draft' | 'Generating' | 'Ready to Post' | 'Published';
 type GenStage = 'idle' | 'generating' | 'ready';
 type Platform = 'tiktok' | 'instagram' | 'facebook';
+type AssetType = 'image' | 'video';
 
 interface Scene {
-  id: string;
   visual: string;
   voiceover: string;
 }
 
 interface DayPlan {
-  id: string;
+  id: string;        // local + db id
   day: string;
+  position: number;
   status: DayStatus;
   benchmark: string;
   concept: string;
   hook: string;
   body: string;
   scenes: Scene[];
+  assetType: AssetType;
+  assetUrl: string | null;
   genStage: GenStage;
   platforms: Record<Platform, boolean>;
   time: string;
 }
 
-/* ---------------- Static seed data ---------------- */
+/* ---------------- Static config ---------------- */
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-const BENCHMARKS = [
-  '🔥 Inspired by Top Meta Skincare Ad, 85% Hold Rate',
-  '🔥 Modeled on viral TikTok unboxing, 4.2M views',
-  '📈 Based on best CTR Reel format, 12% engagement',
-  '⚡ Mirrors trending "POV" hook, 92% retention',
-  '🎯 Derived from high-ROAS UGC ad, 6.1x return',
-  '💬 Patterned on comment-bait carousel, 38k saves',
-  '🚀 Built from top Story swipe-up, 19% conversion',
-];
-
-const CONCEPTS = [
-  'The 7-second glow transformation',
-  'Behind the brand: founder story',
-  'Myth vs Fact: skincare edition',
-  '3 mistakes ruining your routine',
-  'Real customer before & after',
-  'Trend remix with our product',
-  'Weekend self-care ritual',
-];
-
-const HOOKS = [
-  'Stop scrolling, this changed my skin in 7 days',
-  'Nobody tells you this about your morning routine',
-  'I tried it for 30 days, here is what happened',
-  'POV: you finally found the one product that works',
-  'This is why your skincare is not working',
-  'Watch this before you buy another serum',
-  'The 30-second ritual that went viral',
-];
-
-const BODIES = [
-  'Quick cuts of texture, application, and the glowing result with bold on-screen captions.',
-  'Founder talks to camera, intercut with product b-roll and warm lifestyle shots.',
-  'Side-by-side split screen comparing the wrong way vs the right way.',
-  'Fast-paced listicle format with kinetic text and trending audio.',
-  'Authentic UGC selfie style with real reactions and a clear CTA card.',
-  'Aesthetic flat-lay reveal building to a satisfying close-up payoff.',
-  'Calm ASMR-style sequence ending on the logo and offer.',
-];
-
+const DEFAULT_TIMES = ['16:30', '12:00', '18:45', '09:15', '20:00', '11:30', '17:00'];
 const STAGES = ['Cloning voice...', 'Rendering scenes...', 'Adding captions...', 'Color grading...', 'Finalizing export...'];
 
 const PLATFORM_META: Record<Platform, { label: string; on: string; glyph: string }> = {
@@ -96,43 +57,6 @@ const PLATFORM_META: Record<Platform, { label: string; on: string; glyph: string
   facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', glyph: 'f' },
 };
 
-const uid = () => Math.random().toString(36).slice(2);
-const pick = <T,>(arr: T[], i: number) => arr[i % arr.length];
-
-function buildDay(i: number): DayPlan {
-  // Pre-seed a few different operational stages to simulate a live board.
-  const presets: Partial<DayPlan>[] = [
-    { status: 'Published', genStage: 'ready' },
-    { status: 'Ready to Post', genStage: 'ready' },
-    { status: 'Draft', genStage: 'idle' },
-    { status: 'Generating', genStage: 'generating' },
-    { status: 'Draft', genStage: 'idle' },
-    { status: 'Ready to Post', genStage: 'ready' },
-    { status: 'Draft', genStage: 'idle' },
-  ];
-  const preset = presets[i] || {};
-  return {
-    id: uid(),
-    day: DAYS[i],
-    status: 'Draft',
-    benchmark: pick(BENCHMARKS, i),
-    concept: pick(CONCEPTS, i),
-    hook: pick(HOOKS, i),
-    body: pick(BODIES, i),
-    scenes: [
-      { id: uid(), visual: 'Extreme close-up of product texture on fingertip, soft daylight.', voiceover: pick(HOOKS, i) },
-      { id: uid(), visual: 'Quick application montage, mirror reflection, satisfying glide.', voiceover: 'Here is the routine that actually delivers results.' },
-      { id: uid(), visual: 'Final glowing result, smile to camera, product held up.', voiceover: 'Tap the link, your skin will thank you.' },
-    ],
-    genStage: 'idle',
-    platforms: { tiktok: true, instagram: i % 2 === 0, facebook: i % 3 === 0 },
-    time: ['16:30', '12:00', '18:45', '09:15', '20:00', '11:30', '17:00'][i] || '16:30',
-    ...preset,
-  };
-}
-
-/* ---------------- Status badge ---------------- */
-
 const STATUS_STYLES: Record<DayStatus, string> = {
   'Draft': 'bg-muted text-muted-foreground',
   'Generating': 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
@@ -140,9 +64,61 @@ const STATUS_STYLES: Record<DayStatus, string> = {
   'Published': 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
 };
 
-/* ---------------- Component ---------------- */
-
 const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
+
+/* ---------------- DB mapping ---------------- */
+
+interface DayRow {
+  id: string;
+  day: string;
+  position: number;
+  status: string;
+  benchmark: string;
+  concept: string;
+  hook: string;
+  body: string;
+  scenes: unknown;
+  asset_type: string;
+  asset_url: string | null;
+  gen_stage: string;
+  platforms: unknown;
+  scheduled_time: string;
+}
+
+const rowToDay = (r: DayRow): DayPlan => ({
+  id: r.id,
+  day: r.day,
+  position: r.position,
+  status: (r.status as DayStatus) || 'Draft',
+  benchmark: r.benchmark || '',
+  concept: r.concept || '',
+  hook: r.hook || '',
+  body: r.body || '',
+  scenes: Array.isArray(r.scenes) ? (r.scenes as Scene[]) : [],
+  assetType: (r.asset_type as AssetType) || 'image',
+  assetUrl: r.asset_url,
+  genStage: (r.gen_stage as GenStage) || 'idle',
+  platforms: (r.platforms as Record<Platform, boolean>) || { tiktok: true, instagram: false, facebook: false },
+  time: r.scheduled_time || '16:30',
+});
+
+// Map local DayPlan field patch to DB column patch.
+const patchToColumns = (patch: Partial<DayPlan>): Record<string, unknown> => {
+  const out: Record<string, unknown> = {};
+  if (patch.status !== undefined) out.status = patch.status;
+  if (patch.concept !== undefined) out.concept = patch.concept;
+  if (patch.hook !== undefined) out.hook = patch.hook;
+  if (patch.body !== undefined) out.body = patch.body;
+  if (patch.scenes !== undefined) out.scenes = patch.scenes;
+  if (patch.assetType !== undefined) out.asset_type = patch.assetType;
+  if (patch.assetUrl !== undefined) out.asset_url = patch.assetUrl;
+  if (patch.genStage !== undefined) out.gen_stage = patch.genStage;
+  if (patch.platforms !== undefined) out.platforms = patch.platforms;
+  if (patch.time !== undefined) out.scheduled_time = patch.time;
+  return out;
+};
+
+/* ---------------- Component ---------------- */
 
 const CreativeWorkflow = () => {
   // Brand funnel intake
@@ -157,8 +133,44 @@ const CreativeWorkflow = () => {
 
   const [product, setProduct] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(true);
+  const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+
+  // Debounce timers for persisting per-day edits.
+  const persistTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  /* -------- Load most recent saved strategy on mount -------- */
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: strat } = await supabase
+          .from('creative_strategies')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (strat) {
+          setStrategyId(strat.id);
+          setBrandName(strat.brand_name || '');
+          setProduct(strat.product || '');
+          setBrandMessage(strat.brand_message || '');
+          setBrandColor(strat.brand_color || '#8C52FF');
+          const { data: rows } = await supabase
+            .from('creative_days')
+            .select('*')
+            .eq('strategy_id', strat.id)
+            .order('position', { ascending: true });
+          if (rows && rows.length) setDays(rows.map((r) => rowToDay(r as DayRow)));
+        }
+      } catch (e) {
+        console.error('load strategy failed', e);
+      } finally {
+        setLoadingExisting(false);
+      }
+    })();
+  }, []);
 
   const handleScan = async (silent = false) => {
     if (!brandName.trim() && !website.trim()) {
@@ -199,14 +211,24 @@ const CreativeWorkflow = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandName, website, social]);
 
+  /* -------- Persist a single day's edits (debounced) -------- */
+  const persistDay = (id: string, patch: Partial<DayPlan>) => {
+    const cols = patchToColumns(patch);
+    if (Object.keys(cols).length === 0) return;
+    clearTimeout(persistTimers.current[id]);
+    persistTimers.current[id] = setTimeout(async () => {
+      const { error } = await supabase.from('creative_days').update(cols).eq('id', id);
+      if (error) console.error('persist day failed', error);
+    }, 700);
+  };
 
-
-
-
-  const patchDay = (id: string, patch: Partial<DayPlan>) =>
+  const patchDay = (id: string, patch: Partial<DayPlan>, persist = true) => {
     setDays((prev) => (prev ? prev.map((d) => (d.id === id ? { ...d, ...patch } : d)) : prev));
+    if (persist) persistDay(id, patch);
+  };
 
-  const handleStrategy = () => {
+  /* -------- Generate real strategy via AI + save -------- */
+  const handleStrategy = async () => {
     if (!brandName.trim()) {
       toast.error('Add your brand name first.');
       return;
@@ -215,19 +237,65 @@ const CreativeWorkflow = () => {
       toast.error('Add a product or service description first.');
       return;
     }
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) {
+      toast.error('Please sign in to generate and save a strategy.');
+      return;
+    }
+
     setGenerating(true);
     setDays(null);
-    setTimeout(() => {
-      setDays(DAYS.map((_, i) => buildDay(i)));
-      setGenerating(false);
-      const linked = [
-        ...Object.values(social).filter(Boolean),
-        ...Object.values(ecommerce).filter(Boolean),
-      ].length;
-      toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
-    }, 1400);
-  };
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-strategy', {
+        body: { brandName, product, brandMessage, brandColor, social, ecommerce },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl'>> = data.days;
 
+      // Create the strategy record.
+      const { data: strat, error: sErr } = await supabase
+        .from('creative_strategies')
+        .insert({ user_id: userId, brand_name: brandName, product, brand_message: brandMessage, brand_color: brandColor })
+        .select()
+        .single();
+      if (sErr) throw sErr;
+      setStrategyId(strat.id);
+
+      // Insert all 7 days.
+      const rows = genDays.map((d, i) => ({
+        strategy_id: strat.id,
+        user_id: userId,
+        day: d.day,
+        position: i,
+        status: 'Draft',
+        benchmark: d.benchmark,
+        concept: d.concept,
+        hook: d.hook,
+        body: d.body,
+        scenes: d.scenes as unknown as Json,
+        asset_type: d.assetType,
+        gen_stage: 'idle',
+        platforms: { tiktok: true, instagram: i % 2 === 0, facebook: i % 3 === 0 } as unknown as Json,
+        scheduled_time: DEFAULT_TIMES[i] || '16:30',
+      }));
+      const { data: inserted, error: dErr } = await supabase
+        .from('creative_days')
+        .insert(rows)
+        .select();
+      if (dErr) throw dErr;
+      setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
+
+      const linked = [...Object.values(social).filter(Boolean), ...Object.values(ecommerce).filter(Boolean)].length;
+      toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not generate your strategy. Try again.');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleGenerateAsset = (day: DayPlan) => {
     patchDay(day.id, { genStage: 'generating', status: 'Generating' });
@@ -235,6 +303,8 @@ const CreativeWorkflow = () => {
       patchDay(day.id, { genStage: 'ready', status: 'Draft' });
     }, 3000);
   };
+
+  const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
 
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
@@ -400,13 +470,13 @@ const CreativeWorkflow = () => {
             className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
           >
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            Generate Data-Driven 7-Day Strategy
+            {days ? 'Regenerate 7-Day Strategy' : 'Generate Data-Driven 7-Day Strategy'}
           </Button>
         </div>
       </Card>
 
       {/* Empty state */}
-      {!days && !generating && (
+      {!days && !generating && !loadingExisting && (
         <Card className="p-12 text-center border-dashed border-border bg-card/30">
           <CalendarRange className="mx-auto h-10 w-10 text-muted-foreground/50" />
           <p className="mt-3 text-sm text-muted-foreground">
@@ -415,10 +485,12 @@ const CreativeWorkflow = () => {
         </Card>
       )}
 
-      {generating && (
+      {(generating || loadingExisting) && !days && (
         <Card className="p-12 text-center border-border bg-card/30">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#8C52FF]" />
-          <p className="mt-3 text-sm text-muted-foreground">Analyzing benchmarks and building your week...</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {loadingExisting && !generating ? 'Loading your saved workflow...' : 'Analyzing benchmarks and building your week...'}
+          </p>
         </Card>
       )}
 
@@ -466,22 +538,38 @@ const CreativeWorkflow = () => {
               </div>
 
               {/* 4. Generation & preview block */}
-              <div className="rounded-lg border border-border p-2.5">
+              <div className="rounded-lg border border-border p-2.5 space-y-2">
+                {/* Asset type switch */}
+                <div className="flex items-center gap-1 rounded-md bg-muted/40 p-0.5">
+                  {(['image', 'video'] as AssetType[]).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setAssetType(day, t)}
+                      className={cn(
+                        'flex flex-1 items-center justify-center gap-1 rounded px-2 py-1 text-[10px] font-medium capitalize transition-colors',
+                        day.assetType === t ? 'bg-[#8C52FF] text-white' : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {t === 'image' ? <ImageIcon className="h-3 w-3" /> : <Video className="h-3 w-3" />}
+                      {t}
+                    </button>
+                  ))}
+                </div>
                 <div className="relative mx-auto aspect-[9/16] w-full max-w-[140px] overflow-hidden rounded-lg bg-gradient-to-b from-muted to-muted/40">
                   {day.genStage === 'idle' && (
                     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">
-                      <p className="text-[10px] text-muted-foreground">No asset yet</p>
+                      <p className="text-[10px] text-muted-foreground">No {day.assetType} yet</p>
                       <Button
                         size="sm"
                         onClick={() => handleGenerateAsset(day)}
                         className="h-7 gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-[11px]"
                       >
-                        <Wand2 className="h-3 w-3" /> Generate Asset
+                        <Wand2 className="h-3 w-3" /> Generate {day.assetType === 'video' ? 'Video' : 'Image'}
                       </Button>
                     </div>
                   )}
                   {day.genStage === 'generating' && <GeneratingPreview />}
-                  {day.genStage === 'ready' && <MockPlayer />}
+                  {day.genStage === 'ready' && <MockPlayer assetType={day.assetType} />}
                 </div>
               </div>
 
@@ -541,16 +629,15 @@ const CreativeWorkflow = () => {
           {scriptDay && (
             <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
               {scriptDay.scenes.map((scene, idx) => (
-                <div key={scene.id} className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
+                <div key={idx} className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
                   <p className="text-xs font-semibold text-[#8C52FF]">Scene {idx + 1}</p>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual prompt</label>
                     <Textarea
                       value={scene.visual}
                       onChange={(e) => {
-                        const scenes = scriptDay.scenes.map((s) => s.id === scene.id ? { ...s, visual: e.target.value } : s);
-                        const next = { ...scriptDay, scenes };
-                        setScriptDay(next);
+                        const scenes = scriptDay.scenes.map((s, i) => i === idx ? { ...s, visual: e.target.value } : s);
+                        setScriptDay({ ...scriptDay, scenes });
                         patchDay(scriptDay.id, { scenes });
                       }}
                       className="min-h-[60px] text-xs"
@@ -561,9 +648,8 @@ const CreativeWorkflow = () => {
                     <Textarea
                       value={scene.voiceover}
                       onChange={(e) => {
-                        const scenes = scriptDay.scenes.map((s) => s.id === scene.id ? { ...s, voiceover: e.target.value } : s);
-                        const next = { ...scriptDay, scenes };
-                        setScriptDay(next);
+                        const scenes = scriptDay.scenes.map((s, i) => i === idx ? { ...s, voiceover: e.target.value } : s);
+                        setScriptDay({ ...scriptDay, scenes });
                         patchDay(scriptDay.id, { scenes });
                       }}
                       className="min-h-[50px] text-xs"
@@ -583,7 +669,6 @@ const CreativeWorkflow = () => {
 
 const GeneratingPreview = () => {
   const [stage, setStage] = useState(0);
-  // advance through stages every ~600ms for the 3s window
   useEffect(() => {
     let i = 0;
     const t = setInterval(() => {
@@ -601,13 +686,15 @@ const GeneratingPreview = () => {
   );
 };
 
-const MockPlayer = () => (
+const MockPlayer = ({ assetType }: { assetType: AssetType }) => (
   <div className="group relative flex h-full w-full items-end justify-center overflow-hidden bg-gradient-to-b from-[#8C52FF]/30 via-background to-black">
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
-        <Play className="h-5 w-5 fill-white text-white" />
+    {assetType === 'video' && (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
+          <Play className="h-5 w-5 fill-white text-white" />
+        </div>
       </div>
-    </div>
+    )}
     <div className="relative z-10 w-full p-2">
       <span className="inline-block rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-[0_0_10px_rgba(140,82,255,0.8)]">
         ✨ Glow up in 7 days ✨
