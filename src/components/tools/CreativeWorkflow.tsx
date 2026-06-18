@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
-  Flame, Check, Globe, Instagram, Facebook, Music2, ShoppingBag, Image as ImageIcon, Video, Pencil,
+  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import TikTokIcon from './TikTokIcon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -55,8 +56,8 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const DEFAULT_TIMES = ['16:30', '12:00', '18:45', '09:15', '20:00', '11:30', '17:00'];
 const STAGES = ['Cloning voice...', 'Rendering scenes...', 'Adding captions...', 'Color grading...', 'Finalizing export...'];
 
-const PLATFORM_META: Record<Platform, { label: string; on: string; icon: LucideIcon }> = {
-  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', icon: Music2 },
+const PLATFORM_META: Record<Platform, { label: string; on: string; icon: React.ComponentType<{ className?: string }> }> = {
+  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', icon: TikTokIcon },
   instagram: { label: 'Instagram Reels', on: 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white', icon: Instagram },
   facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', icon: Facebook },
 };
@@ -791,11 +792,12 @@ const CreativeWorkflow = () => {
                 <div className="flex items-center gap-2 rounded-md bg-background/60 px-2 py-1.5">
                   <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={day.time}
                     onChange={(e) => patchDay(day.id, { time: e.target.value })}
                     className="w-full bg-transparent text-xs text-foreground outline-none [color-scheme:dark]"
                   />
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
                 <Button
                   size="sm"
