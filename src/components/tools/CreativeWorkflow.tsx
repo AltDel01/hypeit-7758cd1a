@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video, Pencil,
+  CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
+  Flame, Check, Globe, Instagram, Facebook, Music2, ShoppingBag, Image as ImageIcon, Video, Pencil,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -54,10 +55,10 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const DEFAULT_TIMES = ['16:30', '12:00', '18:45', '09:15', '20:00', '11:30', '17:00'];
 const STAGES = ['Cloning voice...', 'Rendering scenes...', 'Adding captions...', 'Color grading...', 'Finalizing export...'];
 
-const PLATFORM_META: Record<Platform, { label: string; on: string; glyph: string }> = {
-  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', glyph: 'TT' },
-  instagram: { label: 'Instagram Reels', on: 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white', glyph: 'IG' },
-  facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', glyph: 'f' },
+const PLATFORM_META: Record<Platform, { label: string; on: string; icon: LucideIcon }> = {
+  tiktok: { label: 'TikTok', on: 'bg-foreground text-background', icon: Music2 },
+  instagram: { label: 'Instagram Reels', on: 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white', icon: Instagram },
+  facebook: { label: 'Facebook Reels', on: 'bg-blue-600 text-white', icon: Facebook },
 };
 
 const STATUS_STYLES: Record<DayStatus, string> = {
@@ -695,7 +696,7 @@ const CreativeWorkflow = () => {
             <Card key={day.id} className="flex flex-col gap-3 p-3 bg-card/60 backdrop-blur-sm border-border">
               {/* 1. Day header */}
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-foreground">{day.day}</span>
+                <span className="font-semibold text-foreground">Day-{day.position + 1}</span>
                 <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', STATUS_STYLES[day.status])}>
                   {day.status}
                 </span>
@@ -770,27 +771,30 @@ const CreativeWorkflow = () => {
               {/* 5. Distribution & scheduler */}
               <div className="rounded-lg bg-muted/40 p-2.5 space-y-2.5">
                 <div className="flex items-center justify-center gap-2">
-                  {(Object.keys(PLATFORM_META) as Platform[]).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => togglePlatform(day, p)}
-                      title={PLATFORM_META[p].label}
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all',
-                        day.platforms[p] ? PLATFORM_META[p].on : 'bg-muted text-muted-foreground/50 grayscale',
-                      )}
-                    >
-                      {PLATFORM_META[p].glyph}
-                    </button>
-                  ))}
+                  {(Object.keys(PLATFORM_META) as Platform[]).map((p) => {
+                    const Icon = PLATFORM_META[p].icon;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => togglePlatform(day, p)}
+                        title={PLATFORM_META[p].label}
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full transition-all',
+                          day.platforms[p] ? PLATFORM_META[p].on : 'bg-muted text-muted-foreground/50 grayscale',
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="flex items-center gap-2 rounded-md bg-background/60 px-2 py-1.5">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <input
-                    type="time"
+                    type="date"
                     value={day.time}
                     onChange={(e) => patchDay(day.id, { time: e.target.value })}
-                    className="w-full bg-transparent text-xs text-foreground outline-none"
+                    className="w-full bg-transparent text-xs text-foreground outline-none [color-scheme:dark]"
                   />
                 </div>
                 <Button
@@ -825,7 +829,7 @@ const CreativeWorkflow = () => {
         <DialogContent className="max-w-2xl border-border bg-card/80 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span>{scriptDay?.day} Script</span>
+              <span>Day-{(scriptDay?.position ?? 0) + 1} Script</span>
               {scriptDay && (
                 <Badge variant="secondary" className="text-[10px]">{scriptDay.concept}</Badge>
               )}
