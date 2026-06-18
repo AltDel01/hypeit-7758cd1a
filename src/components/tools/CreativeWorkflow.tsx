@@ -273,6 +273,27 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
+        {/* Product + niche */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
+            <Input
+              value={product}
+              onChange={(e) => setProduct(e.target.value)}
+              placeholder="e.g. AI Automated Skincare Branding Agency"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Competitor Niche / Category</label>
+            <Select value={niche} onValueChange={setNiche}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Social links */}
         <div className="space-y-1.5">
           <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
