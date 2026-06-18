@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
-  Flame, Check, Globe, Instagram, Facebook, Music2, ShoppingBag, Image as ImageIcon, Video, Pencil,
+  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import TikTokIcon from './TikTokIcon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
