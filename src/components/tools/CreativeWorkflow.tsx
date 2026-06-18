@@ -163,9 +163,9 @@ const CreativeWorkflow = () => {
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
 
-  const handleScan = async () => {
+  const handleScan = async (silent = false) => {
     if (!brandName.trim() && !website.trim()) {
-      toast.error('Add your brand name or website first.');
+      if (!silent) toast.error('Add your brand name or website first.');
       return;
     }
     setScanning(true);
@@ -178,14 +178,31 @@ const CreativeWorkflow = () => {
       if (data?.brandMessage) setBrandMessage(data.brandMessage);
       if (data?.brandColor) setBrandColor(data.brandColor);
       setScanned(true);
-      toast.success('Brand message and color auto-filled from your channels.');
+      toast.success('Brand voice and color auto-detected from your channels.');
     } catch (e) {
       console.error(e);
-      toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
+      if (!silent) toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
     } finally {
       setScanning(false);
     }
   };
+
+  // Auto-scan once the user has supplied enough brand signals (debounced).
+  const lastScanSig = useRef('');
+  useEffect(() => {
+    const hasSignal = website.trim() || social.instagram.trim() || social.tiktok.trim() || social.facebook.trim();
+    if (!brandName.trim() || !hasSignal) return;
+    const sig = JSON.stringify({ brandName, website, social });
+    if (sig === lastScanSig.current) return;
+    const t = setTimeout(() => {
+      lastScanSig.current = sig;
+      handleScan(true);
+    }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandName, website, social]);
+
+
 
 
 
