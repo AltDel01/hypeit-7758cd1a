@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
   Flame, X, Play, Check, Globe, Instagram, ShoppingBag,
@@ -163,9 +163,9 @@ const CreativeWorkflow = () => {
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
 
-  const handleScan = async () => {
+  const handleScan = async (silent = false) => {
     if (!brandName.trim() && !website.trim()) {
-      toast.error('Add your brand name or website first.');
+      if (!silent) toast.error('Add your brand name or website first.');
       return;
     }
     setScanning(true);
@@ -178,14 +178,31 @@ const CreativeWorkflow = () => {
       if (data?.brandMessage) setBrandMessage(data.brandMessage);
       if (data?.brandColor) setBrandColor(data.brandColor);
       setScanned(true);
-      toast.success('Brand message and color auto-filled from your channels.');
+      toast.success('Brand voice and color auto-detected from your channels.');
     } catch (e) {
       console.error(e);
-      toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
+      if (!silent) toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
     } finally {
       setScanning(false);
     }
   };
+
+  // Auto-scan once the user has supplied enough brand signals (debounced).
+  const lastScanSig = useRef('');
+  useEffect(() => {
+    const hasSignal = website.trim() || social.instagram.trim() || social.tiktok.trim() || social.facebook.trim();
+    if (!brandName.trim() || !hasSignal) return;
+    const sig = JSON.stringify({ brandName, website, social });
+    if (sig === lastScanSig.current) return;
+    const t = setTimeout(() => {
+      lastScanSig.current = sig;
+      handleScan(true);
+    }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandName, website, social]);
+
+
 
 
 
@@ -273,6 +290,27 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
+        {/* Product + niche */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
+            <Input
+              value={product}
+              onChange={(e) => setProduct(e.target.value)}
+              placeholder="e.g. AI Automated Skincare Branding Agency"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Competitor Niche / Category</label>
+            <Select value={niche} onValueChange={setNiche}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Social links */}
         <div className="space-y-1.5">
           <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
@@ -297,21 +335,19 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
-        {/* AI scan trigger */}
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-[#8C52FF]/40 bg-[#8C52FF]/5 p-3">
-          <Button
-            type="button"
-            onClick={handleScan}
-            disabled={scanning}
-            className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2"
-          >
-            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-            {scanning ? 'Scanning your brand...' : 'Scan & Auto-fill Brand Voice'}
-          </Button>
+        {/* Auto-scan status */}
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-[#8C52FF]/40 bg-[#8C52FF]/5 p-3">
+          {scanning ? (
+            <Loader2 className="h-4 w-4 animate-spin text-[#8C52FF]" />
+          ) : (
+            <Wand2 className="h-4 w-4 text-[#8C52FF]" />
+          )}
           <p className="text-xs text-muted-foreground">
             {scanning
-              ? 'Reading your website and social channels to detect your tone and brand color.'
-              : 'AI scans your website and social links to recommend your brand message and color automatically.'}
+              ? 'Scanning your website and social channels to detect your tone and brand color...'
+              : scanned
+                ? 'Brand voice and color auto-detected. Edit anything below if needed.'
+                : 'Fill in your brand name, website and social links, the AI scans them automatically to recommend your brand message and color.'}
           </p>
         </div>
 
@@ -368,25 +404,10 @@ const CreativeWorkflow = () => {
 
       {/* Control bar */}
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border">
-
-        <div className="grid gap-3 md:grid-cols-[2fr_1fr_auto] md:items-end">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
-            <Input
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-              placeholder="e.g. AI Automated Skincare Branding Agency"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Competitor Niche / Category</label>
-            <Select value={niche} onValueChange={setNiche}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Ready when you are, we benchmark <span className="text-foreground font-medium">{niche}</span> and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>.
+          </p>
           <Button
             onClick={handleStrategy}
             disabled={generating}
