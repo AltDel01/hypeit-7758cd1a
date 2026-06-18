@@ -165,6 +165,10 @@ const CreativeWorkflow = () => {
     setDays((prev) => (prev ? prev.map((d) => (d.id === id ? { ...d, ...patch } : d)) : prev));
 
   const handleStrategy = () => {
+    if (!brandName.trim()) {
+      toast.error('Add your brand name first.');
+      return;
+    }
     if (!product.trim()) {
       toast.error('Add a product or service description first.');
       return;
@@ -174,9 +178,14 @@ const CreativeWorkflow = () => {
     setTimeout(() => {
       setDays(DAYS.map((_, i) => buildDay(i)));
       setGenerating(false);
-      toast.success('7-day data-driven strategy generated.');
+      const linked = [
+        ...Object.values(social).filter(Boolean),
+        ...Object.values(ecommerce).filter(Boolean),
+      ].length;
+      toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
     }, 1400);
   };
+
 
   const handleGenerateAsset = (day: DayPlan) => {
     patchDay(day.id, { genStage: 'generating', status: 'Generating' });
