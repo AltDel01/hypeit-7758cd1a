@@ -402,8 +402,41 @@ const CreativeWorkflow = () => {
         </div>
       </div>
 
+      {/* Brand summary bar (returning users) */}
+      {hasStrategy && !editingProfile && (
+        <Card className="p-3 bg-card/60 backdrop-blur-sm border-border">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-[#8C52FF]/15 p-2 text-[#8C52FF]">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{brandName || 'Your brand'}</p>
+                {product && <p className="text-xs text-muted-foreground line-clamp-1">{product}</p>}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingProfile(true)}
+              className="gap-1.5 h-9"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Edit brand profile
+            </Button>
+          </div>
+        </Card>
+      )}
+
       {/* Brand profile funnel */}
+      {showProfileForm && (
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border space-y-4">
+        {hasStrategy && editingProfile && (
+          <div className="flex justify-end">
+            <Button variant="ghost" size="sm" onClick={() => setEditingProfile(false)} className="h-7 text-xs">
+              Cancel
+            </Button>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-[#8C52FF]/15 p-1.5 text-[#8C52FF]">
             <Sparkles className="h-4 w-4" />
