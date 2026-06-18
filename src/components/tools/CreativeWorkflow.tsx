@@ -642,16 +642,28 @@ const CreativeWorkflow = () => {
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            Ready when you are, we benchmark your industry and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>.
+            Ready when you are, we benchmark your industry and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>. Prefer full control? Skip and fill each day yourself.
           </p>
-          <Button
-            onClick={handleStrategy}
-            disabled={generating}
-            className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
-          >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {days ? 'Regenerate 7-Day Strategy' : 'Generate Data-Driven 7-Day Strategy'}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={handleStrategy}
+              disabled={generating}
+              className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
+            >
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {days ? 'Regenerate 7-Day Strategy' : 'Generate Data-Driven 7-Day Strategy'}
+            </Button>
+            {!days && (
+              <Button
+                onClick={handleBlankWeek}
+                disabled={generating}
+                variant="outline"
+                className="gap-2 h-10"
+              >
+                <CalendarRange className="h-4 w-4" /> Skip, build blank week
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
       </>
