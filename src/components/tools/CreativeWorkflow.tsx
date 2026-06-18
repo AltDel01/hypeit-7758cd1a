@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 /* ---------------- Types ---------------- */
 
@@ -153,12 +154,39 @@ const CreativeWorkflow = () => {
   const [brandColor, setBrandColor] = useState('#8C52FF');
   const [social, setSocial] = useState({ instagram: '', tiktok: '', facebook: '' });
   const [ecommerce, setEcommerce] = useState({ tiktokshop: '', shopee: '', tokopedia: '' });
+  const [scanning, setScanning] = useState(false);
+  const [scanned, setScanned] = useState(false);
 
   const [product, setProduct] = useState('');
   const [niche, setNiche] = useState('Beauty');
   const [generating, setGenerating] = useState(false);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+
+  const handleScan = async () => {
+    if (!brandName.trim() && !website.trim()) {
+      toast.error('Add your brand name or website first.');
+      return;
+    }
+    setScanning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('brand-scan', {
+        body: { brandName, website, niche, social },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.brandMessage) setBrandMessage(data.brandMessage);
+      if (data?.brandColor) setBrandColor(data.brandColor);
+      setScanned(true);
+      toast.success('Brand message and color auto-filled from your channels.');
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
+    } finally {
+      setScanning(false);
+    }
+  };
+
 
 
   const patchDay = (id: string, patch: Partial<DayPlan>) =>
@@ -245,14 +273,67 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
-        {/* Brand message + color */}
-        <div className="grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
+        {/* Social links */}
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <Instagram className="h-3 w-3" /> Social Media Links
+          </label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="Instagram URL" />
+            <Input value={social.tiktok} onChange={(e) => setSocial({ ...social, tiktok: e.target.value })} placeholder="TikTok URL" />
+            <Input value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="Facebook URL" />
+          </div>
+        </div>
+
+        {/* Ecommerce links */}
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <ShoppingBag className="h-3 w-3" /> E-commerce Links
+          </label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input value={ecommerce.tiktokshop} onChange={(e) => setEcommerce({ ...ecommerce, tiktokshop: e.target.value })} placeholder="TikTok Shop URL" />
+            <Input value={ecommerce.shopee} onChange={(e) => setEcommerce({ ...ecommerce, shopee: e.target.value })} placeholder="Shopee URL" />
+            <Input value={ecommerce.tokopedia} onChange={(e) => setEcommerce({ ...ecommerce, tokopedia: e.target.value })} placeholder="Tokopedia URL" />
+          </div>
+        </div>
+
+        {/* AI scan trigger */}
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-[#8C52FF]/40 bg-[#8C52FF]/5 p-3">
+          <Button
+            type="button"
+            onClick={handleScan}
+            disabled={scanning}
+            className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2"
+          >
+            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+            {scanning ? 'Scanning your brand...' : 'Scan & Auto-fill Brand Voice'}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            {scanning
+              ? 'Reading your website and social channels to detect your tone and brand color.'
+              : 'AI scans your website and social links to recommend your brand message and color automatically.'}
+          </p>
+        </div>
+
+        {/* Brand message + color (auto-filled, still editable) */}
+        <div className="relative grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
+          {scanning && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-lg bg-background/70 backdrop-blur-sm">
+              <Loader2 className="h-5 w-5 animate-spin text-[#8C52FF]" />
+              <span className="text-xs text-muted-foreground">Detecting brand voice and color...</span>
+            </div>
+          )}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Brand Message / Tone</label>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              Brand Message / Tone
+              {scanned && !scanning && (
+                <span className="rounded-full bg-[#8C52FF]/15 px-1.5 py-0.5 text-[9px] font-medium text-[#8C52FF]">AI suggested</span>
+              )}
+            </label>
             <Textarea
               value={brandMessage}
               onChange={(e) => setBrandMessage(e.target.value)}
-              placeholder="e.g. Clean, science-backed skincare for confident everyday glow."
+              placeholder="Auto-filled after scanning, or type your own tone."
               className="min-h-[64px] text-sm"
             />
           </div>
@@ -283,29 +364,6 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
-        {/* Social links */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <Instagram className="h-3 w-3" /> Social Media Links
-          </label>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Input value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="Instagram URL" />
-            <Input value={social.tiktok} onChange={(e) => setSocial({ ...social, tiktok: e.target.value })} placeholder="TikTok URL" />
-            <Input value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="Facebook URL" />
-          </div>
-        </div>
-
-        {/* Ecommerce links */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <ShoppingBag className="h-3 w-3" /> E-commerce Links
-          </label>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Input value={ecommerce.tiktokshop} onChange={(e) => setEcommerce({ ...ecommerce, tiktokshop: e.target.value })} placeholder="TikTok Shop URL" />
-            <Input value={ecommerce.shopee} onChange={(e) => setEcommerce({ ...ecommerce, shopee: e.target.value })} placeholder="Shopee URL" />
-            <Input value={ecommerce.tokopedia} onChange={(e) => setEcommerce({ ...ecommerce, tokopedia: e.target.value })} placeholder="Tokopedia URL" />
-          </div>
-        </div>
       </Card>
 
       {/* Control bar */}
