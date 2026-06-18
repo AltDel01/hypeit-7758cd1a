@@ -292,7 +292,7 @@ const CreativeWorkflow = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl'>> = data.days;
+      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl' | 'requestId'>> = data.days;
 
       // Create the strategy record.
       const { data: strat, error: sErr } = await supabase
