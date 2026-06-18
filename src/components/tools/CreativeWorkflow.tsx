@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video,
+  Flame, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
