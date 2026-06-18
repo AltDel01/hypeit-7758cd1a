@@ -217,8 +217,100 @@ const CreativeWorkflow = () => {
         </div>
       </div>
 
+      {/* Brand profile funnel */}
+      <Card className="p-4 bg-card/60 backdrop-blur-sm border-border space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="rounded-lg bg-[#8C52FF]/15 p-1.5 text-[#8C52FF]">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Brand Profile</h2>
+            <p className="text-xs text-muted-foreground">
+              The more we know, the more accurate the benchmarking, brand voice and on-brand visuals.
+            </p>
+          </div>
+        </div>
+
+        {/* Identity */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Brand Name</label>
+            <Input value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="e.g. Glowance" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Globe className="h-3 w-3" /> Website
+            </label>
+            <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourbrand.com" />
+          </div>
+        </div>
+
+        {/* Brand message + color */}
+        <div className="grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Brand Message / Tone</label>
+            <Textarea
+              value={brandMessage}
+              onChange={(e) => setBrandMessage(e.target.value)}
+              placeholder="e.g. Clean, science-backed skincare for confident everyday glow."
+              className="min-h-[64px] text-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Brand Color</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                className="h-9 w-10 cursor-pointer rounded-md border border-border bg-transparent p-0.5"
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {BRAND_COLOR_PRESETS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBrandColor(c)}
+                    className={cn(
+                      'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
+                      brandColor.toLowerCase() === c.toLowerCase() ? 'border-foreground' : 'border-transparent',
+                    )}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Social links */}
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <Instagram className="h-3 w-3" /> Social Media Links
+          </label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="Instagram URL" />
+            <Input value={social.tiktok} onChange={(e) => setSocial({ ...social, tiktok: e.target.value })} placeholder="TikTok URL" />
+            <Input value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="Facebook URL" />
+          </div>
+        </div>
+
+        {/* Ecommerce links */}
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <ShoppingBag className="h-3 w-3" /> E-commerce Links
+          </label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input value={ecommerce.tiktokshop} onChange={(e) => setEcommerce({ ...ecommerce, tiktokshop: e.target.value })} placeholder="TikTok Shop URL" />
+            <Input value={ecommerce.shopee} onChange={(e) => setEcommerce({ ...ecommerce, shopee: e.target.value })} placeholder="Shopee URL" />
+            <Input value={ecommerce.tokopedia} onChange={(e) => setEcommerce({ ...ecommerce, tokopedia: e.target.value })} placeholder="Tokopedia URL" />
+          </div>
+        </div>
+      </Card>
+
       {/* Control bar */}
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border">
+
         <div className="grid gap-3 md:grid-cols-[2fr_1fr_auto] md:items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
