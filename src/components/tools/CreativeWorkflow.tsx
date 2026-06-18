@@ -388,6 +388,78 @@ const CreativeWorkflow = () => {
     toast.success(`${day.day} approved to queue.`);
   };
 
+  /* -------- Skip Brand Profile: build a blank, fully editable 7-day week -------- */
+  const handleBlankWeek = async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) {
+      toast.error('Please sign in to build your workflow.');
+      return;
+    }
+    setGenerating(true);
+    setDays(null);
+    try {
+      const { data: strat, error: sErr } = await supabase
+        .from('creative_strategies')
+        .insert({
+          user_id: userId,
+          brand_name: brandName || 'My Brand',
+          product: product || '',
+          brand_message: brandMessage || '',
+          brand_color: brandColor,
+        })
+        .select()
+        .single();
+      if (sErr) throw sErr;
+      setStrategyId(strat.id);
+
+      const rows = DAYS.map((d, i) => ({
+        strategy_id: strat.id,
+        user_id: userId,
+        day: d,
+        position: i,
+        status: 'Draft',
+        benchmark: '',
+        concept: '',
+        hook: '',
+        body: '',
+        scenes: [] as unknown as Json,
+        asset_type: 'image',
+        gen_stage: 'idle',
+        platforms: { tiktok: true, instagram: false, facebook: false } as unknown as Json,
+        scheduled_time: DEFAULT_TIMES[i] || '16:30',
+      }));
+      const { data: inserted, error: dErr } = await supabase
+        .from('creative_days')
+        .insert(rows)
+        .select();
+      if (dErr) throw dErr;
+      setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
+      setEditingProfile(false);
+      toast.success('Blank 7-day week ready. Customize each day manually.');
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not build a blank week. Try again.');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /* -------- Post a single day to its selected social platforms -------- */
+  const handlePost = (day: DayPlan) => {
+    if (day.genStage !== 'ready' || !day.assetUrl) {
+      toast.error('Generate or add an asset before posting.');
+      return;
+    }
+    const targets = (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p]);
+    if (!targets.length) {
+      toast.error('Select at least one platform to post to.');
+      return;
+    }
+    patchDay(day.id, { status: 'Published' });
+    toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -570,16 +642,28 @@ const CreativeWorkflow = () => {
       <Card className="p-4 bg-card/60 backdrop-blur-sm border-border">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            Ready when you are, we benchmark your industry and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>.
+            Ready when you are, we benchmark your industry and build a data-driven week for <span className="text-foreground font-medium">{brandName || 'your brand'}</span>. Prefer full control? Skip and fill each day yourself.
           </p>
-          <Button
-            onClick={handleStrategy}
-            disabled={generating}
-            className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
-          >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {days ? 'Regenerate 7-Day Strategy' : 'Generate Data-Driven 7-Day Strategy'}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={handleStrategy}
+              disabled={generating}
+              className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
+            >
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {days ? 'Regenerate 7-Day Strategy' : 'Generate Data-Driven 7-Day Strategy'}
+            </Button>
+            {!days && (
+              <Button
+                onClick={handleBlankWeek}
+                disabled={generating}
+                variant="outline"
+                className="gap-2 h-10"
+              >
+                <CalendarRange className="h-4 w-4" /> Skip, build blank week
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
       </>
@@ -711,13 +795,24 @@ const CreativeWorkflow = () => {
                 </div>
                 <Button
                   size="sm"
+                  variant="outline"
                   onClick={() => approve(day)}
                   disabled={day.status === 'Ready to Post' || day.status === 'Published'}
-                  className="h-8 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-xs disabled:opacity-60"
+                  className="h-8 w-full gap-1 text-xs disabled:opacity-60"
                 >
                   {day.status === 'Ready to Post' || day.status === 'Published'
                     ? <><Check className="h-3.5 w-3.5" /> Queued</>
                     : 'Approve to Queue'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handlePost(day)}
+                  disabled={day.status === 'Published'}
+                  className="h-8 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-xs disabled:opacity-60"
+                >
+                  {day.status === 'Published'
+                    ? <><Check className="h-3.5 w-3.5" /> Posted</>
+                    : <><Sparkles className="h-3.5 w-3.5" /> Post Now</>}
                 </Button>
               </div>
             </Card>
