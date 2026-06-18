@@ -85,7 +85,9 @@ interface DayRow {
   gen_stage: string;
   platforms: unknown;
   scheduled_time: string;
+  request_id: string | null;
 }
+
 
 const rowToDay = (r: DayRow): DayPlan => ({
   id: r.id,
