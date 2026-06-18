@@ -318,21 +318,19 @@ const CreativeWorkflow = () => {
           </div>
         </div>
 
-        {/* AI scan trigger */}
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-[#8C52FF]/40 bg-[#8C52FF]/5 p-3">
-          <Button
-            type="button"
-            onClick={handleScan}
-            disabled={scanning}
-            className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2"
-          >
-            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-            {scanning ? 'Scanning your brand...' : 'Scan & Auto-fill Brand Voice'}
-          </Button>
+        {/* Auto-scan status */}
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-[#8C52FF]/40 bg-[#8C52FF]/5 p-3">
+          {scanning ? (
+            <Loader2 className="h-4 w-4 animate-spin text-[#8C52FF]" />
+          ) : (
+            <Wand2 className="h-4 w-4 text-[#8C52FF]" />
+          )}
           <p className="text-xs text-muted-foreground">
             {scanning
-              ? 'Reading your website and social channels to detect your tone and brand color.'
-              : 'AI scans your website and social links to recommend your brand message and color automatically.'}
+              ? 'Scanning your website and social channels to detect your tone and brand color...'
+              : scanned
+                ? 'Brand voice and color auto-detected. Edit anything below if needed.'
+                : 'Fill in your brand name, website and social links, the AI scans them automatically to recommend your brand message and color.'}
           </p>
         </div>
 
