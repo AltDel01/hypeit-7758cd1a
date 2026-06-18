@@ -43,7 +43,9 @@ interface DayPlan {
   genStage: GenStage;
   platforms: Record<Platform, boolean>;
   time: string;
+  requestId: string | null;
 }
+
 
 /* ---------------- Static config ---------------- */
 
