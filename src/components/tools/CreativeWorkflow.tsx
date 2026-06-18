@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Clock,
-  Flame, Check, Globe, Instagram, ShoppingBag, Image as ImageIcon, Video, Pencil,
+  CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
+  Flame, Check, Globe, Instagram, Facebook, Music2, ShoppingBag, Image as ImageIcon, Video, Pencil,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
