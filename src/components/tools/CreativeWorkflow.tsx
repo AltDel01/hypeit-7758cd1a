@@ -143,6 +143,11 @@ const CreativeWorkflow = () => {
   const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+
+  // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
+  const hasStrategy = !!days && days.length > 0;
+  const showProfileForm = !hasStrategy || editingProfile;
 
   // Debounce timers for persisting per-day edits.
   const persistTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
