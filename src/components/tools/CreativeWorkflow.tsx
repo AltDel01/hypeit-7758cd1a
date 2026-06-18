@@ -297,12 +297,40 @@ const CreativeWorkflow = () => {
     }
   };
 
-  const handleGenerateAsset = (day: DayPlan) => {
-    patchDay(day.id, { genStage: 'generating', status: 'Generating' });
-    setTimeout(() => {
-      patchDay(day.id, { genStage: 'ready', status: 'Draft' });
-    }, 3000);
+  const handleGenerateAsset = async (day: DayPlan) => {
+    patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
+        body: { dayId: day.id },
+      });
+      if (error) {
+        // Surface insufficient-credit / rate-limit messages from the function body.
+        let msg = 'Could not generate this asset. Try again.';
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const j = await ctx.json();
+            if (j?.error) msg = j.error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.assetType === 'image' && data?.assetUrl) {
+        patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' }, false);
+        toast.success(`Image generated for ${day.day}. ${data.creditsUsed} credits used.`);
+      } else if (data?.assetType === 'video') {
+        patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+        toast.success(`Video for ${day.day} is being produced. We'll update it here when it's ready.`);
+      }
+    } catch (e) {
+      console.error(e);
+      patchDay(day.id, { genStage: 'idle', status: 'Draft' }, false);
+      toast.error(e instanceof Error ? e.message : 'Could not generate this asset. Try again.');
+    }
   };
+
 
   const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
 
