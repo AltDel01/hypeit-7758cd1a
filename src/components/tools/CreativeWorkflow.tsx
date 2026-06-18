@@ -289,11 +289,11 @@ const CreativeWorkflow = () => {
 
         {/* Product description */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Your Product / Service Description</label>
+          <label className="text-xs font-medium text-muted-foreground">What are you selling?</label>
           <Input
             value={product}
             onChange={(e) => setProduct(e.target.value)}
-            placeholder="e.g. AI Automated Skincare Branding Agency"
+            placeholder="e.g. Organic vitamin C serum for glowing skin"
           />
         </div>
 
