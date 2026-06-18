@@ -48,8 +48,6 @@ interface DayPlan {
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-const NICHES = ['E-commerce', 'Beauty', 'SaaS', 'Food', 'Fitness', 'Finance', 'Travel'];
-
 const BENCHMARKS = [
   '🔥 Inspired by Top Meta Skincare Ad, 85% Hold Rate',
   '🔥 Modeled on viral TikTok unboxing, 4.2M views',
