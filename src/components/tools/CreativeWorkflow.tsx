@@ -417,6 +417,8 @@ const CreativeWorkflow = () => {
     }
   };
 
+  const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
+
 
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
