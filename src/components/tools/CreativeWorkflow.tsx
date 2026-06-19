@@ -380,8 +380,43 @@ const CreativeWorkflow = () => {
     }
   };
 
+  /* -------- Generate Hook + Script from the concept via LLM -------- */
+  const handleGenerateScript = async (day: DayPlan) => {
+    if (!day.concept.trim()) {
+      toast.error('Add a concept name first so we know what to write about.');
+      return;
+    }
+    setScriptingIds((prev) => ({ ...prev, [day.id]: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-day-script', {
+        body: { dayId: day.id, concept: day.concept },
+      });
+      if (error) {
+        let msg = 'Could not generate the script. Try again.';
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const j = await ctx.json();
+            if (j?.error) msg = j.error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+      patchDay(
+        day.id,
+        { hook: data.hook || '', body: data.body || '', scenes: Array.isArray(data.scenes) ? data.scenes : [] },
+        false,
+      );
+      toast.success(`Hook and script generated for Day-${day.position + 1}.`);
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not generate the script. Try again.');
+    } finally {
+      setScriptingIds((prev) => ({ ...prev, [day.id]: false }));
+    }
+  };
 
-  const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
 
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
