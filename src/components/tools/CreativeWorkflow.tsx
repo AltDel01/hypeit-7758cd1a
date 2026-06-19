@@ -758,10 +758,28 @@ const CreativeWorkflow = () => {
               {/* 3. Scripting block */}
               <div className="rounded-lg border border-border p-2.5 space-y-2">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Script preview</p>
-                <p className="text-xs text-foreground line-clamp-2">
-                  <span className="font-semibold text-[#8C52FF]">Hook:</span> {day.hook}
-                </p>
-                <p className="text-[11px] text-muted-foreground line-clamp-2">{day.body}</p>
+                {day.hook || day.body ? (
+                  <>
+                    <p className="text-xs text-foreground line-clamp-2">
+                      <span className="font-semibold text-[#8C52FF]">Hook:</span> {day.hook}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">{day.body}</p>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">
+                    No script yet. Generate a Hook and full script from your concept.
+                  </p>
+                )}
+                <Button
+                  size="sm"
+                  onClick={() => handleGenerateScript(day)}
+                  disabled={!!scriptingIds[day.id]}
+                  className="h-7 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-[11px]"
+                >
+                  {scriptingIds[day.id]
+                    ? <><Loader2 className="h-3 w-3 animate-spin" /> Writing...</>
+                    : <><Sparkles className="h-3 w-3" /> {day.hook || day.body ? 'Regenerate Script' : 'Generate Hook & Script'}</>}
+                </Button>
                 <Button
                   variant="ghost" size="sm"
                   onClick={() => setScriptDay(day)}
@@ -770,6 +788,7 @@ const CreativeWorkflow = () => {
                   Expand Script <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
+
 
               {/* 4. Generation & preview block */}
               <div className="rounded-lg border border-border p-2.5 space-y-2">
