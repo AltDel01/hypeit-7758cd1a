@@ -145,6 +145,7 @@ const CreativeWorkflow = () => {
   const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+  const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
 
   // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
