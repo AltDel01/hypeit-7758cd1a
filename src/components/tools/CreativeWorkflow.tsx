@@ -145,6 +145,7 @@ const CreativeWorkflow = () => {
   const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
+  const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
 
   // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
@@ -379,8 +380,45 @@ const CreativeWorkflow = () => {
     }
   };
 
+  /* -------- Generate Hook + Script from the concept via LLM -------- */
+  const handleGenerateScript = async (day: DayPlan) => {
+    if (!day.concept.trim()) {
+      toast.error('Add a concept name first so we know what to write about.');
+      return;
+    }
+    setScriptingIds((prev) => ({ ...prev, [day.id]: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-day-script', {
+        body: { dayId: day.id, concept: day.concept },
+      });
+      if (error) {
+        let msg = 'Could not generate the script. Try again.';
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const j = await ctx.json();
+            if (j?.error) msg = j.error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+      patchDay(
+        day.id,
+        { hook: data.hook || '', body: data.body || '', scenes: Array.isArray(data.scenes) ? data.scenes : [] },
+        false,
+      );
+      toast.success(`Hook and script generated for Day-${day.position + 1}.`);
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Could not generate the script. Try again.');
+    } finally {
+      setScriptingIds((prev) => ({ ...prev, [day.id]: false }));
+    }
+  };
 
   const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
+
 
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
@@ -720,10 +758,28 @@ const CreativeWorkflow = () => {
               {/* 3. Scripting block */}
               <div className="rounded-lg border border-border p-2.5 space-y-2">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Script preview</p>
-                <p className="text-xs text-foreground line-clamp-2">
-                  <span className="font-semibold text-[#8C52FF]">Hook:</span> {day.hook}
-                </p>
-                <p className="text-[11px] text-muted-foreground line-clamp-2">{day.body}</p>
+                {day.hook || day.body ? (
+                  <>
+                    <p className="text-xs text-foreground line-clamp-2">
+                      <span className="font-semibold text-[#8C52FF]">Hook:</span> {day.hook}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">{day.body}</p>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">
+                    No script yet. Generate a Hook and full script from your concept.
+                  </p>
+                )}
+                <Button
+                  size="sm"
+                  onClick={() => handleGenerateScript(day)}
+                  disabled={!!scriptingIds[day.id]}
+                  className="h-7 w-full gap-1 bg-[#8C52FF] hover:bg-[#7a45e0] text-white text-[11px]"
+                >
+                  {scriptingIds[day.id]
+                    ? <><Loader2 className="h-3 w-3 animate-spin" /> Writing...</>
+                    : <><Sparkles className="h-3 w-3" /> {day.hook || day.body ? 'Regenerate Script' : 'Generate Hook & Script'}</>}
+                </Button>
                 <Button
                   variant="ghost" size="sm"
                   onClick={() => setScriptDay(day)}
@@ -732,6 +788,7 @@ const CreativeWorkflow = () => {
                   Expand Script <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
+
 
               {/* 4. Generation & preview block */}
               <div className="rounded-lg border border-border p-2.5 space-y-2">
