@@ -46,6 +46,10 @@ verify_jwt = false
 [functions.generate-creative-asset]
 verify_jwt = false
 
+[functions.generate-day-script]
+verify_jwt = false
+
+
 [auth]
 # Allow users to sign in without email verification
 disable_signup = false
