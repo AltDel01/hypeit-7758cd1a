@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange } from 'lucide-react';
+import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange, ListChecks } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import GenerationHistory from '@/components/dashboard/GenerationHistory';
 import RequestDetailView from '@/components/dashboard/RequestDetailView';
