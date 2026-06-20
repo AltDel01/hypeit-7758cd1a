@@ -498,6 +498,7 @@ const CreativeWorkflow = () => {
 
   const approve = (day: DayPlan) => {
     patchDay(day.id, { status: 'Ready to Post' });
+    upsertPost({ ...day, status: 'Ready to Post' }, 'queued');
     toast.success(`${day.day} approved to queue.`);
   };
 
