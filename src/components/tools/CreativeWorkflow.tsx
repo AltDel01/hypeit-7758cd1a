@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
-  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock,
+  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock, ListChecks,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
@@ -71,6 +72,21 @@ const STATUS_STYLES: Record<DayStatus, string> = {
 
 const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Columns applied to a creative_day when its box auto-clears after 7 days.
+const BLANK_DAY_RESET = {
+  status: 'Draft',
+  concept: '',
+  hook: '',
+  body: '',
+  scenes: [] as unknown as Json,
+  asset_url: null as string | null,
+  gen_stage: 'idle',
+  generated_at: null as string | null,
+  request_id: null as string | null,
+};
+
 /* ---------------- DB mapping ---------------- */
 
 interface DayRow {
@@ -86,6 +102,7 @@ interface DayRow {
   asset_type: string;
   asset_url: string | null;
   gen_stage: string;
+  generated_at?: string | null;
   platforms: unknown;
   scheduled_time: string;
   request_id: string | null;
@@ -176,7 +193,27 @@ const CreativeWorkflow = () => {
             .select('*')
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
-          if (rows && rows.length) setDays(rows.map((r) => rowToDay(r as DayRow)));
+          if (rows && rows.length) {
+            // Auto-clear any box whose media was generated more than 7 days ago.
+            const cutoff = Date.now() - SEVEN_DAYS_MS;
+            const stale = rows.filter(
+              (r) => (r as DayRow).generated_at && new Date((r as DayRow).generated_at as string).getTime() < cutoff,
+            );
+            if (stale.length) {
+              await supabase
+                .from('creative_days')
+                .update(BLANK_DAY_RESET)
+                .in('id', stale.map((r) => r.id));
+            }
+            const staleIds = new Set(stale.map((r) => r.id));
+            setDays(
+              rows.map((r) =>
+                staleIds.has(r.id)
+                  ? rowToDay({ ...(r as DayRow), ...BLANK_DAY_RESET } as DayRow)
+                  : rowToDay(r as DayRow),
+              ),
+            );
+          }
         }
       } catch (e) {
         console.error('load strategy failed', e);
@@ -241,6 +278,36 @@ const CreativeWorkflow = () => {
     if (persist) persistDay(id, patch);
   };
 
+  /* -------- Record / update an entry in the posting history -------- */
+  type PostStatus = 'queued' | 'processing' | 'posted' | 'failed';
+  const upsertPost = async (day: DayPlan, status: PostStatus) => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) return;
+      await supabase.from('creative_posts').upsert(
+        {
+          user_id: userId,
+          strategy_id: strategyId,
+          day_id: day.id,
+          day: day.day,
+          position: day.position,
+          concept: day.concept,
+          hook: day.hook,
+          body: day.body,
+          asset_type: day.assetType,
+          asset_url: day.assetUrl,
+          platforms: day.platforms as unknown as Json,
+          scheduled_time: day.time,
+          status,
+        },
+        { onConflict: 'day_id' },
+      );
+    } catch (e) {
+      console.error('upsert post failed', e);
+    }
+  };
+
   /* -------- Poll pending video requests until the editor delivers them -------- */
   const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
   useEffect(() => {
@@ -263,6 +330,7 @@ const CreativeWorkflow = () => {
               .from('creative_days')
               .update({ asset_url: r.result_url, gen_stage: 'ready' })
               .eq('id', day.id);
+            upsertPost({ ...day, assetUrl: r.result_url }, 'queued');
           }
         }
       }
@@ -347,7 +415,11 @@ const CreativeWorkflow = () => {
   };
 
   const handleGenerateAsset = async (day: DayPlan) => {
+    const startedAt = new Date().toISOString();
     patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+    // Stamp the generation time so this box auto-clears 7 days from now.
+    await supabase.from('creative_days').update({ generated_at: startedAt }).eq('id', day.id);
+    upsertPost(day, 'processing');
     try {
       const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
         body: { dayId: day.id },
@@ -368,6 +440,7 @@ const CreativeWorkflow = () => {
 
       if (data?.assetType === 'image' && data?.assetUrl) {
         patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' }, false);
+        upsertPost({ ...day, assetUrl: data.assetUrl }, 'queued');
         toast.success(`Image generated for ${day.day}. ${data.creditsUsed} credits used.`);
       } else if (data?.assetType === 'video') {
         patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
@@ -376,6 +449,7 @@ const CreativeWorkflow = () => {
     } catch (e) {
       console.error(e);
       patchDay(day.id, { genStage: 'idle', status: 'Draft' }, false);
+      upsertPost(day, 'failed');
       toast.error(e instanceof Error ? e.message : 'Could not generate this asset. Try again.');
     }
   };
@@ -425,6 +499,7 @@ const CreativeWorkflow = () => {
 
   const approve = (day: DayPlan) => {
     patchDay(day.id, { status: 'Ready to Post' });
+    upsertPost({ ...day, status: 'Ready to Post' }, 'queued');
     toast.success(`${day.day} approved to queue.`);
   };
 
@@ -497,6 +572,7 @@ const CreativeWorkflow = () => {
       return;
     }
     patchDay(day.id, { status: 'Published' });
+    upsertPost({ ...day, status: 'Published' }, 'posted');
     toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`);
   };
 
@@ -507,13 +583,22 @@ const CreativeWorkflow = () => {
         <div className="rounded-xl bg-[#8C52FF]/15 p-2.5 text-[#8C52FF]">
           <CalendarRange className="h-6 w-6" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">Creative Workflow</h1>
           <p className="text-sm text-muted-foreground">
             Ideation, scripting, generation and automated posting to TikTok, Instagram and Facebook, planned across a full week.
           </p>
         </div>
+        <Button asChild variant="outline" size="sm" className="gap-1.5 h-9 shrink-0">
+          <Link to="/posts">
+            <ListChecks className="h-3.5 w-3.5" /> Posting history
+          </Link>
+        </Button>
       </div>
+      <p className="-mt-3 text-xs text-muted-foreground">
+        Tip: each day box clears automatically 7 days after its media is generated. Your generated and posted content stays in your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
+      </p>
+
 
       {/* Brand summary bar (returning users) */}
       {hasStrategy && !editingProfile && (
