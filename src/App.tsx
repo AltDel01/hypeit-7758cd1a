@@ -95,6 +95,10 @@ const AppRoutes = () => {
         path="/dashboard"
         element={<ProtectedRoute><CustomErrorBoundary><Dashboard /></CustomErrorBoundary></ProtectedRoute>}
       />
+      <Route
+        path="/posts"
+        element={<ProtectedRoute><CustomErrorBoundary><PostingHistory /></CustomErrorBoundary></ProtectedRoute>}
+      />
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
       <Route
         path="/settings"
