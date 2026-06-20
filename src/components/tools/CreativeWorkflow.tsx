@@ -329,6 +329,7 @@ const CreativeWorkflow = () => {
               .from('creative_days')
               .update({ asset_url: r.result_url, gen_stage: 'ready' })
               .eq('id', day.id);
+            upsertPost({ ...day, assetUrl: r.result_url }, 'queued');
           }
         }
       }
