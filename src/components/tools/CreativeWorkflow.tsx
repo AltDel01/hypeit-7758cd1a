@@ -757,19 +757,19 @@ const CreativeWorkflow = () => {
 
               {/* 3. Scripting block */}
               <div className="rounded-lg border border-border p-2.5 space-y-2">
-                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Script preview</p>
-                {day.hook || day.body ? (
-                  <>
-                    <p className="text-xs text-foreground line-clamp-2">
-                      <span className="font-semibold text-[#8C52FF]">Hook:</span> {day.hook}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground line-clamp-2">{day.body}</p>
-                  </>
-                ) : (
-                  <p className="text-[11px] text-muted-foreground">
-                    No script yet. Generate a Hook and full script from your concept.
-                  </p>
-                )}
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Script</p>
+                <Input
+                  value={day.hook}
+                  onChange={(e) => patchDay(day.id, { hook: e.target.value })}
+                  className="h-8 text-xs bg-background/60"
+                  placeholder="Write or paste your hook..."
+                />
+                <Textarea
+                  value={day.body}
+                  onChange={(e) => patchDay(day.id, { body: e.target.value })}
+                  className="min-h-[60px] text-xs bg-background/60"
+                  placeholder="Write or paste your script..."
+                />
                 <Button
                   size="sm"
                   onClick={() => handleGenerateScript(day)}
@@ -778,7 +778,7 @@ const CreativeWorkflow = () => {
                 >
                   {scriptingIds[day.id]
                     ? <><Loader2 className="h-3 w-3 animate-spin" /> Writing...</>
-                    : <><Sparkles className="h-3 w-3" /> {day.hook || day.body ? 'Regenerate Script' : 'Generate Hook & Script'}</>}
+                    : <><Sparkles className="h-3 w-3" /> {day.hook || day.body ? 'Regenerate with AI' : 'Or generate with AI'}</>}
                 </Button>
                 <Button
                   variant="ghost" size="sm"
