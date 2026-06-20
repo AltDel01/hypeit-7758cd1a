@@ -277,6 +277,36 @@ const CreativeWorkflow = () => {
     if (persist) persistDay(id, patch);
   };
 
+  /* -------- Record / update an entry in the posting history -------- */
+  type PostStatus = 'queued' | 'processing' | 'posted' | 'failed';
+  const upsertPost = async (day: DayPlan, status: PostStatus) => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) return;
+      await supabase.from('creative_posts').upsert(
+        {
+          user_id: userId,
+          strategy_id: strategyId,
+          day_id: day.id,
+          day: day.day,
+          position: day.position,
+          concept: day.concept,
+          hook: day.hook,
+          body: day.body,
+          asset_type: day.assetType,
+          asset_url: day.assetUrl,
+          platforms: day.platforms as unknown as Json,
+          scheduled_time: day.time,
+          status,
+        },
+        { onConflict: 'day_id' },
+      );
+    } catch (e) {
+      console.error('upsert post failed', e);
+    }
+  };
+
   /* -------- Poll pending video requests until the editor delivers them -------- */
   const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
   useEffect(() => {
