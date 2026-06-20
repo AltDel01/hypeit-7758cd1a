@@ -582,13 +582,22 @@ const CreativeWorkflow = () => {
         <div className="rounded-xl bg-[#8C52FF]/15 p-2.5 text-[#8C52FF]">
           <CalendarRange className="h-6 w-6" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">Creative Workflow</h1>
           <p className="text-sm text-muted-foreground">
             Ideation, scripting, generation and automated posting to TikTok, Instagram and Facebook, planned across a full week.
           </p>
         </div>
+        <Button asChild variant="outline" size="sm" className="gap-1.5 h-9 shrink-0">
+          <Link to="/posts">
+            <ListChecks className="h-3.5 w-3.5" /> Posting history
+          </Link>
+        </Button>
       </div>
+      <p className="-mt-3 text-xs text-muted-foreground">
+        Tip: each day box clears automatically 7 days after its media is generated. Your generated and posted content stays in your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
+      </p>
+
 
       {/* Brand summary bar (returning users) */}
       {hasStrategy && !editingProfile && (
