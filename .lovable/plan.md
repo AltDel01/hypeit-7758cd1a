@@ -1,42 +1,25 @@
 ## Goal
+Let users write, type, or paste their own Hook and Script directly in each Day card, instead of only viewing an AI-generated, read-only preview. AI generation stays available but becomes optional.
 
-Make the Brand Profile a **one-time setup**. Once a user has generated and saved a strategy, their next visit to Creative Workflow skips the whole intake form and shows the 7-day calendar immediately. They can still reopen the brand profile to edit it or regenerate.
+## Changes (all in `src/components/tools/CreativeWorkflow.tsx`)
 
-## Answer: can Meta OAuth post to a user's Instagram / Facebook from us?
+### 1. Make the per-day Scripting block editable
+Currently the "Script preview" block (lines ~758-790) shows `day.hook` and `day.body` as read-only text. Replace the read-only paragraphs with editable fields:
 
-Yes, but with real conditions:
+- **Hook**: an `Input` bound to `day.hook`, `onChange` → `patchDay(day.id, { hook: e.target.value })`, placeholder "Write or paste your hook...".
+- **Script body**: a small `Textarea` bound to `day.body`, `onChange` → `patchDay(day.id, { body: e.target.value })`, placeholder "Write or paste your script...".
 
-- **Instagram**: Posting on a user's behalf works **only for Instagram Business or Creator accounts that are linked to a Facebook Page**, via the Instagram Graph API (`/media` then `/media_publish`). It does **not** work for personal Instagram accounts.
-- **Facebook**: We can post to a **Facebook Page** the user manages (Pages API), not to a personal Facebook profile/timeline (Meta removed that ability years ago).
-- **Approval required**: Meta requires App Review for the permissions (`instagram_content_publish`, `pages_manage_posts`, `business_management`, etc.) and a Business Verification before it works for accounts other than your own test users. This takes time, similar to TikTok.
+Both persist via the existing `patchDay` (which already saves `hook`/`body` to the database).
 
-So Meta OAuth is the correct, policy-compliant path, but it can only auto-post to **IG Business/Creator accounts and Facebook Pages**, and only after Meta approves the app. Personal accounts can never be auto-posted to by any compliant method, which is also why the username/password approach is both against Meta's terms and limited. This is worth knowing before we build Phase 4.
+### 2. Reposition the AI generate button as optional
+Keep the existing "Generate Hook & Script" / "Regenerate Script" button below the editable fields, relabeled so it's clearly optional (e.g. button text stays, plus helper text "Or generate with AI"). When AI returns, it fills the same editable fields the user can then tweak.
 
-## What changes (this task)
+### 3. Expand Script dialog
+The dialog already has editable scene `visual`/`voiceover` textareas. Add editable Hook and Body fields at the top of the dialog (bound to `scriptDay.hook` / `scriptDay.body`, updating both `setScriptDay` local state and `patchDay`) so the full script can be authored there too, consistent with the inline card.
 
-Only the `CreativeWorkflow.tsx` UI/flow. No database or edge function changes.
+## Result
+Each Day box supports three flows: (a) type/paste your own hook + script, (b) generate with AI then edit, (c) leave blank. Nothing is forced; all fields are free-form and saved automatically.
 
-```text
-First visit (no saved strategy)        Return visit (strategy exists)
-┌────────────────────────────┐        ┌────────────────────────────┐
-│ Brand Profile form          │        │ Compact header:             │
-│ + scan + product            │  ───►  │  "Glowance · edit profile"  │
-│ + Generate Strategy button  │        │ 7-day calendar (immediately)│
-└────────────────────────────┘        └────────────────────────────┘
-```
-
-### Behavior
-
-1. On mount, the component already loads the most recent saved strategy. If one exists (days are present), render the **calendar directly** and **hide** the Brand Profile card and the "Generate Strategy" control bar.
-2. Add a small **brand summary bar** above the calendar showing the saved brand name (and product), with an **"Edit brand profile"** button.
-3. Clicking "Edit brand profile" reveals the existing Brand Profile form again (collapsed by default) so the user can update details and **Regenerate** the 7-day strategy. After regenerating, it collapses back to the calendar.
-4. First-time users (no saved strategy) see exactly today's flow: the full Brand Profile form and the generate button.
-5. While the initial load is still running, keep the existing "Loading your saved workflow..." state so the form doesn't flash before we know whether a strategy exists.
-
-### Technical notes
-
-- Drive this with a derived flag like `hasStrategy = !!days && days.length > 0` plus an `editingProfile` state (default `false`).
-- Show the Brand Profile `Card` and control-bar `Card` only when `!hasStrategy || editingProfile`.
-- Show the new summary bar only when `hasStrategy && !editingProfile`.
-- Reuse the existing `handleStrategy`; on success, set `editingProfile = false`.
-- No schema changes: "one-time" is enforced purely by the presence of a saved strategy for the user, which already persists in `creative_strategies` / `creative_days`.
+## Technical notes
+- No database or edge-function changes needed — `hook`, `body`, `scenes` columns and `patchDay` persistence already exist.
+- Pure frontend/presentation edit to one component.
