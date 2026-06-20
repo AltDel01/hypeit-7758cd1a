@@ -176,7 +176,27 @@ const CreativeWorkflow = () => {
             .select('*')
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
-          if (rows && rows.length) setDays(rows.map((r) => rowToDay(r as DayRow)));
+          if (rows && rows.length) {
+            // Auto-clear any box whose media was generated more than 7 days ago.
+            const cutoff = Date.now() - SEVEN_DAYS_MS;
+            const stale = rows.filter(
+              (r) => (r as DayRow).generated_at && new Date((r as DayRow).generated_at as string).getTime() < cutoff,
+            );
+            if (stale.length) {
+              await supabase
+                .from('creative_days')
+                .update(BLANK_DAY_RESET)
+                .in('id', stale.map((r) => r.id));
+            }
+            const staleIds = new Set(stale.map((r) => r.id));
+            setDays(
+              rows.map((r) =>
+                staleIds.has(r.id)
+                  ? rowToDay({ ...(r as DayRow), ...BLANK_DAY_RESET } as DayRow)
+                  : rowToDay(r as DayRow),
+              ),
+            );
+          }
         }
       } catch (e) {
         console.error('load strategy failed', e);
