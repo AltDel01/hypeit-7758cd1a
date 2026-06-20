@@ -413,7 +413,11 @@ const CreativeWorkflow = () => {
   };
 
   const handleGenerateAsset = async (day: DayPlan) => {
+    const startedAt = new Date().toISOString();
     patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
+    // Stamp the generation time so this box auto-clears 7 days from now.
+    await supabase.from('creative_days').update({ generated_at: startedAt }).eq('id', day.id);
+    upsertPost(day, 'processing');
     try {
       const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
         body: { dayId: day.id },
@@ -434,6 +438,7 @@ const CreativeWorkflow = () => {
 
       if (data?.assetType === 'image' && data?.assetUrl) {
         patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' }, false);
+        upsertPost({ ...day, assetUrl: data.assetUrl }, 'queued');
         toast.success(`Image generated for ${day.day}. ${data.creditsUsed} credits used.`);
       } else if (data?.assetType === 'video') {
         patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
@@ -442,6 +447,7 @@ const CreativeWorkflow = () => {
     } catch (e) {
       console.error(e);
       patchDay(day.id, { genStage: 'idle', status: 'Draft' }, false);
+      upsertPost(day, 'failed');
       toast.error(e instanceof Error ? e.message : 'Could not generate this asset. Try again.');
     }
   };
