@@ -571,6 +571,7 @@ const CreativeWorkflow = () => {
       return;
     }
     patchDay(day.id, { status: 'Published' });
+    upsertPost({ ...day, status: 'Published' }, 'posted');
     toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`);
   };
 
