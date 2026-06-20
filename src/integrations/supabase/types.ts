@@ -117,6 +117,7 @@ export type Database = {
           credits_used: number
           day: string
           gen_stage: string
+          generated_at: string | null
           hook: string
           id: string
           platforms: Json
@@ -139,6 +140,7 @@ export type Database = {
           credits_used?: number
           day: string
           gen_stage?: string
+          generated_at?: string | null
           hook?: string
           id?: string
           platforms?: Json
@@ -161,6 +163,7 @@ export type Database = {
           credits_used?: number
           day?: string
           gen_stage?: string
+          generated_at?: string | null
           hook?: string
           id?: string
           platforms?: Json
@@ -182,6 +185,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      creative_posts: {
+        Row: {
+          asset_type: string
+          asset_url: string | null
+          body: string
+          concept: string
+          created_at: string
+          day: string
+          day_id: string | null
+          hook: string
+          id: string
+          platforms: Json
+          position: number
+          scheduled_time: string
+          status: string
+          strategy_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          asset_url?: string | null
+          body?: string
+          concept?: string
+          created_at?: string
+          day?: string
+          day_id?: string | null
+          hook?: string
+          id?: string
+          platforms?: Json
+          position?: number
+          scheduled_time?: string
+          status?: string
+          strategy_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          asset_url?: string | null
+          body?: string
+          concept?: string
+          created_at?: string
+          day?: string
+          day_id?: string | null
+          hook?: string
+          id?: string
+          platforms?: Json
+          position?: number
+          scheduled_time?: string
+          status?: string
+          strategy_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       creative_strategies: {
         Row: {
