@@ -71,6 +71,21 @@ const STATUS_STYLES: Record<DayStatus, string> = {
 
 const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Columns applied to a creative_day when its box auto-clears after 7 days.
+const BLANK_DAY_RESET = {
+  status: 'Draft',
+  concept: '',
+  hook: '',
+  body: '',
+  scenes: [] as unknown as Json,
+  asset_url: null as string | null,
+  gen_stage: 'idle',
+  generated_at: null as string | null,
+  request_id: null as string | null,
+};
+
 /* ---------------- DB mapping ---------------- */
 
 interface DayRow {
