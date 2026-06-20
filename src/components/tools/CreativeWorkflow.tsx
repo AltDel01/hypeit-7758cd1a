@@ -896,6 +896,32 @@ const CreativeWorkflow = () => {
           </DialogHeader>
           {scriptDay && (
             <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+              <div className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wide text-muted-foreground">Hook</label>
+                  <Input
+                    value={scriptDay.hook}
+                    onChange={(e) => {
+                      setScriptDay({ ...scriptDay, hook: e.target.value });
+                      patchDay(scriptDay.id, { hook: e.target.value });
+                    }}
+                    className="text-xs"
+                    placeholder="Write or paste your hook..."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wide text-muted-foreground">Script</label>
+                  <Textarea
+                    value={scriptDay.body}
+                    onChange={(e) => {
+                      setScriptDay({ ...scriptDay, body: e.target.value });
+                      patchDay(scriptDay.id, { body: e.target.value });
+                    }}
+                    className="min-h-[70px] text-xs"
+                    placeholder="Write or paste your script..."
+                  />
+                </div>
+              </div>
               {scriptDay.scenes.map((scene, idx) => (
                 <div key={idx} className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
                   <p className="text-xs font-semibold text-[#8C52FF]">Scene {idx + 1}</p>
