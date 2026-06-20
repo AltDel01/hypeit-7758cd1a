@@ -101,6 +101,7 @@ interface DayRow {
   asset_type: string;
   asset_url: string | null;
   gen_stage: string;
+  generated_at?: string | null;
   platforms: unknown;
   scheduled_time: string;
   request_id: string | null;
