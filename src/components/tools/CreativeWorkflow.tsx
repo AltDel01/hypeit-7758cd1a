@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   CalendarRange, Sparkles, Loader2, Wand2, ChevronRight, Calendar as CalendarIcon,
-  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock,
+  Flame, Check, Globe, Instagram, Facebook, ShoppingBag, Image as ImageIcon, Video, Pencil, Clock, ListChecks,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
