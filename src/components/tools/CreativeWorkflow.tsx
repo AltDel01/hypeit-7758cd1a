@@ -223,6 +223,25 @@ const CreativeWorkflow = () => {
     })();
   }, []);
 
+  /* -------- Consume a content idea handed off from Trend Research -------- */
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('viralin_trend_handoff');
+      if (!raw) return;
+      localStorage.removeItem('viralin_trend_handoff');
+      const idea = JSON.parse(raw) as { title?: string; angle?: string; hookExample?: string };
+      const note = [idea.title, idea.angle, idea.hookExample ? `Hook: ${idea.hookExample}` : '']
+        .filter(Boolean)
+        .join('. ');
+      if (note) {
+        setProduct((prev) => (prev ? `${prev}\n\nTrend idea: ${note}` : `Trend idea: ${note}`));
+        toast.success('Trend idea added to your brief below.');
+      }
+    } catch (e) {
+      console.error('trend handoff failed', e);
+    }
+  }, []);
+
   const handleScan = async (silent = false) => {
     if (!brandName.trim() && !website.trim()) {
       if (!silent) toast.error('Add your brand name or website first.');

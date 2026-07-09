@@ -37,6 +37,7 @@ import HeroPreview from "./pages/HeroPreview";
 import CareerApply from "./pages/CareerApply";
 import Tools from "./pages/Tools";
 import PostingHistory from "./pages/PostingHistory";
+import TrendResearch from "./pages/TrendResearch";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -98,6 +99,10 @@ const AppRoutes = () => {
       <Route
         path="/posts"
         element={<ProtectedRoute><CustomErrorBoundary><PostingHistory /></CustomErrorBoundary></ProtectedRoute>}
+      />
+      <Route
+        path="/trends"
+        element={<ProtectedRoute><CustomErrorBoundary><TrendResearch /></CustomErrorBoundary></ProtectedRoute>}
       />
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
       <Route
