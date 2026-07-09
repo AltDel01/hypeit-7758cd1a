@@ -37,6 +37,7 @@ import HeroPreview from "./pages/HeroPreview";
 import CareerApply from "./pages/CareerApply";
 import Tools from "./pages/Tools";
 import PostingHistory from "./pages/PostingHistory";
+import TrendResearch from "./pages/TrendResearch";
 import React from "react";
 
 // Create a new query client outside of component rendering
