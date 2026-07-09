@@ -707,6 +707,36 @@ export type Database = {
         }
         Relationships: []
       }
+      trend_research: {
+        Row: {
+          created_at: string
+          id: string
+          ideas: Json
+          industry: string
+          platforms: Json
+          report: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ideas?: Json
+          industry: string
+          platforms?: Json
+          report?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ideas?: Json
+          industry?: string
+          platforms?: Json
+          report?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
