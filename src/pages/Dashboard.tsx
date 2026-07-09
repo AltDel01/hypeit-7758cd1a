@@ -185,6 +185,15 @@ const Dashboard = () => {
             <ListChecks className="w-5 h-5" />
             <span className="text-[10px] font-medium leading-tight text-center">Posts</span>
           </Link>
+
+          <Link
+            to="/trends"
+            className="flex flex-col items-center gap-1 w-16 py-2 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+            title="Trends"
+          >
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-[10px] font-medium leading-tight text-center">Trends</span>
+          </Link>
         </nav>
 
 
