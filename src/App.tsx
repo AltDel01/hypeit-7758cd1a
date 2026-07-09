@@ -100,6 +100,10 @@ const AppRoutes = () => {
         path="/posts"
         element={<ProtectedRoute><CustomErrorBoundary><PostingHistory /></CustomErrorBoundary></ProtectedRoute>}
       />
+      <Route
+        path="/trends"
+        element={<ProtectedRoute><CustomErrorBoundary><TrendResearch /></CustomErrorBoundary></ProtectedRoute>}
+      />
       <Route path="/inpainting" element={<CustomErrorBoundary><StableDiffusionPage /></CustomErrorBoundary>} />
       <Route
         path="/settings"
