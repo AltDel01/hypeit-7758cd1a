@@ -1,25 +1,40 @@
-## Goal
-Let users write, type, or paste their own Hook and Script directly in each Day card, instead of only viewing an AI-generated, read-only preview. AI generation stays available but becomes optional.
+## Trend Research (inspired by Agent-Reach)
 
-## Changes (all in `src/components/tools/CreativeWorkflow.tsx`)
+Agent-Reach itself is a local Python CLI for desktop agents and can't run inside Viralin. But its core idea, cross-platform research for a topic, maps cleanly onto tools this project can use. We'll rebuild that idea natively: one **Firecrawl connector** does the heavy lifting (web search + scraping, including public YouTube / TikTok / Instagram / X result pages via `site:` queries), and the **Lovable AI gateway** synthesizes everything into an industry trend report and content ideas.
 
-### 1. Make the per-day Scripting block editable
-Currently the "Script preview" block (lines ~758-790) shows `day.hook` and `day.body` as read-only text. Replace the read-only paragraphs with editable fields:
+### How coverage works (honest scope)
+- **General web, YouTube, TikTok, X, Instagram**: reached through Firecrawl `search` with per-platform `site:` filters (e.g. `site:youtube.com`, `site:tiktok.com`, `site:instagram.com`, `site:x.com`) plus a broad industry web search. This returns public titles, descriptions, and links without any per-user login.
+- Login-gated deep data (private metrics, full Instagram feeds) is out of scope, matching the limits of a hosted app. Results are public-signal based, which is enough for trend and content ideation.
+- Optional later upgrade: add the dedicated **TikTok** and **X** connectors for richer first-party public data. Not required for v1.
 
-- **Hook**: an `Input` bound to `day.hook`, `onChange` → `patchDay(day.id, { hook: e.target.value })`, placeholder "Write or paste your hook...".
-- **Script body**: a small `Textarea` bound to `day.body`, `onChange` → `patchDay(day.id, { body: e.target.value })`, placeholder "Write or paste your script...".
+### Setup
+- Connect the **Firecrawl** connector (required). If it hits insufficient credits (402), the UI shows a clear message.
+- `LOVABLE_API_KEY` already present for AI synthesis.
 
-Both persist via the existing `patchDay` (which already saves `hook`/`body` to the database).
+### Backend: new edge function `trend-research`
+1. Input: `{ industry: string, platforms: string[] }` (validated with Zod; JWT-validated).
+2. For each selected platform, run a Firecrawl `search` (limit ~8) with a query like `"{industry} trending 2026" site:{platform-domain}`, plus one broad web search.
+3. Collect titles, snippets, and URLs into a compact context (dedup, cap length).
+4. Send that context to the AI gateway (`google/gemini-3-flash-preview`, `response_format: json_object`) with a prompt that returns:
+   - `trendReport`: per-platform trending topics, formats, and recurring hooks.
+   - `contentIdeas`: a ranked list of concrete ideas `{ title, angle, platform, hookExample, whyItWorks }`.
+5. Return generic errors to the client; log details internally (per project security rules).
+6. Handle 429 / 402 from both Firecrawl and the AI gateway with clear status codes.
 
-### 2. Reposition the AI generate button as optional
-Keep the existing "Generate Hook & Script" / "Regenerate Script" button below the editable fields, relabeled so it's clearly optional (e.g. button text stays, plus helper text "Or generate with AI"). When AI returns, it fills the same editable fields the user can then tweak.
+### Database
+- New table `trend_research` to store past runs: `id`, `user_id`, `industry`, `platforms` (jsonb), `report` (jsonb), `ideas` (jsonb), `created_at`. RLS: users read/insert/delete their own rows, plus `service_role`. Includes the required GRANTs.
 
-### 3. Expand Script dialog
-The dialog already has editable scene `visual`/`voiceover` textareas. Add editable Hook and Body fields at the top of the dialog (bound to `scriptDay.hook` / `scriptDay.body`, updating both `setScriptDay` local state and `patchDay`) so the full script can be authored there too, consistent with the inline card.
+### Frontend: new route `/trends`
+- `src/pages/TrendResearch.tsx`, registered in `App.tsx`, with a "Trends" link in the Dashboard sidebar (reusing the existing icon set, e.g. `TrendingUp`).
+- UI: industry input + platform multi-select chips (YouTube, TikTok, X, Instagram, Web), a "Research" button, loading state, then two panels:
+  - **Trend report** grouped by platform.
+  - **Content ideas feed**, each idea a card with a "Use in workflow" action that hands the concept/hook to the Creative Workflow (via the existing localStorage handoff pattern).
+- Past runs listed from `trend_research` so users can revisit research.
+- Styling follows brand rules (primary `#8C52FF`, no em dashes, `display_name` where relevant).
 
-## Result
-Each Day box supports three flows: (a) type/paste your own hook + script, (b) generate with AI then edit, (c) leave blank. Nothing is forced; all fields are free-form and saved automatically.
+### Technical notes
+- Firecrawl called only server-side (`FIRECRAWL_API_KEY` via `Deno.env`), never client-side.
+- Feature is additive: no changes to existing generation or workflow logic beyond the optional handoff into Creative Workflow.
 
-## Technical notes
-- No database or edge-function changes needed — `hook`, `body`, `scenes` columns and `patchDay` persistence already exist.
-- Pure frontend/presentation edit to one component.
+### Out of scope for v1
+- Private/logged-in platform data, follower-level analytics, and real-time trend scores. These would need per-user OAuth or paid platform APIs and can be a follow-up.
