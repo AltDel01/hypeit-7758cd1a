@@ -1,6 +1,6 @@
 /**
  * qwen-image: synchronous image generation OR instruction-based editing
- * via Alibaba DashScope (Qwen-Image-2.0 / Qwen-Image-2.0-Pro).
+ * via Alibaba DashScope (Qwen-Image-3.0 / Qwen-Image-3.0-Pro).
  *
  * On success: uploads result to "Generated Images" bucket, updates
  * generation_requests with result_url + status='completed'.
@@ -23,7 +23,7 @@ interface RequestBody {
   requestId: string;
   mode: 'gen' | 'edit';
   prompt: string;
-  model: string; // e.g. 'qwen-image-2.0' or 'qwen-image-2.0-pro'
+  model: string; // e.g. 'qwen-image-3.0' or 'qwen-image-3.0-pro'
   size?: string; // e.g. '1024*1024'
   n?: number; // number of images to generate (1-4)
   promptExtend?: boolean; // auto-enhance the prompt
