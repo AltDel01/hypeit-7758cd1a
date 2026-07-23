@@ -27,6 +27,17 @@ const formSchema = z.object({
 export default function Login() {
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [params] = useSearchParams();
+
+  // If /login?next=/some/path is present, preserve it for the post-login redirect
+  // so OAuth consent (and other deep links) return here after sign-in.
+  useEffect(() => {
+    const next = params.get('next');
+    if (next && next.startsWith('/')) {
+      sessionStorage.setItem('postLoginRedirect', next);
+    }
+  }, [params]);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
