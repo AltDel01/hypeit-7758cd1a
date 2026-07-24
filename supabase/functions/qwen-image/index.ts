@@ -92,12 +92,13 @@ serve(async (req) => {
     for (const url of body.referenceImageUrls.slice(0, 3)) {
       const resolved = await resolveUrl(url);
       if (!resolved) {
-        await markFailed(admin, body.requestId, body.model);
+        await markFailed(admin, body.requestId, body.model, 'Could not resolve reference image');
         return genericError(400, 'Could not resolve reference image');
       }
       content.push({ image: resolved });
     }
   }
+
   content.push({ text: body.prompt });
 
   const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
