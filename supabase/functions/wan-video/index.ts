@@ -158,9 +158,10 @@ serve(async (req) => {
     faceImageUrl = await resolveUrl(body.faceImageUrl);
   } catch (e) {
     console.error('[wan-video] OSS upload failed', e);
-    await markFailed(admin, body.requestId, body.model);
+    await markFailed(admin, body.requestId, body.model, 'Reference media upload to provider failed');
     return genericError(502, 'Submission failed, an editor will take over');
   }
+
 
   // Build endpoint + payload by category. Wan2.7 uses unified
   // video-generation/video-synthesis endpoint with `media: [{type, url}]`.
