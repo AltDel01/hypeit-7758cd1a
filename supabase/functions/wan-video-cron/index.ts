@@ -61,7 +61,7 @@ serve(async (req) => {
       if (taskStatus === 'FAILED' || taskStatus === 'UNKNOWN') {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new' })
+          .update({ auto_failed: true, status: 'new', failure_reason: humanizeTaskFailure(json) })
           .eq('id', row.id);
         results.push({ id: row.id, status: 'failed' });
         continue;
@@ -75,7 +75,7 @@ serve(async (req) => {
         if (!videoUrl) {
           await admin
             .from('generation_requests')
-            .update({ auto_failed: true, status: 'new' })
+            .update({ auto_failed: true, status: 'new', failure_reason: 'Provider returned no video URL' })
             .eq('id', row.id);
           results.push({ id: row.id, status: 'no-url' });
           continue;
@@ -103,11 +103,13 @@ serve(async (req) => {
             result_url: storedUrl,
             completed_at: new Date().toISOString(),
             auto_failed: false,
+            failure_reason: null,
           })
           .eq('id', row.id);
 
         results.push({ id: row.id, status: 'completed' });
       }
+
     } catch (e) {
       console.error('[wan-cron] exception for', row.id, e);
       results.push({ id: row.id, status: 'exception' });
