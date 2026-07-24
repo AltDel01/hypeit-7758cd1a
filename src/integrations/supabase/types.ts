@@ -387,6 +387,7 @@ export type Database = {
           editor_warn_10min_at: string | null
           editor_warn_15min_at: string | null
           editor_warn_5min_at: string | null
+          failure_reason: string | null
           id: string
           prompt: string
           provider_task_id: string | null
@@ -419,6 +420,7 @@ export type Database = {
           editor_warn_10min_at?: string | null
           editor_warn_15min_at?: string | null
           editor_warn_5min_at?: string | null
+          failure_reason?: string | null
           id?: string
           prompt: string
           provider_task_id?: string | null
@@ -451,6 +453,7 @@ export type Database = {
           editor_warn_10min_at?: string | null
           editor_warn_15min_at?: string | null
           editor_warn_5min_at?: string | null
+          failure_reason?: string | null
           id?: string
           prompt?: string
           provider_task_id?: string | null
