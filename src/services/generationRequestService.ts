@@ -27,8 +27,10 @@ export interface GenerationRequest {
   auto_provider?: string | null;
   auto_model?: string | null;
   auto_failed?: boolean | null;
+  failure_reason?: string | null;
   provider_task_id?: string | null;
 }
+
 
 export interface CreateGenerationRequestParams {
   requestType: "video" | "image";

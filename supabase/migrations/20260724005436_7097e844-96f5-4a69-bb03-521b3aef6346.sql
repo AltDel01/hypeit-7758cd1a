@@ -1,0 +1,1 @@
+ALTER TABLE public.generation_requests ADD COLUMN IF NOT EXISTS failure_reason TEXT;

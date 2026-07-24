@@ -158,9 +158,10 @@ serve(async (req) => {
     faceImageUrl = await resolveUrl(body.faceImageUrl);
   } catch (e) {
     console.error('[wan-video] OSS upload failed', e);
-    await markFailed(admin, body.requestId, body.model);
+    await markFailed(admin, body.requestId, body.model, 'Reference media upload to provider failed');
     return genericError(502, 'Submission failed, an editor will take over');
   }
+
 
   // Build endpoint + payload by category. Wan2.7 uses unified
   // video-generation/video-synthesis endpoint with `media: [{type, url}]`.
@@ -249,7 +250,7 @@ serve(async (req) => {
     if (!upstream.ok) {
       const txt = await upstream.text();
       console.error('[wan-video] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, body.model);
+      await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
       return genericError(502, 'Submission failed, an editor will take over');
     }
 
@@ -257,7 +258,7 @@ serve(async (req) => {
     const taskId: string | undefined = json?.output?.task_id;
     if (!taskId) {
       console.error('[wan-video] no task_id', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, body.model);
+      await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
       return genericError(502, 'Submission failed, an editor will take over');
     }
 
@@ -269,18 +270,37 @@ serve(async (req) => {
         auto_model: body.model,
         provider_task_id: taskId,
         auto_failed: false,
+        failure_reason: null,
       })
       .eq('id', body.requestId);
 
     return ok({ ok: true, taskId, requestId: body.requestId });
   } catch (e) {
     console.error('[wan-video] exception', e);
-    await markFailed(admin, body.requestId, body.model);
+    await markFailed(admin, body.requestId, body.model, 'Network error while submitting to provider');
     return genericError(502, 'Submission failed, an editor will take over');
   }
 });
 
-async function markFailed(admin: any, requestId: string, model: string) {
+function humanizeProviderError(status: number, raw: string): string {
+  const t = (raw || '').toLowerCase();
+  if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
+    return "Blocked by provider's content safety filter. Try rewording your prompt or removing sensitive imagery.";
+  }
+  if (t.includes('inputdatalengthexceeded') || t.includes('prompt') && t.includes('length')) {
+    return 'Prompt is too long for this model. Please shorten it (Wan supports ~800 chars).';
+  }
+  if (t.includes('invalidapikey') || status === 401 || status === 403) {
+    return 'Provider rejected the API key. Please contact support.';
+  }
+  if (t.includes('throttling') || status === 429) {
+    return 'Provider is rate-limiting requests. Please retry in a minute.';
+  }
+  if (status >= 500) return 'Provider service is temporarily unavailable.';
+  return `Provider error (${status}). An editor will take over.`;
+}
+
+async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
   await admin
     .from('generation_requests')
     .update({
@@ -288,6 +308,8 @@ async function markFailed(admin: any, requestId: string, model: string) {
       auto_model: model,
       auto_failed: true,
       status: 'new',
+      failure_reason: reason || 'Automatic generation failed',
     })
     .eq('id', requestId);
 }
+

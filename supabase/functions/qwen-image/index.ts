@@ -92,12 +92,13 @@ serve(async (req) => {
     for (const url of body.referenceImageUrls.slice(0, 3)) {
       const resolved = await resolveUrl(url);
       if (!resolved) {
-        await markFailed(admin, body.requestId, body.model);
+        await markFailed(admin, body.requestId, body.model, 'Could not resolve reference image');
         return genericError(400, 'Could not resolve reference image');
       }
       content.push({ image: resolved });
     }
   }
+
   content.push({ text: body.prompt });
 
   const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
@@ -127,7 +128,7 @@ serve(async (req) => {
     if (!upstream.ok) {
       const txt = await upstream.text();
       console.error('[qwen-image] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, body.model);
+      await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
       return genericError(502, 'Generation failed, an editor will take over');
     }
 
@@ -154,7 +155,7 @@ serve(async (req) => {
 
     if (rawUrls.length === 0) {
       console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, body.model);
+      await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
       return genericError(502, 'Generation failed, an editor will take over');
     }
 
@@ -193,6 +194,7 @@ serve(async (req) => {
         auto_provider: 'qwen',
         auto_model: body.model,
         auto_failed: false,
+        failure_reason: null,
       })
       .eq('id', body.requestId);
 
@@ -204,12 +206,30 @@ serve(async (req) => {
     return ok({ ok: true, requestId: body.requestId });
   } catch (e) {
     console.error('[qwen-image] exception', e);
-    await markFailed(admin, body.requestId, body.model);
+    await markFailed(admin, body.requestId, body.model, 'Network error while contacting provider');
     return genericError(502, 'Generation failed, an editor will take over');
   }
 });
 
-async function markFailed(admin: any, requestId: string, model: string) {
+function humanizeProviderError(status: number, raw: string): string {
+  const t = (raw || '').toLowerCase();
+  if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
+    return "Blocked by provider's content safety filter. Try rewording your prompt.";
+  }
+  if (t.includes('inputdatalengthexceeded') || (t.includes('prompt') && t.includes('length'))) {
+    return 'Prompt is too long for this model (max ~4000 chars). Please shorten it.';
+  }
+  if (t.includes('invalidapikey') || status === 401 || status === 403) {
+    return 'Provider rejected the API key. Please contact support.';
+  }
+  if (t.includes('throttling') || status === 429) {
+    return 'Provider is rate-limiting requests. Please retry in a minute.';
+  }
+  if (status >= 500) return 'Provider service is temporarily unavailable.';
+  return `Provider error (${status}). An editor will take over.`;
+}
+
+async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
   await admin
     .from('generation_requests')
     .update({
@@ -217,6 +237,8 @@ async function markFailed(admin: any, requestId: string, model: string) {
       auto_model: model,
       auto_failed: true,
       status: 'new', // ensure manual editor queue picks it up
+      failure_reason: reason || 'Automatic generation failed',
     })
     .eq('id', requestId);
 }
+

@@ -80,7 +80,7 @@ serve(async (req) => {
       console.error('[wan-video-poll] task failed', JSON.stringify(json).slice(0, 500));
       await admin
         .from('generation_requests')
-        .update({ auto_failed: true, status: 'new' })
+        .update({ auto_failed: true, status: 'new', failure_reason: humanizeTaskFailure(json) })
         .eq('id', body.requestId);
       return ok({ status: 'failed' });
     }
@@ -94,10 +94,11 @@ serve(async (req) => {
       if (!videoUrl) {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new' })
+          .update({ auto_failed: true, status: 'new', failure_reason: 'Provider returned no video URL' })
           .eq('id', body.requestId);
         return ok({ status: 'failed' });
       }
+
 
       // Download and store
       let storedUrl = videoUrl;
@@ -124,6 +125,7 @@ serve(async (req) => {
           result_url: storedUrl,
           completed_at: new Date().toISOString(),
           auto_failed: false,
+          failure_reason: null,
         })
         .eq('id', body.requestId);
 
@@ -136,3 +138,19 @@ serve(async (req) => {
     return ok({ status: 'pending' });
   }
 });
+
+function humanizeTaskFailure(json: any): string {
+  const out = json?.output || {};
+  const code: string = String(out.code || '').toLowerCase();
+  const msg: string = String(out.message || '');
+  if (code.includes('datainspectionfailed') || msg.toLowerCase().includes('green net') || msg.toLowerCase().includes('inappropriate')) {
+    return "Blocked by provider's content safety filter. Try rewording your prompt or removing sensitive imagery.";
+  }
+  if (code.includes('inputdatalengthexceeded') || msg.toLowerCase().includes('too long')) {
+    return 'Prompt is too long for this model. Please shorten it.';
+  }
+  if (code.includes('invalidapikey')) return 'Provider rejected the API key.';
+  if (out.task_status === 'UNKNOWN') return 'Provider lost track of the task. An editor will take over.';
+  return msg ? `Provider error: ${msg}` : 'Automatic generation failed. An editor will take over.';
+}
+

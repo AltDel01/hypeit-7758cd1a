@@ -197,15 +197,21 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
   return (
     <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 space-y-6">
       <div className={cn(
-        'flex items-center gap-3 p-4 rounded-lg border',
+        'flex items-start gap-3 p-4 rounded-lg border',
         status.className
       )}>
-        <StatusIcon className={cn('h-5 w-5', status.animate && 'animate-spin')} />
-        <div>
+        <StatusIcon className={cn('h-5 w-5 mt-0.5 shrink-0', status.animate && 'animate-spin')} />
+        <div className="min-w-0">
           <p className="font-medium">{status.label}</p>
           <p className="text-sm opacity-80">{status.description}</p>
+          {(request as any).failure_reason && (request.status === 'new' || request.status === 'failed') && (
+            <p className="text-sm mt-2 opacity-90">
+              <span className="font-medium">Reason:</span> {(request as any).failure_reason}
+            </p>
+          )}
         </div>
       </div>
+
 
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
