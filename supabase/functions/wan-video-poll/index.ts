@@ -80,7 +80,7 @@ serve(async (req) => {
       console.error('[wan-video-poll] task failed', JSON.stringify(json).slice(0, 500));
       await admin
         .from('generation_requests')
-        .update({ auto_failed: true, status: 'new' })
+        .update({ auto_failed: true, status: 'new', failure_reason: humanizeTaskFailure(json) })
         .eq('id', body.requestId);
       return ok({ status: 'failed' });
     }
@@ -94,10 +94,11 @@ serve(async (req) => {
       if (!videoUrl) {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new' })
+          .update({ auto_failed: true, status: 'new', failure_reason: 'Provider returned no video URL' })
           .eq('id', body.requestId);
         return ok({ status: 'failed' });
       }
+
 
       // Download and store
       let storedUrl = videoUrl;
