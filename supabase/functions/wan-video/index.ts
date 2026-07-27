@@ -297,7 +297,7 @@ function humanizeProviderError(status: number, raw: string): string {
     return 'Provider is rate-limiting requests. Please retry in a minute.';
   }
   if (status >= 500) return 'Provider service is temporarily unavailable.';
-  return `Provider error (${status}). An editor will take over.`;
+  return `Provider error (${status}).`;
 }
 
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
