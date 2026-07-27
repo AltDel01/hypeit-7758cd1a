@@ -374,15 +374,19 @@ interface DispatchParams {
   promptExtend?: boolean;
 }
 
+/**
+ * DashScope Qwen image models only accept a fixed set of sizes:
+ * 1664*928, 1472*1104, 1328*1328, 1104*1472, 928*1664.
+ */
 export function aspectRatioToSize(ratio: string): string {
   switch (ratio) {
-    case "1:1": return "1024*1024";
-    case "16:9": return "1280*720";
-    case "9:16": return "720*1280";
-    case "4:3": return "1024*768";
-    case "3:4": return "768*1024";
-    case "21:9": return "1680*720";
-    default: return "1024*1024";
+    case "1:1": return "1328*1328";
+    case "16:9": return "1664*928";
+    case "21:9": return "1664*928";
+    case "9:16": return "928*1664";
+    case "4:3": return "1472*1104";
+    case "3:4": return "1104*1472";
+    default: return "1328*1328";
   }
 }
 
