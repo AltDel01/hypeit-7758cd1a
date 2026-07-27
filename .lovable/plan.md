@@ -1,40 +1,39 @@
-## Trend Research (inspired by Agent-Reach)
+## Diagnosis (verified against the live provider)
 
-Agent-Reach itself is a local Python CLI for desktop agents and can't run inside Viralin. But its core idea, cross-platform research for a topic, maps cleanly onto tools this project can use. We'll rebuild that idea natively: one **Firecrawl connector** does the heavy lifting (web search + scraping, including public YouTube / TikTok / Instagram / X result pages via `site:` queries), and the **Lovable AI gateway** synthesizes everything into an industry trend report and content ideas.
+The API key is **fine**. I called DashScope directly with your `QWEN_API_KEY`:
 
-### How coverage works (honest scope)
-- **General web, YouTube, TikTok, X, Instagram**: reached through Firecrawl `search` with per-platform `site:` filters (e.g. `site:youtube.com`, `site:tiktok.com`, `site:instagram.com`, `site:x.com`) plus a broad industry web search. This returns public titles, descriptions, and links without any per-user login.
-- Login-gated deep data (private metrics, full Instagram feeds) is out of scope, matching the limits of a hosted app. Results are public-signal based, which is enough for trend and content ideation.
-- Optional later upgrade: add the dedicated **TikTok** and **X** connectors for richer first-party public data. Not required for v1.
+| Model ID we send | Provider response |
+|---|---|
+| `qwen-image-3.0` | 400 `InvalidParameter: Model not exist.` |
+| `qwen-image-3.0-pro` | 403 `AccessDenied` |
+| `qwen-image` | 400 only about size (model works) |
+| `qwen-image-plus` | 400 only about size (model works) |
+| `qwen-image-edit` | 400 only about missing input image (model works) |
 
-### Setup
-- Connect the **Firecrawl** connector (required). If it hits insufficient credits (402), the UI shows a clear message.
-- `LOVABLE_API_KEY` already present for AI synthesis.
+Two separate bugs:
 
-### Backend: new edge function `trend-research`
-1. Input: `{ industry: string, platforms: string[] }` (validated with Zod; JWT-validated).
-2. For each selected platform, run a Firecrawl `search` (limit ~8) with a query like `"{industry} trending 2026" site:{platform-domain}`, plus one broad web search.
-3. Collect titles, snippets, and URLs into a compact context (dedup, cap length).
-4. Send that context to the AI gateway (`google/gemini-3-flash-preview`, `response_format: json_object`) with a prompt that returns:
-   - `trendReport`: per-platform trending topics, formats, and recurring hooks.
-   - `contentIdeas`: a ranked list of concrete ideas `{ title, angle, platform, hookExample, whyItWorks }`.
-5. Return generic errors to the client; log details internally (per project security rules).
-6. Handle 429 / 402 from both Firecrawl and the AI gateway with clear status codes.
+1. **The `qwen-image-3.0` / `-3.0-pro` model IDs don't exist on DashScope International.** They were set when we "upgraded" to Qwen-Image-3.0. Every image request since then fails: gen → "Provider error (400)", instruction edit → 403, which our error mapper mislabels as "Provider rejected the API key".
+2. **Our sizes are invalid.** `qwen-image` only accepts `1664*928`, `1472*1104`, `1328*1328`, `1104*1472`, `928*1664`. We send `1024*1024`, `1280*720`, etc., so even with a correct model the request would 400.
 
-### Database
-- New table `trend_research` to store past runs: `id`, `user_id`, `industry`, `platforms` (jsonb), `report` (jsonb), `ideas` (jsonb), `created_at`. RLS: users read/insert/delete their own rows, plus `service_role`. Includes the required GRANTs.
+Video (Wan) failures are a different, older issue (tasks the provider lost / moderation blocks), not the API key.
 
-### Frontend: new route `/trends`
-- `src/pages/TrendResearch.tsx`, registered in `App.tsx`, with a "Trends" link in the Dashboard sidebar (reusing the existing icon set, e.g. `TrendingUp`).
-- UI: industry input + platform multi-select chips (YouTube, TikTok, X, Instagram, Web), a "Research" button, loading state, then two panels:
-  - **Trend report** grouped by platform.
-  - **Content ideas feed**, each idea a card with a "Use in workflow" action that hands the concept/hook to the Creative Workflow (via the existing localStorage handoff pattern).
-- Past runs listed from `trend_research` so users can revisit research.
-- Styling follows brand rules (primary `#8C52FF`, no em dashes, `display_name` where relevant).
+## Fix
 
-### Technical notes
-- Firecrawl called only server-side (`FIRECRAWL_API_KEY` via `Deno.env`), never client-side.
-- Feature is additive: no changes to existing generation or workflow logic beyond the optional handoff into Creative Workflow.
+**1. `src/config/generationCategories.ts`**
+- `image-gen`: `modelDefault: 'qwen-image'`, `modelPro: 'qwen-image-plus'`
+- `image-edit-instruction`: `modelDefault` / `modelPro`: `'qwen-image-edit'`
 
-### Out of scope for v1
-- Private/logged-in platform data, follower-level analytics, and real-time trend scores. These would need per-user OAuth or paid platform APIs and can be a follow-up.
+**2. `src/services/generationRequestService.ts`**
+- Rewrite `aspectRatioToSize` to map to the provider's allowed sizes:
+  - 1:1 → `1328*1328`, 16:9 / 21:9 → `1664*928`, 9:16 → `928*1664`, 4:3 → `1472*1104`, 3:4 → `1104*1472`, default → `1328*1328`.
+
+**3. `supabase/functions/qwen-image/index.ts`**
+- Whitelist the five allowed sizes server-side and snap anything else to the nearest one, so a stale client can never 400.
+- Fix the error mapper: only report "API key rejected" for `InvalidApiKey` / 401; map `AccessDenied` and `Model not exist` to "This model isn't available on the account, an editor will take over" so we never again misdiagnose a key problem.
+- Redeploy the function.
+
+**4. Recover the stuck requests**
+- Leave the 2 failed image requests in the editor queue as-is (they're already routed to manual fulfilment); after the fix they can be retried automatically. I'll confirm one real generation end-to-end through the live function before calling it done.
+
+## Note on Qwen-Image-3.0
+It isn't exposed on the Singapore/International DashScope endpoint for this account (403 AccessDenied). If you want 3.0 specifically, it needs either the Beijing/China endpoint or model access enabled in Model Studio for this account. `qwen-image-plus` is the best available text-rendering model on the current endpoint.
