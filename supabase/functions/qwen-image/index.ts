@@ -109,7 +109,7 @@ serve(async (req) => {
       messages: [{ role: 'user', content }],
     },
     parameters: {
-      size: body.size || '1024*1024',
+      size: snapSize(body.size),
       n: imageCount,
       prompt_extend: body.promptExtend ?? false,
     },
@@ -211,6 +211,31 @@ serve(async (req) => {
   }
 });
 
+/**
+ * DashScope Qwen image models accept only these sizes. Anything else is
+ * rejected with a 400, so snap to the closest allowed aspect ratio.
+ */
+const ALLOWED_SIZES: Array<[number, number]> = [
+  [1664, 928], [1472, 1104], [1328, 1328], [1104, 1472], [928, 1664],
+];
+
+function snapSize(size?: string): string {
+  const m = (size || '').match(/^(\d+)\s*\*\s*(\d+)$/);
+  if (!m) return '1328*1328';
+  const w = parseInt(m[1], 10);
+  const h = parseInt(m[2], 10);
+  if (!w || !h) return '1328*1328';
+  if (ALLOWED_SIZES.some(([aw, ah]) => aw === w && ah === h)) return `${w}*${h}`;
+  const target = w / h;
+  let best = ALLOWED_SIZES[2];
+  let bestDiff = Infinity;
+  for (const s of ALLOWED_SIZES) {
+    const diff = Math.abs(s[0] / s[1] - target);
+    if (diff < bestDiff) { bestDiff = diff; best = s; }
+  }
+  return `${best[0]}*${best[1]}`;
+}
+
 function humanizeProviderError(status: number, raw: string): string {
   const t = (raw || '').toLowerCase();
   if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
@@ -219,11 +244,20 @@ function humanizeProviderError(status: number, raw: string): string {
   if (t.includes('inputdatalengthexceeded') || (t.includes('prompt') && t.includes('length'))) {
     return 'Prompt is too long for this model (max ~4000 chars). Please shorten it.';
   }
-  if (t.includes('invalidapikey') || status === 401 || status === 403) {
+  if (t.includes('invalidapikey')) {
     return 'Provider rejected the API key. Please contact support.';
+  }
+  if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied')) {
+    return 'This image model is not available on the provider account. An editor will take over.';
   }
   if (t.includes('throttling') || status === 429) {
     return 'Provider is rate-limiting requests. Please retry in a minute.';
+  }
+  if (status === 401) {
+    return 'Provider rejected the API key. Please contact support.';
+  }
+  if (status === 403) {
+    return 'This image model is not available on the provider account. An editor will take over.';
   }
   if (status >= 500) return 'Provider service is temporarily unavailable.';
   return `Provider error (${status}). An editor will take over.`;
