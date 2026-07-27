@@ -248,7 +248,7 @@ function humanizeProviderError(status: number, raw: string): string {
     return 'Provider rejected the API key. Please contact support.';
   }
   if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied')) {
-    return 'This image model is not available on the provider account. An editor will take over.';
+    return 'This image model is not available on the provider account.';
   }
   if (t.includes('throttling') || status === 429) {
     return 'Provider is rate-limiting requests. Please retry in a minute.';
@@ -257,10 +257,10 @@ function humanizeProviderError(status: number, raw: string): string {
     return 'Provider rejected the API key. Please contact support.';
   }
   if (status === 403) {
-    return 'This image model is not available on the provider account. An editor will take over.';
+    return 'This image model is not available on the provider account.';
   }
   if (status >= 500) return 'Provider service is temporarily unavailable.';
-  return `Provider error (${status}). An editor will take over.`;
+  return `Provider error (${status}).`;
 }
 
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {

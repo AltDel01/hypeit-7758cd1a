@@ -150,7 +150,7 @@ function humanizeTaskFailure(json: any): string {
     return 'Prompt is too long for this model. Please shorten it.';
   }
   if (code.includes('invalidapikey')) return 'Provider rejected the API key.';
-  if (out.task_status === 'UNKNOWN') return 'Provider lost track of the task. An editor will take over.';
-  return msg ? `Provider error: ${msg}` : 'Automatic generation failed. An editor will take over.';
+  if (out.task_status === 'UNKNOWN') return 'Provider lost track of the task.';
+  return msg ? `Provider error: ${msg}` : 'Automatic generation failed.';
 }
 
