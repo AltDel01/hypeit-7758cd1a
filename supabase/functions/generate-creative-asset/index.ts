@@ -158,9 +158,33 @@ Deno.serve(async (req) => {
 
     const assetRef = `storage:generated-images/${path}`
 
+    // Record the finished image in the user's generation history
+    const { data: imgReq } = await admin
+      .from('generation_requests')
+      .insert({
+        user_id: userId,
+        user_email: profile?.email || 'unknown@user',
+        user_name: profile?.display_name || null,
+        request_type: 'image',
+        prompt: basePrompt,
+        aspect_ratio: '9:16',
+        status: 'completed',
+        credits_used: cost,
+        category: 'creative-workflow',
+        result_url: assetRef,
+        completed_at: new Date().toISOString(),
+      })
+      .select('id')
+      .maybeSingle()
+
     await admin
       .from('creative_days')
-      .update({ asset_url: assetRef, gen_stage: 'ready', credits_used: cost })
+      .update({
+        asset_url: assetRef,
+        gen_stage: 'ready',
+        credits_used: cost,
+        ...(imgReq?.id ? { request_id: imgReq.id } : {}),
+      })
       .eq('id', dayId)
 
     // Deduct credits on successful image generation
@@ -170,6 +194,7 @@ Deno.serve(async (req) => {
       .eq('id', userId)
 
     return json({ assetType: 'image', status: 'ready', assetUrl: assetRef, creditsUsed: cost })
+
   } catch (e) {
     console.error('generate-creative-asset error', e)
     return json({ error: 'Unexpected error during generation.' }, 500)
