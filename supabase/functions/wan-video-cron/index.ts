@@ -43,9 +43,14 @@ serve(async (req) => {
   if (error) return genericError(500, 'DB query failed');
 
   const results: Array<{ id: string; status: string }> = [];
+  // Provider tasks that never leave the queue must not hang forever.
+  const STALE_MINUTES = 30;
 
   for (const row of stuck ?? []) {
     try {
+      const ageMinutes =
+        (Date.now() - new Date(row.created_at as string).getTime()) / 60000;
+
       const upstream = await fetch(
         `${DASHSCOPE_BASE}/api/v1/tasks/${row.provider_task_id}`,
         { headers: authHeaders() }
@@ -58,6 +63,19 @@ serve(async (req) => {
       const taskStatus: string = json?.output?.task_status || 'UNKNOWN';
 
       if (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
+        if (ageMinutes > STALE_MINUTES) {
+          await admin
+            .from('generation_requests')
+            .update({
+              auto_failed: true,
+              status: 'new',
+              failure_reason:
+                'The provider queue timed out on this video. Please try again, a shorter duration or lower resolution usually goes through faster.',
+            })
+            .eq('id', row.id);
+          results.push({ id: row.id, status: 'timed-out' });
+          continue;
+        }
         results.push({ id: row.id, status: 'pending' });
         continue;
       }
