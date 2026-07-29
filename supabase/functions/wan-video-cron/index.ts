@@ -29,11 +29,14 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
+  // Only rows we have not already given up on. Without the auto_failed filter
+  // every previously failed task is re-polled on every single cron tick.
   const { data: stuck, error } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, status, result_url')
+    .select('id, user_id, provider_task_id, status, result_url, created_at')
     .eq('auto_provider', 'wan')
     .in('status', ['new', 'in-progress'])
+    .eq('auto_failed', false)
     .not('provider_task_id', 'is', null)
     .is('result_url', null);
 
