@@ -29,20 +29,28 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
+  // Only rows we have not already given up on. Without the auto_failed filter
+  // every previously failed task is re-polled on every single cron tick.
   const { data: stuck, error } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, status, result_url')
+    .select('id, user_id, provider_task_id, status, result_url, created_at')
     .eq('auto_provider', 'wan')
     .in('status', ['new', 'in-progress'])
+    .eq('auto_failed', false)
     .not('provider_task_id', 'is', null)
     .is('result_url', null);
 
   if (error) return genericError(500, 'DB query failed');
 
   const results: Array<{ id: string; status: string }> = [];
+  // Provider tasks that never leave the queue must not hang forever.
+  const STALE_MINUTES = 30;
 
   for (const row of stuck ?? []) {
     try {
+      const ageMinutes =
+        (Date.now() - new Date(row.created_at as string).getTime()) / 60000;
+
       const upstream = await fetch(
         `${DASHSCOPE_BASE}/api/v1/tasks/${row.provider_task_id}`,
         { headers: authHeaders() }
@@ -55,6 +63,19 @@ serve(async (req) => {
       const taskStatus: string = json?.output?.task_status || 'UNKNOWN';
 
       if (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
+        if (ageMinutes > STALE_MINUTES) {
+          await admin
+            .from('generation_requests')
+            .update({
+              auto_failed: true,
+              status: 'new',
+              failure_reason:
+                'The provider queue timed out on this video. Please try again, a shorter duration or lower resolution usually goes through faster.',
+            })
+            .eq('id', row.id);
+          results.push({ id: row.id, status: 'timed-out' });
+          continue;
+        }
         results.push({ id: row.id, status: 'pending' });
         continue;
       }
