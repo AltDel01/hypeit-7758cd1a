@@ -194,26 +194,57 @@ const CreativeWorkflow = () => {
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
           if (rows && rows.length) {
-            // Auto-clear any box whose media was generated more than 7 days ago.
+            // Any box whose media already finished is archived to history and blanked,
+            // so a returning user always starts from empty boxes.
             const cutoff = Date.now() - SEVEN_DAYS_MS;
-            const stale = rows.filter(
-              (r) => (r as DayRow).generated_at && new Date((r as DayRow).generated_at as string).getTime() < cutoff,
-            );
-            if (stale.length) {
+            const done = rows.filter((r) => {
+              const row = r as DayRow;
+              return (
+                !!row.asset_url ||
+                (row.generated_at && new Date(row.generated_at).getTime() < cutoff)
+              );
+            }) as DayRow[];
+
+            if (done.length) {
+              const { data: auth } = await supabase.auth.getUser();
+              const userId = auth.user?.id;
+              const finished = done.filter((r) => !!r.asset_url);
+              if (userId && finished.length) {
+                await supabase.from('creative_posts').upsert(
+                  finished.map((r) => ({
+                    user_id: userId,
+                    strategy_id: strat.id,
+                    day_id: r.id,
+                    day: r.day,
+                    position: r.position,
+                    concept: r.concept || '',
+                    hook: r.hook || '',
+                    body: r.body || '',
+                    asset_type: r.asset_type,
+                    asset_url: r.asset_url,
+                    platforms: r.platforms as Json,
+                    scheduled_time: r.scheduled_time,
+                    status: 'queued',
+                  })),
+                  { onConflict: 'day_id' },
+                );
+              }
               await supabase
                 .from('creative_days')
                 .update(BLANK_DAY_RESET)
-                .in('id', stale.map((r) => r.id));
+                .in('id', done.map((r) => r.id));
             }
-            const staleIds = new Set(stale.map((r) => r.id));
+
+            const doneIds = new Set(done.map((r) => r.id));
             setDays(
               rows.map((r) =>
-                staleIds.has(r.id)
+                doneIds.has(r.id)
                   ? rowToDay({ ...(r as DayRow), ...BLANK_DAY_RESET } as DayRow)
                   : rowToDay(r as DayRow),
               ),
             );
           }
+
         }
       } catch (e) {
         console.error('load strategy failed', e);
@@ -327,6 +358,26 @@ const CreativeWorkflow = () => {
     }
   };
 
+  /* -------- Archive a finished day to history and blank its box -------- */
+  const finalizeDay = async (day: DayPlan, assetUrl: string) => {
+    // 1. Record the finished result in the posting history.
+    await upsertPost({ ...day, assetUrl }, 'queued');
+    // 2. Blank the box locally and in the database so it starts fresh next time.
+    clearTimeout(persistTimers.current[day.id]);
+    setDays((prev) =>
+      prev
+        ? prev.map((d) =>
+            d.id === day.id
+              ? { ...d, status: 'Draft', concept: '', hook: '', body: '', scenes: [], assetUrl: null, genStage: 'idle', requestId: null }
+              : d,
+          )
+        : prev,
+    );
+    const { error } = await supabase.from('creative_days').update(BLANK_DAY_RESET).eq('id', day.id);
+    if (error) console.error('reset day failed', error);
+  };
+
+
   /* -------- Poll pending video requests until the editor delivers them -------- */
   const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
   useEffect(() => {
@@ -344,13 +395,10 @@ const CreativeWorkflow = () => {
         if (r.status === 'completed' && r.result_url) {
           const day = pending.find((d) => d.requestId === r.id);
           if (day) {
-            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready' }, false);
-            await supabase
-              .from('creative_days')
-              .update({ asset_url: r.result_url, gen_stage: 'ready' })
-              .eq('id', day.id);
-            upsertPost({ ...day, assetUrl: r.result_url }, 'queued');
+            await finalizeDay(day, r.result_url);
+            toast.success(`${day.day} video is ready, saved to your posting history.`);
           }
+
         }
       }
     };
@@ -458,13 +506,14 @@ const CreativeWorkflow = () => {
       if (data?.error) throw new Error(data.error);
 
       if (data?.assetType === 'image' && data?.assetUrl) {
-        patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' }, false);
-        upsertPost({ ...day, assetUrl: data.assetUrl }, 'queued');
-        toast.success(`Image generated for ${day.day}. ${data.creditsUsed} credits used.`);
+        await finalizeDay(day, data.assetUrl);
+        toast.success(`Image generated for ${day.day}, saved to your posting history. ${data.creditsUsed} credits used.`);
       } else if (data?.assetType === 'video') {
         patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
-        toast.success(`Video for ${day.day} is being produced. We'll update it here when it's ready.`);
+        setDays((prev) => (prev ? prev.map((d) => (d.id === day.id ? { ...d, requestId: data.requestId || d.requestId } : d)) : prev));
+        toast.success(`Video for ${day.day} is being produced. It moves to your posting history when it's ready.`);
       }
+
     } catch (e) {
       console.error(e);
       patchDay(day.id, { genStage: 'idle', status: 'Draft' }, false);
@@ -615,7 +664,7 @@ const CreativeWorkflow = () => {
         </Button>
       </div>
       <p className="-mt-3 text-xs text-muted-foreground">
-        Tip: each day box clears automatically 7 days after its media is generated. Your generated and posted content stays in your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
+        Tip: once a day's media finishes generating, the box clears itself and the result moves to your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
       </p>
 
 
