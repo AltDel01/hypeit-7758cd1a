@@ -364,13 +364,10 @@ const CreativeWorkflow = () => {
         if (r.status === 'completed' && r.result_url) {
           const day = pending.find((d) => d.requestId === r.id);
           if (day) {
-            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready' }, false);
-            await supabase
-              .from('creative_days')
-              .update({ asset_url: r.result_url, gen_stage: 'ready' })
-              .eq('id', day.id);
-            upsertPost({ ...day, assetUrl: r.result_url }, 'queued');
+            await finalizeDay(day, r.result_url);
+            toast.success(`${day.day} video is ready, saved to your posting history.`);
           }
+
         }
       }
     };
