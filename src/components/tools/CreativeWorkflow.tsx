@@ -194,26 +194,57 @@ const CreativeWorkflow = () => {
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
           if (rows && rows.length) {
-            // Auto-clear any box whose media was generated more than 7 days ago.
+            // Any box whose media already finished is archived to history and blanked,
+            // so a returning user always starts from empty boxes.
             const cutoff = Date.now() - SEVEN_DAYS_MS;
-            const stale = rows.filter(
-              (r) => (r as DayRow).generated_at && new Date((r as DayRow).generated_at as string).getTime() < cutoff,
-            );
-            if (stale.length) {
+            const done = rows.filter((r) => {
+              const row = r as DayRow;
+              return (
+                !!row.asset_url ||
+                (row.generated_at && new Date(row.generated_at).getTime() < cutoff)
+              );
+            }) as DayRow[];
+
+            if (done.length) {
+              const { data: auth } = await supabase.auth.getUser();
+              const userId = auth.user?.id;
+              const finished = done.filter((r) => !!r.asset_url);
+              if (userId && finished.length) {
+                await supabase.from('creative_posts').upsert(
+                  finished.map((r) => ({
+                    user_id: userId,
+                    strategy_id: strat.id,
+                    day_id: r.id,
+                    day: r.day,
+                    position: r.position,
+                    concept: r.concept || '',
+                    hook: r.hook || '',
+                    body: r.body || '',
+                    asset_type: r.asset_type,
+                    asset_url: r.asset_url,
+                    platforms: r.platforms as Json,
+                    scheduled_time: r.scheduled_time,
+                    status: 'queued',
+                  })),
+                  { onConflict: 'day_id' },
+                );
+              }
               await supabase
                 .from('creative_days')
                 .update(BLANK_DAY_RESET)
-                .in('id', stale.map((r) => r.id));
+                .in('id', done.map((r) => r.id));
             }
-            const staleIds = new Set(stale.map((r) => r.id));
+
+            const doneIds = new Set(done.map((r) => r.id));
             setDays(
               rows.map((r) =>
-                staleIds.has(r.id)
+                doneIds.has(r.id)
                   ? rowToDay({ ...(r as DayRow), ...BLANK_DAY_RESET } as DayRow)
                   : rowToDay(r as DayRow),
               ),
             );
           }
+
         }
       } catch (e) {
         console.error('load strategy failed', e);
