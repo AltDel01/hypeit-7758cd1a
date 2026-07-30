@@ -633,7 +633,7 @@ const CreativeWorkflow = () => {
         </Button>
       </div>
       <p className="-mt-3 text-xs text-muted-foreground">
-        Tip: each day box clears automatically 7 days after its media is generated. Your generated and posted content stays in your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
+        Tip: once a day's media finishes generating, the box clears itself and the result moves to your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
       </p>
 
 
