@@ -327,6 +327,26 @@ const CreativeWorkflow = () => {
     }
   };
 
+  /* -------- Archive a finished day to history and blank its box -------- */
+  const finalizeDay = async (day: DayPlan, assetUrl: string) => {
+    // 1. Record the finished result in the posting history.
+    await upsertPost({ ...day, assetUrl }, 'queued');
+    // 2. Blank the box locally and in the database so it starts fresh next time.
+    clearTimeout(persistTimers.current[day.id]);
+    setDays((prev) =>
+      prev
+        ? prev.map((d) =>
+            d.id === day.id
+              ? { ...d, status: 'Draft', concept: '', hook: '', body: '', scenes: [], assetUrl: null, genStage: 'idle', requestId: null }
+              : d,
+          )
+        : prev,
+    );
+    const { error } = await supabase.from('creative_days').update(BLANK_DAY_RESET).eq('id', day.id);
+    if (error) console.error('reset day failed', error);
+  };
+
+
   /* -------- Poll pending video requests until the editor delivers them -------- */
   const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
   useEffect(() => {
