@@ -66,6 +66,7 @@ const CareerApply = () => {
 
       const { error } = await supabase.from('career_applications').insert({
         full_name: form.full_name,
+        email: form.email.trim(),
         phone: form.phone,
         position,
         application_type: type,
@@ -78,8 +79,24 @@ const CareerApply = () => {
 
       if (error) throw error;
 
-      toast({ title: 'Application submitted!', description: 'We will review your application and get back to you.' });
+      // Notify the team by email (never block the submission on this)
+      supabase.functions.invoke('send-career-application', {
+        body: {
+          full_name: form.full_name,
+          email: form.email.trim(),
+          phone: form.phone,
+          position,
+          application_type: type,
+          persona_type: personaType,
+          portfolio_url: form.portfolio_url || null,
+          cover_letter: form.cover_letter,
+          has_cv: !!cv_url,
+        },
+      }).catch((e) => console.error('Notification failed:', e));
+
+      toast({ title: 'Application submitted!', description: `Thanks for applying to ${position}. We will review your application and get back to you.` });
       navigate('/careers');
+
     } catch (err: any) {
       console.error('Application error:', err);
       toast({ title: 'Failed to submit', description: 'Please try again later.', variant: 'destructive' });
