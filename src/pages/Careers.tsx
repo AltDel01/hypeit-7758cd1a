@@ -24,6 +24,11 @@ const folderGroup1: Position[] = [
     title: 'Visual & Motion Designer',
     description: 'As a Motion Designer, you\'ll support the Google Doodles team, combining contemporary design aesthetics with technical expertise in motion, 3D, and traditional animation. You\'ll leverage a diverse toolkit to solve animation challenges across a broad spectrum of visual styles and illustration techniques, and you\'ll be comfortable experimenting with AI technology to support your process. Your projects will span independent contributions, such as GIF animations for Doodles, to collaborations with a larger team on short-form videos. You will approach projects conceptually and demonstrate the versatility to develop original artwork, animate within existing creative assets, and execute designs that cohere with established systems.',
   },
+  {
+    title: 'Event & Marketing',
+    description: 'Creative, communicative, and eager to learn, you will help run company events and drive marketing activity from concept to wrap-up. On event management, you will help shape event concepts and themes, set the schedule together with the team, send invitations and confirm attendance, coordinate with and host guest speakers, and prepare all operational needs including venue, logistics, catering, and equipment. During the event you will capture photo and video documentation, manage participant registration and attendance, and make sure every technical aspect runs smoothly, from rundown and presentations to screens, audio, and other technical requirements. On marketing and communication, you will support event publicity across social media and other marketing channels, write and distribute press releases to media, contribute creative ideas for marketing and social content, and document company activities on location (high mobility as needed). Qualifications: strong, confident communication skills; organized, creative, and closely tuned to social media trends; willing to work mobile for events and documentation; photography or videography skills are a plus.',
+  },
+
 ];
 
 const folderGroup2: Position[] = [
