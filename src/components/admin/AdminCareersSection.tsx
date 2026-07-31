@@ -4,12 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Briefcase, Phone, FileText, ExternalLink, Calendar, User } from 'lucide-react';
+import { Briefcase, Phone, FileText, ExternalLink, Calendar, User, Mail } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Application {
   id: string;
   full_name: string;
+  email: string | null;
+
   phone: string;
   position: string;
   application_type: string;
@@ -129,10 +131,17 @@ const AdminCareersSection = () => {
               {expandedId === app.id && (
                 <CardContent className="border-t border-border/30 pt-4 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {app.email && (
+                      <a href={`mailto:${app.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
+                        <Mail className="h-4 w-4" />
+                        {app.email}
+                      </a>
+                    )}
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span>{app.phone}</span>
                     </div>
+
                     {app.portfolio_url && (
                       <a href={app.portfolio_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
                         <ExternalLink className="h-4 w-4" />
