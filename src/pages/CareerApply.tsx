@@ -18,6 +18,7 @@ const CareerApply = () => {
 
   const [form, setForm] = useState({
     full_name: '',
+    email: '',
     phone: '',
     portfolio_url: '',
     cover_letter: '',
@@ -32,10 +33,20 @@ const CareerApply = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.full_name || !form.phone || !form.cover_letter || !personaType) {
+    if (!form.full_name || !form.email || !form.phone || !form.cover_letter || !personaType) {
       toast({ title: 'Please fill in all required fields', variant: 'destructive' });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      toast({ title: 'Please enter a valid email address', variant: 'destructive' });
+      return;
+    }
+    if (!position) {
+      toast({ title: 'No position selected', description: 'Please pick a role from the careers page.', variant: 'destructive' });
+      return;
+    }
+
+
 
 
     setSubmitting(true);
