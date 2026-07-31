@@ -1,39 +1,33 @@
-## Diagnosis (verified against the live provider)
+# Fix the Careers application form + application delivery
 
-The API key is **fine**. I called DashScope directly with your `QWEN_API_KEY`:
+## What's broken today
 
-| Model ID we send | Provider response |
-|---|---|
-| `qwen-image-3.0` | 400 `InvalidParameter: Model not exist.` |
-| `qwen-image-3.0-pro` | 403 `AccessDenied` |
-| `qwen-image` | 400 only about size (model works) |
-| `qwen-image-plus` | 400 only about size (model works) |
-| `qwen-image-edit` | 400 only about missing input image (model works) |
+The form on `/careers/apply` looks complete, but submissions never save. The applications table was created without database access grants, so every public submit is rejected with a permission error. The database currently holds **0 applications**, so any applications people have tried to send were lost.
 
-Two separate bugs:
+Two other gaps:
+- The form never asks for an **email address**, so even a saved application has no way to reply to the candidate (only a phone number).
+- Nobody is notified when an application arrives, so it depends on someone opening the admin panel.
 
-1. **The `qwen-image-3.0` / `-3.0-pro` model IDs don't exist on DashScope International.** They were set when we "upgraded" to Qwen-Image-3.0. Every image request since then fails: gen → "Provider error (400)", instruction edit → 403, which our error mapper mislabels as "Provider rejected the API key".
-2. **Our sizes are invalid.** `qwen-image` only accepts `1664*928`, `1472*1104`, `1328*1328`, `1104*1472`, `928*1664`. We send `1024*1024`, `1280*720`, etc., so even with a correct model the request would 400.
+Good news: the vacancy tagging already works. The apply link passes the job title and the type (Full-Time or Internship), and both are stored with the application, so each entry is tagged with the exact vacancy chosen.
 
-Video (Wan) failures are a different, older issue (tasks the provider lost / moderation blocks), not the API key.
+## What will be built
 
-## Fix
+1. **Make submissions actually save**
+   - Add the missing database access grants so the public form can insert an application and admins can read/update/delete them.
+   - Verify the CV upload path works for non-logged-in visitors too.
 
-**1. `src/config/generationCategories.ts`**
-- `image-gen`: `modelDefault: 'qwen-image'`, `modelPro: 'qwen-image-plus'`
-- `image-edit-instruction`: `modelDefault` / `modelPro`: `'qwen-image-edit'`
+2. **Add an email field to the form**
+   - Required "Email Address" input with validation, stored alongside the application and shown in the admin panel.
 
-**2. `src/services/generationRequestService.ts`**
-- Rewrite `aspectRatioToSize` to map to the provider's allowed sizes:
-  - 1:1 → `1328*1328`, 16:9 / 21:9 → `1664*928`, 9:16 → `928*1664`, 4:3 → `1472*1104`, 3:4 → `1104*1472`, default → `1328*1328`.
+3. **Where applications land: both**
+   - **Admin dashboard** (already exists): `/admin` → "Careers" tab lists every application with vacancy, type, phone, CV download, portfolio link, self-described persona, cover letter, and a status selector (new / reviewed / shortlisted / rejected). This will now be populated once grants are fixed, plus the new email column.
+   - **Email notification** (new): each submission triggers an email to `hello.viralin@gmail.com` from `noreply@viralin.ai` containing the vacancy applied for, type, name, email, phone, persona, portfolio link, and cover letter, with a link to open the admin panel.
 
-**3. `supabase/functions/qwen-image/index.ts`**
-- Whitelist the five allowed sizes server-side and snap anything else to the nearest one, so a stale client can never 400.
-- Fix the error mapper: only report "API key rejected" for `InvalidApiKey` / 401; map `AccessDenied` and `Model not exist` to "This model isn't available on the account, an editor will take over" so we never again misdiagnose a key problem.
-- Redeploy the function.
+4. **End-to-end verification**
+   - Submit a real test application through the browser against the live preview, confirm the row is stored with the correct vacancy tag, confirm it appears in the admin Careers tab, and confirm the notification email is dispatched. Remove the test row afterwards.
 
-**4. Recover the stuck requests**
-- Leave the 2 failed image requests in the editor queue as-is (they're already routed to manual fulfilment); after the fix they can be retried automatically. I'll confirm one real generation end-to-end through the live function before calling it done.
+## Technical notes
 
-## Note on Qwen-Image-3.0
-It isn't exposed on the Singapore/International DashScope endpoint for this account (403 AccessDenied). If you want 3.0 specifically, it needs either the Beijing/China endpoint or model access enabled in Model Studio for this account. `qwen-image-plus` is the best available text-rendering model on the current endpoint.
+- Migration: `GRANT INSERT ON public.career_applications TO anon, authenticated;` plus `SELECT, UPDATE, DELETE` for `authenticated` and `ALL` for `service_role`; add an `email text` column. Existing RLS policies (public insert, admin-only read/update/delete) stay as they are.
+- New edge function `send-career-application` using the existing `RESEND_API_KEY`, called from `CareerApply.tsx` after a successful insert; a failed email never blocks the submission.
+- Frontend edits limited to `src/pages/CareerApply.tsx` (email field) and `src/components/admin/AdminCareersSection.tsx` (email display).
