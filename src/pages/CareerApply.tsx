@@ -134,6 +134,38 @@ const CareerApply = () => {
               <Input id="portfolio_url" name="portfolio_url" value={form.portfolio_url} onChange={handleChange} placeholder="https://your-portfolio.com or drive link" />
             </div>
 
+            <div className="space-y-3">
+              <Label>Do you consider yourself: *</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { value: 'creative', label: 'Creative person' },
+                  { value: 'analytical', label: 'Analytical person' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setPersonaType(opt.value)}
+                    aria-pressed={personaType === opt.value}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm text-left transition-colors ${
+                      personaType === opt.value
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-input bg-background text-muted-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    <span
+                      className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                        personaType === opt.value ? 'border-primary' : 'border-muted-foreground/50'
+                      }`}
+                    >
+                      {personaType === opt.value && <span className="h-2 w-2 rounded-full bg-primary" />}
+                    </span>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+
             <div className="space-y-2">
               <Label htmlFor="cover_letter">Why do you want to apply for this position? *</Label>
               <Textarea
