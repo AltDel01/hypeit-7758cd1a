@@ -10,6 +10,8 @@ import { toast } from '@/hooks/use-toast';
 interface Application {
   id: string;
   full_name: string;
+  email: string | null;
+
   phone: string;
   position: string;
   application_type: string;
