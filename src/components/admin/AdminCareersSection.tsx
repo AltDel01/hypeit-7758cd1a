@@ -139,7 +139,14 @@ const AdminCareersSection = () => {
                         Portfolio
                       </a>
                     )}
+                    {app.persona_type && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Self-described: </span>
+                        <span className="capitalize">{app.persona_type} person</span>
+                      </div>
+                    )}
                   </div>
+
 
                   {app.cv_url && (
                     <Button variant="outline" size="sm" onClick={() => downloadCV(app.cv_url!)} className="gap-2">
