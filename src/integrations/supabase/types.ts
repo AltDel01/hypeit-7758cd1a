@@ -70,6 +70,7 @@ export type Database = {
           cover_letter: string
           created_at: string
           cv_url: string | null
+          email: string | null
           full_name: string
           id: string
           persona_type: string | null
@@ -84,6 +85,7 @@ export type Database = {
           cover_letter: string
           created_at?: string
           cv_url?: string | null
+          email?: string | null
           full_name: string
           id?: string
           persona_type?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           cover_letter?: string
           created_at?: string
           cv_url?: string | null
+          email?: string | null
           full_name?: string
           id?: string
           persona_type?: string | null
