@@ -22,6 +22,7 @@ const CareerApply = () => {
     portfolio_url: '',
     cover_letter: '',
   });
+  const [personaType, setPersonaType] = useState('');
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -31,10 +32,11 @@ const CareerApply = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.full_name || !form.phone || !form.cover_letter) {
+    if (!form.full_name || !form.phone || !form.cover_letter || !personaType) {
       toast({ title: 'Please fill in all required fields', variant: 'destructive' });
       return;
     }
+
 
     setSubmitting(true);
     try {
