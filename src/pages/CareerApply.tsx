@@ -152,7 +152,7 @@ const CareerApply = () => {
 
 
             <div className="space-y-2">
-              <Label htmlFor="cv">Upload CV</Label>
+              <Label htmlFor="cv">Upload CV *</Label>
               <div className="relative">
                 <label
                   htmlFor="cv"
@@ -160,7 +160,7 @@ const CareerApply = () => {
                 >
                   <Upload className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {cvFile ? cvFile.name : 'Choose a file (PDF, DOC, DOCX)'}
+                    {cvFile ? cvFile.name : 'Choose a file (PDF, DOC, DOCX, max 10MB)'}
                   </span>
                 </label>
                 <input
