@@ -2,7 +2,6 @@ import React from 'react';
 import Seo from '@/components/seo/Seo';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import FooterMenu from '@/components/layout/FooterMenu';
 import {
   Accordion,
   AccordionContent,
@@ -139,7 +138,6 @@ const FAQ: React.FC = () => {
         </div>
       </main>
       <Footer />
-      <FooterMenu />
     </div>
   );
 };

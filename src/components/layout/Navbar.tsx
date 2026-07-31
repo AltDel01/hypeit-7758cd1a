@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { LogOut, User, ChevronDown, Menu, X, Sparkles, CreditCard, HelpCircle, Globe, Gift } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserCredits } from '@/hooks/useUserCredits';
-import FooterMenu from './FooterMenu';
 import ReferralDialog from '@/components/referral/ReferralDialog';
 import {
   DropdownMenu,
@@ -365,7 +364,6 @@ const Navbar = () => {
         </div>
       </nav>
       
-      <FooterMenu />
       <ReferralDialog open={referralOpen} onOpenChange={setReferralOpen} />
     </>
   );
