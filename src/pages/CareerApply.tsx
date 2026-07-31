@@ -45,16 +45,26 @@ const CareerApply = () => {
       toast({ title: 'No position selected', description: 'Please pick a role from the careers page.', variant: 'destructive' });
       return;
     }
-
-
-
+    if (!cvFile) {
+      toast({ title: 'CV is required', description: 'Please upload your CV (PDF, DOC or DOCX).', variant: 'destructive' });
+      return;
+    }
+    const ext = (cvFile.name.split('.').pop() || '').toLowerCase();
+    if (!['pdf', 'doc', 'docx'].includes(ext)) {
+      toast({ title: 'Unsupported file type', description: 'Please upload a PDF, DOC or DOCX file.', variant: 'destructive' });
+      return;
+    }
+    if (cvFile.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum CV size is 10 MB.', variant: 'destructive' });
+      return;
+    }
 
     setSubmitting(true);
     try {
       let cv_url: string | null = null;
 
-      if (cvFile) {
-        const fileExt = cvFile.name.split('.').pop();
+      {
+        const fileExt = ext;
         const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from('career-applications')
