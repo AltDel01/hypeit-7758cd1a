@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Seo from '@/components/seo/Seo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Briefcase, GraduationCap } from 'lucide-react';
+import { Briefcase, GraduationCap, Link2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Position {
@@ -49,9 +49,41 @@ const folderGroup2: Position[] = [
     description: 'As a Project Officer, you\'ll be the versatile backbone of operations, wearing many hats across the organization. You\'ll coordinate events from concept to execution, handle administrative workflows, support marketing campaigns, contribute to product development cycles, assist with design direction, and nurture client relationships. Your ability to juggle multiple responsibilities while maintaining quality and meeting deadlines will be essential. You thrive in fast-paced environments and enjoy the variety of working across different functions to keep the team running smoothly.',
   },
 ];
+const slugify = (title: string) =>
+  title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const roleParam = searchParams.get('role');
+  const matchedIndex = positions.findIndex((p) => slugify(p.title) === roleParam);
+  const [localIndex, setLocalIndex] = useState(0);
+  const activeIndex = matchedIndex >= 0 ? matchedIndex : localIndex;
+  const [copied, setCopied] = useState(false);
+
+  const selectRole = (i: number) => {
+    setLocalIndex(i);
+    const next = new URLSearchParams(searchParams);
+    next.set('role', slugify(positions[i].title));
+    setSearchParams(next, { replace: true });
+  };
+
+  const copyLink = async () => {
+    const url = `${window.location.origin}/careers?role=${slugify(positions[activeIndex].title)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt('Copy this link:', url);
+    }
+  };
+
+  useEffect(() => {
+    if (matchedIndex >= 0) {
+      setLocalIndex(matchedIndex);
+    }
+  }, [matchedIndex]);
 
   return (
     <div className="w-full">
@@ -60,7 +92,7 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
         {positions.map((pos, i) => (
           <button
             key={pos.title}
-            onClick={() => setActiveIndex(i)}
+            onClick={() => selectRole(i)}
             className={cn(
               "flex-1 px-3 py-3 md:py-4 text-xs md:text-sm font-semibold text-center transition-all duration-200 border border-b-0 relative",
               "rounded-t-xl",
@@ -85,12 +117,16 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
         <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
           {positions[activeIndex].description}
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={() => navigate(`/careers/apply?position=${encodeURIComponent(positions[activeIndex].title)}&type=full-time`)} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
             Apply
           </button>
           <button onClick={() => navigate(`/careers/apply?position=${encodeURIComponent(positions[activeIndex].title)}&type=intern`)} className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
             Apply for Intern
+          </button>
+          <button onClick={copyLink} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/60 text-muted-foreground text-sm font-semibold hover:text-foreground hover:bg-muted transition-colors">
+            {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+            {copied ? 'Link copied' : 'Copy link'}
           </button>
         </div>
       </div>
