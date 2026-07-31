@@ -22,7 +22,7 @@ const folderGroup1: Position[] = [
   },
   {
     title: 'Visual & Motion Designer',
-    description: 'As a Motion Designer, you\'ll support the Google Doodles team, combining contemporary design aesthetics with technical expertise in motion, 3D, and traditional animation. You\'ll leverage a diverse toolkit to solve animation challenges across a broad spectrum of visual styles and illustration techniques, and you\'ll be comfortable experimenting with AI technology to support your process. Your projects will span independent contributions, such as GIF animations for Doodles, to collaborations with a larger team on short-form videos. You will approach projects conceptually and demonstrate the versatility to develop original artwork, animate within existing creative assets, and execute designs that cohere with established systems.',
+    description: 'As a Motion Designer, you\'ll support the video content team, combining contemporary design aesthetics with technical expertise in motion, 3D, and traditional animation. You\'ll leverage a diverse toolkit to solve animation challenges across a broad spectrum of visual styles and illustration techniques, and you\'ll be comfortable experimenting with AI technology to support your process. Your projects will span independent contributions, such as GIF animations for Doodles, to collaborations with a larger team on short-form videos. You will approach projects conceptually and demonstrate the versatility to develop original artwork, animate within existing creative assets, and execute designs that cohere with established systems.',
   },
   {
     title: 'Event & Marketing',
