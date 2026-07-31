@@ -72,6 +72,7 @@ export type Database = {
           cv_url: string | null
           full_name: string
           id: string
+          persona_type: string | null
           phone: string
           portfolio_url: string | null
           position: string
@@ -85,6 +86,7 @@ export type Database = {
           cv_url?: string | null
           full_name: string
           id?: string
+          persona_type?: string | null
           phone: string
           portfolio_url?: string | null
           position: string
@@ -98,6 +100,7 @@ export type Database = {
           cv_url?: string | null
           full_name?: string
           id?: string
+          persona_type?: string | null
           phone?: string
           portfolio_url?: string | null
           position?: string

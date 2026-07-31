@@ -16,6 +16,8 @@ interface Application {
   cv_url: string | null;
   portfolio_url: string | null;
   cover_letter: string;
+  persona_type: string | null;
+
   status: string;
   created_at: string;
 }
@@ -137,7 +139,14 @@ const AdminCareersSection = () => {
                         Portfolio
                       </a>
                     )}
+                    {app.persona_type && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Self-described: </span>
+                        <span className="capitalize">{app.persona_type} person</span>
+                      </div>
+                    )}
                   </div>
+
 
                   {app.cv_url && (
                     <Button variant="outline" size="sm" onClick={() => downloadCV(app.cv_url!)} className="gap-2">
