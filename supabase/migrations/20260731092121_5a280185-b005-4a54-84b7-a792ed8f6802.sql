@@ -1,0 +1,1 @@
+ALTER TABLE public.career_applications ADD COLUMN IF NOT EXISTS persona_type text;
