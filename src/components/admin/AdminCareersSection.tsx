@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Briefcase, Phone, FileText, ExternalLink, Calendar, User } from 'lucide-react';
+import { Briefcase, Phone, FileText, ExternalLink, Calendar, User, Mail } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Application {
