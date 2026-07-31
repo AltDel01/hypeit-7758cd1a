@@ -3,7 +3,7 @@ import Seo from '@/components/seo/Seo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Briefcase, GraduationCap, Link2, Check } from 'lucide-react';
+import { Briefcase, GraduationCap, Share2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Position {
@@ -111,8 +111,17 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
 
       {/* Folder Body */}
       <div className="border border-border/40 rounded-b-2xl rounded-tr-none bg-card/80 backdrop-blur-sm p-6 md:p-8 min-h-[220px]">
-        <div className="mb-3">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</span>
+          <button
+            onClick={copyLink}
+            aria-label="Copy link to this role"
+            title={copied ? 'Link copied' : 'Copy link to this role'}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+            {copied ? 'Link copied' : 'Share'}
+          </button>
         </div>
         <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
           {positions[activeIndex].description}
@@ -124,11 +133,8 @@ const FolderCard: React.FC<{ positions: Position[] }> = ({ positions }) => {
           <button onClick={() => navigate(`/careers/apply?position=${encodeURIComponent(positions[activeIndex].title)}&type=intern`)} className="px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-colors">
             Apply for Intern
           </button>
-          <button onClick={copyLink} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/60 text-muted-foreground text-sm font-semibold hover:text-foreground hover:bg-muted transition-colors">
-            {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
-            {copied ? 'Link copied' : 'Copy link'}
-          </button>
         </div>
+
       </div>
     </div>
   );
