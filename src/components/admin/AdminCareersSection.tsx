@@ -16,6 +16,8 @@ interface Application {
   cv_url: string | null;
   portfolio_url: string | null;
   cover_letter: string;
+  persona_type: string | null;
+
   status: string;
   created_at: string;
 }
