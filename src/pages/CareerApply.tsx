@@ -61,7 +61,9 @@ const CareerApply = () => {
         cv_url,
         portfolio_url: form.portfolio_url || null,
         cover_letter: form.cover_letter,
+        persona_type: personaType,
       });
+
 
       if (error) throw error;
 
