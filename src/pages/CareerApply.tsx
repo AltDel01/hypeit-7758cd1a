@@ -131,9 +131,15 @@ const CareerApply = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="email">Email Address *</Label>
+              <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@email.com" required />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone Number *</Label>
               <Input id="phone" name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+62 xxx xxxx xxxx" required />
             </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="cv">Upload CV</Label>
