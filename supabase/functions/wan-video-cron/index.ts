@@ -42,6 +42,34 @@ serve(async (req) => {
 
   if (error) return genericError(500, 'DB query failed');
 
+  // Safety net: requests that were never submitted to the provider (no task
+  // id) would otherwise show 'Processing' forever. After 15 minutes hand them
+  // to the editor queue.
+  const NEVER_SUBMITTED_MINUTES = 15;
+  const cutoff = new Date(Date.now() - NEVER_SUBMITTED_MINUTES * 60000).toISOString();
+  const { data: orphans } = await admin
+    .from('generation_requests')
+    .select('id')
+    .not('auto_provider', 'is', null)
+    .in('status', ['new', 'in-progress'])
+    .eq('auto_failed', false)
+    .is('provider_task_id', null)
+    .is('result_url', null)
+    .lt('created_at', cutoff);
+
+  for (const o of orphans ?? []) {
+    await admin
+      .from('generation_requests')
+      .update({
+        auto_failed: true,
+        status: 'new',
+        failure_reason:
+          'This request never reached the provider. An editor will take it from here.',
+      })
+      .eq('id', o.id);
+  }
+  if (orphans?.length) console.log('[wan-cron] orphaned', orphans.length);
+
   const results: Array<{ id: string; status: string }> = [];
   // Provider tasks that never leave the queue must not hang forever.
   const STALE_MINUTES = 30;
