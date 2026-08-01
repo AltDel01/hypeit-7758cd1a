@@ -157,8 +157,10 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     label: 'Lip Sync',
     requestType: 'video',
     provider: 'wan',
-    modelDefault: 'videoretalk',
-    modelPro: 'videoretalk',
+    // Portrait (image + audio) is the default path; the edge function switches
+    // this to 'videoretalk' when a source video is supplied.
+    modelDefault: 'emo-v1',
+    modelPro: 'emo-v1',
     enabled: true,
     async: true,
     baseCredits: 200,
