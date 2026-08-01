@@ -101,6 +101,8 @@ const CareerApply = () => {
           portfolio_url: form.portfolio_url || null,
           cover_letter: form.cover_letter,
           has_cv: !!cv_url,
+          cv_url,
+          cv_filename: cvFile.name,
         },
       }).catch((e) => console.error('Notification failed:', e));
 
