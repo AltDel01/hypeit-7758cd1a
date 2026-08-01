@@ -109,7 +109,8 @@ const CareerApply = () => {
 
     } catch (err: any) {
       console.error('Application error:', err);
-      toast({ title: 'Failed to submit', description: 'Please try again later.', variant: 'destructive' });
+      const detail = err?.message || err?.error_description || 'Please try again later.';
+      toast({ title: 'Failed to submit', description: detail, variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
