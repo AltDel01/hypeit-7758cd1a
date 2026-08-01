@@ -35,6 +35,8 @@ serve(async (req: Request) => {
       portfolio_url,
       cover_letter,
       has_cv,
+      cv_url,
+      cv_filename,
     } = body ?? {};
 
     if (!full_name || !position) {
@@ -45,6 +47,43 @@ serve(async (req: Request) => {
     }
 
     const typeLabel = application_type === "intern" ? "Internship" : "Full-Time";
+
+    // Fetch the CV so it can be attached to the email + provide a signed link
+    let attachments: Array<{ filename: string; content: string }> | undefined;
+    let signedLink: string | null = null;
+    if (typeof cv_url === "string" && cv_url.startsWith("storage:")) {
+      try {
+        const [bucket, ...rest] = cv_url.replace("storage:", "").split("/");
+        const path = rest.join("/");
+        const admin = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        const { data: signed } = await admin.storage
+          .from(bucket)
+          .createSignedUrl(path, 60 * 60 * 24 * 30);
+        signedLink = signed?.signedUrl ?? null;
+
+        const { data: file } = await admin.storage.from(bucket).download(path);
+        if (file) {
+          const buf = new Uint8Array(await file.arrayBuffer());
+          if (buf.byteLength <= 15 * 1024 * 1024) {
+            let binary = "";
+            for (let i = 0; i < buf.length; i += 8192) {
+              binary += String.fromCharCode(...buf.subarray(i, i + 8192));
+            }
+            attachments = [{
+              filename: (typeof cv_filename === "string" && cv_filename) ||
+                path.split("/").pop() || "cv.pdf",
+              content: btoa(binary),
+            }];
+          }
+        }
+      } catch (e) {
+        console.error("CV attachment failed:", e);
+      }
+    }
+
 
     const html = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#111">
