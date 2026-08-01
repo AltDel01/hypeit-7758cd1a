@@ -188,7 +188,12 @@ export function useMultimodalChat() {
         : isI2V ? 'video-i2v'
         : 'video-t2v';
 
-      const firstFrame = firstFrameRef || (isI2V && !hasFirst ? storageRefs[0] : undefined);
+      // Lip-sync portraits and i2v first frames both fall back to the first
+      // attachment, otherwise the request is dispatched without an image and
+      // the provider rejects it before a task is ever created.
+      const firstFrame =
+        firstFrameRef ||
+        ((isI2V || isLipsync) && !hasFirst ? storageRefs[0] : undefined);
 
       request = await createGenerationRequest({
         requestType: 'video',
