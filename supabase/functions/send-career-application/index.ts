@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const ALERT_EMAIL = "hello.viralin@gmail.com";
@@ -34,6 +35,8 @@ serve(async (req: Request) => {
       portfolio_url,
       cover_letter,
       has_cv,
+      cv_url,
+      cv_filename,
     } = body ?? {};
 
     if (!full_name || !position) {
@@ -45,6 +48,43 @@ serve(async (req: Request) => {
 
     const typeLabel = application_type === "intern" ? "Internship" : "Full-Time";
 
+    // Fetch the CV so it can be attached to the email + provide a signed link
+    let attachments: Array<{ filename: string; content: string }> | undefined;
+    let signedLink: string | null = null;
+    if (typeof cv_url === "string" && cv_url.startsWith("storage:")) {
+      try {
+        const [bucket, ...rest] = cv_url.replace("storage:", "").split("/");
+        const path = rest.join("/");
+        const admin = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        const { data: signed } = await admin.storage
+          .from(bucket)
+          .createSignedUrl(path, 60 * 60 * 24 * 30);
+        signedLink = signed?.signedUrl ?? null;
+
+        const { data: file } = await admin.storage.from(bucket).download(path);
+        if (file) {
+          const buf = new Uint8Array(await file.arrayBuffer());
+          if (buf.byteLength <= 15 * 1024 * 1024) {
+            let binary = "";
+            for (let i = 0; i < buf.length; i += 8192) {
+              binary += String.fromCharCode(...buf.subarray(i, i + 8192));
+            }
+            attachments = [{
+              filename: (typeof cv_filename === "string" && cv_filename) ||
+                path.split("/").pop() || "cv.pdf",
+              content: btoa(binary),
+            }];
+          }
+        }
+      } catch (e) {
+        console.error("CV attachment failed:", e);
+      }
+    }
+
+
     const html = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#111">
         <h2 style="color:#8C52FF;margin-bottom:4px">New Career Application</h2>
@@ -55,7 +95,13 @@ serve(async (req: Request) => {
           <tr><td style="padding:6px 0;color:#666">Phone</td><td>${esc(phone)}</td></tr>
           <tr><td style="padding:6px 0;color:#666">Self-described</td><td>${esc(persona_type) || "-"}</td></tr>
           <tr><td style="padding:6px 0;color:#666">Portfolio</td><td>${portfolio_url ? `<a href="${esc(portfolio_url)}">${esc(portfolio_url)}</a>` : "-"}</td></tr>
-          <tr><td style="padding:6px 0;color:#666">CV attached</td><td>${has_cv ? "Yes, download it in the admin panel" : "No"}</td></tr>
+          <tr><td style="padding:6px 0;color:#666">CV</td><td>${
+      attachments
+        ? "Attached to this email"
+        : has_cv
+        ? "Uploaded, see link below"
+        : "No"
+    }${signedLink ? ` &middot; <a href="${esc(signedLink)}">Download CV</a>` : ""}</td></tr>
         </table>
         <h3 style="margin-top:24px;font-size:15px">Why they applied</h3>
         <p style="white-space:pre-wrap;font-size:14px;line-height:1.6">${esc(cover_letter)}</p>
@@ -71,7 +117,9 @@ serve(async (req: Request) => {
       reply_to: email || undefined,
       subject: `New application: ${position} (${typeLabel}) - ${full_name}`,
       html,
+      ...(attachments ? { attachments } : {}),
     } as Record<string, unknown>);
+
 
     if (error) {
       console.error("Resend error:", error);
