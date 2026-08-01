@@ -42,8 +42,11 @@ serve(async (req) => {
 
   let body: Body;
   try { body = await req.json(); } catch { return genericError(400, 'Invalid JSON'); }
-  if (!body.requestId || !body.mode || !body.audioUrl) {
-    return genericError(400, 'Missing requestId, mode or audioUrl');
+  if (!body.requestId) return genericError(400, 'Missing requestId');
+  if (!body.mode || !body.audioUrl) {
+    await markFailed(admin, body.requestId, body.mode === 'video' ? 'videoretalk' : 'emo-v1',
+      'No audio track was attached for lip sync.');
+    return genericError(400, 'Missing mode or audioUrl');
   }
 
   const { data: reqRow } = await admin
@@ -73,18 +76,30 @@ serve(async (req) => {
   const portraitUrl = await resolveUrl(body.portraitUrl);
   const sourceVideoUrl = await resolveUrl(body.sourceVideoUrl);
 
-  if (!audioUrl) return genericError(400, 'Could not resolve audioUrl');
+  if (!audioUrl) {
+    await markFailed(admin, body.requestId, body.mode === 'video' ? 'videoretalk' : 'emo-v1',
+      'The audio file could not be read. Please re-upload it and try again.');
+    return genericError(400, 'Could not resolve audioUrl');
+  }
 
   let model: string;
   let input: Record<string, unknown>;
   const endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
 
   if (body.mode === 'portrait') {
-    if (!portraitUrl) return genericError(400, 'Portrait mode requires portraitUrl');
+    if (!portraitUrl) {
+      await markFailed(admin, body.requestId, 'emo-v1',
+        'Lip sync needs a clear portrait photo. Please attach one image with a visible face plus the audio track.');
+      return genericError(400, 'Portrait mode requires portraitUrl');
+    }
     model = 'emo-v1';
     input = { image_url: portraitUrl, audio_url: audioUrl };
   } else {
-    if (!sourceVideoUrl) return genericError(400, 'Video mode requires sourceVideoUrl');
+    if (!sourceVideoUrl) {
+      await markFailed(admin, body.requestId, 'videoretalk',
+        'Lip sync in video mode needs a source video plus the audio track.');
+      return genericError(400, 'Video mode requires sourceVideoUrl');
+    }
     model = 'videoretalk';
     input = { video_url: sourceVideoUrl, audio_url: audioUrl };
   }
@@ -101,16 +116,16 @@ serve(async (req) => {
     if (!upstream.ok) {
       const txt = await upstream.text();
       console.error('[dashscope-lipsync] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, model);
-      return genericError(502, 'Submission failed, an editor will take over');
+      await markFailed(admin, body.requestId, model, humanizeUpstream(txt));
+      return genericError(502, 'Submission failed');
     }
 
     const json = await upstream.json();
     const taskId: string | undefined = json?.output?.task_id;
     if (!taskId) {
       console.error('[dashscope-lipsync] no task_id', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, model);
-      return genericError(502, 'Submission failed, an editor will take over');
+      await markFailed(admin, body.requestId, model, 'Provider did not return a task id.');
+      return genericError(502, 'Submission failed');
     }
 
     await admin
@@ -127,14 +142,28 @@ serve(async (req) => {
     return ok({ ok: true, taskId, requestId: body.requestId });
   } catch (e) {
     console.error('[dashscope-lipsync] exception', e);
-    await markFailed(admin, body.requestId, model);
-    return genericError(502, 'Submission failed, an editor will take over');
+    await markFailed(admin, body.requestId, model, 'Could not reach the provider.');
+    return genericError(502, 'Submission failed');
   }
 });
 
-async function markFailed(admin: any, requestId: string, model: string) {
+function humanizeUpstream(txt: string): string {
+  const t = txt.toLowerCase();
+  if (t.includes('face')) return 'The provider could not detect a usable face in the photo. Try a clear, front-facing portrait.';
+  if (t.includes('audio')) return 'The provider rejected the audio track. Try a shorter WAV or MP3 file.';
+  if (t.includes('invalidapikey')) return 'Provider rejected the API key.';
+  return 'The provider rejected this lip sync request.';
+}
+
+async function markFailed(admin: any, requestId: string, model: string, reason: string) {
   await admin
     .from('generation_requests')
-    .update({ auto_provider: 'wan', auto_model: model, auto_failed: true, status: 'new' })
+    .update({
+      auto_provider: 'wan',
+      auto_model: model,
+      auto_failed: true,
+      status: 'new',
+      failure_reason: reason,
+    })
     .eq('id', requestId);
 }
