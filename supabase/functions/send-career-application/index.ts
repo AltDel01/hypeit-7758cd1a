@@ -95,7 +95,13 @@ serve(async (req: Request) => {
           <tr><td style="padding:6px 0;color:#666">Phone</td><td>${esc(phone)}</td></tr>
           <tr><td style="padding:6px 0;color:#666">Self-described</td><td>${esc(persona_type) || "-"}</td></tr>
           <tr><td style="padding:6px 0;color:#666">Portfolio</td><td>${portfolio_url ? `<a href="${esc(portfolio_url)}">${esc(portfolio_url)}</a>` : "-"}</td></tr>
-          <tr><td style="padding:6px 0;color:#666">CV attached</td><td>${has_cv ? "Yes, download it in the admin panel" : "No"}</td></tr>
+          <tr><td style="padding:6px 0;color:#666">CV</td><td>${
+      attachments
+        ? "Attached to this email"
+        : has_cv
+        ? "Uploaded, see link below"
+        : "No"
+    }${signedLink ? ` &middot; <a href="${esc(signedLink)}">Download CV</a>` : ""}</td></tr>
         </table>
         <h3 style="margin-top:24px;font-size:15px">Why they applied</h3>
         <p style="white-space:pre-wrap;font-size:14px;line-height:1.6">${esc(cover_letter)}</p>
@@ -111,7 +117,9 @@ serve(async (req: Request) => {
       reply_to: email || undefined,
       subject: `New application: ${position} (${typeLabel}) - ${full_name}`,
       html,
+      ...(attachments ? { attachments } : {}),
     } as Record<string, unknown>);
+
 
     if (error) {
       console.error("Resend error:", error);
