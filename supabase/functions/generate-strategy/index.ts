@@ -1,3 +1,4 @@
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 
 interface StrategyBody {
@@ -19,6 +20,26 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    if (!authHeader?.startsWith('Bearer ') || !supabaseUrl || !anonKey) {
+      return new Response(JSON.stringify({ error: 'Unauthorized.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(authHeader.slice(7))
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const apiKey = Deno.env.get('LOVABLE_API_KEY')
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'AI is not configured.' }), {
