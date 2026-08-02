@@ -722,17 +722,47 @@ const CreativeWorkflow = () => {
             </Button>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-[#8C52FF]/15 p-1.5 text-[#8C52FF]">
-            <Sparkles className="h-4 w-4" />
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-[#8C52FF]/15 p-1.5 text-[#8C52FF]">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Brand Profile</h2>
+              <p className="text-xs text-muted-foreground">
+                The more we know, the more accurate the benchmarking, brand voice and on-brand visuals.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Brand Profile</h2>
-            <p className="text-xs text-muted-foreground">
-              The more we know, the more accurate the benchmarking, brand voice and on-brand visuals.
-            </p>
-          </div>
+          {prefilled && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 shrink-0 text-xs"
+              onClick={() => {
+                setBrandName('');
+                setWebsite('');
+                setProduct('');
+                setBrandMessage('');
+                setBrandColor('#8C52FF');
+                setSocial({ instagram: '', tiktok: '', facebook: '' });
+                setEcommerce({ tiktokshop: '', shopee: '', tokopedia: '' });
+                setScanned(false);
+                setPrefilled(false);
+                lastScanSig.current = '';
+              }}
+            >
+              Clear fields
+            </Button>
+          )}
         </div>
+
+        {prefilled && (
+          <p className="text-xs text-muted-foreground">
+            Loaded from your saved brand profile. Edit anything below, or clear the fields to start a new brand.
+          </p>
+        )}
+
 
         {/* Identity */}
         <div className="grid gap-3 md:grid-cols-2">
