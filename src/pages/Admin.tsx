@@ -7,12 +7,13 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { RequestManagementSection } from '@/components/admin/RequestManagementSection';
 import { TestRequestSection } from '@/components/admin/TestRequestSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Users, BarChart3, Zap, LayoutDashboard, Briefcase } from 'lucide-react';
+import { ClipboardList, Users, BarChart3, Zap, LayoutDashboard, Briefcase, Wallet } from 'lucide-react';
 import AdminEditorsSection from '@/components/admin/AdminEditorsSection';
 import AdminStatsSection from '@/components/admin/AdminStatsSection';
 import AdminCreditsSection from '@/components/admin/AdminCreditsSection';
 import AdminTokenDashboard from '@/components/admin/AdminTokenDashboard';
 import AdminCareersSection from '@/components/admin/AdminCareersSection';
+import AdminPaymentsSection from '@/components/admin/AdminPaymentsSection';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -65,7 +66,12 @@ const Admin = () => {
                   <Briefcase className="h-4 w-4" />
                   Careers
                 </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-2">
+                  <Wallet className="h-4 w-4" />
+                  Payments
+                </TabsTrigger>
               </TabsList>
+
 
               <TabsContent value="dashboard">
                 <AdminTokenDashboard />
@@ -90,6 +96,10 @@ const Admin = () => {
 
               <TabsContent value="careers">
                 <AdminCareersSection />
+              </TabsContent>
+
+              <TabsContent value="payments">
+                <AdminPaymentsSection />
               </TabsContent>
             </Tabs>
           </div>
