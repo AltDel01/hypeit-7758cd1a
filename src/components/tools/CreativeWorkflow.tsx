@@ -749,6 +749,7 @@ const CreativeWorkflow = () => {
                 setEcommerce({ tiktokshop: '', shopee: '', tokopedia: '' });
                 setScanned(false);
                 setPrefilled(false);
+                setStrategyId(null);
                 lastScanSig.current = '';
               }}
             >
