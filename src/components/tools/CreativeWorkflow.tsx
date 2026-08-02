@@ -611,10 +611,14 @@ const CreativeWorkflow = () => {
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
 
-  const approve = (day: DayPlan) => {
-    patchDay(day.id, { status: 'Ready to Post' });
-    upsertPost({ ...day, status: 'Ready to Post' }, 'queued');
-    toast.success(`${day.day} approved to queue.`);
+  const approve = async (day: DayPlan) => {
+    if (day.genStage !== 'ready' || !day.assetUrl) {
+      toast.error('Generate the image or video first, then approve it.');
+      return;
+    }
+    // Saving to the posting history happens here, once the user approves the result.
+    await finalizeDay(day, day.assetUrl);
+    toast.success(`${day.day} approved and saved to your posting history.`);
   };
 
   /* -------- Skip Brand Profile: build a blank, fully editable 7-day week -------- */
