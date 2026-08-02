@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PricingCard from '@/components/ui/PricingCard';
+import QrisCheckoutDialog from '@/components/payments/QrisCheckoutDialog';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const Pricing = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [packKey, setPackKey] = useState<string | null>(null);
+
+  const startCheckout = (title: string) => {
+    if (title === 'Free') return;
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    setPackKey(title.toLowerCase());
+  };
+
   const pricing = [
   {
     title: "Free",
@@ -123,6 +139,7 @@ const Pricing = () => {
               plan.title === "Pro" ?
               "Upgrade to Pro" :
               "Upgrade to Specialist"}
+              onButtonClick={() => startCheckout(plan.title)}
               className="duration-300" />
 
             </div>
@@ -136,6 +153,8 @@ const Pricing = () => {
           </a>
         </div>
       </div>
+
+      <QrisCheckoutDialog packKey={packKey} onOpenChange={(open) => !open && setPackKey(null)} />
     </section>);
 
 };
