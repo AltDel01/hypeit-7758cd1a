@@ -552,12 +552,12 @@ const CreativeWorkflow = () => {
       if (data?.error) throw new Error(data.error);
 
       if (data?.assetType === 'image' && data?.assetUrl) {
-        await finalizeDay(day, data.assetUrl);
-        toast.success(`Image generated for ${day.day}, saved to your posting history. ${data.creditsUsed} credits used.`);
+        patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' });
+        toast.success(`Image ready for ${day.day}. Review it, then hit Approve to Queue. ${data.creditsUsed} credits used.`);
       } else if (data?.assetType === 'video') {
         patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
         setDays((prev) => (prev ? prev.map((d) => (d.id === day.id ? { ...d, requestId: data.requestId || d.requestId } : d)) : prev));
-        toast.success(`Video for ${day.day} is being produced. It moves to your posting history when it's ready.`);
+        toast.success(`Video for ${day.day} is being produced. It appears here as soon as it's ready.`);
       }
 
     } catch (e) {
