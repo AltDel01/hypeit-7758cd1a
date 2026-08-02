@@ -200,19 +200,9 @@ const CreativeWorkflow = () => {
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
           if (rows && rows.length) {
-            // Only restore a brand profile when it belongs to a complete saved
-            // strategy. Failed/orphaned headers must never pre-fill the form.
+            // Restore the saved calendar only. Brand Profile is a fresh intake
+            // form on every page load and must never inherit an older brand.
             setStrategyId(strat.id);
-            setBrandName(strat.brand_name || '');
-            setProduct(strat.product || '');
-            setBrandMessage(strat.brand_message || '');
-            setBrandColor(strat.brand_color || '#8C52FF');
-            setPrefilled(true);
-            lastScanSig.current = JSON.stringify({
-              brandName: strat.brand_name || '',
-              website: '',
-              social: { instagram: '', tiktok: '', facebook: '' },
-            });
 
             // Any box whose media already finished is archived to history and blanked,
             // so a returning user always starts from empty boxes.
