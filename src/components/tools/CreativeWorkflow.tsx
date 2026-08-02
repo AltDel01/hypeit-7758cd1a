@@ -468,18 +468,19 @@ const CreativeWorkflow = () => {
       setStrategyId(strat.id);
 
       // Insert all 7 days.
+      const str = (v: unknown, fallback = '') => (typeof v === 'string' && v.trim() ? v : fallback);
       const rows = genDays.map((d, i) => ({
         strategy_id: strat.id,
         user_id: userId,
-        day: d.day,
+        day: str(d.day, DAYS[i] || `Day-${i + 1}`),
         position: i,
         status: 'Draft',
-        benchmark: d.benchmark,
-        concept: d.concept,
-        hook: d.hook,
-        body: d.body,
-        scenes: d.scenes as unknown as Json,
-        asset_type: d.assetType,
+        benchmark: str(d.benchmark),
+        concept: str(d.concept, `Day ${i + 1} concept`),
+        hook: str(d.hook),
+        body: str(d.body),
+        scenes: (Array.isArray(d.scenes) ? d.scenes : []) as unknown as Json,
+        asset_type: str(d.asset_type ?? (d as { assetType?: unknown }).assetType, 'image'),
         gen_stage: 'idle',
         platforms: { tiktok: true, instagram: i % 2 === 0, facebook: i % 3 === 0 } as unknown as Json,
         scheduled_time: DEFAULT_TIMES[i] || '16:30',
@@ -488,7 +489,12 @@ const CreativeWorkflow = () => {
         .from('creative_days')
         .insert(rows)
         .select();
-      if (dErr) throw dErr;
+      if (dErr) {
+        // Roll back the orphan strategy row so failed attempts don't pile up.
+        await supabase.from('creative_strategies').delete().eq('id', strat.id);
+        setStrategyId(null);
+        throw new Error(`Saving your 7-day plan failed: ${dErr.message}`);
+      }
       setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
       setEditingProfile(false);
 
