@@ -518,6 +518,24 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_keys: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       payment_email_events: {
         Row: {
           amount_idr: number | null

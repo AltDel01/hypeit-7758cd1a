@@ -1,3 +1,4 @@
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { serviceClient, expireStaleOrders, settleOrder, sendReceipt, notifyAdmin, formatIDR } from '../_shared/qris.ts'
 
@@ -58,14 +59,44 @@ Deno.serve(async (req) => {
     })
 
   try {
+    const db = serviceClient()
+
+    // Callable by the scheduler (shared key) or by a signed-in admin.
+    const cronKey = req.headers.get('x-cron-key')
+    let authorized = false
+    if (cronKey) {
+      const { data: stored } = await db
+        .from('internal_keys')
+        .select('value')
+        .eq('key', 'qris_cron')
+        .maybeSingle()
+      authorized = !!stored?.value && stored.value === cronKey
+    } else {
+      const authHeader = req.headers.get('Authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const authClient = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_ANON_KEY')!,
+          { global: { headers: { Authorization: authHeader } } },
+        )
+        const { data: claims } = await authClient.auth.getClaims(authHeader.slice(7))
+        const userId = claims?.claims?.sub as string | undefined
+        if (userId) {
+          const { data: isAdmin } = await db.rpc('has_role', { _user_id: userId, _role: 'admin' })
+          authorized = !!isAdmin
+        }
+      }
+    }
+    if (!authorized) return json({ error: 'Unauthorized.' }, 401)
+
     const lovableKey = Deno.env.get('LOVABLE_API_KEY')
     const gmailKey = Deno.env.get('GOOGLE_MAIL_API_KEY')
     if (!lovableKey || !gmailKey) {
       return json({ error: 'Gmail reconciliation is not connected yet.' }, 503)
     }
 
-    const db = serviceClient()
     await expireStaleOrders(db)
+
 
     const { data: settings } = await db.from('payment_settings').select('*').maybeSingle()
     const senders: string[] = settings?.bank_senders ?? []
