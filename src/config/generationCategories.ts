@@ -157,10 +157,10 @@ export const CATEGORY_MAP: Record<GenerationCategory, CategoryMeta> = {
     label: 'Lip Sync',
     requestType: 'video',
     provider: 'wan',
-    // Portrait (image + audio) is the default path; the edge function switches
-    // this to 'videoretalk' when a source video is supplied.
-    modelDefault: 'emo-v1',
-    modelPro: 'emo-v1',
+    // Audio-driven lip sync runs through Wan 2.7 image-to-video with a
+    // driving_audio track (emo-v1 / videoretalk are not hosted in this region).
+    modelDefault: 'wan2.7-i2v',
+    modelPro: 'wan2.7-i2v',
     enabled: true,
     async: true,
     baseCredits: 200,
