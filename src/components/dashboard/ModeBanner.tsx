@@ -48,7 +48,7 @@ const ModeBanner: React.FC<ModeBannerProps> = ({ category }) => {
             <div className="text-xs text-muted-foreground">
               {isManual
                 ? 'Hand-crafted by our editors. Typically delivered within minutes.'
-                : `Auto-generated via ${PROVIDER_LABEL[meta.provider!] || meta.provider}. Editors take over if anything fails.`}
+                : `Auto-generated via ${PROVIDER_LABEL[meta.provider!] || meta.provider}.`}
             </div>
           </div>
         </div>

@@ -118,7 +118,7 @@ serve(async (req) => {
       const txt = await createRes.text();
       console.error('[dashscope-inpaint] create failed', createRes.status, txt);
       await markFailed(admin, body.requestId, model);
-      return genericError(502, 'Inpaint failed, an editor will take over');
+      return genericError(502, 'Inpaint failed');
     }
 
     const createJson = await createRes.json();
@@ -126,7 +126,7 @@ serve(async (req) => {
     if (!taskId) {
       console.error('[dashscope-inpaint] no task_id', JSON.stringify(createJson).slice(0, 500));
       await markFailed(admin, body.requestId, model);
-      return genericError(502, 'Inpaint failed, an editor will take over');
+      return genericError(502, 'Inpaint failed');
     }
 
     // Persist task id for visibility
@@ -160,14 +160,14 @@ serve(async (req) => {
       if (status === 'FAILED' || status === 'UNKNOWN') {
         console.error('[dashscope-inpaint] task failed', JSON.stringify(pollJson).slice(0, 500));
         await markFailed(admin, body.requestId, model);
-        return genericError(502, 'Inpaint failed, an editor will take over');
+        return genericError(502, 'Inpaint failed');
       }
     }
 
     if (!resultImageUrl) {
       console.error('[dashscope-inpaint] timed out waiting for result');
       await markFailed(admin, body.requestId, model);
-      return genericError(504, 'Inpaint timed out, an editor will take over');
+      return genericError(504, 'Inpaint timed out');
     }
 
     // 3. Download + store
@@ -211,7 +211,7 @@ serve(async (req) => {
   } catch (e) {
     console.error('[dashscope-inpaint] exception', e);
     await markFailed(admin, body.requestId, model);
-    return genericError(502, 'Inpaint failed, an editor will take over');
+    return genericError(502, 'Inpaint failed');
   }
 });
 

@@ -64,7 +64,7 @@ serve(async (req) => {
         auto_failed: true,
         status: 'new',
         failure_reason:
-          'This request never reached the provider. An editor will take it from here.',
+          'This request never reached the provider.',
       })
       .eq('id', o.id);
   }

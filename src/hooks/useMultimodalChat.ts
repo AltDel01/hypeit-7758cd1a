@@ -263,7 +263,7 @@ export function useMultimodalChat() {
           update(assistantId, {
             kind: 'error',
             status: 'failed',
-            content: 'Auto-generation failed. A human editor will take over and the result will appear in your dashboard.',
+            content: 'Auto-generation failed. Please try again.',
           });
           return;
         }

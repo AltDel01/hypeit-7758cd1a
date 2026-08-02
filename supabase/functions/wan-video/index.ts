@@ -159,7 +159,7 @@ serve(async (req) => {
   } catch (e) {
     console.error('[wan-video] OSS upload failed', e);
     await markFailed(admin, body.requestId, body.model, 'Reference media upload to provider failed');
-    return genericError(502, 'Submission failed, an editor will take over');
+    return genericError(502, 'Submission failed');
   }
 
 
@@ -251,7 +251,7 @@ serve(async (req) => {
       const txt = await upstream.text();
       console.error('[wan-video] upstream error', upstream.status, txt);
       await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
-      return genericError(502, 'Submission failed, an editor will take over');
+      return genericError(502, 'Submission failed');
     }
 
     const json = await upstream.json();
@@ -259,7 +259,7 @@ serve(async (req) => {
     if (!taskId) {
       console.error('[wan-video] no task_id', JSON.stringify(json).slice(0, 500));
       await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Submission failed, an editor will take over');
+      return genericError(502, 'Submission failed');
     }
 
     await admin
@@ -278,7 +278,7 @@ serve(async (req) => {
   } catch (e) {
     console.error('[wan-video] exception', e);
     await markFailed(admin, body.requestId, body.model, 'Network error while submitting to provider');
-    return genericError(502, 'Submission failed, an editor will take over');
+    return genericError(502, 'Submission failed');
   }
 });
 

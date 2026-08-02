@@ -65,7 +65,7 @@ const CinemaStudio = () => {
           const url = await resolveResultUrl(data.result_url);
           setResultUrl(url || data.result_url); setBusy(false); return;
         }
-        if (data.status === 'failed') { setBusy(false); toast.error('Auto-gen failed. An editor will take over.'); return; }
+        if (data.status === 'failed') { setBusy(false); toast.error('Auto-gen failed.'); return; }
         setTimeout(poll, 5000);
       } catch { setTimeout(poll, 8000); }
     };

@@ -68,7 +68,7 @@ const LipSyncStudio = () => {
           const url = await resolveResultUrl(data.result_url);
           setResultUrl(url || data.result_url); setStatus('completed'); return;
         }
-        if (data.status === 'failed') { setStatus('failed'); setError('Auto-gen failed. An editor will take over.'); return; }
+        if (data.status === 'failed') { setStatus('failed'); setError('Auto-gen failed.'); return; }
         setTimeout(poll, 5000);
       } catch { setTimeout(poll, 8000); }
     };
