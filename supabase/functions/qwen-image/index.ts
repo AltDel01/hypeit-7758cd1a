@@ -129,7 +129,7 @@ serve(async (req) => {
       const txt = await upstream.text();
       console.error('[qwen-image] upstream error', upstream.status, txt);
       await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
-      return genericError(502, 'Generation failed, an editor will take over');
+      return genericError(502, 'Generation failed');
     }
 
     const json = await upstream.json();
@@ -156,7 +156,7 @@ serve(async (req) => {
     if (rawUrls.length === 0) {
       console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
       await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Generation failed, an editor will take over');
+      return genericError(502, 'Generation failed');
     }
 
     // Download and upload each image to Supabase Storage
@@ -207,7 +207,7 @@ serve(async (req) => {
   } catch (e) {
     console.error('[qwen-image] exception', e);
     await markFailed(admin, body.requestId, body.model, 'Network error while contacting provider');
-    return genericError(502, 'Generation failed, an editor will take over');
+    return genericError(502, 'Generation failed');
   }
 });
 

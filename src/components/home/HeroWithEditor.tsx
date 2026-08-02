@@ -475,7 +475,7 @@ const HeroWithEditor: React.FC = () => {
                   )}
                   <span className="text-sm text-white font-medium capitalize">
                     {submittedRequest.status === 'completed' ? 'Completed' :
-                     submittedRequest.status === 'failed' ? 'An editor will take over' :
+                     submittedRequest.status === 'failed' ? 'Generation failed' :
                      'Processing'}
                   </span>
                 </div>

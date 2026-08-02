@@ -175,7 +175,7 @@ const SequenceGeneration = () => {
           return;
         }
         if (data.status === 'failed') {
-          update(box.id, { status: 'failed', error: 'Auto-gen failed. An editor will take over.' });
+          update(box.id, { status: 'failed', error: 'Auto-gen failed.' });
           return;
         }
         setTimeout(poll, 5000);
