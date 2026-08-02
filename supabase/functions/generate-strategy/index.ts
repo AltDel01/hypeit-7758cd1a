@@ -131,6 +131,7 @@ Provide exactly 7 day objects, each with exactly 3 scenes.`
           voiceover: (s.voiceover || '').toString().slice(0, 400),
         }
       })
+      const assetType = DEFAULT_ASSET_TYPES[i]
       return {
         day: dayName,
         position: i,
@@ -139,7 +140,9 @@ Provide exactly 7 day objects, each with exactly 3 scenes.`
         hook: (d.hook || '').toString().slice(0, 120),
         body: (d.body || '').toString().slice(0, 220),
         scenes,
-        asset_type: DEFAULT_ASSET_TYPES[i],
+        // Keep both names while older browser bundles still read camelCase.
+        asset_type: assetType,
+        assetType,
       }
     })
 
