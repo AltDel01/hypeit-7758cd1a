@@ -453,7 +453,10 @@ const CreativeWorkflow = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const genDays: Array<Omit<DayPlan, 'id' | 'platforms' | 'time' | 'status' | 'genStage' | 'assetUrl' | 'requestId'>> = data.days;
+      const genDays = (data?.days || []) as Array<Record<string, unknown>>;
+      if (!Array.isArray(genDays) || genDays.length === 0) {
+        throw new Error('The strategy came back empty. Please try again.');
+      }
 
       // Create the strategy record.
       const { data: strat, error: sErr } = await supabase
