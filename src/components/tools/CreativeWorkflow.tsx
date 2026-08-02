@@ -204,15 +204,12 @@ const CreativeWorkflow = () => {
             // form on every page load and must never inherit an older brand.
             setStrategyId(strat.id);
 
-            // Any box whose media already finished is archived to history and blanked,
-            // so a returning user always starts from empty boxes.
+            // Only boxes older than a week are archived and blanked. A freshly
+            // generated asset stays visible until the user approves it.
             const cutoff = Date.now() - SEVEN_DAYS_MS;
             const done = rows.filter((r) => {
               const row = r as DayRow;
-              return (
-                !!row.asset_url ||
-                (row.generated_at && new Date(row.generated_at).getTime() < cutoff)
-              );
+              return !!row.generated_at && new Date(row.generated_at).getTime() < cutoff;
             }) as DayRow[];
 
             if (done.length) {
