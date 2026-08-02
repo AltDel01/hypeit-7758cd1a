@@ -489,6 +489,30 @@ const CreativeWorkflow = () => {
       setDays((inserted as DayRow[]).map(rowToDay).sort((a, b) => a.position - b.position));
       setEditingProfile(false);
 
+      // Record the strategy generation in the user's request history.
+      try {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('email, display_name')
+          .eq('id', userId)
+          .maybeSingle();
+        await supabase.from('generation_requests').insert({
+          user_id: userId,
+          user_email: prof?.email || auth.user?.email || '',
+          user_name: prof?.display_name || null,
+          request_type: 'creative-strategy',
+          category: 'creative-workflow',
+          prompt: `7-Day Creative Strategy for ${brandName} — ${product}`.replace(/—/g, '-'),
+          status: 'completed',
+          credits_used: 0,
+          completed_at: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.error('strategy history log failed', logErr);
+      }
+
+
+
       const linked = [...Object.values(social).filter(Boolean), ...Object.values(ecommerce).filter(Boolean)].length;
       toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
     } catch (e) {
