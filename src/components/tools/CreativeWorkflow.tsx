@@ -164,6 +164,7 @@ const CreativeWorkflow = () => {
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
 
   // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
   const hasStrategy = !!days && days.length > 0;
@@ -171,14 +172,24 @@ const CreativeWorkflow = () => {
 
   // Debounce timers for persisting per-day edits.
   const persistTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Signature of the last auto-scan, seeded after load so restoring a saved
+  // profile never triggers a re-scan that overwrites saved tone/color.
+  const lastScanSig = useRef('');
 
   /* -------- Load most recent saved strategy on mount -------- */
   useEffect(() => {
     (async () => {
       try {
+        const { data: auth } = await supabase.auth.getUser();
+        const currentUserId = auth.user?.id;
+        if (!currentUserId) {
+          setLoadingExisting(false);
+          return;
+        }
         const { data: strat } = await supabase
           .from('creative_strategies')
           .select('*')
+          .eq('user_id', currentUserId)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -188,6 +199,13 @@ const CreativeWorkflow = () => {
           setProduct(strat.product || '');
           setBrandMessage(strat.brand_message || '');
           setBrandColor(strat.brand_color || '#8C52FF');
+          setPrefilled(true);
+          lastScanSig.current = JSON.stringify({
+            brandName: strat.brand_name || '',
+            website: '',
+            social: { instagram: '', tiktok: '', facebook: '' },
+          });
+
           const { data: rows } = await supabase
             .from('creative_days')
             .select('*')
