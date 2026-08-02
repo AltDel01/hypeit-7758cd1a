@@ -316,7 +316,7 @@ const CreativeWorkflow = () => {
   };
 
   // Auto-scan once the user has supplied enough brand signals (debounced).
-  const lastScanSig = useRef('');
+
   useEffect(() => {
     const hasSignal = website.trim() || social.instagram.trim() || social.tiktok.trim() || social.facebook.trim();
     if (!brandName.trim() || !hasSignal) return;
