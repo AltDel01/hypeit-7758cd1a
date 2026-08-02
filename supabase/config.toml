@@ -54,3 +54,15 @@ verify_jwt = false
 # Allow users to sign in without email verification
 disable_signup = false
 enable_signup = true
+
+[functions.qris-reconcile]
+verify_jwt = false
+
+[functions.qris-create-order]
+verify_jwt = false
+
+[functions.qris-submit-proof]
+verify_jwt = false
+
+[functions.qris-admin-order]
+verify_jwt = false

@@ -1,3 +1,4 @@
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { serviceClient, expireStaleOrders, settleOrder, sendReceipt, notifyAdmin, formatIDR } from '../_shared/qris.ts'
 
