@@ -194,24 +194,26 @@ const CreativeWorkflow = () => {
           .limit(1)
           .maybeSingle();
         if (strat) {
-          setStrategyId(strat.id);
-          setBrandName(strat.brand_name || '');
-          setProduct(strat.product || '');
-          setBrandMessage(strat.brand_message || '');
-          setBrandColor(strat.brand_color || '#8C52FF');
-          setPrefilled(true);
-          lastScanSig.current = JSON.stringify({
-            brandName: strat.brand_name || '',
-            website: '',
-            social: { instagram: '', tiktok: '', facebook: '' },
-          });
-
           const { data: rows } = await supabase
             .from('creative_days')
             .select('*')
             .eq('strategy_id', strat.id)
             .order('position', { ascending: true });
           if (rows && rows.length) {
+            // Only restore a brand profile when it belongs to a complete saved
+            // strategy. Failed/orphaned headers must never pre-fill the form.
+            setStrategyId(strat.id);
+            setBrandName(strat.brand_name || '');
+            setProduct(strat.product || '');
+            setBrandMessage(strat.brand_message || '');
+            setBrandColor(strat.brand_color || '#8C52FF');
+            setPrefilled(true);
+            lastScanSig.current = JSON.stringify({
+              brandName: strat.brand_name || '',
+              website: '',
+              social: { instagram: '', tiktok: '', facebook: '' },
+            });
+
             // Any box whose media already finished is archived to history and blanked,
             // so a returning user always starts from empty boxes.
             const cutoff = Date.now() - SEVEN_DAYS_MS;
@@ -261,6 +263,9 @@ const CreativeWorkflow = () => {
                   : rowToDay(r as DayRow),
               ),
             );
+          } else {
+            // This is a failed generation attempt, not a reusable brand profile.
+            await supabase.from('creative_strategies').delete().eq('id', strat.id);
           }
 
         }
