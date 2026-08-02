@@ -282,6 +282,45 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_packs: {
+        Row: {
+          active: boolean
+          created_at: string
+          credits: number
+          id: string
+          key: string
+          name: string
+          price_idr: number
+          price_usd: number | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          credits: number
+          id?: string
+          key: string
+          name: string
+          price_idr: number
+          price_usd?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          credits?: number
+          id?: string
+          key?: string
+          name?: string
+          price_idr?: number
+          price_usd?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generated_images: {
         Row: {
           created_at: string | null
@@ -476,6 +515,146 @@ export type Database = {
           user_name?: string | null
           video_downloaded_at?: string | null
           video_played_at?: string | null
+        }
+        Relationships: []
+      }
+      payment_email_events: {
+        Row: {
+          amount_idr: number | null
+          created_at: string
+          id: string
+          matched_order_id: string | null
+          note: string | null
+          provider_message_id: string
+          received_at: string | null
+          sender: string | null
+          snippet: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          amount_idr?: number | null
+          created_at?: string
+          id?: string
+          matched_order_id?: string | null
+          note?: string | null
+          provider_message_id: string
+          received_at?: string | null
+          sender?: string | null
+          snippet?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          amount_idr?: number | null
+          created_at?: string
+          id?: string
+          matched_order_id?: string | null
+          note?: string | null
+          provider_message_id?: string
+          received_at?: string | null
+          sender?: string | null
+          snippet?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_email_events_matched_order_id_fkey"
+            columns: ["matched_order_id"]
+            isOneToOne: false
+            referencedRelation: "payment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_orders: {
+        Row: {
+          approved_by: string | null
+          base_amount_idr: number
+          created_at: string
+          credits: number
+          expires_at: string
+          id: string
+          matched_at: string | null
+          matched_email_id: string | null
+          pack_key: string
+          pack_name: string
+          proof_url: string | null
+          rejection_reason: string | null
+          status: string
+          unique_amount_idr: number
+          updated_at: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          base_amount_idr: number
+          created_at?: string
+          credits: number
+          expires_at?: string
+          id?: string
+          matched_at?: string | null
+          matched_email_id?: string | null
+          pack_key: string
+          pack_name: string
+          proof_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          unique_amount_idr: number
+          updated_at?: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          base_amount_idr?: number
+          created_at?: string
+          credits?: number
+          expires_at?: string
+          id?: string
+          matched_at?: string | null
+          matched_email_id?: string | null
+          pack_key?: string
+          pack_name?: string
+          proof_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          unique_amount_idr?: number
+          updated_at?: string
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_settings: {
+        Row: {
+          bank_senders: string[]
+          id: boolean
+          instructions: string | null
+          merchant_name: string | null
+          order_ttl_minutes: number
+          qris_image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_senders?: string[]
+          id?: boolean
+          instructions?: string | null
+          merchant_name?: string | null
+          order_ttl_minutes?: number
+          qris_image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_senders?: string[]
+          id?: boolean
+          instructions?: string | null
+          merchant_name?: string | null
+          order_ttl_minutes?: number
+          qris_image_url?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
