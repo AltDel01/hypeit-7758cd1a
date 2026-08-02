@@ -121,7 +121,7 @@ const rowToDay = (r: DayRow): DayPlan => ({
   scenes: Array.isArray(r.scenes) ? (r.scenes as Scene[]) : [],
   assetType: (r.asset_type as AssetType) || 'image',
   assetUrl: r.asset_url,
-  genStage: (r.gen_stage as GenStage) || 'idle',
+  genStage: r.asset_url ? 'ready' : ((r.gen_stage as GenStage) || 'idle'),
   platforms: (r.platforms as Record<Platform, boolean>) || { tiktok: true, instagram: false, facebook: false },
   time: r.scheduled_time || '16:30',
   requestId: r.request_id || null,
