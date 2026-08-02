@@ -121,7 +121,7 @@ const rowToDay = (r: DayRow): DayPlan => ({
   scenes: Array.isArray(r.scenes) ? (r.scenes as Scene[]) : [],
   assetType: (r.asset_type as AssetType) || 'image',
   assetUrl: r.asset_url,
-  genStage: (r.gen_stage as GenStage) || 'idle',
+  genStage: r.asset_url ? 'ready' : ((r.gen_stage as GenStage) || 'idle'),
   platforms: (r.platforms as Record<Platform, boolean>) || { tiktok: true, instagram: false, facebook: false },
   time: r.scheduled_time || '16:30',
   requestId: r.request_id || null,
@@ -204,15 +204,12 @@ const CreativeWorkflow = () => {
             // form on every page load and must never inherit an older brand.
             setStrategyId(strat.id);
 
-            // Any box whose media already finished is archived to history and blanked,
-            // so a returning user always starts from empty boxes.
+            // Only boxes older than a week are archived and blanked. A freshly
+            // generated asset stays visible until the user approves it.
             const cutoff = Date.now() - SEVEN_DAYS_MS;
             const done = rows.filter((r) => {
               const row = r as DayRow;
-              return (
-                !!row.asset_url ||
-                (row.generated_at && new Date(row.generated_at).getTime() < cutoff)
-              );
+              return !!row.generated_at && new Date(row.generated_at).getTime() < cutoff;
             }) as DayRow[];
 
             if (done.length) {
@@ -408,8 +405,8 @@ const CreativeWorkflow = () => {
         if (r.status === 'completed' && r.result_url) {
           const day = pending.find((d) => d.requestId === r.id);
           if (day) {
-            await finalizeDay(day, r.result_url);
-            toast.success(`${day.day} video is ready, saved to your posting history.`);
+            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready', status: 'Draft' });
+            toast.success(`${day.day} video is ready. Review it, then hit Approve to Queue.`);
           }
 
         }
@@ -552,12 +549,12 @@ const CreativeWorkflow = () => {
       if (data?.error) throw new Error(data.error);
 
       if (data?.assetType === 'image' && data?.assetUrl) {
-        await finalizeDay(day, data.assetUrl);
-        toast.success(`Image generated for ${day.day}, saved to your posting history. ${data.creditsUsed} credits used.`);
+        patchDay(day.id, { assetUrl: data.assetUrl, genStage: 'ready', status: 'Draft' });
+        toast.success(`Image ready for ${day.day}. Review it, then hit Approve to Queue. ${data.creditsUsed} credits used.`);
       } else if (data?.assetType === 'video') {
         patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
         setDays((prev) => (prev ? prev.map((d) => (d.id === day.id ? { ...d, requestId: data.requestId || d.requestId } : d)) : prev));
-        toast.success(`Video for ${day.day} is being produced. It moves to your posting history when it's ready.`);
+        toast.success(`Video for ${day.day} is being produced. It appears here as soon as it's ready.`);
       }
 
     } catch (e) {
@@ -611,10 +608,14 @@ const CreativeWorkflow = () => {
   const togglePlatform = (day: DayPlan, p: Platform) =>
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
 
-  const approve = (day: DayPlan) => {
-    patchDay(day.id, { status: 'Ready to Post' });
-    upsertPost({ ...day, status: 'Ready to Post' }, 'queued');
-    toast.success(`${day.day} approved to queue.`);
+  const approve = async (day: DayPlan) => {
+    if (day.genStage !== 'ready' || !day.assetUrl) {
+      toast.error('Generate the image or video first, then approve it.');
+      return;
+    }
+    // Saving to the posting history happens here, once the user approves the result.
+    await finalizeDay(day, day.assetUrl);
+    toast.success(`${day.day} approved and saved to your posting history.`);
   };
 
   /* -------- Skip Brand Profile: build a blank, fully editable 7-day week -------- */
