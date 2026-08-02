@@ -1219,6 +1219,7 @@ const GeneratingPreview = ({ assetType }: { assetType: AssetType }) => {
 
 const AssetPreview = ({ assetUrl, assetType }: { assetUrl: string | null; assetType: AssetType }) => {
   const [url, setUrl] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     let active = true;
     if (!assetUrl) { setUrl(null); return; }
@@ -1237,7 +1238,28 @@ const AssetPreview = ({ assetUrl, assetType }: { assetUrl: string | null; assetT
   if (assetType === 'video') {
     return <video src={url} controls className="h-full w-full object-cover" />;
   }
-  return <img src={url} alt="Generated asset" className="h-full w-full object-cover" />;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="h-full w-full cursor-zoom-in"
+        aria-label="View full image"
+      >
+        <img src={url} alt="Generated asset" className="h-full w-full object-cover" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none">
+          <img
+            src={url}
+            alt="Generated asset full size"
+            className="max-h-[85vh] w-full rounded-lg object-contain"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 };
+
 
 export default CreativeWorkflow;
