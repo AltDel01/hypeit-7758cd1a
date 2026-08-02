@@ -408,8 +408,8 @@ const CreativeWorkflow = () => {
         if (r.status === 'completed' && r.result_url) {
           const day = pending.find((d) => d.requestId === r.id);
           if (day) {
-            await finalizeDay(day, r.result_url);
-            toast.success(`${day.day} video is ready, saved to your posting history.`);
+            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready', status: 'Draft' });
+            toast.success(`${day.day} video is ready. Review it, then hit Approve to Queue.`);
           }
 
         }
