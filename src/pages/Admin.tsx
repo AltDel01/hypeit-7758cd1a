@@ -65,7 +65,12 @@ const Admin = () => {
                   <Briefcase className="h-4 w-4" />
                   Careers
                 </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-2">
+                  <Wallet className="h-4 w-4" />
+                  Payments
+                </TabsTrigger>
               </TabsList>
+
 
               <TabsContent value="dashboard">
                 <AdminTokenDashboard />
