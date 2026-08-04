@@ -114,3 +114,32 @@ export async function notifyAdmin(subject: string, html: string) {
     console.error('admin email failed', (e as Error).message)
   }
 }
+
+/** Tells the buyer their payment could not be verified. Never throws. */
+export async function sendRejection(order: any, reason: string, toEmail?: string | null) {
+  const key = Deno.env.get('RESEND_API_KEY')
+  const to = toEmail || order?.user_email
+  if (!key || !to) return
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        from: 'Viralin AI <hello@viralin.ai>',
+        to: [to],
+        subject: 'We could not verify your QRIS payment',
+        html: `
+          <div style="font-family:Inter,Arial,sans-serif;background:#0d0d12;padding:32px;color:#fff">
+            <h2 style="color:#8C52FF;margin:0 0 16px">Payment not verified</h2>
+            <p style="color:#d5d5e0;margin:0 0 12px">We reviewed the receipt for your ${order?.pack_name ?? 'credit'} order and could not confirm the payment.</p>
+            <p style="color:#d5d5e0;margin:0 0 12px"><b>Reason:</b> ${reason}</p>
+            <p style="color:#d5d5e0;margin:0 0 12px">Amount expected: <b>${formatIDR(Number(order?.unique_amount_idr ?? 0))}</b></p>
+            <p style="margin:24px 0"><a href="https://viralin.ai/pricing" style="background:#8C52FF;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Try again</a></p>
+            <p style="color:#8b8b9a;font-size:12px">If you believe this is a mistake, reply to this email with your receipt.</p>
+          </div>`,
+      }),
+    })
+  } catch (e) {
+    console.error('rejection email failed', (e as Error).message)
+  }
+}
