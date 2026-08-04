@@ -364,11 +364,15 @@ const AdminPaymentsSection = () => {
       </Card>
 
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Bank emails read</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
+      <details className="rounded-lg border border-border p-4">
+        <summary className="cursor-pointer text-sm font-medium">
+          Optional: bank email matching
+        </summary>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Only useful if your bank sends transaction notification emails. Receipt uploads above are
+          the primary way orders get confirmed.
+        </p>
+        <div className="mt-3 space-y-2">
           {events.length === 0 && (
             <p className="text-sm text-muted-foreground">No bank notifications processed yet.</p>
           )}
@@ -386,8 +390,9 @@ const AdminPaymentsSection = () => {
               </p>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </details>
+
     </div>
   );
 };
