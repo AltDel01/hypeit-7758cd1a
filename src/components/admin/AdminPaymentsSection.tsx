@@ -44,6 +44,7 @@ const statusTone: Record<string, string> = {
 const AdminPaymentsSection = () => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [proofPreviews, setProofPreviews] = useState<Record<string, string>>({});
   const [events, setEvents] = useState<EmailEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
