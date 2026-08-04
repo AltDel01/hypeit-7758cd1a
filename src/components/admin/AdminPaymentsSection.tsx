@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, RefreshCw, Upload, Check, X } from 'lucide-react';
+import { Loader2, RefreshCw, Upload, Check, X, FileText } from 'lucide-react';
 
 interface Order {
   id: string;
