@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { serviceClient, settleOrder, sendReceipt } from '../_shared/qris.ts'
+import { serviceClient, settleOrder, sendReceipt, sendRejection } from '../_shared/qris.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -44,20 +44,23 @@ Deno.serve(async (req) => {
     }
 
     if (body.action === 'reject') {
+      const reason = (body.reason || 'Payment could not be verified.').toString().slice(0, 300)
       const { data, error } = await db
         .from('payment_orders')
         .update({
           status: 'rejected',
-          rejection_reason: (body.reason || 'Payment could not be verified.').toString().slice(0, 300),
+          rejection_reason: reason,
           approved_by: userId,
         })
         .eq('id', orderId)
-        .in('status', ['pending', 'expired'])
+        .in('status', ['pending', 'expired', 'review'])
         .select('*')
         .maybeSingle()
       if (error || !data) return json({ error: 'Could not reject this order.' }, 400)
+      await sendRejection(data, reason, data.user_email)
       return json({ ok: true, order: data })
     }
+
 
     return json({ error: 'Unknown action.' }, 400)
   } catch (e) {

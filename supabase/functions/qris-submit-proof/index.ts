@@ -46,8 +46,9 @@ Deno.serve(async (req) => {
       `QRIS proof uploaded, ${formatIDR(order.unique_amount_idr)}`,
       `<p><b>${order.user_email ?? order.user_id}</b> uploaded proof for ${order.pack_name}.</p>
        <p>Amount: ${formatIDR(order.unique_amount_idr)} , Credits: ${order.credits}</p>
-       <p>Approve or reject it in the admin Payments tab.</p>`,
+       <p><a href="https://viralin.ai/admin?tab=payments">Open the admin Payments tab</a> to approve or reject it.</p>`,
     )
+
 
     return json({ ok: true, order })
   } catch (e) {
