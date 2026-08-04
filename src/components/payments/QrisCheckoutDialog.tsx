@@ -198,11 +198,28 @@ const QrisCheckoutDialog = ({ packKey, onOpenChange }: Props) => {
 
             {instructions && <p className="text-xs text-muted-foreground">{instructions}</p>}
 
-            <div className="rounded-lg border border-dashed border-border p-3">
-              <p className="text-xs text-muted-foreground">
+            <div
+              className={`rounded-lg border p-3 ${
+                order.status === 'review'
+                  ? 'border-primary/40 bg-primary/5'
+                  : order.status === 'rejected'
+                    ? 'border-destructive/40 bg-destructive/5'
+                    : 'border-primary/40 bg-primary/5'
+              }`}
+            >
+              <p className="text-sm font-medium">
                 {order.status === 'review'
-                  ? 'Proof received. We are verifying your payment, credits arrive shortly.'
-                  : 'Paid already? Credits usually arrive automatically within a few minutes. You can also upload your receipt to speed things up.'}
+                  ? 'We are verifying your payment'
+                  : order.status === 'rejected'
+                    ? 'We could not verify this payment'
+                    : 'Paid? Upload your receipt to get your credits'}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {order.status === 'review'
+                  ? 'Your receipt is with our team. Credits are added as soon as it is confirmed, and this window updates automatically.'
+                  : order.status === 'rejected'
+                    ? 'Upload a clearer receipt or contact us at hello@viralin.ai.'
+                    : 'Upload the payment receipt from your bank or e-wallet app. Our team confirms it and your credits are added.'}
               </p>
               <input
                 ref={fileRef}
@@ -215,9 +232,9 @@ const QrisCheckoutDialog = ({ packKey, onOpenChange }: Props) => {
                 }}
               />
               <Button
-                variant="secondary"
                 size="sm"
-                className="mt-2 w-full"
+                className="mt-3 w-full"
+                variant={order.status === 'review' ? 'secondary' : 'default'}
                 disabled={uploading}
                 onClick={() => fileRef.current?.click()}
               >
@@ -226,9 +243,10 @@ const QrisCheckoutDialog = ({ packKey, onOpenChange }: Props) => {
                 ) : (
                   <Upload className="mr-1 h-3.5 w-3.5" />
                 )}
-                Upload payment proof
+                {order.status === 'review' ? 'Replace receipt' : 'Upload payment receipt'}
               </Button>
             </div>
+
           </div>
         )}
       </DialogContent>
