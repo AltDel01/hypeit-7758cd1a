@@ -225,9 +225,71 @@ const AdminPaymentsSection = () => {
         </CardContent>
       </Card>
 
+      <Card className="border-primary/40">
+        <CardHeader>
+          <CardTitle className="text-base">
+            Needs review {needsReview.length > 0 && `(${needsReview.length})`}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {needsReview.length === 0 && (
+            <p className="text-sm text-muted-foreground">No receipts waiting for approval.</p>
+          )}
+          {needsReview.map((order) => (
+            <div
+              key={order.id}
+              className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3 md:flex-row md:items-center md:justify-between"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                {proofPreviews[order.id] ? (
+                  <img
+                    src={proofPreviews[order.id]}
+                    alt={`Payment receipt from ${order.user_email ?? 'buyer'}`}
+                    className="h-16 w-16 cursor-pointer rounded-md object-cover"
+                    onClick={() => order.proof_url && openProof(order.proof_url)}
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-md border border-border">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{order.user_email ?? 'Unknown user'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {order.pack_name} , {order.credits.toLocaleString('en-US')} credits ,{' '}
+                    {new Date(order.created_at).toLocaleString()}
+                  </p>
+                  <p className="text-sm font-semibold text-primary">
+                    {formatIDR(order.unique_amount_idr)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {order.proof_url && (
+                  <Button size="sm" variant="ghost" onClick={() => openProof(order.proof_url!)}>
+                    View receipt
+                  </Button>
+                )}
+                <Button size="sm" disabled={busyId === order.id} onClick={() => act(order.id, 'approve')}>
+                  <Check className="mr-1 h-3.5 w-3.5" /> Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={busyId === order.id}
+                  onClick={() => act(order.id, 'reject')}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Orders</CardTitle>
+          <CardTitle className="text-base">All orders</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {orders.length === 0 && <p className="text-sm text-muted-foreground">No orders yet.</p>}
@@ -249,16 +311,7 @@ const AdminPaymentsSection = () => {
                   {order.status}
                 </Badge>
                 {order.proof_url && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      const { data } = await supabase.storage
-                        .from('payment-assets')
-                        .createSignedUrl(order.proof_url!, 600);
-                      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                    }}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => openProof(order.proof_url!)}>
                     Proof
                   </Button>
                 )}
@@ -282,6 +335,7 @@ const AdminPaymentsSection = () => {
           ))}
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
