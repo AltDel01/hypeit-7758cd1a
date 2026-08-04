@@ -85,6 +85,32 @@ const AdminPaymentsSection = () => {
     load();
   }, [load]);
 
+  const needsReview = orders.filter((o) => o.status === 'review');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        needsReview
+          .filter((o) => o.proof_url && !o.proof_url.toLowerCase().endsWith('.pdf'))
+          .map(async (o) => {
+            const { data } = await supabase.storage
+              .from('payment-assets')
+              .createSignedUrl(o.proof_url!, 3600);
+            return [o.id, data?.signedUrl ?? ''] as const;
+          }),
+      );
+      if (cancelled) return;
+      setProofPreviews(Object.fromEntries(entries.filter(([, url]) => url)));
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders]);
+
+
+
   const act = async (orderId: string, action: 'approve' | 'reject') => {
     let reason = 'Payment could not be verified.';
     if (action === 'reject') {
