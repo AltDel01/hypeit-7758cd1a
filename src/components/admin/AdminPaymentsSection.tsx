@@ -85,9 +85,15 @@ const AdminPaymentsSection = () => {
   }, [load]);
 
   const act = async (orderId: string, action: 'approve' | 'reject') => {
+    let reason = 'Payment could not be verified.';
+    if (action === 'reject') {
+      const input = window.prompt('Reason shown to the buyer:', reason);
+      if (input === null) return;
+      if (input.trim()) reason = input.trim();
+    }
     setBusyId(orderId);
     const { data, error } = await supabase.functions.invoke('qris-admin-order', {
-      body: { orderId, action, reason: 'Payment could not be verified.' },
+      body: { orderId, action, reason },
     });
     setBusyId(null);
     if (error || data?.error) {
@@ -97,6 +103,12 @@ const AdminPaymentsSection = () => {
     toast({ title: action === 'approve' ? 'Credits granted' : 'Order rejected' });
     load();
   };
+
+  const openProof = async (path: string) => {
+    const { data } = await supabase.storage.from('payment-assets').createSignedUrl(path, 600);
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
+
 
   const runScan = async () => {
     setScanning(true);
