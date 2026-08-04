@@ -36,7 +36,7 @@ export async function settleOrder(
     .from('payment_orders')
     .update({ status: 'paid', matched_at: new Date().toISOString(), ...patch })
     .eq('id', orderId)
-    .in('status', ['pending', 'expired'])
+    .in('status', ['pending', 'expired', 'review'])
     .select('*')
     .maybeSingle()
 
