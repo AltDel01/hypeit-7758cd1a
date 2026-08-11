@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PricingCard from '@/components/ui/PricingCard';
 import QrisCheckoutDialog from '@/components/payments/QrisCheckoutDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 type Currency = 'IDR' | 'USD';
 
@@ -63,10 +62,10 @@ const plans = [
     key: 'pro',
     title: 'Pro',
     usd: '$25/month',
-    idr: 'Rp 415.000/bulan',
+    idr: 'Rp 449.000/bulan',
     credits: '8,000',
     usdPer: 'As low as $1.01 per 100 Credits',
-    idrPer: 'As low as Rp 5.188 per 100 Credits',
+    idrPer: 'As low as Rp 5.613 per 100 Credits',
     mediaInfo: '',
     description: 'For businesses needing high conversion',
     features: [
@@ -83,10 +82,10 @@ const plans = [
     key: 'specialist',
     title: 'Specialist',
     usd: '$125/month',
-    idr: 'Rp 2.075.000/bulan',
+    idr: 'Rp 1.750.000/bulan',
     credits: '26,000',
     usdPer: 'As low as $0.62 per 100 Credits',
-    idrPer: 'As low as Rp 7.981 per 100 Credits',
+    idrPer: 'As low as Rp 6.731 per 100 Credits',
     mediaInfo: '',
     description: 'Suitable for agency or enterprise',
     features: [
@@ -108,11 +107,8 @@ const Pricing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [packKey, setPackKey] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<Currency>('USD');
+  const [currency] = useState<Currency>(() => (detectIndonesia() ? 'IDR' : 'USD'));
 
-  useEffect(() => {
-    setCurrency(detectIndonesia() ? 'IDR' : 'USD');
-  }, []);
 
   const startCheckout = (key: string) => {
     if (key === 'free') return;
@@ -150,34 +146,8 @@ const Pricing = () => {
           </p>
         </div>
 
-        {/* Currency switch */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full border border-white/15 bg-white/5 p-1">
-            {(['IDR', 'USD'] as Currency[]).map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCurrency(c)}
-                className={cn(
-                  'px-4 py-1.5 text-xs md:text-sm rounded-full transition-colors',
-                  currency === c
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {c === 'IDR' ? 'Rupiah (IDR)' : 'US Dollar (USD)'}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {!isIDR && (
-          <p className="mx-auto mb-8 max-w-2xl rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-center text-xs md:text-sm text-muted-foreground">
-            International card checkout is not live yet. Prices are shown in USD for reference, email{' '}
-            <a href="mailto:hello@viralin.ai" className="text-brand-blue hover:underline">hello@viralin.ai</a>{' '}
-            and we will activate your plan manually. Paying from Indonesia? Switch to Rupiah for instant QRIS checkout.
-          </p>
-        )}
+
 
         {/* Mobile: 2-col grid, Desktop: 4-col grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
