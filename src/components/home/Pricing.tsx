@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PricingCard from '@/components/ui/PricingCard';
 import QrisCheckoutDialog from '@/components/payments/QrisCheckoutDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 type Currency = 'IDR' | 'USD';
 
