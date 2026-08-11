@@ -1,100 +1,136 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PricingCard from '@/components/ui/PricingCard';
 import QrisCheckoutDialog from '@/components/payments/QrisCheckoutDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
+type Currency = 'IDR' | 'USD';
+
+const detectIndonesia = () => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/Jakarta|Pontianak|Makassar|Jayapura/i.test(tz)) return true;
+    const langs = [navigator.language, ...(navigator.languages || [])].filter(Boolean);
+    return langs.some((l) => /^id\b|-ID$/i.test(l));
+  } catch {
+    return false;
+  }
+};
+
+const plans = [
+  {
+    key: 'free',
+    title: 'Free',
+    usd: 'FREE',
+    idr: 'GRATIS',
+    credits: '500',
+    usdPer: '',
+    idrPer: '',
+    mediaInfo: 'TRIAL',
+    description: 'Perfect to try core features',
+    features: [
+      { name: 'Queue', included: true },
+      { name: 'Fast-track generation', included: true },
+      { name: '720p Video Generation', included: true, bold: '720p' },
+      { name: 'Image upscaling', included: true },
+      { name: 'Video extension', included: true },
+      { name: 'Generated content is for commercial use', included: true }],
+    popular: false,
+  },
+  {
+    key: 'starter',
+    title: 'Starter',
+    usd: '$15/month',
+    idr: 'Rp 249.000/bulan',
+    credits: '3,000',
+    usdPer: 'As low as $1.09 per 100 Credits',
+    idrPer: 'As low as Rp 8.300 per 100 Credits',
+    mediaInfo: '',
+    description: 'For growing brands and creators',
+    features: [
+      { name: 'Queue unlimited tasks', included: true },
+      { name: 'Fast-track generation', included: true },
+      { name: '1080p Video Generation', included: true, bold: '1080p' },
+      { name: 'Image upscaling', included: true },
+      { name: 'Video extension', included: true },
+      { name: 'Priority access to new features', included: true },
+      { name: 'Generated content is for commercial use', included: true }],
+    popular: true,
+  },
+  {
+    key: 'pro',
+    title: 'Pro',
+    usd: '$25/month',
+    idr: 'Rp 415.000/bulan',
+    credits: '8,000',
+    usdPer: 'As low as $1.01 per 100 Credits',
+    idrPer: 'As low as Rp 5.188 per 100 Credits',
+    mediaInfo: '',
+    description: 'For businesses needing high conversion',
+    features: [
+      { name: 'Queue unlimited tasks', included: true },
+      { name: 'Fast-track generation', included: true },
+      { name: '1080p Video Generation', included: true, bold: '1080p' },
+      { name: 'Image upscaling', included: true },
+      { name: 'Video extension', included: true },
+      { name: 'Priority access to new features', included: true },
+      { name: 'Generated content is for commercial use', included: true }],
+    popular: false,
+  },
+  {
+    key: 'specialist',
+    title: 'Specialist',
+    usd: '$125/month',
+    idr: 'Rp 2.075.000/bulan',
+    credits: '26,000',
+    usdPer: 'As low as $0.62 per 100 Credits',
+    idrPer: 'As low as Rp 7.981 per 100 Credits',
+    mediaInfo: '',
+    description: 'Suitable for agency or enterprise',
+    features: [
+      { name: 'Queue unlimited tasks', included: true },
+      { name: 'Fast-track generation', included: true },
+      { name: '1080p Video Generation', included: true, bold: '1080p' },
+      { name: 'Image upscaling', included: true },
+      { name: 'Video extension', included: true },
+      { name: 'Priority access to new features', included: true },
+      { name: 'Beta test invite (if applicable)', included: true },
+      { name: 'Generated content is for commercial use', included: true }],
+    popular: false,
+    isVibe: true,
+  },
+];
 
 const Pricing = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [packKey, setPackKey] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<Currency>('USD');
 
-  const startCheckout = (title: string) => {
-    if (title === 'Free') return;
+  useEffect(() => {
+    setCurrency(detectIndonesia() ? 'IDR' : 'USD');
+  }, []);
+
+  const startCheckout = (key: string) => {
+    if (key === 'free') return;
+    if (currency === 'USD') {
+      toast({
+        title: 'Card payments are coming soon',
+        description: 'International checkout is not live yet. Email hello@viralin.ai and we will set your plan up manually.',
+      });
+      return;
+    }
     if (!user) {
       navigate('/auth');
       return;
     }
-    setPackKey(title.toLowerCase());
+    setPackKey(key);
   };
 
-  const pricing = [
-  {
-    title: "Free",
-    price: "FREE",
-    credits: "500",
-    creditsPerPrice: "",
-    mediaInfo: "TRIAL",
-    description: "Perfect to try core features",
-    features: [
-    { name: "Queue", included: true },
-    { name: "Fast-track generation", included: true },
-    { name: "720p Video Generation", included: true, bold: "720p" },
-    { name: "Image upscaling", included: true },
-    { name: "Video extension", included: true },
-    { name: "Generated content is for commercial use", included: true }],
-
-    popular: false
-  },
-  {
-    title: "Starter",
-    price: "$15/month",
-    credits: "3,000",
-    creditsPerPrice: "As low as $1.09 per 100 Credits",
-    mediaInfo: "",
-    description: "For growing brands and creators",
-    features: [
-    { name: "Queue unlimited tasks", included: true },
-    { name: "Fast-track generation", included: true },
-    { name: "1080p Video Generation", included: true, bold: "1080p" },
-    { name: "Image upscaling", included: true },
-    { name: "Video extension", included: true },
-    { name: "Priority access to new features", included: true },
-    { name: "Generated content is for commercial use", included: true }],
-
-    popular: true
-  },
-  {
-    title: "Pro",
-    price: "$25/month",
-    credits: "8,000",
-    creditsPerPrice: "As low as $1.01 per 100 Credits",
-    mediaInfo: "",
-    description: "For businesses needing high conversion",
-    features: [
-    { name: "Queue unlimited tasks", included: true },
-    { name: "Fast-track generation", included: true },
-    { name: "1080p Video Generation", included: true, bold: "1080p" },
-    { name: "Image upscaling", included: true },
-    { name: "Video extension", included: true },
-    { name: "Priority access to new features", included: true },
-    { name: "Generated content is for commercial use", included: true }],
-
-    popular: false
-  },
-  {
-    title: "Specialist",
-    price: "$125/month",
-    credits: "26,000",
-    creditsPerPrice: "As low as $0.62 per 100 Credits",
-    mediaInfo: "",
-    description: "Suitable for agency or enterprise",
-    features: [
-    { name: "Queue unlimited tasks", included: true },
-    { name: "Fast-track generation", included: true },
-    { name: "1080p Video Generation", included: true, bold: "1080p" },
-    { name: "Image upscaling", included: true },
-    { name: "Video extension", included: true },
-    { name: "Priority access to new features", included: true },
-    { name: "Beta test invite (if applicable)", included: true },
-    { name: "Generated content is for commercial use", included: true }],
-
-    popular: false,
-    isVibe: true,
-    buttonText: "Upgrade to Specialist"
-  }];
-
+  const isIDR = currency === 'IDR';
 
   return (
     <section className="py-12 relative overflow-hidden">
@@ -103,51 +139,75 @@ const Pricing = () => {
         <div className="absolute bottom-0 -left-40 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl" />
         <div className="absolute top-0 -right-40 w-96 h-96 bg-brand-teal/5 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-10">
-        <div className="text-center mb-12 max-w-2xl mx-auto">
+        <div className="text-center mb-8 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Simple & Transparent Pricing
+            Simple &amp; Transparent Pricing
           </h2>
           <p className="text-brand-slate-600 text-md md:text-lg">
-            Choose the right plan for your business. 
+            Choose the right plan for your business.
           </p>
         </div>
-        
+
+        {/* Currency switch */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex rounded-full border border-white/15 bg-white/5 p-1">
+            {(['IDR', 'USD'] as Currency[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCurrency(c)}
+                className={cn(
+                  'px-4 py-1.5 text-xs md:text-sm rounded-full transition-colors',
+                  currency === c
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {c === 'IDR' ? 'Rupiah (IDR)' : 'US Dollar (USD)'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {!isIDR && (
+          <p className="mx-auto mb-8 max-w-2xl rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-center text-xs md:text-sm text-muted-foreground">
+            International card checkout is not live yet. Prices are shown in USD for reference, email{' '}
+            <a href="mailto:hello@viralin.ai" className="text-brand-blue hover:underline">hello@viralin.ai</a>{' '}
+            and we will activate your plan manually. Paying from Indonesia? Switch to Rupiah for instant QRIS checkout.
+          </p>
+        )}
+
         {/* Mobile: 2-col grid, Desktop: 4-col grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-          {pricing.map((plan, index) =>
-          <div
-            key={index}
-            className="">
-
+          {plans.map((plan) => (
+            <div key={plan.key}>
               <PricingCard
-              title={plan.title}
-              price={plan.price}
-              credits={plan.credits}
-              creditsPerPrice={plan.creditsPerPrice}
-              mediaInfo={plan.mediaInfo}
-              description={plan.description}
-              features={plan.features}
-              popular={plan.popular}
-              isVibe={(plan as any).isVibe}
-              buttonText={
-              plan.title === "Free" ?
-              "Current Plan" :
-              plan.title === "Starter" ?
-              "Upgrade to Starter" :
-              plan.title === "Pro" ?
-              "Upgrade to Pro" :
-              "Upgrade to Specialist"}
-              onButtonClick={() => startCheckout(plan.title)}
-              className="duration-300" />
-
+                title={isIDR && plan.key === 'free' ? 'Gratis' : plan.title}
+                price={isIDR ? plan.idr : plan.usd}
+                credits={plan.credits}
+                creditsPerPrice={isIDR ? plan.idrPer : plan.usdPer}
+                mediaInfo={plan.mediaInfo}
+                description={plan.description}
+                features={plan.features}
+                popular={plan.popular}
+                isVibe={(plan as any).isVibe}
+                buttonText={
+                  plan.key === 'free'
+                    ? 'Current Plan'
+                    : isIDR
+                      ? `Upgrade ke ${plan.title}`
+                      : `Upgrade to ${plan.title}`
+                }
+                onButtonClick={() => startCheckout(plan.key)}
+                className="duration-300" />
             </div>
-          )}
+          ))}
         </div>
-        
+
         <div className="mt-10 text-center text-brand-slate-500 text-sm px-2">
-          Need a custom plan? Visit our page{" "}
+          Need a custom plan? Visit our page{' '}
           <a href="/enterprise" className="text-brand-blue hover:underline">
             here
           </a>
