@@ -9,6 +9,8 @@ type Currency = 'IDR' | 'USD';
 
 const detectIndonesia = () => {
   try {
+    const override = new URLSearchParams(window.location.search).get('cur');
+    if (override) return override.toUpperCase() === 'IDR';
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (/Jakarta|Pontianak|Makassar|Jayapura/i.test(tz)) return true;
     const langs = [navigator.language, ...(navigator.languages || [])].filter(Boolean);
