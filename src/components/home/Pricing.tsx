@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import PricingCard from '@/components/ui/PricingCard';
 import QrisCheckoutDialog from '@/components/payments/QrisCheckoutDialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 
 type Currency = 'IDR' | 'USD';
 
