@@ -24,7 +24,7 @@ const plans = [
     key: 'free',
     title: 'Free',
     usd: 'FREE',
-    idr: 'GRATIS',
+    idr: 'Coba Sekarang',
     credits: '500',
     usdPer: '',
     idrPer: '',
