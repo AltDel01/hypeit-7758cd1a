@@ -75,7 +75,7 @@ const PricingCard = ({
         <p className="text-gray-300 text-[11px] md:text-sm mt-1">Credits per month</p>
         {creditsPerPrice &&
         <p className="text-gray-400 text-[10px] md:text-xs mt-1">
-            As low as <span className="text-white font-semibold">{creditsPerPrice.match(/\$[\d.]+/)?.[0]}</span> per 100 Credits
+            As low as <span className="text-white font-semibold">{creditsPerPrice.match(/(\$[\d.]+|Rp\s?[\d.,]+)/)?.[0] ?? creditsPerPrice}</span> per 100 Credits
           </p>
         }
         {mediaInfo &&
