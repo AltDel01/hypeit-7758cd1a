@@ -106,21 +106,29 @@ const plans = [
 
 const Pricing = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [packKey, setPackKey] = useState<string | null>(null);
-  const [currency] = useState<Currency>(() => (detectIndonesia() ? 'IDR' : 'USD'));
+  const [currency, setCurrency] = useState<Currency>(() => (detectIndonesia() ? 'IDR' : 'USD'));
 
+  // Fallback: IP-based country check when browser locale/timezone is inconclusive
+  React.useEffect(() => {
+    if (currency === 'IDR') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('https://ipapi.co/country/');
+        const country = (await res.text()).trim().toUpperCase();
+        if (!cancelled && country === 'ID') setCurrency('IDR');
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const startCheckout = (key: string) => {
     if (key === 'free') return;
-    if (currency === 'USD') {
-      toast({
-        title: 'Card payments are coming soon',
-        description: 'International checkout is not live yet. Email hello@viralin.ai and we will set your plan up manually.',
-      });
-      return;
-    }
+    if (currency === 'USD') return;
     if (!user) {
       navigate('/auth');
       return;
