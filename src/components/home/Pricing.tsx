@@ -108,11 +108,8 @@ const Pricing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [packKey, setPackKey] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<Currency>('USD');
+  const [currency] = useState<Currency>(() => (detectIndonesia() ? 'IDR' : 'USD'));
 
-  useEffect(() => {
-    setCurrency(detectIndonesia() ? 'IDR' : 'USD');
-  }, []);
 
   const startCheckout = (key: string) => {
     if (key === 'free') return;
