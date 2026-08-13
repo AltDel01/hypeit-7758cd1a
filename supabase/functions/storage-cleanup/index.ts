@@ -31,14 +31,6 @@ Deno.serve(async (req) => {
     const result: Record<string, unknown> = { cutoff, dryRun, buckets: {} };
 
     for (const bucket of buckets) {
-      const { data: rows, error } = await supabase
-        .from("storage_objects_to_prune" as never)
-        .select("*")
-        .limit(0);
-      // The view above is optional; fall back to direct storage listing below.
-      void rows;
-      void error;
-
       const names: string[] = [];
       let bytes = 0;
       let page = 0;
