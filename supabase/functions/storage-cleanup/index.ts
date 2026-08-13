@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cleanup-secret",
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -21,21 +23,73 @@ Deno.serve(async (req) => {
     const buckets: string[] = body.buckets ?? [];
     const olderThanDays: number = Number(body.olderThanDays ?? 45);
     const dryRun: boolean = body.dryRun === true;
+    // Paid accounts keep their assets forever unless explicitly overridden.
+    const protectPaid: boolean = body.protectPaid !== false;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Build the set of paying users: non-free subscription tier, bonus credits
+    // from a purchase, or at least one approved payment order.
+    const paidUsers = new Set<string>();
+    if (protectPaid) {
+      const { data: paidProfiles, error: profErr } = await supabase
+        .from("profiles")
+        .select("id, subscription_tier, bonus_credits")
+        .limit(10000);
+      if (profErr) throw profErr;
+      for (const p of paidProfiles ?? []) {
+        const tier = (p.subscription_tier ?? "free").toLowerCase();
+        if (tier && tier !== "free") paidUsers.add(p.id as string);
+      }
+
+      const { data: orders, error: orderErr } = await supabase
+        .from("payment_orders")
+        .select("user_id, status")
+        .eq("status", "approved")
+        .limit(10000);
+      if (orderErr) throw orderErr;
+      for (const o of orders ?? []) if (o.user_id) paidUsers.add(o.user_id as string);
+    }
+
+    // Editor deliverables live at `results/<request-id>-<ts>.<ext>`, so their
+    // owner has to be resolved through the generation request row.
+    const requestOwner = new Map<string, string>();
+    if (protectPaid) {
+      const { data: reqs, error: reqErr } = await supabase
+        .from("generation_requests")
+        .select("id, user_id")
+        .limit(20000);
+      if (reqErr) throw reqErr;
+      for (const r of reqs ?? []) requestOwner.set(r.id as string, r.user_id as string);
+    }
+
+    const ownerFromFileName = (fileName: string): string | null => {
+      const m = fileName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (!m) return null;
+      return requestOwner.get(m[1]) ?? null;
+    };
+
+
     const cutoff = new Date(Date.now() - olderThanDays * 86400000).toISOString();
-    const result: Record<string, unknown> = { cutoff, dryRun, buckets: {} };
+    const result: Record<string, unknown> = {
+      cutoff,
+      dryRun,
+      protectPaid,
+      paidUsers: paidUsers.size,
+      buckets: {},
+    };
 
     for (const bucket of buckets) {
       const names: string[] = [];
       let bytes = 0;
+      let skippedPaid = 0;
+      let skippedPaidBytes = 0;
       let page = 0;
-      // Walk the bucket root and one level of folders.
-      const walk = async (prefix: string) => {
+      // Walk the bucket root and nested folders.
+      const walk = async (prefix: string, ownerId: string | null) => {
         let offset = 0;
         while (true) {
           const { data, error: listErr } = await supabase.storage
@@ -46,20 +100,28 @@ Deno.serve(async (req) => {
           for (const entry of data) {
             const path = prefix ? `${prefix}/${entry.name}` : entry.name;
             if (!entry.id) {
-              await walk(path); // folder
+              // Folder: the first UUID-looking segment identifies the owner.
+              const nextOwner = ownerId ?? (UUID_RE.test(entry.name) ? entry.name : null);
+              await walk(path, nextOwner);
               continue;
             }
-            if (entry.created_at && entry.created_at < cutoff) {
-              names.push(path);
-              bytes += Number((entry.metadata as Record<string, unknown> | null)?.size ?? 0);
+            if (!entry.created_at || entry.created_at >= cutoff) continue;
+            const size = Number((entry.metadata as Record<string, unknown> | null)?.size ?? 0);
+            const owner = ownerId ?? ownerFromFileName(entry.name);
+            if (protectPaid && owner && paidUsers.has(owner)) {
+              skippedPaid += 1;
+              skippedPaidBytes += size;
+              continue;
             }
+            names.push(path);
+            bytes += size;
           }
           if (data.length < 1000) break;
           offset += 1000;
           if (++page > 50) break;
         }
       };
-      await walk("");
+      await walk("", null);
 
       let removed = 0;
       if (!dryRun) {
@@ -75,6 +137,8 @@ Deno.serve(async (req) => {
         matched: names.length,
         removed,
         bytes,
+        skippedPaid,
+        skippedPaidBytes,
       };
     }
 
