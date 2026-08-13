@@ -66,3 +66,6 @@ verify_jwt = false
 
 [functions.qris-admin-order]
 verify_jwt = false
+
+[functions.storage-cleanup]
+verify_jwt = false
