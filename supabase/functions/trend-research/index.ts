@@ -216,9 +216,11 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
       "hooks": ["recurring hook style seen on this platform"],
       "hashtags": ["#tag"],
       "sounds": ["trending sound or audio style, empty array if not applicable"],
-      "bestPostTimes": ["e.g. Tue 7-9pm"]
+      "bestPostTimes": ["e.g. Tue 7-9pm"],
+      "postingTip": "one practical posting tip for this platform"
     }
   ],
+  "actions": ["5 concrete next actions the creator should take this week, best first"],
   "competitorInsights": [
     { "name": "competitor or account archetype", "whatWorks": "one sentence", "gap": "one sentence opportunity you can own" }
   ],
