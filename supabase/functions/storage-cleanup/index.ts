@@ -54,6 +54,25 @@ Deno.serve(async (req) => {
       for (const o of orders ?? []) if (o.user_id) paidUsers.add(o.user_id as string);
     }
 
+    // Editor deliverables live at `results/<request-id>-<ts>.<ext>`, so their
+    // owner has to be resolved through the generation request row.
+    const requestOwner = new Map<string, string>();
+    if (protectPaid) {
+      const { data: reqs, error: reqErr } = await supabase
+        .from("generation_requests")
+        .select("id, user_id")
+        .limit(20000);
+      if (reqErr) throw reqErr;
+      for (const r of reqs ?? []) requestOwner.set(r.id as string, r.user_id as string);
+    }
+
+    const ownerFromFileName = (fileName: string): string | null => {
+      const m = fileName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (!m) return null;
+      return requestOwner.get(m[1]) ?? null;
+    };
+
+
     const cutoff = new Date(Date.now() - olderThanDays * 86400000).toISOString();
     const result: Record<string, unknown> = {
       cutoff,
