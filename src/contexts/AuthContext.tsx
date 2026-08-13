@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { sendNotificationEmail } from '@/services/generationRequestService';
+import { captureUserCountry } from '@/utils/geo';
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -30,6 +31,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
+          // Backfill the user's country in the background (non-blocking)
+          const uid = currentSession?.user?.id;
+          if (uid) setTimeout(() => { captureUserCountry(uid); }, 0);
           // Only redirect when sign-in was explicitly initiated from UI
           const shouldHandleRedirect = sessionStorage.getItem('authRedirectPending') === '1';
           if (shouldHandleRedirect) {
