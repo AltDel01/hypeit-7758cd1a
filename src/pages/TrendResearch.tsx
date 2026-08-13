@@ -660,6 +660,21 @@ const TrendResearch = () => {
                     <p className="text-sm text-slate-200">{summary}</p>
                   </Card>
                 )}
+                {actions.length > 0 && (
+                  <Card className="p-4 bg-card/60 border-[#8C52FF]/30 backdrop-blur">
+                    <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[#8C52FF]">
+                      <Sparkles className="w-4 h-4" /> Do this next
+                    </h3>
+                    <ul className="space-y-2 text-sm text-slate-200">
+                      {actions.map((a, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-[#8C52FF]">{i + 1}.</span>
+                          <span>{a}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
                 <div className="grid gap-4 md:grid-cols-2">
                   {report.map((entry, i) => {
                     const m = momentumStyles[(entry.momentum || '').toLowerCase()];
