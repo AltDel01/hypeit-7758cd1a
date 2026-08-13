@@ -285,6 +285,7 @@ const TrendResearch = () => {
       setReport(nextReport);
       setIdeas(nextIdeas);
       setCompetitorInsights(Array.isArray(data?.competitorInsights) ? data.competitorInsights : []);
+      setActions(Array.isArray(data?.actions) ? data.actions : []);
       setSummary(typeof data?.summary === 'string' ? data.summary : '');
       if (nextReport.length === 0 && nextIdeas.length === 0) {
         toast.error('No trends found. Try a broader industry term.');
