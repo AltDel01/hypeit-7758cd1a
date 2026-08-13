@@ -103,8 +103,8 @@ serve(async (req) => {
 
   const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
 
-  const payload = {
-    model: body.model,
+  const buildPayload = (model: string) => ({
+    model,
     input: {
       messages: [{ role: 'user', content }],
     },
@@ -113,22 +113,42 @@ serve(async (req) => {
       n: imageCount,
       prompt_extend: body.promptExtend ?? false,
     },
-  };
+  });
 
   try {
-    const upstream = await fetch(
-      `${DASHSCOPE_BASE}/api/v1/services/aigc/multimodal-generation/generation`,
-      {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-      }
-    );
+    // Try the requested model first, then fall back to the previous-generation
+    // Qwen image models if the provider does not accept it.
+    const candidates = modelCandidates(body.model, body.mode);
+    let upstream: Response | undefined;
+    let lastStatus = 502;
+    let lastText = '';
+    let effectiveModel = body.model;
 
-    if (!upstream.ok) {
-      const txt = await upstream.text();
-      console.error('[qwen-image] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
+    for (const candidate of candidates) {
+      const res = await fetch(
+        `${DASHSCOPE_BASE}/api/v1/services/aigc/multimodal-generation/generation`,
+        {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(buildPayload(candidate)),
+        }
+      );
+      if (res.ok) {
+        upstream = res;
+        effectiveModel = candidate;
+        if (candidate !== body.model) {
+          console.warn('[qwen-image] fell back from', body.model, 'to', candidate);
+        }
+        break;
+      }
+      lastStatus = res.status;
+      lastText = await res.text();
+      console.error('[qwen-image] upstream error', candidate, res.status, lastText);
+      if (!isModelUnavailable(res.status, lastText)) break;
+    }
+
+    if (!upstream) {
+      await markFailed(admin, body.requestId, body.model, humanizeProviderError(lastStatus, lastText));
       return genericError(502, 'Generation failed');
     }
 
@@ -155,7 +175,7 @@ serve(async (req) => {
 
     if (rawUrls.length === 0) {
       console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
+      await markFailed(admin, body.requestId, effectiveModel, humanizeProviderError(200, JSON.stringify(json)));
       return genericError(502, 'Generation failed');
     }
 
@@ -192,7 +212,7 @@ serve(async (req) => {
         result_images: storedUrls,
         completed_at: new Date().toISOString(),
         auto_provider: 'qwen',
-        auto_model: body.model,
+        auto_model: effectiveModel,
         auto_failed: false,
         failure_reason: null,
       })
@@ -234,6 +254,26 @@ function snapSize(size?: string): string {
     if (diff < bestDiff) { bestDiff = diff; best = s; }
   }
   return `${best[0]}*${best[1]}`;
+}
+
+/**
+ * Fallback chain: requested model first, then the previous-generation Qwen
+ * image models so a request still produces a result if 3.0 is unavailable.
+ */
+function modelCandidates(requested: string, mode: 'gen' | 'edit'): string[] {
+  const legacy = mode === 'edit'
+    ? ['qwen-image-edit-plus', 'qwen-image-edit']
+    : ['qwen-image-plus', 'qwen-image'];
+  return [requested, ...legacy.filter((m) => m !== requested)];
+}
+
+/** True when the provider rejected the model itself (not the prompt/content). */
+function isModelUnavailable(status: number, raw: string): boolean {
+  const t = (raw || '').toLowerCase();
+  if (t.includes('model not exist') || t.includes('invalid_parameter') && t.includes('model')) return true;
+  if (t.includes('unsupported model') || t.includes('model not support')) return true;
+  if (t.includes('accessdenied') || t.includes('access denied')) return true;
+  return status === 403 || status === 404;
 }
 
 function humanizeProviderError(status: number, raw: string): string {

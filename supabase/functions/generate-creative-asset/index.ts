@@ -113,39 +113,74 @@ Deno.serve(async (req) => {
       return json({ assetType: 'video', status: 'generating', requestId: gr.id })
     }
 
-    /* ---------------- IMAGE: generate now via Lovable AI ---------------- */
-    if (!apiKey) {
-      return json({ error: 'AI is not configured.' }, 500)
+    /* ---------------- IMAGE: generate now via Qwen (DashScope) ---------------- */
+    const qwenKey = Deno.env.get('QWEN_API_KEY')
+    if (!qwenKey) {
+      return json({ error: 'Image generation is not configured.' }, 500)
     }
 
-    const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Lovable-API-Key': apiKey },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image-preview',
-        messages: [{ role: 'user', content: basePrompt }],
-        modalities: ['image', 'text'],
-      }),
-    })
+    const imageModels = ['qwen-image-3.0-pro', 'qwen-image-plus', 'qwen-image']
+    let remoteImageUrl: string | undefined
+    let lastErr = ''
 
-    if (aiRes.status === 429) return json({ error: 'Too many requests, try again shortly.' }, 429)
-    if (aiRes.status === 402) return json({ error: 'AI credits exhausted.' }, 402)
-    if (!aiRes.ok) {
-      console.error('image gen error', aiRes.status, await aiRes.text())
+    for (const model of imageModels) {
+      const res = await fetch(
+        'https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${qwenKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model,
+            input: { messages: [{ role: 'user', content: [{ text: basePrompt }] }] },
+            parameters: { size: '928*1664', n: 1, prompt_extend: false },
+          }),
+        },
+      )
+
+      if (!res.ok) {
+        lastErr = await res.text()
+        console.error('qwen image error', model, res.status, lastErr.slice(0, 400))
+        const t = lastErr.toLowerCase()
+        const modelIssue =
+          res.status === 403 || res.status === 404 ||
+          t.includes('model not exist') || t.includes('unsupported model') ||
+          t.includes('model not support') || t.includes('access denied')
+        if (modelIssue) continue
+        break
+      }
+
+      const data = await res.json()
+      const choices = data?.output?.choices
+      if (Array.isArray(choices)) {
+        for (const choice of choices) {
+          const parts = choice?.message?.content
+          if (Array.isArray(parts)) {
+            for (const part of parts) {
+              if (part?.image && !remoteImageUrl) remoteImageUrl = part.image
+            }
+          }
+        }
+      }
+      if (!remoteImageUrl && Array.isArray(data?.output?.results)) {
+        remoteImageUrl = data.output.results.find((r: { url?: string }) => r?.url)?.url
+      }
+      if (remoteImageUrl) {
+        if (model !== imageModels[0]) console.warn('creative asset fell back to', model)
+        break
+      }
+      console.error('qwen returned no image', JSON.stringify(data).slice(0, 400))
+    }
+
+    if (!remoteImageUrl) {
       return json({ error: 'Image generation failed.' }, 502)
     }
 
-    const aiData = await aiRes.json()
-    const imageUrl: string | undefined =
-      aiData?.choices?.[0]?.message?.images?.[0]?.image_url?.url
-    if (!imageUrl || !imageUrl.startsWith('data:')) {
-      console.error('no image returned', JSON.stringify(aiData).slice(0, 500))
-      return json({ error: 'Image generation returned no image.' }, 502)
+    const imgRes = await fetch(remoteImageUrl)
+    if (!imgRes.ok) {
+      console.error('image download failed', imgRes.status)
+      return json({ error: 'Could not download the generated image.' }, 502)
     }
-
-    // Decode the data URL
-    const [, base64] = imageUrl.split(',')
-    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+    const bytes = new Uint8Array(await imgRes.arrayBuffer())
     const path = `${userId}/creative/${dayId}-${Date.now()}.png`
 
     const { error: upErr } = await admin.storage
