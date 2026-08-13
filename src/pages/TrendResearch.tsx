@@ -747,6 +747,9 @@ const TrendResearch = () => {
                             ))}
                           </div>
                         )}
+                        {entry.postingTip && (
+                          <p className="text-xs italic text-muted-foreground pt-1">{entry.postingTip}</p>
+                        )}
                       </Card>
                     );
                   })}
