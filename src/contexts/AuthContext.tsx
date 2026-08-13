@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { sendNotificationEmail } from '@/services/generationRequestService';
+import { captureUserCountry } from '@/utils/geo';
 interface AuthContextType {
   session: Session | null;
   user: User | null;
