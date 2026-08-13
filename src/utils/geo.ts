@@ -26,7 +26,7 @@ export const lookupCountry = async (): Promise<GeoInfo | null> => {
  * Store the country on the user's own profile when it isn't set yet.
  * Silent and non-blocking: any failure is ignored.
  */
-export const captureUserCountry = async (userId: string) => {
+export const captureUserCountry = async (userId: string, attempt = 0) => {
   try {
     const { data: profile, error } = await supabase
       .from('profiles')
@@ -34,7 +34,14 @@ export const captureUserCountry = async (userId: string) => {
       .eq('id', userId)
       .maybeSingle();
 
-    if (error || !profile || (profile as any).country_code) return;
+    if (error) return;
+    if (!profile) {
+      // Profile row may still be getting created right after signup
+      if (attempt < 2) setTimeout(() => { captureUserCountry(userId, attempt + 1); }, 2000);
+      return;
+    }
+    if ((profile as any).country_code) return;
+
 
     const geo = await lookupCountry();
     if (!geo) return;
