@@ -114,6 +114,7 @@ interface TrendEntry {
   hashtags?: string[];
   sounds?: string[];
   bestPostTimes?: string[];
+  postingTip?: string;
 }
 
 interface ContentIdea {
