@@ -176,6 +176,7 @@ const TrendResearch = () => {
   const [report, setReport] = useState<TrendEntry[]>([]);
   const [ideas, setIdeas] = useState<ContentIdea[]>([]);
   const [competitorInsights, setCompetitorInsights] = useState<CompetitorInsight[]>([]);
+  const [actions, setActions] = useState<string[]>([]);
   const [past, setPast] = useState<PastRun[]>([]);
 
   const [ideaPlatformFilter, setIdeaPlatformFilter] = useState('all');
