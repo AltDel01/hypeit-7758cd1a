@@ -258,6 +258,7 @@ const TrendResearch = () => {
     setReport([]);
     setIdeas([]);
     setCompetitorInsights([]);
+    setActions([]);
     setSummary('');
     try {
       const { data, error } = await supabase.functions.invoke('trend-research', {
