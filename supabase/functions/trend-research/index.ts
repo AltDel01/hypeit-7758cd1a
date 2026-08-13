@@ -282,6 +282,7 @@ Provide one trendReport entry per platform listed, and ${ideaCount} ranked conte
       trendReport?: unknown[]
       contentIdeas?: unknown[]
       competitorInsights?: unknown[]
+      actions?: unknown[]
     } = {}
     try {
       parsed = JSON.parse(content)
@@ -293,10 +294,11 @@ Provide one trendReport entry per platform listed, and ${ideaCount} ranked conte
     const trendReport = Array.isArray(parsed.trendReport) ? parsed.trendReport : []
     const contentIdeas = Array.isArray(parsed.contentIdeas) ? parsed.contentIdeas : []
     const competitorInsights = Array.isArray(parsed.competitorInsights) ? parsed.competitorInsights : []
+    const actions = Array.isArray(parsed.actions) ? parsed.actions.filter((a) => typeof a === 'string') : []
     const summary = typeof parsed.summary === 'string' ? parsed.summary : ''
 
     return new Response(
-      JSON.stringify({ summary, trendReport, contentIdeas, competitorInsights, sourceCount: hits.length }),
+      JSON.stringify({ summary, trendReport, contentIdeas, competitorInsights, actions, sourceCount: hits.length }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (e) {
