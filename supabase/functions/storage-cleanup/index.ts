@@ -107,7 +107,8 @@ Deno.serve(async (req) => {
             }
             if (!entry.created_at || entry.created_at >= cutoff) continue;
             const size = Number((entry.metadata as Record<string, unknown> | null)?.size ?? 0);
-            if (protectPaid && ownerId && paidUsers.has(ownerId)) {
+            const owner = ownerId ?? ownerFromFileName(entry.name);
+            if (protectPaid && owner && paidUsers.has(owner)) {
               skippedPaid += 1;
               skippedPaidBytes += size;
               continue;
