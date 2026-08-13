@@ -105,18 +105,36 @@ serve(async (req) => {
       },
     };
 
-    const createRes = await fetch(
-      `${DASHSCOPE_BASE}/api/v1/services/aigc/image2image/image-synthesis`,
-      {
-        method: 'POST',
-        headers: asyncAuthHeaders(),
-        body: JSON.stringify(payload),
-      },
-    );
+    // Try the requested model, then fall back to the stable inpaint model.
+    const candidates = [model, 'wanx2.1-imageedit'].filter((m, i, a) => a.indexOf(m) === i);
+    let createRes: Response | undefined;
+    let effectiveModel = model;
+    for (const candidate of candidates) {
+      const res = await fetch(
+        `${DASHSCOPE_BASE}/api/v1/services/aigc/image2image/image-synthesis`,
+        {
+          method: 'POST',
+          headers: asyncAuthHeaders(),
+          body: JSON.stringify({ ...payload, model: candidate }),
+        },
+      );
+      if (res.ok) {
+        createRes = res;
+        effectiveModel = candidate;
+        if (candidate !== model) console.warn('[dashscope-inpaint] fell back to', candidate);
+        break;
+      }
+      const txt = await res.text();
+      console.error('[dashscope-inpaint] create failed', candidate, res.status, txt);
+      const t = txt.toLowerCase();
+      const modelIssue =
+        res.status === 403 || res.status === 404 ||
+        t.includes('model not exist') || t.includes('unsupported model') ||
+        t.includes('model not support') || t.includes('access denied');
+      if (!modelIssue) break;
+    }
 
-    if (!createRes.ok) {
-      const txt = await createRes.text();
-      console.error('[dashscope-inpaint] create failed', createRes.status, txt);
+    if (!createRes) {
       await markFailed(admin, body.requestId, model);
       return genericError(502, 'Inpaint failed');
     }
@@ -132,7 +150,7 @@ serve(async (req) => {
     // Persist task id for visibility
     await admin
       .from('generation_requests')
-      .update({ provider_task_id: taskId, auto_provider: 'qwen', auto_model: model })
+      .update({ provider_task_id: taskId, auto_provider: 'qwen', auto_model: effectiveModel })
       .eq('id', body.requestId);
 
     // 2. Poll
