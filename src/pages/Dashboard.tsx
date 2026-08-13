@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange, ListChecks, TrendingUp, Radar } from 'lucide-react';
+import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange, ListChecks, Radar } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import GenerationHistory from '@/components/dashboard/GenerationHistory';
 import RequestDetailView from '@/components/dashboard/RequestDetailView';
@@ -11,7 +11,6 @@ import LipSyncStudio from '@/components/tools/LipSyncStudio';
 import CinemaStudio from '@/components/tools/CinemaStudio';
 import WorkflowStudio from '@/components/tools/WorkflowStudio';
 import CreativeWorkflow from '@/components/tools/CreativeWorkflow';
-import TrendIntelligence from '@/components/tools/TrendIntelligence';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGenerationRequests } from '@/hooks/useGenerationRequests';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,11 +21,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 
-type ToolId = 'trendintel' | 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
+type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
 
 const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
   { id: 'calendar', label: 'Posting', icon: CalendarRange },
-  { id: 'trendintel', label: 'Trend Intel', icon: Radar },
   { id: 'sequence', label: 'Sequence', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Predictor', icon: Brain },
@@ -156,6 +154,15 @@ const Dashboard = () => {
 
           <div className="w-10 h-px bg-border my-1" />
 
+          <Link
+            to="/trends"
+            className="flex flex-col items-center gap-1 w-16 py-2 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+            title="Trends"
+          >
+            <Radar className="w-5 h-5" />
+            <span className="text-[10px] font-medium leading-tight text-center">Trends</span>
+          </Link>
+
           {/* Permanent tool features */}
           {TOOLS.map((t) => (
             <button
@@ -187,15 +194,6 @@ const Dashboard = () => {
             <ListChecks className="w-5 h-5" />
             <span className="text-[10px] font-medium leading-tight text-center">Posts</span>
           </Link>
-
-          <Link
-            to="/trends"
-            className="flex flex-col items-center gap-1 w-16 py-2 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
-            title="Trends"
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span className="text-[10px] font-medium leading-tight text-center">Trends</span>
-          </Link>
         </nav>
 
 
@@ -220,7 +218,6 @@ const Dashboard = () => {
             ) : (
               <div className="animate-fade-in">
                 {activeTool === 'calendar' && <CreativeWorkflow />}
-                {activeTool === 'trendintel' && <TrendIntelligence />}
                 {activeTool === 'sequence' && <SequenceGeneration />}
                 {activeTool === 'adcopy' && <AdCopyGenerator />}
                 {activeTool === 'predictor' && <ViralPredictor />}

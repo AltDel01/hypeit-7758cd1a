@@ -216,9 +216,11 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
       "hooks": ["recurring hook style seen on this platform"],
       "hashtags": ["#tag"],
       "sounds": ["trending sound or audio style, empty array if not applicable"],
-      "bestPostTimes": ["e.g. Tue 7-9pm"]
+      "bestPostTimes": ["e.g. Tue 7-9pm"],
+      "postingTip": "one practical posting tip for this platform"
     }
   ],
+  "actions": ["5 concrete next actions the creator should take this week, best first"],
   "competitorInsights": [
     { "name": "competitor or account archetype", "whatWorks": "one sentence", "gap": "one sentence opportunity you can own" }
   ],
@@ -280,6 +282,7 @@ Provide one trendReport entry per platform listed, and ${ideaCount} ranked conte
       trendReport?: unknown[]
       contentIdeas?: unknown[]
       competitorInsights?: unknown[]
+      actions?: unknown[]
     } = {}
     try {
       parsed = JSON.parse(content)
@@ -291,10 +294,11 @@ Provide one trendReport entry per platform listed, and ${ideaCount} ranked conte
     const trendReport = Array.isArray(parsed.trendReport) ? parsed.trendReport : []
     const contentIdeas = Array.isArray(parsed.contentIdeas) ? parsed.contentIdeas : []
     const competitorInsights = Array.isArray(parsed.competitorInsights) ? parsed.competitorInsights : []
+    const actions = Array.isArray(parsed.actions) ? parsed.actions.filter((a) => typeof a === 'string') : []
     const summary = typeof parsed.summary === 'string' ? parsed.summary : ''
 
     return new Response(
-      JSON.stringify({ summary, trendReport, contentIdeas, competitorInsights, sourceCount: hits.length }),
+      JSON.stringify({ summary, trendReport, contentIdeas, competitorInsights, actions, sourceCount: hits.length }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (e) {

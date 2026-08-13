@@ -114,6 +114,7 @@ interface TrendEntry {
   hashtags?: string[];
   sounds?: string[];
   bestPostTimes?: string[];
+  postingTip?: string;
 }
 
 interface ContentIdea {
@@ -175,6 +176,7 @@ const TrendResearch = () => {
   const [report, setReport] = useState<TrendEntry[]>([]);
   const [ideas, setIdeas] = useState<ContentIdea[]>([]);
   const [competitorInsights, setCompetitorInsights] = useState<CompetitorInsight[]>([]);
+  const [actions, setActions] = useState<string[]>([]);
   const [past, setPast] = useState<PastRun[]>([]);
 
   const [ideaPlatformFilter, setIdeaPlatformFilter] = useState('all');
@@ -256,6 +258,7 @@ const TrendResearch = () => {
     setReport([]);
     setIdeas([]);
     setCompetitorInsights([]);
+    setActions([]);
     setSummary('');
     try {
       const { data, error } = await supabase.functions.invoke('trend-research', {
@@ -282,6 +285,7 @@ const TrendResearch = () => {
       setReport(nextReport);
       setIdeas(nextIdeas);
       setCompetitorInsights(Array.isArray(data?.competitorInsights) ? data.competitorInsights : []);
+      setActions(Array.isArray(data?.actions) ? data.actions : []);
       setSummary(typeof data?.summary === 'string' ? data.summary : '');
       if (nextReport.length === 0 && nextIdeas.length === 0) {
         toast.error('No trends found. Try a broader industry term.');
@@ -656,6 +660,21 @@ const TrendResearch = () => {
                     <p className="text-sm text-slate-200">{summary}</p>
                   </Card>
                 )}
+                {actions.length > 0 && (
+                  <Card className="p-4 bg-card/60 border-[#8C52FF]/30 backdrop-blur">
+                    <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[#8C52FF]">
+                      <Sparkles className="w-4 h-4" /> Do this next
+                    </h3>
+                    <ul className="space-y-2 text-sm text-slate-200">
+                      {actions.map((a, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-[#8C52FF]">{i + 1}.</span>
+                          <span>{a}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
                 <div className="grid gap-4 md:grid-cols-2">
                   {report.map((entry, i) => {
                     const m = momentumStyles[(entry.momentum || '').toLowerCase()];
@@ -742,6 +761,9 @@ const TrendResearch = () => {
                               <span key={j} className="text-xs text-slate-400">{t}{j < entry.bestPostTimes!.length - 1 ? ',' : ''}</span>
                             ))}
                           </div>
+                        )}
+                        {entry.postingTip && (
+                          <p className="text-xs italic text-muted-foreground pt-1">{entry.postingTip}</p>
                         )}
                       </Card>
                     );
