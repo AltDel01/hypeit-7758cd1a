@@ -31,6 +31,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
+          // Backfill the user's country in the background (non-blocking)
+          const uid = currentSession?.user?.id;
+          if (uid) setTimeout(() => { captureUserCountry(uid); }, 0);
           // Only redirect when sign-in was explicitly initiated from UI
           const shouldHandleRedirect = sessionStorage.getItem('authRedirectPending') === '1';
           if (shouldHandleRedirect) {
