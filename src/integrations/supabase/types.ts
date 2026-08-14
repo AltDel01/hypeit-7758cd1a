@@ -64,6 +64,51 @@ export type Database = {
           },
         ]
       }
+      broll_jobs: {
+        Row: {
+          clips: Json
+          created_at: string
+          credits_used: number
+          id: string
+          orientation: string | null
+          plan: Json
+          result_url: string | null
+          source_duration: number | null
+          source_name: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clips?: Json
+          created_at?: string
+          credits_used?: number
+          id?: string
+          orientation?: string | null
+          plan?: Json
+          result_url?: string | null
+          source_duration?: number | null
+          source_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clips?: Json
+          created_at?: string
+          credits_used?: number
+          id?: string
+          orientation?: string | null
+          plan?: Json
+          result_url?: string | null
+          source_duration?: number | null
+          source_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       career_applications: {
         Row: {
           application_type: string
