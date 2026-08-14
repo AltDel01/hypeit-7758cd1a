@@ -220,6 +220,7 @@ const Dashboard = () => {
             ) : (
               <div className="animate-fade-in">
                 {activeTool === 'calendar' && <CreativeWorkflow />}
+                {activeTool === 'videoeditor' && <AIVideoEditor />}
                 {activeTool === 'sequence' && <SequenceGeneration />}
                 {activeTool === 'adcopy' && <AdCopyGenerator />}
                 {activeTool === 'predictor' && <ViralPredictor />}
