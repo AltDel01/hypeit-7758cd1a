@@ -48,11 +48,9 @@ const AIVideoEditor: React.FC = () => {
       </div>
 
       {/* Content based on active sub-tab */}
-      {activeSubTab === 'editor' ? (
-        <AIEditorPrompt />
-      ) : (
-        <ViralClipsDashboard />
-      )}
+      {activeSubTab === 'editor' && <AIEditorPrompt />}
+      {activeSubTab === 'viralclips' && <ViralClipsDashboard />}
+      {activeSubTab === 'broll' && <BrollStudio />}
     </div>
   );
 };
