@@ -10,7 +10,7 @@ const AIVideoEditor: React.FC = () => {
           Editor
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          AI b-roll editing, upload a video and let AI plan, generate and insert cutaways
+          AI video editing, upload a video and let AI plan, generate and insert cutaways
         </p>
       </div>
 
