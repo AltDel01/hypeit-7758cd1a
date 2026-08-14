@@ -11,6 +11,7 @@ import LipSyncStudio from '@/components/tools/LipSyncStudio';
 import CinemaStudio from '@/components/tools/CinemaStudio';
 import WorkflowStudio from '@/components/tools/WorkflowStudio';
 import CreativeWorkflow from '@/components/tools/CreativeWorkflow';
+import AIVideoEditor from '@/components/dashboard/sections/AIVideoEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGenerationRequests } from '@/hooks/useGenerationRequests';
 import { useIsMobile } from '@/hooks/use-mobile';
