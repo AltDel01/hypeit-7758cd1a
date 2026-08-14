@@ -142,7 +142,7 @@ export async function compositeBroll({
   ]);
 
   onProgress?.(1, 'Done');
-  return new Blob([bytes], { type: 'video/mp4' });
+  return new Blob([bytes.slice().buffer as ArrayBuffer], { type: 'video/mp4' });
 }
 
 /** Videos above these limits are too heavy for browser compositing. */
