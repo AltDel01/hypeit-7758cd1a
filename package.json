@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@11labs/react": "^0.1.3",
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@hookform/resolvers": "^3.9.0",
     "@huggingface/transformers": "^3.4.0",
     "@lovable.dev/mcp-js": "^0.24.0",
