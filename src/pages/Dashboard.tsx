@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange, ListChecks, Radar } from 'lucide-react';
+import { ArrowLeft, X, History, Home, Layers, Megaphone, Brain, Mic2, Camera, Workflow, CalendarRange, ListChecks, Radar, Clapperboard } from 'lucide-react';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import GenerationHistory from '@/components/dashboard/GenerationHistory';
 import RequestDetailView from '@/components/dashboard/RequestDetailView';
@@ -11,6 +11,7 @@ import LipSyncStudio from '@/components/tools/LipSyncStudio';
 import CinemaStudio from '@/components/tools/CinemaStudio';
 import WorkflowStudio from '@/components/tools/WorkflowStudio';
 import CreativeWorkflow from '@/components/tools/CreativeWorkflow';
+import AIVideoEditor from '@/components/dashboard/sections/AIVideoEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGenerationRequests } from '@/hooks/useGenerationRequests';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -21,10 +22,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 
-type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
+type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow' | 'videoeditor';
 
 const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
   { id: 'calendar', label: 'Posting', icon: CalendarRange },
+  { id: 'videoeditor', label: 'Editor', icon: Clapperboard },
   { id: 'sequence', label: 'Sequence', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Predictor', icon: Brain },
@@ -218,6 +220,7 @@ const Dashboard = () => {
             ) : (
               <div className="animate-fade-in">
                 {activeTool === 'calendar' && <CreativeWorkflow />}
+                {activeTool === 'videoeditor' && <AIVideoEditor />}
                 {activeTool === 'sequence' && <SequenceGeneration />}
                 {activeTool === 'adcopy' && <AdCopyGenerator />}
                 {activeTool === 'predictor' && <ViralPredictor />}
