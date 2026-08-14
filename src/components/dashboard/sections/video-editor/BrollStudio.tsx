@@ -351,7 +351,7 @@ const BrollStudio: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Film className="w-4 h-4 text-[#b616d6]" />
-                AI B-roll
+                Video Editor
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 Upload a talking video. The AI finds the flat moments, generates cutaway
