@@ -22,10 +22,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type FeedbackMap = Record<string, { rating: number; feedback: string }>;
 
-type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow';
+type ToolId = 'calendar' | 'sequence' | 'adcopy' | 'predictor' | 'lipsync' | 'cinema' | 'workflow' | 'videoeditor';
 
 const TOOLS: { id: ToolId; label: string; icon: typeof Layers }[] = [
   { id: 'calendar', label: 'Posting', icon: CalendarRange },
+  { id: 'videoeditor', label: 'Editor', icon: Clapperboard },
   { id: 'sequence', label: 'Sequence', icon: Layers },
   { id: 'adcopy', label: 'Ad Copy', icon: Megaphone },
   { id: 'predictor', label: 'Predictor', icon: Brain },
