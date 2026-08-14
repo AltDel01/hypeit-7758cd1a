@@ -10,6 +10,7 @@ const KNOWN_STORAGE_BUCKETS = new Set([
   'generated-images',
   'career-applications',
   'avatars',
+  'broll-media',
 ]);
 
 const decodeBase64Url = (value: string) => {

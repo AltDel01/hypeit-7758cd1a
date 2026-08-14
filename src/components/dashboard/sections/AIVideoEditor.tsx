@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Clapperboard, Sparkles } from 'lucide-react';
+import { Clapperboard, Sparkles, Film } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AIEditorPrompt from './video-editor/AIEditorPrompt';
 import ViralClipsDashboard from './video-editor/ViralClipsDashboard';
+import BrollStudio from './video-editor/BrollStudio';
 
-type SubTab = 'editor' | 'viralclips';
+type SubTab = 'editor' | 'viralclips' | 'broll';
 
 const AIVideoEditor: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('editor');
@@ -12,6 +13,7 @@ const AIVideoEditor: React.FC = () => {
   const subTabs = [
     { id: 'editor' as SubTab, label: 'AI Editor', icon: Clapperboard },
     { id: 'viralclips' as SubTab, label: 'Viral Clip', icon: Sparkles },
+    { id: 'broll' as SubTab, label: 'AI B-roll', icon: Film },
   ];
 
   return (
@@ -46,11 +48,9 @@ const AIVideoEditor: React.FC = () => {
       </div>
 
       {/* Content based on active sub-tab */}
-      {activeSubTab === 'editor' ? (
-        <AIEditorPrompt />
-      ) : (
-        <ViralClipsDashboard />
-      )}
+      {activeSubTab === 'editor' && <AIEditorPrompt />}
+      {activeSubTab === 'viralclips' && <ViralClipsDashboard />}
+      {activeSubTab === 'broll' && <BrollStudio />}
     </div>
   );
 };
