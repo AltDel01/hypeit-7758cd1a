@@ -462,6 +462,20 @@ export function useMultimodalChat() {
     };
     setMessages(prev => [...prev, assistantMsg]);
 
+    // Record the media tags in the prompt metadata so history, the editor
+    // workspace and notification emails all show what each file is for.
+    const mediaTagParts = [
+      ...attachments.map((a) => `${MEDIA_ROLE_LABELS[a.role || 'reference']}: ${a.file.name}`),
+      ...(videoOpts?.firstFrameFile ? [`First frame: ${videoOpts.firstFrameFile.name}`] : []),
+      ...(videoOpts?.lastFrameFile ? [`Last frame: ${videoOpts.lastFrameFile.name}`] : []),
+      ...(videoOpts?.audioFile ? [`Audio / voice: ${videoOpts.audioFile.name}`] : []),
+      ...(imageOpts?.maskFile ? [`Mask: ${imageOpts.maskFile.name}`] : []),
+    ];
+    const basePrompt = (routed.prompt && routed.prompt.trim()) || text;
+    const promptWithMedia = mediaTagParts.length
+      ? `${basePrompt} | Media: ${mediaTagParts.join('; ')}`
+      : basePrompt;
+
     try {
       if (intent === 'chat') {
         await streamChat(assistantMsg.id, [...buildHistory(), { role: 'user', content: text }]);
@@ -472,7 +486,7 @@ export function useMultimodalChat() {
           await runGeneration(
             assistantMsg.id,
             intent,
-            (routed.prompt && routed.prompt.trim()) || text,
+            promptWithMedia,
             storageRefs,
             routed,
             audioRef,
@@ -485,6 +499,7 @@ export function useMultimodalChat() {
     } finally {
       setIsBusy(false);
     }
+
   }, [user, buildHistory, streamChat, runGeneration, update]);
 
   return { messages, send, isBusy, clear };
