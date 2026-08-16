@@ -190,13 +190,30 @@ export function useMultimodalChat() {
         promptExtend: routed.promptExtend,
       });
     } else {
-      const hasFirst = !!firstFrameRef;
-      const hasLast = !!lastFrameRef;
-      const isKf2v = hasFirst && hasLast;
-      const isLipsync = !isKf2v && !!audioRef && (hasFirst || storageRefs.length >= 1);
-      const isI2V = !isKf2v && !isLipsync && (hasFirst || (storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false));
-      const isR2V = !isKf2v && !isLipsync && !isI2V && storageRefs.length > 1;
-      const category = isKf2v ? 'video-kf2v'
+      // Tagged attachments win over positional guessing: a file the user
+      // tagged "First frame" is always the first frame, etc.
+      const taggedFirst = storageRefs.find((r) => getMediaRole(r) === 'first-frame');
+      const taggedLast = storageRefs.find((r) => getMediaRole(r) === 'last-frame');
+      const taggedFace = faceRef || storageRefs.find((r) => getMediaRole(r) === 'face');
+      const taggedVideo = sourceVideoRef || storageRefs.find((r) => getMediaRole(r) === 'source-video');
+      const plainRefs = storageRefs.filter((r) =>
+        ['reference', 'product', 'style'].includes(getMediaRole(r))
+      );
+
+      const first = firstFrameRef || taggedFirst;
+      const last = lastFrameRef || taggedLast;
+      const hasFirst = !!first;
+      const hasLast = !!last;
+
+      const isFaceSwap = !!taggedVideo && !!taggedFace;
+      const isKf2v = !isFaceSwap && hasFirst && hasLast;
+      const isLipsync = !isFaceSwap && !isKf2v && !!audioRef && (hasFirst || storageRefs.length >= 1);
+      const isI2V =
+        !isFaceSwap && !isKf2v && !isLipsync &&
+        (hasFirst || (plainRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false));
+      const isR2V = !isFaceSwap && !isKf2v && !isLipsync && !isI2V && plainRefs.length > 1;
+      const category = isFaceSwap ? 'video-face-swap'
+        : isKf2v ? 'video-kf2v'
         : isLipsync ? 'video-lipsync'
         : isR2V ? 'video-r2v'
         : isI2V ? 'video-i2v'
@@ -206,8 +223,8 @@ export function useMultimodalChat() {
       // attachment, otherwise the request is dispatched without an image and
       // the provider rejects it before a task is ever created.
       const firstFrame =
-        firstFrameRef ||
-        ((isI2V || isLipsync) && !hasFirst ? storageRefs[0] : undefined);
+        first ||
+        ((isI2V || isLipsync) && !hasFirst ? (plainRefs[0] || storageRefs[0]) : undefined);
 
       request = await createGenerationRequest({
         requestType: 'video',
@@ -216,14 +233,17 @@ export function useMultimodalChat() {
         referenceImageUrl: refUrl,
         category,
         firstFrameUrl: (category === 'video-i2v' || category === 'video-kf2v' || category === 'video-lipsync') ? firstFrame : undefined,
-        lastFrameUrl: category === 'video-kf2v' ? lastFrameRef : undefined,
-        referenceImageUrls: category === 'video-r2v' ? storageRefs : undefined,
+        lastFrameUrl: category === 'video-kf2v' ? last : undefined,
+        referenceImageUrls: category === 'video-r2v' ? plainRefs : undefined,
+        sourceVideoUrl: category === 'video-face-swap' ? taggedVideo : undefined,
+        faceImageUrl: category === 'video-face-swap' ? taggedFace : undefined,
         duration: routed.duration,
         resolution: routed.resolution,
         audioUrl: audioRef,
         lipsyncMode: isLipsync ? 'portrait' : undefined,
       });
     }
+
 
 
     if (!request) {
