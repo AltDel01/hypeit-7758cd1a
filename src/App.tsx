@@ -39,6 +39,7 @@ import Tools from "./pages/Tools";
 import PostingHistory from "./pages/PostingHistory";
 import TrendResearch from "./pages/TrendResearch";
 import OAuthConsent from "./pages/OAuthConsent";
+import VeoStudio from "./pages/VeoStudio";
 import React from "react";
 
 // Create a new query client outside of component rendering
@@ -155,6 +156,11 @@ const AppRoutes = () => {
       <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
       <Route path="/tools" element={<CustomErrorBoundary><Tools /></CustomErrorBoundary>} />
       <Route path="/invite/:code" element={<InviteRedirect />} />
+      {/* Unlisted internal Veo workbench, not linked from any menu */}
+      <Route
+        path="/lab/veo-studio"
+        element={<ProtectedRoute><CustomErrorBoundary><VeoStudio /></CustomErrorBoundary></ProtectedRoute>}
+      />
       <Route path="/.lovable/oauth/consent" element={<CustomErrorBoundary><OAuthConsent /></CustomErrorBoundary>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
