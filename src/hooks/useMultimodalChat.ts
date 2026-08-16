@@ -7,10 +7,21 @@ import {
   GenerationRequest,
 } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
-import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
+import {
+  joinStoredAttachmentUrls,
+  withMediaRole,
+  getMediaRole,
+  
+  MEDIA_ROLE_LABELS,
+  type MediaRole,
+} from '@/utils/requestMedia';
 import { toast } from 'sonner';
 
 export type ChatMode = 'chat' | 'image' | 'video';
+
+/** An upload plus the explicit role the user tagged it with. */
+export type TaggedFile = { file: File; role?: MediaRole };
+
 
 export interface ChatMessage {
   id: string;
@@ -152,6 +163,9 @@ export function useMultimodalChat() {
     firstFrameRef?: string,
     lastFrameRef?: string,
     maskRef?: string,
+    sourceVideoRef?: string,
+    faceRef?: string,
+
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
@@ -162,27 +176,47 @@ export function useMultimodalChat() {
     let request: GenerationRequest | null = null;
 
     if (intent === 'image') {
-      const isInpaint = !!maskRef && storageRefs.length >= 1;
+      const taggedMask = maskRef || storageRefs.find((r) => getMediaRole(r) === 'mask');
+      const imageRefs = storageRefs.filter((r) => getMediaRole(r) !== 'mask');
+      const isInpaint = !!taggedMask && imageRefs.length >= 1;
       request = await createGenerationRequest({
         requestType: 'image',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
-        category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
-        referenceImageUrls: storageRefs.length ? storageRefs : undefined,
-        maskUrl: isInpaint ? maskRef : undefined,
+        category: isInpaint ? 'image-inpaint' : (imageRefs.length ? 'image-edit-instruction' : 'image-gen'),
+        referenceImageUrls: imageRefs.length ? imageRefs : undefined,
+        maskUrl: isInpaint ? taggedMask : undefined,
         size: routed.imageSize,
         imageCount: routed.imageCount,
         promptExtend: routed.promptExtend,
       });
+
     } else {
-      const hasFirst = !!firstFrameRef;
-      const hasLast = !!lastFrameRef;
-      const isKf2v = hasFirst && hasLast;
-      const isLipsync = !isKf2v && !!audioRef && (hasFirst || storageRefs.length >= 1);
-      const isI2V = !isKf2v && !isLipsync && (hasFirst || (storageRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false));
-      const isR2V = !isKf2v && !isLipsync && !isI2V && storageRefs.length > 1;
-      const category = isKf2v ? 'video-kf2v'
+      // Tagged attachments win over positional guessing: a file the user
+      // tagged "First frame" is always the first frame, etc.
+      const taggedFirst = storageRefs.find((r) => getMediaRole(r) === 'first-frame');
+      const taggedLast = storageRefs.find((r) => getMediaRole(r) === 'last-frame');
+      const taggedFace = faceRef || storageRefs.find((r) => getMediaRole(r) === 'face');
+      const taggedVideo = sourceVideoRef || storageRefs.find((r) => getMediaRole(r) === 'source-video');
+      const plainRefs = storageRefs.filter((r) =>
+        ['reference', 'product', 'style'].includes(getMediaRole(r))
+      );
+
+      const first = firstFrameRef || taggedFirst;
+      const last = lastFrameRef || taggedLast;
+      const hasFirst = !!first;
+      const hasLast = !!last;
+
+      const isFaceSwap = !!taggedVideo && !!taggedFace;
+      const isKf2v = !isFaceSwap && hasFirst && hasLast;
+      const isLipsync = !isFaceSwap && !isKf2v && !!audioRef && (hasFirst || storageRefs.length >= 1);
+      const isI2V =
+        !isFaceSwap && !isKf2v && !isLipsync &&
+        (hasFirst || (plainRefs.length === 1 && routed.useAttachmentAsFirstFrame !== false));
+      const isR2V = !isFaceSwap && !isKf2v && !isLipsync && !isI2V && plainRefs.length > 1;
+      const category = isFaceSwap ? 'video-face-swap'
+        : isKf2v ? 'video-kf2v'
         : isLipsync ? 'video-lipsync'
         : isR2V ? 'video-r2v'
         : isI2V ? 'video-i2v'
@@ -192,8 +226,8 @@ export function useMultimodalChat() {
       // attachment, otherwise the request is dispatched without an image and
       // the provider rejects it before a task is ever created.
       const firstFrame =
-        firstFrameRef ||
-        ((isI2V || isLipsync) && !hasFirst ? storageRefs[0] : undefined);
+        first ||
+        ((isI2V || isLipsync) && !hasFirst ? (plainRefs[0] || storageRefs[0]) : undefined);
 
       request = await createGenerationRequest({
         requestType: 'video',
@@ -202,14 +236,17 @@ export function useMultimodalChat() {
         referenceImageUrl: refUrl,
         category,
         firstFrameUrl: (category === 'video-i2v' || category === 'video-kf2v' || category === 'video-lipsync') ? firstFrame : undefined,
-        lastFrameUrl: category === 'video-kf2v' ? lastFrameRef : undefined,
-        referenceImageUrls: category === 'video-r2v' ? storageRefs : undefined,
+        lastFrameUrl: category === 'video-kf2v' ? last : undefined,
+        referenceImageUrls: category === 'video-r2v' ? plainRefs : undefined,
+        sourceVideoUrl: category === 'video-face-swap' ? taggedVideo : undefined,
+        faceImageUrl: category === 'video-face-swap' ? taggedFace : undefined,
         duration: routed.duration,
         resolution: routed.resolution,
         audioUrl: audioRef,
         lipsyncMode: isLipsync ? 'portrait' : undefined,
       });
     }
+
 
 
     if (!request) {
@@ -282,7 +319,7 @@ export function useMultimodalChat() {
 
   const send = useCallback(async (
     text: string,
-    attachments: File[],
+    rawAttachments: (File | TaggedFile)[],
     modeOverride: ChatMode = 'chat',
     videoOpts?: {
       ratio?: string;
@@ -302,15 +339,19 @@ export function useMultimodalChat() {
     /** Optional clean text to show in the chat bubble (without embedded settings). */
     displayText?: string,
   ) => {
+    const attachments: TaggedFile[] = rawAttachments.map((item) =>
+      item instanceof File ? { file: item } : item
+    );
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
 
     // 1. Append user message
     const allPreviews: File[] = [
-      ...attachments,
+      ...attachments.map((a) => a.file),
       ...(videoOpts?.firstFrameFile ? [videoOpts.firstFrameFile] : []),
       ...(videoOpts?.lastFrameFile ? [videoOpts.lastFrameFile] : []),
     ];
+
     const userMsg: ChatMessage = {
       id: uid(),
       role: 'user',
@@ -362,14 +403,15 @@ export function useMultimodalChat() {
       } catch (e) { console.error('upload fail', e); return undefined; }
     };
 
-    // 2. Upload attachments (paperclip)
+    // 2. Upload attachments (paperclip), keeping each user-assigned role.
     const storageRefs: string[] = [];
     if (user && attachments.length) {
-      for (const file of attachments) {
-        const r = await uploadFile(file);
-        if (r) storageRefs.push(r);
+      for (const item of attachments) {
+        const r = await uploadFile(item.file);
+        if (r) storageRefs.push(withMediaRole(r, item.role));
       }
     }
+
 
     // 2b. Upload optional audio + keyframe files for video mode
     let audioRef: string | undefined;
@@ -420,6 +462,20 @@ export function useMultimodalChat() {
     };
     setMessages(prev => [...prev, assistantMsg]);
 
+    // Record the media tags in the prompt metadata so history, the editor
+    // workspace and notification emails all show what each file is for.
+    const mediaTagParts = [
+      ...attachments.map((a) => `${MEDIA_ROLE_LABELS[a.role || 'reference']}: ${a.file.name}`),
+      ...(videoOpts?.firstFrameFile ? [`First frame: ${videoOpts.firstFrameFile.name}`] : []),
+      ...(videoOpts?.lastFrameFile ? [`Last frame: ${videoOpts.lastFrameFile.name}`] : []),
+      ...(videoOpts?.audioFile ? [`Audio / voice: ${videoOpts.audioFile.name}`] : []),
+      ...(imageOpts?.maskFile ? [`Mask: ${imageOpts.maskFile.name}`] : []),
+    ];
+    const basePrompt = (routed.prompt && routed.prompt.trim()) || text;
+    const promptWithMedia = mediaTagParts.length
+      ? `${basePrompt} | Media: ${mediaTagParts.join('; ')}`
+      : basePrompt;
+
     try {
       if (intent === 'chat') {
         await streamChat(assistantMsg.id, [...buildHistory(), { role: 'user', content: text }]);
@@ -430,7 +486,7 @@ export function useMultimodalChat() {
           await runGeneration(
             assistantMsg.id,
             intent,
-            (routed.prompt && routed.prompt.trim()) || text,
+            promptWithMedia,
             storageRefs,
             routed,
             audioRef,
@@ -443,6 +499,7 @@ export function useMultimodalChat() {
     } finally {
       setIsBusy(false);
     }
+
   }, [user, buildHistory, streamChat, runGeneration, update]);
 
   return { messages, send, isBusy, clear };

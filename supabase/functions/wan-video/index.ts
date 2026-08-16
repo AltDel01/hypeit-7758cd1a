@@ -68,7 +68,7 @@ function parseSetting(prompt: string | undefined, key: string): string | undefin
 function cleanPromptForModel(prompt: string | undefined): string {
   if (!prompt) return '';
   return prompt
-    .replace(/\s*\|\s*(Aspect|Resolution|Duration|Timeline|First frame|Last frame)\s*:[^|\n]*/gi, '')
+    .replace(/\s*\|\s*(Aspect|Resolution|Duration|Timeline|Media|First frame|Last frame)\s*:[^|\n]*/gi, '')
     .trim();
 }
 
