@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMultimodalChat, ChatMode } from '@/hooks/useMultimodalChat';
+import { useMultimodalChat, ChatMode, TaggedFile } from '@/hooks/useMultimodalChat';
+import { MEDIA_ROLE_LABELS, rolesForMode, DEFAULT_MEDIA_ROLE, type MediaRole } from '@/utils/requestMedia';
+
 import InpaintDialog from './InpaintDialog';
 import ReactMarkdown from 'react-markdown';
 
