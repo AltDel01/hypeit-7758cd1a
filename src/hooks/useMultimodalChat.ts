@@ -163,6 +163,9 @@ export function useMultimodalChat() {
     firstFrameRef?: string,
     lastFrameRef?: string,
     maskRef?: string,
+    sourceVideoRef?: string,
+    faceRef?: string,
+
   ) => {
     if (!user) {
       update(assistantId, { kind: 'error', content: 'Please sign in to generate.' });
