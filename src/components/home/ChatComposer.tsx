@@ -98,9 +98,17 @@ const ChatComposer: React.FC = () => {
   }, []);
 
   const onPickFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files || []);
+    const list = Array.from(e.target.files || []).map<TaggedFile>((file) => ({
+      file,
+      role: DEFAULT_MEDIA_ROLE,
+    }));
     setFiles(prev => [...prev, ...list].slice(0, 3));
   };
+
+  const setFileRole = (index: number, role: MediaRole) => {
+    setFiles(prev => prev.map((item, i) => (i === index ? { ...item, role } : item)));
+  };
+
 
   const buildVideoPrompt = (base: string) => {
     // Creative direction is baked into the prompt so the model honors it.
