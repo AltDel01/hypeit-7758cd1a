@@ -217,33 +217,59 @@ const ChatComposer: React.FC = () => {
           <div className="bg-gray-900/80 border border-gray-700/50 rounded-xl md:rounded-2xl p-3 md:p-4 backdrop-blur-sm">
             {files.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
-                {files.map((f, i) => (
-                  <div key={i} className="relative rounded-lg overflow-hidden bg-black inline-block">
-                    <img src={URL.createObjectURL(f)} alt={f.name} className="max-h-24 object-contain rounded-lg" />
-                    <button
-                      onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
-                      className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                    {mode === 'image' && files.length === 1 && (
+                {files.map((item, i) => {
+                  const f = item.file;
+                  const isImage = f.type.startsWith('image/');
+                  return (
+                  <div key={i} className="rounded-lg bg-black/60 border border-gray-700/60 p-1.5 inline-flex flex-col gap-1.5 w-[140px]">
+                    <div className="relative rounded-md overflow-hidden bg-black">
+                      {isImage ? (
+                        <img src={URL.createObjectURL(f)} alt={f.name} className="h-20 w-full object-contain rounded-md" />
+                      ) : (
+                        <div className="h-20 w-full flex items-center justify-center text-[10px] text-gray-400 px-2 text-center break-all">
+                          {f.name}
+                        </div>
+                      )}
                       <button
-                        onClick={() => setInpaintOpen(true)}
-                        className={cn(
-                          'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md text-[10px] inline-flex items-center gap-1 border backdrop-blur-sm',
-                          maskFile
-                            ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
-                            : 'bg-black/70 text-white border-white/20 hover:bg-black/90',
-                        )}
-                        title="Erase / inpaint a region"
+                        onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                        className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80"
                       >
-                        <Eraser className="w-3 h-3" />
-                        {maskFile ? 'Mask set' : 'Erase area'}
+                        <X className="w-3 h-3" />
                       </button>
-                    )}
+                      {mode === 'image' && files.length === 1 && isImage && (
+                        <button
+                          onClick={() => setInpaintOpen(true)}
+                          className={cn(
+                            'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md text-[10px] inline-flex items-center gap-1 border backdrop-blur-sm',
+                            maskFile
+                              ? 'bg-[#8c52ff] text-white border-[#8c52ff]'
+                              : 'bg-black/70 text-white border-white/20 hover:bg-black/90',
+                          )}
+                          title="Erase / inpaint a region"
+                        >
+                          <Eraser className="w-3 h-3" />
+                          {maskFile ? 'Mask set' : 'Erase area'}
+                        </button>
+                      )}
+                    </div>
+                    {/* Explicit media tag: tells the pipeline what this file is for. */}
+                    <select
+                      value={item.role || DEFAULT_MEDIA_ROLE}
+                      onChange={(e) => setFileRole(i, e.target.value as MediaRole)}
+                      className="w-full bg-gray-800 border border-gray-700 text-[10px] text-gray-200 rounded-md px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-[#8c52ff]"
+                      title="Tag this media"
+                    >
+                      {rolesForMode(mode).map((role) => (
+                        <option key={role} value={role}>
+                          {MEDIA_ROLE_LABELS[role]}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ))}
+                  );
+                })}
               </div>
+
             )}
 
             <Textarea
