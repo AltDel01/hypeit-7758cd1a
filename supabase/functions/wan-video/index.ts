@@ -96,6 +96,14 @@ serve(async (req) => {
   if (!body.requestId || !body.model || !body.category) {
     return genericError(400, 'Missing required fields');
   }
+
+  const { data: reqRow } = await admin
+    .from('generation_requests')
+    .select('id, user_id')
+    .eq('id', body.requestId)
+    .maybeSingle();
+  if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
+
   // No artificial prompt cap: Wan accepts long prompts (the ModelStudio
   // playground proves it). Only a far-above-real-usage sanity ceiling remains,
   // and anything Alibaba itself dislikes comes back as a provider error we
@@ -104,13 +112,6 @@ serve(async (req) => {
     await markFailed(admin, body.requestId, body.model, 'Prompt is unusually long. Please shorten it.');
     return genericError(400, 'Prompt too long');
   }
-
-  const { data: reqRow } = await admin
-    .from('generation_requests')
-    .select('id, user_id')
-    .eq('id', body.requestId)
-    .maybeSingle();
-  if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
 
   // Resolve storage: refs by downloading the bytes and uploading them to
   // DashScope's own OSS storage (oss:// URL). This is Alibaba's officially
