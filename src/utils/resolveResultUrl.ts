@@ -100,10 +100,15 @@ const parseStorageReference = (value: string): StorageReference | null => {
  * Supports permanent `storage:` refs plus legacy Supabase signed URLs,
  * and always returns a fresh signed URL for private storage objects.
  */
-export async function resolveResultUrl(resultUrl: string): Promise<string | null> {
-  if (!resultUrl) return null;
+export async function resolveResultUrl(rawUrl: string): Promise<string | null> {
+  if (!rawUrl) return null;
+
+  // Media references may carry a `#role=` tag; it is metadata, not part of
+  // the storage path.
+  const resultUrl = stripMediaRole(rawUrl);
 
   const storageReference = parseStorageReference(resultUrl);
+
 
   if (storageReference) {
     const { data, error } = await supabase.storage
