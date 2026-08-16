@@ -1,5 +1,70 @@
 export type MediaKind = 'video' | 'image' | 'audio' | 'file';
 
+/**
+ * Explicit role a user assigns to an uploaded file so the pipeline never has
+ * to guess what an attachment is for.
+ */
+export type MediaRole =
+  | 'reference'
+  | 'first-frame'
+  | 'last-frame'
+  | 'product'
+  | 'face'
+  | 'style'
+  | 'source-video'
+  | 'audio'
+  | 'mask';
+
+export const MEDIA_ROLE_LABELS: Record<MediaRole, string> = {
+  reference: 'Reference',
+  'first-frame': 'First frame',
+  'last-frame': 'Last frame',
+  product: 'Product',
+  face: 'Face / character',
+  style: 'Style reference',
+  'source-video': 'Source video',
+  audio: 'Audio / voice',
+  mask: 'Mask',
+};
+
+export const DEFAULT_MEDIA_ROLE: MediaRole = 'reference';
+
+const ROLE_TAG = '#role=';
+
+/** Roles offered in the composer for a given generation mode. */
+export const rolesForMode = (mode: 'image' | 'video' | 'chat'): MediaRole[] => {
+  if (mode === 'video') {
+    return ['reference', 'first-frame', 'last-frame', 'product', 'face', 'style', 'source-video'];
+  }
+  if (mode === 'image') {
+    return ['reference', 'product', 'face', 'style', 'mask'];
+  }
+  return ['reference', 'product', 'style'];
+};
+
+/** Append a role tag to a stored media reference. */
+export const withMediaRole = (url: string, role?: MediaRole | null) => {
+  const clean = stripMediaRole(url);
+  if (!role || role === DEFAULT_MEDIA_ROLE) return clean;
+  return `${clean}${ROLE_TAG}${role}`;
+};
+
+/** Remove the role tag so the raw storage/http reference remains. */
+export const stripMediaRole = (url: string) => {
+  const index = url.indexOf(ROLE_TAG);
+  return index === -1 ? url : url.slice(0, index);
+};
+
+/** Read the role tag from a stored media reference. */
+export const getMediaRole = (url: string): MediaRole => {
+  const index = url.indexOf(ROLE_TAG);
+  if (index === -1) return DEFAULT_MEDIA_ROLE;
+  const role = url.slice(index + ROLE_TAG.length) as MediaRole;
+  return role in MEDIA_ROLE_LABELS ? role : DEFAULT_MEDIA_ROLE;
+};
+
+export const getMediaRoleLabel = (url: string) => MEDIA_ROLE_LABELS[getMediaRole(url)];
+
 const MULTI_ATTACHMENT_DELIMITER = '||';
 const LEGACY_ATTACHMENT_SPLIT_REGEX = /,(?=(?:storage:|https?:\/\/))/g;
 
@@ -7,7 +72,9 @@ const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'webm', 'avi', 'mkv', 'm4v']);
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp', 'heic', 'heif']);
 const AUDIO_EXTENSIONS = new Set(['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac']);
 
-const getNormalizedPath = (value: string) => {
+const getNormalizedPath = (rawValue: string) => {
+  const value = stripMediaRole(rawValue);
+
   if (value.startsWith('storage:')) {
     return decodeURIComponent(value.slice('storage:'.length));
   }
@@ -25,6 +92,7 @@ const getExtension = (value: string) => {
   const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
   return (extension || '').toLowerCase();
 };
+
 
 export const splitStoredAttachmentUrls = (value?: string | null) => {
   if (!value?.trim()) return [];
