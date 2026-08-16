@@ -39,6 +39,7 @@ import Tools from "./pages/Tools";
 import PostingHistory from "./pages/PostingHistory";
 import TrendResearch from "./pages/TrendResearch";
 import OAuthConsent from "./pages/OAuthConsent";
+import VeoStudio from "./pages/VeoStudio";
 import React from "react";
 
 // Create a new query client outside of component rendering
