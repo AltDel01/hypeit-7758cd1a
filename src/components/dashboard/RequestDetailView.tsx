@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink, FileText, Music2, Paperclip } from 'lucide-react';
+import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink, FileText, Music2, Paperclip, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { GenerationRequest } from '@/services/generationRequestService';
+import { GenerationRequest, retryAutoFulfill } from '@/services/generationRequestService';
+import { toast } from 'sonner';
 import { parsePromptString } from '@/utils/promptParser';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
