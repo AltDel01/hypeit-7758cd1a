@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { stripMediaRole } from "@/utils/requestMedia";
+
 import {
   GenerationCategory,
   CATEGORY_MAP,
