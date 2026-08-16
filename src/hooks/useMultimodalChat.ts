@@ -259,11 +259,15 @@ export function useMultimodalChat() {
           });
           return;
         }
-        if (cur.status === 'failed') {
+        // auto_failed is terminal too: the automatic provider gave up, so the
+        // spinner must stop and the real reason must be shown.
+        if (cur.status === 'failed' || (cur as any).auto_failed) {
           update(assistantId, {
             kind: 'error',
             status: 'failed',
-            content: 'Auto-generation failed. Please try again.',
+            content:
+              (cur as any).failure_reason ||
+              'Auto-generation failed. Please try again.',
           });
           return;
         }
