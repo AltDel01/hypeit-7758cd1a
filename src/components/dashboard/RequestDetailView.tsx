@@ -300,6 +300,12 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           </p>
         </div>
 
+        {parsed.media && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Media tags: </span>{parsed.media}
+          </div>
+        )}
+
         {(parsed.aspectRatio || parsed.resolution || parsed.duration) && (
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
             {parsed.aspectRatio && (

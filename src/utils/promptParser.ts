@@ -9,6 +9,8 @@ export interface ParsedPrompt {
   resolution?: string;
   duration?: string;
   timeline?: string;
+  /** User-assigned media tags, e.g. "First frame: hero.jpg; Product: can.png". */
+  media?: string;
 }
 
 export function parsePromptString(raw: string): ParsedPrompt {
@@ -41,5 +43,6 @@ export function parsePromptString(raw: string): ParsedPrompt {
     resolution: settings['resolution'],
     duration: settings['duration'],
     timeline: settings['timeline'],
+    media: settings['media'],
   };
 }
