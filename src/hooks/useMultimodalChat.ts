@@ -319,7 +319,7 @@ export function useMultimodalChat() {
 
   const send = useCallback(async (
     text: string,
-    attachments: File[],
+    rawAttachments: (File | TaggedFile)[],
     modeOverride: ChatMode = 'chat',
     videoOpts?: {
       ratio?: string;
@@ -339,15 +339,19 @@ export function useMultimodalChat() {
     /** Optional clean text to show in the chat bubble (without embedded settings). */
     displayText?: string,
   ) => {
+    const attachments: TaggedFile[] = rawAttachments.map((item) =>
+      item instanceof File ? { file: item } : item
+    );
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
     setIsBusy(true);
 
     // 1. Append user message
     const allPreviews: File[] = [
-      ...attachments,
+      ...attachments.map((a) => a.file),
       ...(videoOpts?.firstFrameFile ? [videoOpts.firstFrameFile] : []),
       ...(videoOpts?.lastFrameFile ? [videoOpts.lastFrameFile] : []),
     ];
+
     const userMsg: ChatMessage = {
       id: uid(),
       role: 'user',
