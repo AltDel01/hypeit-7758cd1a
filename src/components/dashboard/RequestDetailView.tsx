@@ -77,6 +77,19 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
       }
     : statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    const ok = await retryAutoFulfill(request.id);
+    setIsRetrying(false);
+    toast[ok ? 'success' : 'error'](
+      ok
+        ? 'Resubmitted. Generation is running again.'
+        : 'Could not resubmit this request. Please create a new one.'
+    );
+  };
+
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [resolvedImages, setResolvedImages] = useState<string[]>([]);
