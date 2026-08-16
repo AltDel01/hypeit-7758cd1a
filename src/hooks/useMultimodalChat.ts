@@ -176,19 +176,22 @@ export function useMultimodalChat() {
     let request: GenerationRequest | null = null;
 
     if (intent === 'image') {
-      const isInpaint = !!maskRef && storageRefs.length >= 1;
+      const taggedMask = maskRef || storageRefs.find((r) => getMediaRole(r) === 'mask');
+      const imageRefs = storageRefs.filter((r) => getMediaRole(r) !== 'mask');
+      const isInpaint = !!taggedMask && imageRefs.length >= 1;
       request = await createGenerationRequest({
         requestType: 'image',
         prompt,
         aspectRatio: routed.ratio,
         referenceImageUrl: refUrl,
-        category: isInpaint ? 'image-inpaint' : (storageRefs.length ? 'image-edit-instruction' : 'image-gen'),
-        referenceImageUrls: storageRefs.length ? storageRefs : undefined,
-        maskUrl: isInpaint ? maskRef : undefined,
+        category: isInpaint ? 'image-inpaint' : (imageRefs.length ? 'image-edit-instruction' : 'image-gen'),
+        referenceImageUrls: imageRefs.length ? imageRefs : undefined,
+        maskUrl: isInpaint ? taggedMask : undefined,
         size: routed.imageSize,
         imageCount: routed.imageCount,
         promptExtend: routed.promptExtend,
       });
+
     } else {
       // Tagged attachments win over positional guessing: a file the user
       // tagged "First frame" is always the first frame, etc.
