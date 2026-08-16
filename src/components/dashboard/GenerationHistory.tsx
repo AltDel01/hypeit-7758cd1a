@@ -77,7 +77,16 @@ const GenerationHistory = ({
     <ScrollArea className="h-full">
       <div className="p-2 space-y-2 min-w-0">
         {requests.map((request) => {
-          const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
+          // A row that failed automatic generation must never look like it is
+          // still processing, even while it waits in the manual editor queue.
+          const autoFailed = Boolean((request as any).auto_failed) && request.status !== 'completed';
+          const status = autoFailed
+            ? {
+                label: 'Attention needed',
+                icon: XCircle,
+                className: 'text-orange-500 bg-orange-500/10',
+              }
+            : statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
           const StatusIcon = status.icon;
           const isSelected = selectedId === request.id;
           const fb = feedbackMap[request.id];
