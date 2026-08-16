@@ -626,7 +626,7 @@ const ChatComposer: React.FC = () => {
       <InpaintDialog
         open={inpaintOpen}
         onOpenChange={setInpaintOpen}
-        image={files[0] || null}
+        image={files[0]?.file || null}
         onApply={(mask) => setMaskFile(mask)}
       />
     </>
