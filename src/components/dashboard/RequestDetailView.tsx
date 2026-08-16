@@ -63,7 +63,18 @@ const getFileName = (url: string) => {
 };
 
 const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
-  const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
+  const autoFailed = Boolean((request as any).auto_failed) && request.status !== 'completed';
+  const status = autoFailed
+    ? {
+        label: 'Attention needed',
+        description:
+          (request as any).failure_reason ||
+          'Automatic generation did not go through. Our editors will take over.',
+        icon: XCircle,
+        className: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+        animate: false,
+      }
+    : statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
