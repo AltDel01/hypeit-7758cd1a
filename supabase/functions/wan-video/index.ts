@@ -96,7 +96,14 @@ serve(async (req) => {
   if (!body.requestId || !body.model || !body.category) {
     return genericError(400, 'Missing required fields');
   }
-  if (body.prompt && body.prompt.length > 4000) return genericError(400, 'Prompt too long');
+  // No artificial prompt cap: Wan accepts long prompts (the ModelStudio
+  // playground proves it). Only a far-above-real-usage sanity ceiling remains,
+  // and anything Alibaba itself dislikes comes back as a provider error we
+  // surface, rather than a request we silently block here.
+  if (body.prompt && body.prompt.length > 40000) {
+    await markFailed(admin, body.requestId, body.model, 'Prompt is unusually long. Please shorten it.');
+    return genericError(400, 'Prompt too long');
+  }
 
   const { data: reqRow } = await admin
     .from('generation_requests')
