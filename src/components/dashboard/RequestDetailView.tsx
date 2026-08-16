@@ -220,6 +220,22 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
               <span className="font-medium">Reason:</span> {(request as any).failure_reason}
             </p>
           )}
+          {autoFailed && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3"
+              disabled={isRetrying}
+              onClick={handleRetry}
+            >
+              {isRetrying ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Try again
+            </Button>
+          )}
         </div>
       </div>
 
