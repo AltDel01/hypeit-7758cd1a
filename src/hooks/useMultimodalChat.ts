@@ -11,7 +11,7 @@ import {
   joinStoredAttachmentUrls,
   withMediaRole,
   getMediaRole,
-  stripMediaRole,
+  
   MEDIA_ROLE_LABELS,
   type MediaRole,
 } from '@/utils/requestMedia';
