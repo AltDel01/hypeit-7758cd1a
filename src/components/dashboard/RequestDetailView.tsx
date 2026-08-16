@@ -10,7 +10,7 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
 import { supabase } from '@/integrations/supabase/client';
-import { getMediaFileName, MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
+import { getMediaFileName, getMediaRoleLabel, MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface RequestDetailViewProps {
   request: GenerationRequest;
@@ -60,7 +60,8 @@ const statusConfig: Record<string, {
 };
 
 const getFileName = (url: string) => {
-  return decodeURIComponent(getMediaFileName(url));
+  // Show the user-assigned media tag next to the file name.
+  return `${getMediaRoleLabel(url)} · ${decodeURIComponent(getMediaFileName(url))}`;
 };
 
 const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
