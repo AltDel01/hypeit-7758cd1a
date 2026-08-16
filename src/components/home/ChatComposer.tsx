@@ -59,7 +59,7 @@ const ChatComposer: React.FC = () => {
   const navigate = useNavigate();
   const { messages, send, isBusy, clear } = useMultimodalChat();
   const [text, setText] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<TaggedFile[]>([]);
   const [mode, setMode] = useState<ChatMode>('chat');
   const [ratio, setRatio] = useState<string>('16:9');
   const [duration, setDuration] = useState<number>(5);
