@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import type { GenerationRequest } from '@/services/generationRequestService';
-import { MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
+import { getMediaRoleLabel, MediaKind, resolveMediaKind, splitStoredAttachmentUrls } from '@/utils/requestMedia';
 
 interface ResolvedReferenceItem {
   rawUrl: string;
@@ -230,6 +230,9 @@ export const RequestDetails = ({
             <div className="mt-1 space-y-3">
                {resolvedAttachments.map((attachment, idx) => (
                 <div key={idx} className="rounded-md overflow-hidden border border-border">
+                  <div className="px-2 py-1 text-[11px] font-medium text-muted-foreground bg-muted/40 border-b border-border">
+                    {getMediaRoleLabel(attachment.rawUrl)}
+                  </div>
                    {!attachment.resolvedUrl ? (
                      <div className="flex min-h-40 items-center justify-center bg-muted/50 text-sm text-muted-foreground">
                        Attachment unavailable
