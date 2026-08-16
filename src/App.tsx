@@ -156,6 +156,11 @@ const AppRoutes = () => {
       <Route path="/refund-request" element={<CustomErrorBoundary><RefundRequest /></CustomErrorBoundary>} />
       <Route path="/tools" element={<CustomErrorBoundary><Tools /></CustomErrorBoundary>} />
       <Route path="/invite/:code" element={<InviteRedirect />} />
+      {/* Unlisted internal Veo workbench, not linked from any menu */}
+      <Route
+        path="/lab/veo-studio"
+        element={<ProtectedRoute><CustomErrorBoundary><VeoStudio /></CustomErrorBoundary></ProtectedRoute>}
+      />
       <Route path="/.lovable/oauth/consent" element={<CustomErrorBoundary><OAuthConsent /></CustomErrorBoundary>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
