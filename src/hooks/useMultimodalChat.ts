@@ -7,10 +7,21 @@ import {
   GenerationRequest,
 } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
-import { joinStoredAttachmentUrls } from '@/utils/requestMedia';
+import {
+  joinStoredAttachmentUrls,
+  withMediaRole,
+  getMediaRole,
+  stripMediaRole,
+  MEDIA_ROLE_LABELS,
+  type MediaRole,
+} from '@/utils/requestMedia';
 import { toast } from 'sonner';
 
 export type ChatMode = 'chat' | 'image' | 'video';
+
+/** An upload plus the explicit role the user tagged it with. */
+export type TaggedFile = { file: File; role?: MediaRole };
+
 
 export interface ChatMessage {
   id: string;
