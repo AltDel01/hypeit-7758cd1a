@@ -403,14 +403,15 @@ export function useMultimodalChat() {
       } catch (e) { console.error('upload fail', e); return undefined; }
     };
 
-    // 2. Upload attachments (paperclip)
+    // 2. Upload attachments (paperclip), keeping each user-assigned role.
     const storageRefs: string[] = [];
     if (user && attachments.length) {
-      for (const file of attachments) {
-        const r = await uploadFile(file);
-        if (r) storageRefs.push(r);
+      for (const item of attachments) {
+        const r = await uploadFile(item.file);
+        if (r) storageRefs.push(withMediaRole(r, item.role));
       }
     }
+
 
     // 2b. Upload optional audio + keyframe files for video mode
     let audioRef: string | undefined;
