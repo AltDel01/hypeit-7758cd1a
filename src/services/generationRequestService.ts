@@ -472,6 +472,52 @@ async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
 }
 
 /**
+ * Re-dispatch a request whose automatic generation never went through.
+ * Rebuilds the dispatch parameters from the stored row so the user does not
+ * have to retype the prompt or re-upload the reference media.
+ */
+export async function retryAutoFulfill(requestId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("generation_requests")
+    .select("*")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (error || !data) return false;
+
+  const row = data as any;
+  const category = (row.category || "video-t2v") as GenerationCategory;
+  const model = row.auto_model as string | null;
+  if (!model) return false;
+
+  const refs: string[] = String(row.reference_image_url || "")
+    .split("||")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const { error: resetError } = await supabase
+    .from("generation_requests")
+    .update({ auto_failed: false, failure_reason: null, status: "new" })
+    .eq("id", requestId);
+  if (resetError) return false;
+
+  await dispatchAutoFulfill({
+    requestId,
+    category,
+    model,
+    prompt: row.prompt || "",
+    size: row.aspect_ratio ? aspectRatioToSize(row.aspect_ratio) : undefined,
+    referenceImageUrls: refs.length ? refs : undefined,
+    firstFrameUrl:
+      category === "video-i2v" || category === "video-kf2v" || category === "video-lipsync"
+        ? refs[0]
+        : undefined,
+    lastFrameUrl: category === "video-kf2v" ? refs[1] : undefined,
+  });
+
+  return true;
+}
+
+/**
  * Poll a Wan video task. Returns the latest status payload.
  * Call repeatedly (e.g. every 10s) from the dashboard until status is
  * 'completed' or 'failed'.

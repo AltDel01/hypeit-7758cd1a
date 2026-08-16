@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink, FileText, Music2, Paperclip } from 'lucide-react';
+import { Image, Video, Clock, CheckCircle, XCircle, Loader2, Download, ExternalLink, FileText, Music2, Paperclip, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { GenerationRequest } from '@/services/generationRequestService';
+import { GenerationRequest, retryAutoFulfill } from '@/services/generationRequestService';
+import { toast } from 'sonner';
 import { parsePromptString } from '@/utils/promptParser';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
@@ -63,8 +64,32 @@ const getFileName = (url: string) => {
 };
 
 const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDetailViewProps) => {
-  const status = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
+  const autoFailed = Boolean((request as any).auto_failed) && request.status !== 'completed';
+  const status = autoFailed
+    ? {
+        label: 'Attention needed',
+        description:
+          (request as any).failure_reason ||
+          'Automatic generation did not go through. Our editors will take over.',
+        icon: XCircle,
+        className: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+        animate: false,
+      }
+    : statusConfig[request.status as keyof typeof statusConfig] || statusConfig.new;
   const StatusIcon = status.icon;
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    const ok = await retryAutoFulfill(request.id);
+    setIsRetrying(false);
+    toast[ok ? 'success' : 'error'](
+      ok
+        ? 'Resubmitted. Generation is running again.'
+        : 'Could not resubmit this request. Please create a new one.'
+    );
+  };
+
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [resolvedImages, setResolvedImages] = useState<string[]>([]);
@@ -208,6 +233,22 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
             <p className="text-sm mt-2 opacity-90">
               <span className="font-medium">Reason:</span> {(request as any).failure_reason}
             </p>
+          )}
+          {autoFailed && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3"
+              disabled={isRetrying}
+              onClick={handleRetry}
+            >
+              {isRetrying ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Try again
+            </Button>
           )}
         </div>
       </div>

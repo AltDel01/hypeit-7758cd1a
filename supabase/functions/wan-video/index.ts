@@ -96,7 +96,6 @@ serve(async (req) => {
   if (!body.requestId || !body.model || !body.category) {
     return genericError(400, 'Missing required fields');
   }
-  if (body.prompt && body.prompt.length > 4000) return genericError(400, 'Prompt too long');
 
   const { data: reqRow } = await admin
     .from('generation_requests')
@@ -104,6 +103,15 @@ serve(async (req) => {
     .eq('id', body.requestId)
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
+
+  // No artificial prompt cap: Wan accepts long prompts (the ModelStudio
+  // playground proves it). Only a far-above-real-usage sanity ceiling remains,
+  // and anything Alibaba itself dislikes comes back as a provider error we
+  // surface, rather than a request we silently block here.
+  if (body.prompt && body.prompt.length > 40000) {
+    await markFailed(admin, body.requestId, body.model, 'Prompt is unusually long. Please shorten it.');
+    return genericError(400, 'Prompt too long');
+  }
 
   // Resolve storage: refs by downloading the bytes and uploading them to
   // DashScope's own OSS storage (oss:// URL). This is Alibaba's officially
@@ -186,12 +194,19 @@ serve(async (req) => {
     duration,
   };
 
+  // Every early return below marks the row failed first: a request that never
+  // reaches the provider must never keep showing "Processing" to the user.
+  const bail = async (reason: string) => {
+    await markFailed(admin, body.requestId, body.model, reason)
+    return genericError(400, 'Submission failed');
+  };
+
   switch (body.category) {
     case 'video-t2v':
       input = { prompt: modelPrompt };
       break;
     case 'video-i2v':
-      if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
+      if (!firstFrameUrl) return await bail('The reference image could not be read. Please re-upload it.');
       input = {
         prompt: modelPrompt,
         media: [{ type: 'first_frame', url: firstFrameUrl }],
@@ -199,7 +214,7 @@ serve(async (req) => {
       break;
     case 'video-kf2v':
       if (!firstFrameUrl || !lastFrameUrl) {
-        return genericError(400, 'KF2V requires both firstFrameUrl and lastFrameUrl');
+        return await bail('Both the first and last frame images are required. Please re-upload them.');
       }
       input = {
         prompt: modelPrompt,
@@ -210,7 +225,9 @@ serve(async (req) => {
       };
       break;
     case 'video-r2v':
-      if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
+      if (!referenceImageUrls?.length) {
+        return await bail('The reference images could not be read. Please re-upload them.');
+      }
       input = {
         prompt: modelPrompt,
         media: referenceImageUrls.slice(0, 3).map((url) => ({
@@ -221,13 +238,13 @@ serve(async (req) => {
       break;
     case 'video-face-swap':
       if (!sourceVideoUrl || !faceImageUrl) {
-        return genericError(400, 'Face swap requires sourceVideoUrl and faceImageUrl');
+        return await bail('A source video and a face image are both required for face swap.');
       }
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
       input = { video_url: sourceVideoUrl, image_url: faceImageUrl };
       break;
     default:
-      return genericError(400, 'Unknown category');
+      return await bail('This generation mode is not supported.');
   }
   console.log(
     '[wan-video] dispatch', body.category, body.model,
