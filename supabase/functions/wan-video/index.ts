@@ -194,12 +194,19 @@ serve(async (req) => {
     duration,
   };
 
+  // Every early return below marks the row failed first: a request that never
+  // reaches the provider must never keep showing "Processing" to the user.
+  const bail = async (reason: string) => {
+    await markFailed(admin, body.requestId, body.model, reason)
+    return genericError(400, 'Submission failed');
+  };
+
   switch (body.category) {
     case 'video-t2v':
       input = { prompt: modelPrompt };
       break;
     case 'video-i2v':
-      if (!firstFrameUrl) return genericError(400, 'I2V requires firstFrameUrl');
+      if (!firstFrameUrl) return await bail('The reference image could not be read. Please re-upload it.');
       input = {
         prompt: modelPrompt,
         media: [{ type: 'first_frame', url: firstFrameUrl }],
@@ -207,7 +214,7 @@ serve(async (req) => {
       break;
     case 'video-kf2v':
       if (!firstFrameUrl || !lastFrameUrl) {
-        return genericError(400, 'KF2V requires both firstFrameUrl and lastFrameUrl');
+        return await bail('Both the first and last frame images are required. Please re-upload them.');
       }
       input = {
         prompt: modelPrompt,
@@ -218,7 +225,9 @@ serve(async (req) => {
       };
       break;
     case 'video-r2v':
-      if (!referenceImageUrls?.length) return genericError(400, 'R2V requires referenceImageUrls');
+      if (!referenceImageUrls?.length) {
+        return await bail('The reference images could not be read. Please re-upload them.');
+      }
       input = {
         prompt: modelPrompt,
         media: referenceImageUrls.slice(0, 3).map((url) => ({
@@ -229,13 +238,13 @@ serve(async (req) => {
       break;
     case 'video-face-swap':
       if (!sourceVideoUrl || !faceImageUrl) {
-        return genericError(400, 'Face swap requires sourceVideoUrl and faceImageUrl');
+        return await bail('A source video and a face image are both required for face swap.');
       }
       endpoint = `${DASHSCOPE_BASE}/api/v1/services/aigc/image2video/video-synthesis`;
       input = { video_url: sourceVideoUrl, image_url: faceImageUrl };
       break;
     default:
-      return genericError(400, 'Unknown category');
+      return await bail('This generation mode is not supported.');
   }
   console.log(
     '[wan-video] dispatch', body.category, body.model,
