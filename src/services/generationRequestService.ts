@@ -395,7 +395,20 @@ export function aspectRatioToSize(ratio: string): string {
  * Returns immediately. Failure is silently logged; the edge function will
  * mark `auto_failed=true` so the manual editor queue takes over.
  */
-async function dispatchAutoFulfill(p: DispatchParams): Promise<void> {
+async function dispatchAutoFulfill(rawParams: DispatchParams): Promise<void> {
+  // Role tags (`#role=...`) are UI/history metadata. Providers must receive
+  // the plain storage reference.
+  const p: DispatchParams = {
+    ...rawParams,
+    firstFrameUrl: rawParams.firstFrameUrl ? stripMediaRole(rawParams.firstFrameUrl) : undefined,
+    lastFrameUrl: rawParams.lastFrameUrl ? stripMediaRole(rawParams.lastFrameUrl) : undefined,
+    sourceVideoUrl: rawParams.sourceVideoUrl ? stripMediaRole(rawParams.sourceVideoUrl) : undefined,
+    faceImageUrl: rawParams.faceImageUrl ? stripMediaRole(rawParams.faceImageUrl) : undefined,
+    audioUrl: rawParams.audioUrl ? stripMediaRole(rawParams.audioUrl) : undefined,
+    maskUrl: rawParams.maskUrl ? stripMediaRole(rawParams.maskUrl) : undefined,
+    referenceImageUrls: rawParams.referenceImageUrls?.map(stripMediaRole),
+  };
+
   if (p.category === "image-gen" || p.category === "image-edit-instruction") {
     const { error } = await supabase.functions.invoke("qwen-image", {
       body: {
