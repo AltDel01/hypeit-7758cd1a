@@ -1,43 +1,49 @@
 # Fix: latest video request stuck on "Processing"
 
-## What actually happened
+## Correction: the limit was ours, not Alibaba's
 
-The latest request (today 04:46 UTC, putra.ekadarma@gmail.com, reference-to-video with two reference images) never reached Alibaba at all.
+The playground worked because Wan itself accepts that prompt. The rejection came from our own code: `wan-video` has a hardcoded `if (prompt.length > 4000) return 400` guard, and the prompt was 4,777 characters. The request died in our edge function and never reached DashScope at all.
 
-Confirmed from the database row:
-- `provider_task_id` is empty, `result_url` is empty
-- `auto_failed = true`, `failure_reason = "This request never reached the provider."` (written by the safety-net cron 15 minutes later)
-- prompt length is **4,777 characters**
+Evidence from the stuck row (today 04:46 UTC, putra.ekadarma@gmail.com, reference-to-video with two reference images):
+- `provider_task_id` empty, `result_url` empty, prompt length 4,777
+- `failure_reason` was written 15 minutes later by our safety-net cron: "This request never reached the provider."
 
-The submit function `wan-video` rejects any prompt longer than 4,000 characters with a 400 before it touches the database, so the row was never marked failed and no task was ever created. The browser only logs that error to the console and keeps polling, and a row with status `new` renders as "Processing" in the UI. Result: a request that died in the first second looks like it is still working, forever.
-
-Two separate problems, both need fixing:
-1. Very long prompts are silently dropped. Alibaba's Wan models themselves only accept roughly 800 characters of prompt, so even a 3,000-character prompt would have been rejected upstream.
-2. When submission fails, the user is never told. The failure is invisible in both the chat composer and the request history.
+Second problem, independent of the first: when submission fails, nothing tells the user. The browser only logs the error to the console and keeps polling, and a row with status `new` renders as "Processing", so a request that died in the first second looks like it is still working, forever.
 
 ## The fix
 
-### 1. Long prompts get condensed instead of dropped
-- Before submitting to Alibaba, if the creative prompt exceeds the model's safe limit, condense it with the existing Gemini gateway into a tight shot description under the limit, preserving subject, action, camera, lighting and style, and dropping the timeline/dialogue/negative-instruction blocks Wan cannot follow anyway.
-- If condensing is unavailable, fall back to a hard trim rather than a hard error.
-- Keep the original full prompt in the request history record; only the model receives the condensed version.
+### 1. Remove the artificial prompt cap
+- Drop the 4,000-character rejection. Send the prompt through to DashScope and let Alibaba decide, exactly like the playground does.
+- Keep only a sanity ceiling far above real usage, and if DashScope ever does reject on length, surface their actual message instead of blocking the request ourselves.
+- Keep the existing cleanup that strips our trailing `| Aspect: ... | Duration: ...` metadata line before the prompt goes to the model.
 
-### 2. Submission failures become visible
-- Whenever `wan-video` returns any error path (prompt problem, media problem, provider rejection, network error), the request row is marked `auto_failed` with a clear reason before the response returns, never left untouched.
-- The chat composer surfaces that reason in the message bubble instead of spinning, and stops polling.
-- Request history / dashboard shows an "Attention needed" state with the reason for `auto_failed` rows instead of "Processing".
+### 2. Make submission failures visible
+- Every error path in `wan-video` (bad media, provider rejection, network error) marks the row failed with a reason before returning, so no row is ever left silently untouched.
+- The chat composer treats a failed row as terminal: it stops polling and shows the reason instead of a permanent spinner.
+- Request history stops showing failed rows as "Processing".
 
-### 3. Recover this specific request
-- Re-submit the stuck request with the condensed prompt so the user gets their video, or mark it clearly failed with a message telling them the prompt was too long, depending on your preference below.
+### 3. Recover this request
+- Resubmit the stuck request now that the cap is gone, so the user gets their video.
+
+## Your Veo question
+
+Yes, Veo is available to us through the Lovable AI Gateway (`google/veo-3.1-lite`, `veo-3.1-fast`, `veo-3.1`). It is already in use in this app for the b-roll clips in the Editor. Practical differences versus Wan for the main generator:
+
+| | Wan (DashScope, current) | Veo (AI Gateway) |
+| --- | --- | --- |
+| Clip length | 2 to 15 seconds | 4, 6 or 8 seconds only |
+| Image input | first frame, first+last frame, multiple reference images, face swap, lip sync | single starting image only |
+| Prompt | long prompts fine | provider always rewrites the prompt |
+| Billing | your DashScope account | workspace AI credits |
+| Quality | good | generally stronger motion and it generates audio |
+
+So Veo cannot replace Wan outright: the 15-second durations, last-frame control, multi-reference (which is exactly what this stuck request used), lip sync and face swap all only exist on Wan. What is realistic is Veo as an option alongside Wan, or as an automatic fallback when a Wan submission fails, for the plain text-to-video and single-image-to-video cases.
+
+This plan fixes the Wan bug only. Tell me if you want the Veo option added and I will extend it.
 
 ## Technical notes
 
-- `supabase/functions/wan-video/index.ts`: replace the `prompt.length > 4000` hard reject with a condense-then-submit step; route every early return through `markFailed` so no row is left silent.
-- New condensing helper calls the Lovable AI Gateway with `google/gemini-3-flash-preview` (already used elsewhere in the app), non-streaming, short output.
-- `src/hooks/useMultimodalChat.ts`: treat `auto_failed = true` as a terminal state in the poll loop and render `failure_reason`.
-- Request history status mapping: `auto_failed` rows stop mapping to the unified "Processing" state.
+- `supabase/functions/wan-video/index.ts`: remove the `prompt.length > 4000` early return; route every remaining early return through `markFailed` so the row always carries a reason.
+- `src/hooks/useMultimodalChat.ts`: treat `auto_failed = true` as terminal in the poll loop and render `failure_reason`.
+- Request history status mapping: `auto_failed` rows no longer map to the unified "Processing" state.
 - No schema changes; `failure_reason` already exists.
-
-## Open question
-
-Should the stuck request be automatically retried with the condensed prompt once the fix is live, or just marked failed so the user can resubmit themselves?
