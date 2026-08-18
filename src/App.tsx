@@ -181,7 +181,8 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <CustomErrorBoundary>
+          <LanguageBootstrap />
+
             <AppRoutes />
             <AvaButton />
             <Toaster />
