@@ -1,33 +1,46 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Twitter, Instagram, Youtube, Linkedin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const footerLinks = {
-  Product: [
-    { label: 'Features', href: '/features' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Enterprise', href: '/enterprise' },
-    { label: 'AI Editor', href: '/dashboard' },
-  ],
-  Solutions: [
-    { label: 'Video Editing', href: '/dashboard' },
-    { label: 'Social Content', href: '/' },
-    { label: 'Brand Identity', href: '/brand-identity' },
-    { label: 'Virality Strategy', href: '/virality' },
-  ],
-  Resources: [
-    { label: 'FAQ', href: '/faq' },
-    { label: 'Tutorials', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Community', href: '#' },
-  ],
-  Company: [
-    { label: 'About', href: '#' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Contact', href: '#' },
-    { label: 'Press', href: '#' },
-  ],
-};
+const footerGroups = [
+  {
+    titleKey: 'footer.product',
+    links: [
+      { key: 'features', href: '/features' },
+      { key: 'pricing', href: '/pricing' },
+      { key: 'enterprise', href: '/enterprise' },
+      { key: 'aiEditor', href: '/dashboard' },
+    ],
+  },
+  {
+    titleKey: 'footer.solutions',
+    links: [
+      { key: 'videoEditing', href: '/dashboard' },
+      { key: 'socialContent', href: '/' },
+      { key: 'brandIdentity', href: '/brand-identity' },
+      { key: 'viralityStrategy', href: '/virality' },
+    ],
+  },
+  {
+    titleKey: 'footer.resources',
+    links: [
+      { key: 'faq', href: '/faq' },
+      { key: 'tutorials', href: '#' },
+      { key: 'blog', href: '#' },
+      { key: 'community', href: '#' },
+    ],
+  },
+  {
+    titleKey: 'footer.company',
+    links: [
+      { key: 'about', href: '#' },
+      { key: 'careers', href: '/careers' },
+      { key: 'contact', href: '#' },
+      { key: 'press', href: '#' },
+    ],
+  },
+];
 
 const socialLinks = [
   { icon: Twitter, href: '#', label: 'Twitter' },
@@ -37,6 +50,8 @@ const socialLinks = [
 ];
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <footer className="relative bg-black border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-16">
@@ -50,7 +65,7 @@ const Footer: React.FC = () => {
               />
             </Link>
             <p className="text-gray-400 text-sm mb-6 max-w-xs">
-              AI-powered video editing platform that helps creators produce viral content in minutes.
+              {t('footer.tagline')}
             </p>
             <div className="flex items-center gap-4">
               {socialLinks.map((social) => (
@@ -66,14 +81,14 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h3 className="text-white font-semibold mb-4">{category}</h3>
+          {footerGroups.map((group) => (
+            <div key={group.titleKey}>
+              <h3 className="text-white font-semibold mb-4">{t(group.titleKey)}</h3>
               <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.label}>
+                {group.links.map((link) => (
+                  <li key={link.key}>
                     <Link to={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">
-                      {link.label}
+                      {t(`footer.links.${link.key}`)}
                     </Link>
                   </li>
                 ))}
@@ -83,10 +98,10 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Viralin. All rights reserved.</p>
+          <p className="text-gray-500 text-sm">{t('footer.rights', { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-6">
-            <Link to="#" className="text-gray-500 hover:text-white text-sm transition-colors">Privacy Policy</Link>
-            <Link to="#" className="text-gray-500 hover:text-white text-sm transition-colors">Terms of Service</Link>
+            <Link to="#" className="text-gray-500 hover:text-white text-sm transition-colors">{t('footer.privacy')}</Link>
+            <Link to="#" className="text-gray-500 hover:text-white text-sm transition-colors">{t('footer.terms')}</Link>
           </div>
         </div>
       </div>
