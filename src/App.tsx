@@ -41,9 +41,17 @@ import TrendResearch from "./pages/TrendResearch";
 import OAuthConsent from "./pages/OAuthConsent";
 import VeoStudio from "./pages/VeoStudio";
 import React from "react";
+import { useLanguage } from "./hooks/useLanguage";
 
 // Create a new query client outside of component rendering
 const queryClient = new QueryClient();
+
+// Resolves the UI language (saved preference > device > country) app-wide
+const LanguageBootstrap = () => {
+  useLanguage();
+  return null;
+};
+
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
