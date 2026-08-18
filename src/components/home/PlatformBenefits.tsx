@@ -1,31 +1,15 @@
 import React from 'react';
 import { Zap, Award, Sliders, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const benefits = [
-  {
-    icon: Zap,
-    title: 'Speed',
-    value: '10x',
-    description: 'Faster than traditional editing',
-    detail: 'What used to take hours now takes minutes. Our AI processes your videos instantly, so you can publish while the moment is still hot.',
-  },
-  {
-    icon: Award,
-    title: 'Quality',
-    value: 'Pro',
-    description: 'Professional-grade output',
-    detail: 'Every video looks like it was made by a professional team. iPhone-quality enhancement, perfect color grading, and flawless transitions.',
-  },
-  {
-    icon: Sliders,
-    title: 'Control',
-    value: '100%',
-    description: 'Full creative control',
-    detail: 'AI assists, but you decide. Fine-tune every aspect of your video with simple prompts. The perfect balance of automation and creativity.',
-  },
+  { key: 'speed', icon: Zap, value: '10x' },
+  { key: 'quality', icon: Award, value: 'Pro' },
+  { key: 'control', icon: Sliders, value: '100%' },
 ];
 
 const PlatformBenefits: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
       {/* Background gradient */}
@@ -37,16 +21,16 @@ const PlatformBenefits: React.FC = () => {
         <div className="text-center mb-8 md:mb-16">
           <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-3 md:mb-6">
             <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
-            <span className="text-xs md:text-sm font-medium text-purple-300">Creator Benefits</span>
+            <span className="text-xs md:text-sm font-medium text-purple-300">{t('home.benefits.badge')}</span>
           </div>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-4">
-            Why creators{' '}
+            {t('home.benefits.headingPrefix')}{' '}
             <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-              love us
+              {t('home.benefits.headingHighlight')}
             </span>
           </h2>
           <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-2">
-            Join thousands of creators who've transformed their workflow with AI-powered editing
+            {t('home.benefits.subtitle')}
           </p>
         </div>
 
@@ -54,7 +38,7 @@ const PlatformBenefits: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
           {benefits.map((benefit, index) => (
             <div
-              key={benefit.title}
+              key={benefit.key}
               className="group relative text-center p-5 md:p-8 rounded-xl md:rounded-2xl bg-gray-900/30 border border-gray-800/50 hover:border-purple-500/30 transition-all duration-300"
             >
               {/* Icon */}
@@ -68,16 +52,16 @@ const PlatformBenefits: React.FC = () => {
                   {benefit.value}
                 </span>
                 <h3 className="text-lg md:text-xl font-semibold text-white">
-                  {benefit.title}
+                  {t(`home.benefits.${benefit.key}.title`)}
                 </h3>
               </div>
               <p className="text-purple-400 text-xs md:text-sm mb-3 md:mb-4">
-                {benefit.description}
+                {t(`home.benefits.${benefit.key}.description`)}
               </p>
               
               {/* Detail */}
               <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
-                {benefit.detail}
+                {t(`home.benefits.${benefit.key}.detail`)}
               </p>
               
               {/* Decorative line */}

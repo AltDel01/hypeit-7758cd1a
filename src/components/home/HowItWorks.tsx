@@ -1,28 +1,15 @@
 import React from 'react';
 import { Upload, Wand2, Download, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const steps = [
-  {
-    number: '01',
-    icon: Upload,
-    title: 'Upload or Describe',
-    description: 'Upload your raw video footage or simply describe the video you want to create. Our AI understands natural language.',
-  },
-  {
-    number: '02',
-    icon: Wand2,
-    title: 'Customize with AI',
-    description: 'Select the editing features you want: captions, transitions, effects, B-roll. Tell AI how you want it styled.',
-  },
-  {
-    number: '03',
-    icon: Download,
-    title: 'Export & Share',
-    description: 'Download your professionally edited video in seconds. Ready for TikTok, Instagram, YouTube, or any platform.',
-  },
+  { number: '01', key: 'upload', icon: Upload },
+  { number: '02', key: 'customize', icon: Wand2 },
+  { number: '03', key: 'export', icon: Download },
 ];
 
 const HowItWorks: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
       {/* Background */}
@@ -33,16 +20,16 @@ const HowItWorks: React.FC = () => {
         <div className="text-center mb-8 md:mb-16">
           <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 mb-3 md:mb-6">
             <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
-            <span className="text-xs md:text-sm font-medium text-purple-300">Simple Process</span>
+            <span className="text-xs md:text-sm font-medium text-purple-300">{t('home.howItWorks.badge')}</span>
           </div>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-4">
-            How it{' '}
+            {t('home.howItWorks.headingPrefix')}{' '}
             <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-              works
+              {t('home.howItWorks.headingHighlight')}
             </span>
           </h2>
           <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-2 mb-4 md:mb-0">
-            From raw footage to viral content in three simple steps
+            {t('home.howItWorks.subtitle')}
           </p>
         </div>
 
@@ -71,10 +58,10 @@ const HowItWorks: React.FC = () => {
                   
                   {/* Content */}
                   <h3 className="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3">
-                    {step.title}
+                    {t(`home.howItWorks.steps.${step.key}.title`)}
                   </h3>
                   <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                    {step.description}
+                    {t(`home.howItWorks.steps.${step.key}.description`)}
                   </p>
                 </div>
                 
