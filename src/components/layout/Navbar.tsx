@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,20 +18,21 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
-const solutionsItems = [
-  { label: 'Viral Ready Short-Form Content', href: '/dashboard', description: 'AI-optimized clips for TikTok, Reels & Shorts' },
-  { label: 'Promotional Video', href: '/dashboard', description: 'Brand ads, product launches & campaigns' },
-  { label: 'Explainer Video', href: '/dashboard', description: 'Tutorials & walkthroughs with AI avatars' },
-  { label: 'Podcast Video', href: '/dashboard', description: 'AI-generated podcast episodes' },
-  { label: 'Edit Existing Video', href: '/dashboard', description: 'Upload & enhance your own footage' },
-  { label: 'Audio Ad', href: '/dashboard', description: 'Professional audio advertisements' },
-  { label: 'Audio Podcast', href: '/dashboard', description: 'Generate podcast audio content' },
-  { label: 'API-Generated Content', href: '/dashboard', description: 'Automate content via API' },
-  { label: 'Meditation', href: '/dashboard', description: 'Calming meditation audio & video' },
+const solutionKeys = [
+  { key: 'shortForm', href: '/dashboard' },
+  { key: 'promo', href: '/dashboard' },
+  { key: 'explainer', href: '/dashboard' },
+  { key: 'podcastVideo', href: '/dashboard' },
+  { key: 'editVideo', href: '/dashboard' },
+  { key: 'audioAd', href: '/dashboard' },
+  { key: 'audioPodcast', href: '/dashboard' },
+  { key: 'api', href: '/dashboard' },
+  { key: 'meditation', href: '/dashboard' },
 ];
 
 const MobileTopBar = () => {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSolutionsOpen, setIsSolutionsOpen] = useState(false);
   const [mobileProfileName, setMobileProfileName] = useState<string | null>(null);
@@ -68,39 +71,42 @@ const MobileTopBar = () => {
               onClick={() => setIsSolutionsOpen(!isSolutionsOpen)}
               className="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors"
             >
-              <span>Solutions</span>
+              <span>{t('nav.solutions')}</span>
               <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isSolutionsOpen && "rotate-180")} />
             </button>
             {isSolutionsOpen && (
               <div className="ml-2 pl-3 border-l border-gray-700 space-y-0.5">
-                {solutionsItems.map((item) => (
+                {solutionKeys.map((item) => (
                   <Link
-                    key={item.label}
+                    key={item.key}
                     to={item.href}
                     className="block px-3 py-2.5 rounded-lg hover:bg-gray-800/50 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <span className="text-white text-sm font-medium block">{item.label}</span>
-                    <span className="text-gray-500 text-xs">{item.description}</span>
+                    <span className="text-white text-sm font-medium block">{t(`nav.solutionItems.${item.key}.label`)}</span>
+                    <span className="text-gray-500 text-xs">{t(`nav.solutionItems.${item.key}.description`)}</span>
                   </Link>
                 ))}
               </div>
             )}
 
             <Link to="/features" className="px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-              Features
+              {t('nav.features')}
             </Link>
             <Link to="/pricing" className="px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-              Pricing
+              {t('nav.pricing')}
             </Link>
             <Link to="/enterprise" className="px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-              Enterprise
+              {t('nav.enterprise')}
             </Link>
+            <div className="px-1 py-1">
+              <LanguageSwitcher variant="inline" />
+            </div>
             <div className="pt-2 border-t border-gray-800">
               {user ? (
                 <>
                   <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                   <div className="border-t border-gray-700 my-2"></div>
                   <Link to="/settings" className="px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
@@ -114,38 +120,38 @@ const MobileTopBar = () => {
                   </Link>
                   <Link to="/pricing" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <Sparkles size={18} />
-                    Upgrade plan
+                    {t('nav.upgradePlan')}
                   </Link>
                   <Link to="/language" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <Globe size={18} />
-                    Language
+                    {t('common.language')}
                   </Link>
                   <Link to="/credit-usage" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <CreditCard size={18} />
-                    Credit Usage
+                    {t('nav.creditUsage')}
                   </Link>
                   <Link to="/help" className="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <HelpCircle size={18} />
-                    Help
+                    {t('nav.help')}
                   </Link>
                   <button 
                     onClick={() => { signOut(); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors"
                   >
                     <LogOut size={18} />
-                    Log out
+                    {t('nav.logout')}
                   </button>
                 </>
               ) : (
                 <div className="flex flex-col gap-2">
                   <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="ghost" className="w-full text-white hover:bg-gray-800">
-                      Log in
+                      {t('nav.login')}
                     </Button>
                   </Link>
                   <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
                     <Button className="w-full bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white hover:opacity-90">
-                      Try for Free
+                      {t('common.tryForFree')}
                     </Button>
                   </Link>
                 </div>
@@ -160,6 +166,7 @@ const MobileTopBar = () => {
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [profileName, setProfileName] = useState<string | null>(null);
   const [referralOpen, setReferralOpen] = useState(false);
@@ -186,28 +193,28 @@ const Navbar = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-1 px-4 py-2 text-gray-300 hover:text-white transition-colors">
-            Solutions
+            {t('nav.solutions')}
             <ChevronDown className="w-4 h-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72 bg-gray-900/95 backdrop-blur-lg border-gray-800">
-          {solutionsItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
+          {solutionKeys.map((item) => (
+            <DropdownMenuItem key={item.key} asChild>
               <Link 
                 to={item.href} 
                 className="flex flex-col items-start text-left gap-1 px-4 py-3 cursor-pointer hover:bg-gray-800/50 w-full"
               >
-                <span className="text-white font-bold text-sm">{item.label}</span>
-                <span className="text-xs text-gray-400">{item.description}</span>
+                <span className="text-white font-bold text-sm">{t(`nav.solutionItems.${item.key}.label`)}</span>
+                <span className="text-xs text-gray-400">{t(`nav.solutionItems.${item.key}.description`)}</span>
               </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
       
-      <NavLink to="/features">Features</NavLink>
-      <NavLink to="/pricing">Pricing</NavLink>
-      <NavLink to="/enterprise">Enterprise</NavLink>
+      <NavLink to="/features">{t('nav.features')}</NavLink>
+      <NavLink to="/pricing">{t('nav.pricing')}</NavLink>
+      <NavLink to="/enterprise">{t('nav.enterprise')}</NavLink>
     </>
   );
 
@@ -219,7 +226,7 @@ const Navbar = () => {
             to="/dashboard" 
             className="relative px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-all duration-300 before:absolute before:inset-0 before:rounded-lg before:p-[1.5px] before:bg-gradient-to-r before:from-[#8c52ff] before:to-[#b616d6] before:transition-all before:duration-300 before:-z-10 before:content-[''] after:absolute after:inset-[1.5px] after:rounded-[6px] after:bg-black/80 after:-z-10 hover:before:shadow-[0_0_12px_rgba(140,82,255,0.6)] hover:before:brightness-125"
           >
-            <span className="hidden md:inline relative z-10">Dashboard</span>
+            <span className="hidden md:inline relative z-10">{t('nav.dashboard')}</span>
           </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -227,7 +234,7 @@ const Navbar = () => {
                 variant="ghost" 
                 className="text-white hover:bg-gray-800 flex items-center gap-1"
               >
-                <span className="hidden md:inline">My Account</span>
+                <span className="hidden md:inline">{t('nav.myAccount')}</span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -250,9 +257,9 @@ const Navbar = () => {
                 <div className="px-3 py-3">
                   <Link to="/credit-usage" className="block group">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-300 text-sm font-medium">Credits</span>
+                      <span className="text-gray-300 text-sm font-medium">{t('nav.credits')}</span>
                       <span className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">
-                        {credits.remaining} left <span className="text-gray-500">›</span>
+                        {t('nav.creditsLeft', { count: credits.remaining })} <span className="text-gray-500">›</span>
                       </span>
                     </div>
                     <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -264,7 +271,7 @@ const Navbar = () => {
                     {credits.bonusCredits > 0 && (
                       <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-                        Using bonus credits
+                        {t('nav.usingBonus')}
                       </p>
                     )}
                   </Link>
@@ -277,33 +284,33 @@ const Navbar = () => {
                 className="flex items-center gap-2 px-3 py-2 w-full text-left hover:bg-gray-800/50 rounded-md transition-colors cursor-pointer"
               >
                 <Gift size={16} className="text-primary" />
-                <span className="text-primary text-sm font-medium">Get free credits</span>
+                <span className="text-primary text-sm font-medium">{t('nav.getFreeCredits')}</span>
               </button>
 
               <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuItem asChild>
                 <Link to="/pricing" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
                   <Sparkles size={16} className="text-gray-400" />
-                  <span className="text-white">Upgrade plan</span>
+                  <span className="text-white">{t('nav.upgradePlan')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/language" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
                   <Globe size={16} className="text-gray-400" />
-                  <span className="text-white">Language</span>
+                  <span className="text-white">{t('common.language')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/credit-usage" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
                   <CreditCard size={16} className="text-gray-400" />
-                  <span className="text-white">Credit Usage</span>
+                  <span className="text-white">{t('nav.creditUsage')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuItem asChild>
                 <Link to="/help" className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50">
                   <HelpCircle size={16} className="text-gray-400" />
-                  <span className="text-white">Help</span>
+                  <span className="text-white">{t('nav.help')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem 
@@ -311,7 +318,7 @@ const Navbar = () => {
                 className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-800/50"
               >
                 <LogOut size={16} className="text-gray-400" />
-                <span className="text-white">Log out</span>
+                <span className="text-white">{t('nav.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -323,13 +330,13 @@ const Navbar = () => {
             variant="ghost" 
             className="text-white hover:bg-gray-800"
           >
-            <Link to="/login">Log in</Link>
+            <Link to="/login">{t('nav.login')}</Link>
           </Button>
           <Button 
             asChild
             className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white hover:opacity-90 border-0"
           >
-            <Link to="/signup">Try for Free</Link>
+            <Link to="/signup">{t('common.tryForFree')}</Link>
           </Button>
         </>
       )}
@@ -357,6 +364,7 @@ const Navbar = () => {
                 <NavLinks />
               </div>
               <div className="flex items-center space-x-3">
+                <LanguageSwitcher />
                 <AuthButtons />
               </div>
             </>
