@@ -777,6 +777,7 @@ export type Database = {
           linkedin_url: string | null
           monthly_generation_limit: number | null
           phone: string | null
+          preferred_language: string | null
           referral_code: string | null
           referred_by: string | null
           subscription_tier: string | null
@@ -798,6 +799,7 @@ export type Database = {
           linkedin_url?: string | null
           monthly_generation_limit?: number | null
           phone?: string | null
+          preferred_language?: string | null
           referral_code?: string | null
           referred_by?: string | null
           subscription_tier?: string | null
@@ -819,6 +821,7 @@ export type Database = {
           linkedin_url?: string | null
           monthly_generation_limit?: number | null
           phone?: string | null
+          preferred_language?: string | null
           referral_code?: string | null
           referred_by?: string | null
           subscription_tier?: string | null
