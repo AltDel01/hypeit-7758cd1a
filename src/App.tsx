@@ -182,6 +182,8 @@ const App = () => (
       <AuthProvider>
         <TooltipProvider>
           <LanguageBootstrap />
+          <CustomErrorBoundary>
+
 
             <AppRoutes />
             <AvaButton />
