@@ -2,14 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
-const features = [
-  'No credit card required',
-  'Free tier available',
-  'Cancel anytime',
-];
+const featureKeys = ['noCard', 'freeTier', 'cancelAnytime'];
 
 const FinalCTA: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className="relative py-12 md:py-12 px-3 md:px-4 overflow-hidden">
       {/* Background */}
@@ -21,21 +19,20 @@ const FinalCTA: React.FC = () => {
         {/* Badge */}
         <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs md:text-sm font-medium mb-4 md:mb-6">
           <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          Start creating today
+          {t('home.finalCta.badge')}
         </div>
         
         {/* Heading */}
         <h2 className="text-2xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-          Ready to create{' '}
+          {t('home.finalCta.headingPrefix')}{' '}
           <span className="bg-gradient-to-r from-[#8c52ff] to-[#b616d6] bg-clip-text text-transparent">
-            viral content
+            {t('home.finalCta.headingHighlight')}
           </span>
-          ?
         </h2>
         
         {/* Description */}
         <p className="text-sm md:text-xl text-gray-400 mb-6 md:mb-8 max-w-2xl mx-auto">
-          Join thousands of creators who are already using Viralin to produce stunning videos in minutes.
+          {t('home.finalCta.subtitle')}
         </p>
         
         {/* CTA Buttons */}
@@ -46,7 +43,7 @@ const FinalCTA: React.FC = () => {
             className="px-6 md:px-8 py-5 md:py-6 text-sm md:text-lg bg-gradient-to-r from-[#8c52ff] to-[#b616d6] text-white font-semibold hover:opacity-90 shadow-lg shadow-purple-500/30"
           >
             <Link to="/signup">
-              Get Started Free
+              {t('home.finalCta.cta')}
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
             </Link>
           </Button>
@@ -55,10 +52,10 @@ const FinalCTA: React.FC = () => {
         
         {/* Features list */}
         <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-1.5 md:gap-2 text-gray-400">
+          {featureKeys.map((key) => (
+            <div key={key} className="flex items-center gap-1.5 md:gap-2 text-gray-400">
               <CheckCircle className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" />
-              <span className="text-xs md:text-sm">{feature}</span>
+              <span className="text-xs md:text-sm">{t(`home.finalCta.points.${key}`)}</span>
             </div>
           ))}
         </div>
