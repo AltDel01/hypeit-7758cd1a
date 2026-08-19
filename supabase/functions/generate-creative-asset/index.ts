@@ -83,8 +83,9 @@ Deno.serve(async (req) => {
     const sceneText = scenes.map((s, i) => `Scene ${i + 1}: ${s.visual || ''}`).join('. ')
     const basePrompt = `Vertical 9:16 social media ${assetType} for "${day.concept}". Hook: ${day.hook}. ${day.body}. ${sceneText}. Polished, scroll-stopping, high quality.`
 
-    /* ---------------- VIDEO: route to editor fulfillment pipeline ---------------- */
+    /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
+      const videoModel = 'wan2.7-t2v'
       const { data: gr, error: grErr } = await admin
         .from('generation_requests')
         .insert({
@@ -96,7 +97,9 @@ Deno.serve(async (req) => {
           aspect_ratio: '9:16',
           status: 'new',
           credits_used: cost,
-          category: 'creative-workflow',
+          category: 'video-t2v',
+          auto_provider: 'wan',
+          auto_model: videoModel,
         })
         .select('id')
         .single()
@@ -109,6 +112,47 @@ Deno.serve(async (req) => {
         .from('creative_days')
         .update({ request_id: gr.id, gen_stage: 'generating', status: 'Generating', credits_used: cost })
         .eq('id', dayId)
+
+      // Submit to the provider right away so the request never sits in the
+      // queue waiting for a human. wan-video authenticates the caller, so the
+      // user's own Authorization header is forwarded.
+      const dispatch = await fetch(`${supabaseUrl}/functions/v1/wan-video`, {
+        method: 'POST',
+        headers: {
+          Authorization: authHeader,
+          apikey: anonKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requestId: gr.id,
+          category: 'video-t2v',
+          model: videoModel,
+          prompt: basePrompt,
+          resolution: '1080P',
+          duration: 5,
+        }),
+      }).catch((e) => {
+        console.error('wan-video dispatch failed', e)
+        return null
+      })
+
+      if (!dispatch || !dispatch.ok) {
+        const detail = dispatch ? await dispatch.text().catch(() => '') : 'network error'
+        console.error('wan-video dispatch rejected', dispatch?.status, detail.slice(0, 300))
+        await admin
+          .from('generation_requests')
+          .update({
+            auto_failed: true,
+            status: 'new',
+            failure_reason: 'Video generation could not be submitted to the provider. Please try again.',
+          })
+          .eq('id', gr.id)
+        await admin
+          .from('creative_days')
+          .update({ gen_stage: 'idle', status: 'Draft' })
+          .eq('id', dayId)
+        return json({ error: 'Could not start video generation.' }, 502)
+      }
 
       return json({ assetType: 'video', status: 'generating', requestId: gr.id })
     }
