@@ -398,19 +398,24 @@ const CreativeWorkflow = () => {
       const ids = pending.map((d) => d.requestId as string);
       const { data: reqs } = await supabase
         .from('generation_requests')
-        .select('id, status, result_url')
+        .select('id, status, result_url, auto_failed, failure_reason')
         .in('id', ids);
       if (!reqs) return;
       for (const r of reqs) {
+        const day = pending.find((d) => d.requestId === r.id);
+        if (!day) continue;
         if (r.status === 'completed' && r.result_url) {
-          const day = pending.find((d) => d.requestId === r.id);
-          if (day) {
-            patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready', status: 'Draft' });
-            toast.success(`${day.day} video is ready. Review it, then hit Approve to Queue.`);
-          }
-
+          patchDay(day.id, { assetUrl: r.result_url, genStage: 'ready', status: 'Draft' });
+          toast.success(`${day.day} video is ready. Review it, then hit Approve to Queue.`);
+        } else if ((r as { auto_failed?: boolean }).auto_failed) {
+          patchDay(day.id, { genStage: 'idle', status: 'Draft' });
+          toast.error(
+            (r as { failure_reason?: string }).failure_reason ||
+              `${day.day} video generation failed. Please try again.`
+          );
         }
       }
+
     };
     const t = setInterval(poll, 6000);
     poll();
