@@ -9,8 +9,8 @@ const corsHeaders = {
 
 const GATEWAY_URL =
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
-// Latest Qwen chat models, tried in order (first available wins).
-const MODELS = ["qwen3.8-plus", "qwen3.8", "qwen3-max", "qwen-plus"];
+// Latest Qwen chat models on DashScope, tried in order (first available wins).
+const MODELS = ["qwen3-max", "qwen-plus"];
 
 const SYSTEM_CHAT = `You are Viralin AI, a creative co-pilot helping users brainstorm and create viral short-form video and image content.
 Be concise, practical, and idea-rich. Suggest concrete prompts the user can use to generate images/videos in this same chat.
