@@ -63,9 +63,8 @@ function gatewayErrorResponse(status: number) {
       JSON.stringify({ error: "AI provider quota exceeded. Please check the DashScope account balance." }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-
-    );
   }
+
   return new Response(JSON.stringify({ error: "AI service unavailable" }), {
     status: 500,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
