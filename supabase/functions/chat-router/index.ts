@@ -58,10 +58,12 @@ function gatewayErrorResponse(status: number) {
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
-  if (status === 402) {
+  if (status === 402 || status === 403) {
     return new Response(
-      JSON.stringify({ error: "AI credits exhausted. Add funds in workspace settings." }),
-      { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ error: "AI provider quota exceeded. Please check the DashScope account balance." }),
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+
     );
   }
   return new Response(JSON.stringify({ error: "AI service unavailable" }), {
