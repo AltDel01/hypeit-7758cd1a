@@ -1,4 +1,4 @@
-// Multimodal chat router: intent classification + chat streaming via Lovable AI Gateway.
+// Multimodal chat router: intent classification + chat streaming via Alibaba DashScope (Qwen).
 // Body: { mode: 'route' | 'chat', messages: {role,content}[], hasAttachment?: boolean }
 
 const corsHeaders = {
@@ -7,8 +7,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+const GATEWAY_URL =
+  "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
+// Latest Qwen chat models, tried in order (first available wins).
+const MODELS = ["qwen3.8-plus", "qwen3.8", "qwen3-max", "qwen-plus"];
 
 const SYSTEM_CHAT = `You are Viralin AI, a creative co-pilot helping users brainstorm and create viral short-form video and image content.
 Be concise, practical, and idea-rich. Suggest concrete prompts the user can use to generate images/videos in this same chat.
@@ -22,17 +24,32 @@ If unsure, prefer "chat". If the user asks to "make / create / generate / animat
 For image/video, return a clean prompt (no meta words like "make a video of"), plus optional ratio (16:9|9:16|1:1|4:3|21:9), duration in seconds (2-15, video only), and useAttachmentAsFirstFrame (boolean, video only, true when user wants the image animated).`;
 
 async function callGateway(body: any, stream = false) {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
-  return await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model: MODEL, ...body, stream }),
-  });
+  const apiKey = Deno.env.get("QWEN_API_KEY");
+  if (!apiKey) throw new Error("QWEN_API_KEY missing");
+
+  let lastResp: Response | null = null;
+  for (const model of MODELS) {
+    const resp = await fetch(GATEWAY_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model, ...body, stream }),
+    });
+    if (resp.ok) return resp;
+    // Only fall through on "model not found / unsupported" style errors.
+    if (resp.status === 400 || resp.status === 404) {
+      const text = await resp.text().catch(() => "");
+      console.error("dashscope model rejected", model, resp.status, text);
+      lastResp = new Response(text, { status: resp.status });
+      continue;
+    }
+    return resp;
+  }
+  return lastResp ?? new Response("", { status: 500 });
 }
+
 
 function gatewayErrorResponse(status: number) {
   if (status === 429) {
