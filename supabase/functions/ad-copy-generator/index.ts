@@ -7,8 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+import { callQwen } from "../_shared/qwen.ts";
 
 function err(status: number, message: string) {
   return new Response(JSON.stringify({ error: message }), {
@@ -50,7 +49,7 @@ Deno.serve(async (req) => {
 
     const brandText = await fetchBrandText(url);
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    const apiKey = Deno.env.get("QWEN_API_KEY");
     if (!apiKey) return err(500, "AI not configured");
 
     const system = `You are a senior performance marketing copywriter. Given a brand's website content, produce 15 distinct ad campaigns covering varied ad sizes, placements, tones, and angles.
@@ -75,11 +74,7 @@ Return 15 ad campaign variants via the generate_campaigns tool. Mix these format
 - Email subject line + preview text combo
 Vary tone: bold, witty, urgent, educational, FOMO, social proof, problem-solution, founder-voice.`;
 
-    const resp = await fetch(GATEWAY_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
+    const resp = await callQwen({
         messages: [
           { role: "system", content: system },
           { role: "user", content: userPrompt },
@@ -118,7 +113,6 @@ Vary tone: bold, witty, urgent, educational, FOMO, social proof, problem-solutio
           },
         }],
         tool_choice: { type: "function", function: { name: "generate_campaigns" } },
-      }),
     });
 
     if (!resp.ok) {
