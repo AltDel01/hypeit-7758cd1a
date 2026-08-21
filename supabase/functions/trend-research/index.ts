@@ -1,4 +1,5 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { callQwen } from '../_shared/qwen.ts'
 
 interface ResearchBody {
   industry?: string
@@ -71,7 +72,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const lovableKey = Deno.env.get('LOVABLE_API_KEY')
+    const lovableKey = Deno.env.get('QWEN_API_KEY')
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY')
     if (!lovableKey || !firecrawlKey) {
       return new Response(JSON.stringify({ error: 'Research service is not configured.' }), {
@@ -242,17 +243,9 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
 }
 Provide one trendReport entry per platform listed, and ${ideaCount} ranked contentIdeas (best first). Never use em dashes.`
 
-    const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Lovable-API-Key': lovableKey,
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      }),
+    const aiRes = await callQwen({
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
     })
 
     if (aiRes.status === 429) {

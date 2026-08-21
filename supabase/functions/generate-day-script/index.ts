@@ -1,5 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { callQwen } from '../_shared/qwen.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -7,7 +8,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('LOVABLE_API_KEY')
+    const apiKey = Deno.env.get('QWEN_API_KEY')
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'AI is not configured.' }), {
         status: 500,
@@ -77,17 +78,9 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
 }
 Provide exactly 3 scenes.`
 
-    const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Lovable-API-Key': apiKey,
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      }),
+    const aiRes = await callQwen({
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
     })
 
     if (aiRes.status === 429) {
