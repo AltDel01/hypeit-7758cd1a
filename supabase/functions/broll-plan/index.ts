@@ -18,7 +18,6 @@ interface PlanRequest {
   maxClips?: number
 }
 
-const MODEL = 'google/gemini-3-flash-preview'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
