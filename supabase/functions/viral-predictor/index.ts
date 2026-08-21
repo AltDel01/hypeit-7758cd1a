@@ -96,7 +96,6 @@ Also give 3 concrete improvements ranked by impact.`;
           },
         }],
         tool_choice: { type: "function", function: { name: "score_clip" } },
-      }),
     });
 
     if (!resp.ok) {
