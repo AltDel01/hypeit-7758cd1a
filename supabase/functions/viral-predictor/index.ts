@@ -8,8 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+import { callQwen } from "../_shared/qwen.ts";
 
 function err(status: number, message: string) {
   return new Response(JSON.stringify({ error: message }), {
@@ -28,7 +27,7 @@ Deno.serve(async (req) => {
       return err(400, "durationSeconds must be 0-15");
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    const apiKey = Deno.env.get("QWEN_API_KEY");
     if (!apiKey) return err(500, "AI not configured");
 
     const system = `You are a neuro-marketing analyst trained on Meta's 2024-2025 fMRI ad-response research and TikTok/Reels retention data.
@@ -57,11 +56,7 @@ Plus top-line:
 
 Also give 3 concrete improvements ranked by impact.`;
 
-    const resp = await fetch(GATEWAY_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
+    const resp = await callQwen({
         messages: [
           { role: "system", content: system },
           { role: "user", content: userPrompt },
@@ -101,7 +96,6 @@ Also give 3 concrete improvements ranked by impact.`;
           },
         }],
         tool_choice: { type: "function", function: { name: "score_clip" } },
-      }),
     });
 
     if (!resp.ok) {
