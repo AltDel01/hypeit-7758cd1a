@@ -1,5 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { callQwen } from '../_shared/qwen.ts'
 
 /**
  * broll-plan
@@ -42,7 +43,7 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser()
     if (userErr || !userData?.user) return json({ error: 'Unauthorized' }, 401)
 
-    const apiKey = Deno.env.get('LOVABLE_API_KEY')
+    const apiKey = Deno.env.get('QWEN_API_KEY')
     if (!apiKey) return json({ error: 'AI is not configured.' }, 500)
 
     const body = (await req.json().catch(() => ({}))) as PlanRequest
@@ -89,18 +90,10 @@ Rules: "duration" must be 4, 6 or 8 seconds and must not run past the end of the
       content.push({ type: 'image_url', image_url: { url: f.dataUrl } })
     }
 
-    const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: 'user', content }],
-        response_format: { type: 'json_object' },
-      }),
-    })
+    const aiRes = await callQwen({
+      messages: [{ role: 'user', content }],
+      response_format: { type: 'json_object' },
+    }, { vision: true })
 
     if (!aiRes.ok) {
       const detail = await aiRes.text()
