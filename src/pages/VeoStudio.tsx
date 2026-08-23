@@ -19,14 +19,14 @@ import { extractVideoFrame, fileToDataUrl, normalizeImageDataUrl } from '@/utils
 
 type Quality = 'lite' | 'fast' | 'high';
 type Orientation = 'landscape' | 'portrait';
-type Resolution = '720p' | '1080p' | '4k';
+type Resolution = '720p' | '1080p';
 
 interface Scene {
   id: string;
   prompt: string;
   dialogue: string;
   avoid: string;
-  seconds: 4 | 6 | 8;
+  seconds: number;
   reference?: string; // data URL used as first frame
   referenceLabel?: string;
   status: 'idle' | 'running' | 'done' | 'failed';
@@ -41,7 +41,7 @@ const newScene = (): Scene => ({
   prompt: '',
   dialogue: '',
   avoid: '',
-  seconds: 8,
+  seconds: 5,
   status: 'idle',
   progress: 0,
 });
@@ -52,9 +52,9 @@ const LIGHT = ['golden hour', 'soft studio light', 'neon night', 'high-key comme
 const STYLE = ['cinematic film look', 'documentary realism', 'anime', '3D animation', 'analog 16mm', 'hyperreal product ad'];
 
 const QUALITY_LABEL: Record<Quality, string> = {
-  lite: 'Veo 3.1 Lite, cheapest',
-  fast: 'Veo 3.1 Fast, balanced',
-  high: 'Veo 3.1, top quality',
+  lite: 'Wan 2.7, fast draft (720p)',
+  fast: 'Wan 2.7, balanced',
+  high: 'Wan 2.7, top quality',
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -82,12 +82,7 @@ const VeoStudio: React.FC = () => {
 
   useEffect(() => () => { cancelRef.current = true; }, []);
 
-  const lockedTo8 = resolution !== '720p';
-  const fourKAvailable = quality !== 'lite';
-
-  useEffect(() => {
-    if (resolution === '4k' && !fourKAvailable) setResolution('1080p');
-  }, [quality, resolution, fourKAvailable]);
+  const lockedTo8 = false;
 
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>
     set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -122,7 +117,7 @@ const VeoStudio: React.FC = () => {
       body: {
         action: 'create',
         prompt: buildPrompt(scene),
-        seconds: lockedTo8 ? 8 : scene.seconds,
+        seconds: scene.seconds,
         orientation,
         resolution,
         quality,
@@ -253,9 +248,9 @@ const VeoStudio: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>Veo Studio, internal video lab</title>
+        <title>Wan Studio, internal video lab</title>
         <meta name="robots" content="noindex, nofollow" />
-        <meta name="description" content="Internal Veo generation and video edit workbench." />
+        <meta name="description" content="Internal Wan generation and video edit workbench." />
       </Helmet>
 
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -263,10 +258,10 @@ const VeoStudio: React.FC = () => {
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-semibold">
               <Clapperboard className="h-6 w-6 text-primary" />
-              Veo Studio
+              Wan Studio
             </h1>
             <p className="text-sm text-muted-foreground">
-              Unlisted workbench for Veo 3.1 generation and video continuation. Not linked anywhere in the app.
+              Unlisted workbench for Alibaba Wan 2.7 generation and video continuation. Not linked anywhere in the app.
             </p>
           </div>
           <Badge variant="outline" className="border-primary/40 text-primary">Internal, unlisted</Badge>
@@ -319,11 +314,10 @@ const VeoStudio: React.FC = () => {
                   </div>
                   <Label className="text-xs uppercase tracking-wide text-muted-foreground">Resolution</Label>
                   <div className="flex gap-2">
-                    {(['720p', '1080p', '4k'] as Resolution[]).map((r) => (
+                    {(['720p', '1080p'] as Resolution[]).map((r) => (
                       <button
                         key={r}
                         type="button"
-                        disabled={r === '4k' && !fourKAvailable}
                         onClick={() => setResolution(r)}
                         className={`flex-1 rounded-md border px-2 py-2 text-xs transition disabled:opacity-40 ${
                           resolution === r ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
@@ -333,9 +327,7 @@ const VeoStudio: React.FC = () => {
                       </button>
                     ))}
                   </div>
-                  {lockedTo8 && (
-                    <p className="text-[11px] text-muted-foreground">1080p and 4k render 8 second clips.</p>
-                  )}
+                  <p className="text-[11px] text-muted-foreground">Wan renders 2 to 15 second clips, no soundtrack.</p>
                 </div>
 
                 <div className="space-y-2">
@@ -424,14 +416,13 @@ const VeoStudio: React.FC = () => {
                     placeholder="Avoid, e.g. text overlays"
                   />
                   <div className="flex gap-2">
-                    {([4, 6, 8] as const).map((s) => (
+                    {([4, 6, 8, 10, 15] as const).map((s) => (
                       <button
                         key={s}
                         type="button"
-                        disabled={lockedTo8 && s !== 8}
                         onClick={() => updateScene(scene.id, { seconds: s })}
                         className={`flex-1 rounded-md border px-2 py-2 text-xs transition disabled:opacity-40 ${
-                          (lockedTo8 ? 8 : scene.seconds) === s
+                          scene.seconds === s
                             ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
                         }`}
                       >
@@ -510,7 +501,7 @@ const VeoStudio: React.FC = () => {
               <div>
                 <h2 className="text-sm font-semibold">Extend or restyle an existing clip</h2>
                 <p className="text-xs text-muted-foreground">
-                  Upload a video, scrub to any frame, then let Veo continue the action from that frame as a new scene.
+                  Upload a video, scrub to any frame, then let Wan continue the action from that frame as a new scene.
                 </p>
               </div>
 
