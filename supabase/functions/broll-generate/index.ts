@@ -1,22 +1,26 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import {
+  DASHSCOPE_BASE,
+  authHeaders,
+  asyncAuthHeaders,
+} from '../_shared/dashscope.ts'
 
 /**
  * broll-generate
- * action "create": starts one Veo b-roll job on the Lovable AI Gateway.
- * action "poll":   checks the job; once completed it downloads the MP4,
+ * action "create": starts one Alibaba Wan b-roll job on DashScope (async task).
+ * action "poll":   checks the task; once succeeded it downloads the MP4,
  *                  stores it in the private broll-media bucket and returns a signed URL.
  *
- * Jobs are created one at a time by the client (gateway limits concurrent video jobs).
+ * Jobs are created one at a time by the client.
  */
 
-const GATEWAY = 'https://ai.gateway.lovable.dev/v1/videos'
+const CREATE_URL = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`
+const TASK_URL = `${DASHSCOPE_BASE}/api/v1/tasks`
 const BUCKET = 'broll-media'
+const MODEL = 'wan2.7-t2v'
 
 type Orientation = 'portrait' | 'landscape' | 'square'
-
-const sizeFor = (orientation: Orientation) =>
-  orientation === 'portrait' ? '720x1280' : '1280x720'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -42,8 +46,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: 'Unauthorized' }, 401)
     const userId = userData.user.id
 
-    const apiKey = Deno.env.get('LOVABLE_API_KEY')
-    if (!apiKey) return json({ error: 'AI is not configured.' }, 500)
+    if (!Deno.env.get('QWEN_API_KEY')) return json({ error: 'AI is not configured.' }, 500)
 
     const body = (await req.json().catch(() => ({}))) as {
       action?: string
@@ -60,48 +63,48 @@ Deno.serve(async (req) => {
       const prompt = (body.prompt || '').toString().trim().slice(0, 1500)
       if (!prompt) return json({ error: 'A b-roll prompt is required.' }, 400)
 
-      const allowed = [4, 6, 8]
-      const secs = allowed.includes(Number(body.seconds)) ? Number(body.seconds) : 4
+      // Wan supports 2-15s clips.
+      const rawSecs = Number(body.seconds)
+      const secs = Number.isFinite(rawSecs) ? Math.max(2, Math.min(15, Math.round(rawSecs))) : 5
       const orientation: Orientation =
         body.orientation === 'portrait' || body.orientation === 'square' ? body.orientation : 'landscape'
-      const model =
-        body.quality === 'high' ? 'google/veo-3.1'
-        : body.quality === 'fast' ? 'google/veo-3.1-fast'
-        : 'google/veo-3.1-lite'
+      // Wan accepts 720P or 1080P only.
+      const resolution = body.quality === 'lite' ? '720P' : '1080P'
+      const size =
+        orientation === 'portrait' ? (resolution === '720P' ? '720*1280' : '1080*1920')
+        : orientation === 'square' ? (resolution === '720P' ? '960*960' : '1440*1440')
+        : (resolution === '720P' ? '1280*720' : '1920*1080')
 
-      const res = await fetch(GATEWAY, {
+      const res = await fetch(CREATE_URL, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        headers: asyncAuthHeaders(),
         body: JSON.stringify({
-          model,
-          prompt,
-          seconds: String(secs),
-          size: sizeFor(orientation),
+          model: MODEL,
+          input: { prompt },
+          parameters: { resolution, duration: secs, size },
         }),
       })
 
-      if (!res.ok) {
-        const detail = await res.text()
-        console.error('broll-generate create failed', res.status, detail.slice(0, 500))
+      const payload = await res.json().catch(() => null)
+      const taskId = payload?.output?.task_id
+
+      if (!res.ok || !taskId) {
+        console.error('broll-generate create failed', res.status, JSON.stringify(payload).slice(0, 500))
         if (res.status === 429) {
-          return json({ error: 'Another clip is still generating, please wait a moment.' }, 429)
-        }
-        if (res.status === 402) {
-          return json({ error: 'Not enough AI credits to generate this clip.' }, 402)
+          return json({ error: 'The provider is rate limiting, please wait a moment.' }, 429)
         }
         return json({ error: 'The b-roll clip could not be started.' }, 400)
       }
 
-      const job = await res.json()
-      return json({ videoId: job.id, status: job.status ?? 'in_progress', model, seconds: secs })
+      return json({ videoId: taskId, status: 'in_progress', model: MODEL, seconds: secs })
     }
 
     // ---- poll ----
     const videoId = (body.videoId || '').toString().trim()
     if (!videoId) return json({ error: 'Missing clip id.' }, 400)
 
-    const jobRes = await fetch(`${GATEWAY}/${encodeURIComponent(videoId)}`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+    const jobRes = await fetch(`${TASK_URL}/${encodeURIComponent(videoId)}`, {
+      headers: authHeaders(),
     })
     if (!jobRes.ok) {
       const detail = await jobRes.text()
@@ -109,15 +112,26 @@ Deno.serve(async (req) => {
       return json({ error: 'Could not check the clip status.' }, 502)
     }
     const job = await jobRes.json()
+    const state = job?.output?.task_status
 
-    if (job.status === 'failed') {
+    if (state === 'FAILED' || state === 'UNKNOWN' || state === 'CANCELED') {
+      console.error('broll-generate task failed', JSON.stringify(job?.output).slice(0, 500))
       return json({
         status: 'failed',
-        error: job?.error?.message || 'The provider rejected this b-roll clip.',
+        error: job?.output?.message || 'The provider rejected this b-roll clip.',
       })
     }
-    if (job.status !== 'completed') {
-      return json({ status: job.status ?? 'in_progress', progress: job.progress ?? 0 })
+    if (state !== 'SUCCEEDED') {
+      return json({ status: 'in_progress', progress: 0 })
+    }
+
+    const remoteUrl: string | undefined =
+      job?.output?.video_url ||
+      job?.output?.results?.[0]?.video_url ||
+      job?.output?.results?.[0]?.url
+    if (!remoteUrl) {
+      console.error('broll-generate no video url', JSON.stringify(job?.output).slice(0, 500))
+      return json({ error: 'The finished clip could not be downloaded.' }, 502)
     }
 
     const service = createClient(
@@ -132,9 +146,7 @@ Deno.serve(async (req) => {
       .list(`${userId}/clips`, { search: `${videoId}.mp4` })
 
     if (!existing || existing.length === 0) {
-      const contentRes = await fetch(`${GATEWAY}/${encodeURIComponent(videoId)}/content`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      })
+      const contentRes = await fetch(remoteUrl)
       if (!contentRes.ok) {
         console.error('broll-generate download failed', contentRes.status)
         return json({ error: 'The finished clip could not be downloaded.' }, 502)
