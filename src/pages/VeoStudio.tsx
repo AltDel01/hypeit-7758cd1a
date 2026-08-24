@@ -82,7 +82,6 @@ const VeoStudio: React.FC = () => {
 
   useEffect(() => () => { cancelRef.current = true; }, []);
 
-  const lockedTo8 = false;
 
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>
     set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
