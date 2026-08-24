@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const apiKey = Deno.env.get('LOVABLE_API_KEY')
 
     // Identify the caller
     const authClient = createClient(supabaseUrl, anonKey, {
