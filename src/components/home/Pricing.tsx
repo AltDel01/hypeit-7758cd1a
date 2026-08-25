@@ -183,7 +183,25 @@ const Pricing = () => {
           </p>
         </div>
 
-
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+            {(['USD', 'IDR'] as Currency[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => chooseCurrency(c)}
+                aria-pressed={currency === c}
+                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                  currency === c
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-brand-slate-500 hover:text-foreground'
+                }`}
+              >
+                {c === 'USD' ? 'USD ($)' : 'IDR (Rp)'}
+              </button>
+            ))}
+          </div>
+        </div>
 
 
         {/* Mobile: 2-col grid, Desktop: 4-col grid */}
