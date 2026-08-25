@@ -103,15 +103,32 @@ const plans = [
   },
 ];
 
+const CURRENCY_KEY = 'viralin.pricing.currency';
+
 const Pricing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [packKey, setPackKey] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<Currency>(() => (detectIndonesia() ? 'IDR' : 'USD'));
+  const [manual, setManual] = useState<boolean>(() => {
+    try {
+      return !!localStorage.getItem(CURRENCY_KEY);
+    } catch {
+      return false;
+    }
+  });
+  const [currency, setCurrency] = useState<Currency>(() => {
+    try {
+      const saved = localStorage.getItem(CURRENCY_KEY);
+      if (saved === 'IDR' || saved === 'USD') return saved;
+    } catch {
+      /* ignore */
+    }
+    return detectIndonesia() ? 'IDR' : 'USD';
+  });
 
   // Fallback: IP-based country check when browser locale/timezone is inconclusive
   React.useEffect(() => {
-    if (currency === 'IDR') return;
+    if (manual || currency === 'IDR') return;
     let cancelled = false;
     (async () => {
       try {
@@ -125,6 +142,16 @@ const Pricing = () => {
     return () => { cancelled = true; };
   }, []);
 
+  const chooseCurrency = (next: Currency) => {
+    setCurrency(next);
+    setManual(true);
+    try {
+      localStorage.setItem(CURRENCY_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const startCheckout = (key: string) => {
     if (key === 'free') return;
     if (currency === 'USD') return;
@@ -136,6 +163,7 @@ const Pricing = () => {
   };
 
   const isIDR = currency === 'IDR';
+
 
   return (
     <section className="py-12 relative overflow-hidden">
@@ -155,7 +183,25 @@ const Pricing = () => {
           </p>
         </div>
 
-
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+            {(['USD', 'IDR'] as Currency[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => chooseCurrency(c)}
+                aria-pressed={currency === c}
+                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                  currency === c
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-brand-slate-500 hover:text-foreground'
+                }`}
+              >
+                {c === 'USD' ? 'USD ($)' : 'IDR (Rp)'}
+              </button>
+            ))}
+          </div>
+        </div>
 
 
         {/* Mobile: 2-col grid, Desktop: 4-col grid */}
