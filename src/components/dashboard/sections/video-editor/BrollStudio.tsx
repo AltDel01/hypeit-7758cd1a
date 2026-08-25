@@ -335,7 +335,12 @@ const BrollStudio: React.FC = () => {
           .update({ status: 'failed', failure_reason: 'Compositing failed', credits_used: 0 })
           .eq('id', requestRow.id);
       }
-      toast.error('The final cut could not be rendered in the browser. Try a shorter video.');
+      toast.error(
+        e instanceof Error && e.message
+          ? `Final render failed: ${e.message}`
+          : 'The final cut could not be rendered in the browser. Try a shorter video.',
+      );
+
       setStage('review');
     }
   };
