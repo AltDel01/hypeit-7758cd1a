@@ -27,7 +27,12 @@ export interface CompositeOptions {
 
 let ffmpegPromise: Promise<any> | null = null;
 
-const CORE_BASE = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd';
+// The bundled worker runs as a module worker, so it can only `import()` the core.
+// That means the ESM build is required, the UMD build fails with "failed to import ffmpeg-core.js".
+const CORE_BASES = [
+  'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm',
+  'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm',
+];
 
 async function getFfmpeg(onProgress?: (ratio: number, message: string) => void) {
   if (!ffmpegPromise) {
@@ -38,15 +43,31 @@ async function getFfmpeg(onProgress?: (ratio: number, message: string) => void) 
       ]);
       const ffmpeg = new FFmpeg();
       onProgress?.(0.02, 'Loading the video engine');
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${CORE_BASE}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${CORE_BASE}/ffmpeg-core.wasm`, 'application/wasm'),
-      });
-      return ffmpeg;
-    })();
+
+      let lastError: unknown;
+      for (const base of CORE_BASES) {
+        try {
+          await ffmpeg.load({
+            coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
+            wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+          });
+          return ffmpeg;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError instanceof Error
+        ? lastError
+        : new Error('Could not load the video engine');
+    })().catch((error) => {
+      // Let the next attempt retry instead of caching a rejected promise.
+      ffmpegPromise = null;
+      throw error;
+    });
   }
   return ffmpegPromise;
 }
+
 
 const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 
