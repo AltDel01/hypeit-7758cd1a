@@ -295,10 +295,9 @@ serve(async (req) => {
         auto_failed: false,
         failure_reason: null,
       })
-
       .eq('id', body.requestId);
 
-    return ok({ ok: true, taskId, requestId: body.requestId });
+    return ok({ ok: true, taskId, model: result.model, duration: result.duration, requestId: body.requestId });
   } catch (e) {
     console.error('[wan-video] exception', e);
     await markFailed(admin, body.requestId, body.model, 'Network error while submitting to provider');
