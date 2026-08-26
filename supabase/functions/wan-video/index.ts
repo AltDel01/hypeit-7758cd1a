@@ -16,12 +16,16 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
   DASHSCOPE_BASE,
-  asyncAuthHeaders,
+  
   getUserIdFromAuth,
   genericError,
   ok,
   uploadToDashScopeOss,
   normalizeImageForWan,
+  createWanVideoTask,
+  clampWanDuration,
+  needsLongFormModel,
+  WAN_LONGFORM_MODEL,
 } from '../_shared/dashscope.ts';
 
 function guessTypeFromExt(path: string): string {
@@ -178,11 +182,12 @@ serve(async (req) => {
   // Clean creative prompt (technical settings line removed) for the model.
   const modelPrompt = cleanPromptForModel(body.prompt);
   // Duration: prefer the explicit body value; fall back to the value recorded
-  // in the prompt metadata so it is never silently lost. Wan2.7 supports 2-15s.
+  // in the prompt metadata so it is never silently lost. Wan3.0 supports up to
+  // 30s, Wan2.7 up to 15s.
   const promptDuration = parseInt(parseSetting(body.prompt, 'Duration') || '', 10);
   const rawDuration = body.duration ?? (Number.isFinite(promptDuration) ? promptDuration : 5);
-  const duration = Math.max(2, Math.min(15, Math.round(rawDuration)));
-  // Wan2.x video models only accept '720P' or '1080P'. Normalize any
+  const duration = clampWanDuration(rawDuration, 5);
+  // Wan video models only accept '720P' or '1080P'. Normalize any
   // unsupported value (e.g. legacy '480P' or '4K') so a request never gets
   // rejected and stuck in processing. Fall back to the prompt metadata too.
   const rawResolution = String(
@@ -193,6 +198,10 @@ serve(async (req) => {
     resolution,
     duration,
   };
+  // Clips longer than 15s only exist on the wan3.0 long-form model.
+  const longForm = needsLongFormModel(duration) && body.category !== 'video-face-swap';
+  const requestModel = longForm ? WAN_LONGFORM_MODEL : body.model;
+
 
   // Every early return below marks the row failed first: a request that never
   // reaches the provider must never keep showing "Processing" to the user.
@@ -247,51 +256,48 @@ serve(async (req) => {
       return await bail('This generation mode is not supported.');
   }
   console.log(
-    '[wan-video] dispatch', body.category, body.model,
+    '[wan-video] dispatch', body.category, requestModel,
     'duration=' + duration, 'resolution=' + resolution,
     JSON.stringify(input).slice(0, 300)
   );
 
-  const payload = { model: body.model, input, parameters };
-
   try {
-    const headers: Record<string, string> = { ...asyncAuthHeaders() };
+    const headers: Record<string, string> = {};
     // Required when input media uses oss:// URLs uploaded to DashScope storage.
     if (usedOss) headers['X-DashScope-OssResourceResolve'] = 'enable';
-    const upstream = await fetch(endpoint, {
-      method: 'POST',
+
+    const result = await createWanVideoTask({
+      endpoint,
+      model: requestModel,
+      input,
+      parameters,
       headers,
-      body: JSON.stringify(payload),
+      fallbackModel: longForm ? body.model : undefined,
     });
 
-    if (!upstream.ok) {
-      const txt = await upstream.text();
-      console.error('[wan-video] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
+    if (!result.ok) {
+      await markFailed(
+        admin, body.requestId, requestModel,
+        humanizeProviderError(result.status, result.detail),
+      );
       return genericError(502, 'Submission failed');
     }
 
-    const json = await upstream.json();
-    const taskId: string | undefined = json?.output?.task_id;
-    if (!taskId) {
-      console.error('[wan-video] no task_id', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Submission failed');
-    }
+    const taskId = result.taskId;
 
     await admin
       .from('generation_requests')
       .update({
         status: 'in-progress',
         auto_provider: 'wan',
-        auto_model: body.model,
+        auto_model: result.model,
         provider_task_id: taskId,
         auto_failed: false,
         failure_reason: null,
       })
       .eq('id', body.requestId);
 
-    return ok({ ok: true, taskId, requestId: body.requestId });
+    return ok({ ok: true, taskId, model: result.model, duration: result.duration, requestId: body.requestId });
   } catch (e) {
     console.error('[wan-video] exception', e);
     await markFailed(admin, body.requestId, body.model, 'Network error while submitting to provider');
