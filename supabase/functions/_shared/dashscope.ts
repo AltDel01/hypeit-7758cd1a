@@ -154,6 +154,100 @@ export async function uploadToDashScopeOss(
   return `oss://${key}`;
 }
 
+/* ------------------------------------------------------------------ *
+ * Wan video models
+ * wan3.0-video is the long-form model: single model for text/image
+ * driven generation, up to 30 seconds. wan2.7-* caps at 15 seconds.
+ * ------------------------------------------------------------------ */
+
+export const WAN_LONGFORM_MODEL = 'wan3.0-video';
+export const WAN_MAX_DURATION = 30;
+export const WAN_LEGACY_MAX_DURATION = 15;
+
+/** Clamp any requested clip length to what Wan accepts (2-30s). */
+export function clampWanDuration(raw: unknown, fallback = 5): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(2, Math.min(WAN_MAX_DURATION, Math.round(n)));
+}
+
+/** Anything longer than 15s must run on the wan3.0 long-form model. */
+export function needsLongFormModel(seconds: number): boolean {
+  return seconds > WAN_LEGACY_MAX_DURATION;
+}
+
+export type WanTaskResult =
+  | { ok: true; taskId: string; model: string; duration: number }
+  | { ok: false; status: number; detail: string };
+
+/**
+ * Submit a DashScope video-synthesis task. When the long-form wan3.0 model is
+ * used and the provider rejects it (not yet enabled in the region/account),
+ * the call is retried once on the legacy model with the duration clamped to
+ * 15s so the user still gets a clip instead of a stuck request.
+ */
+export async function createWanVideoTask(opts: {
+  endpoint: string;
+  model: string;
+  input: Record<string, unknown>;
+  parameters: Record<string, unknown>;
+  headers?: Record<string, string>;
+  fallbackModel?: string;
+}): Promise<WanTaskResult> {
+  const attempt = async (model: string, parameters: Record<string, unknown>) => {
+    const res = await fetch(opts.endpoint, {
+      method: 'POST',
+      headers: { ...asyncAuthHeaders(), ...(opts.headers || {}) },
+      body: JSON.stringify({ model, input: opts.input, parameters }),
+    });
+    const text = await res.text();
+    let taskId: string | undefined;
+    try {
+      taskId = JSON.parse(text)?.output?.task_id;
+    } catch { /* non-JSON error body */ }
+    return { res, text, taskId };
+  };
+
+  const first = await attempt(opts.model, opts.parameters);
+  if (first.res.ok && first.taskId) {
+    return {
+      ok: true,
+      taskId: first.taskId,
+      model: opts.model,
+      duration: Number(opts.parameters.duration) || 0,
+    };
+  }
+  console.error('[dashscope] wan create failed', opts.model, first.res.status, first.text.slice(0, 400));
+
+  const canFallback =
+    opts.model === WAN_LONGFORM_MODEL &&
+    !!opts.fallbackModel &&
+    first.res.status !== 429;
+
+  if (canFallback) {
+    const params: Record<string, unknown> = { ...opts.parameters };
+    delete params.ratio;
+    params.duration = Math.min(
+      Number(opts.parameters.duration) || 5,
+      WAN_LEGACY_MAX_DURATION,
+    );
+    const second = await attempt(opts.fallbackModel!, params);
+    if (second.res.ok && second.taskId) {
+      console.warn('[dashscope] fell back to', opts.fallbackModel);
+      return {
+        ok: true,
+        taskId: second.taskId,
+        model: opts.fallbackModel!,
+        duration: Number(params.duration) || 0,
+      };
+    }
+    return { ok: false, status: second.res.status, detail: second.text };
+  }
+
+  return { ok: false, status: first.res.status, detail: first.text };
+}
+
+
 export interface DashScopeAsyncCreateResponse {
   output?: { task_id?: string; task_status?: string };
   request_id?: string;
