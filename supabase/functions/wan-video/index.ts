@@ -22,6 +22,10 @@ import {
   ok,
   uploadToDashScopeOss,
   normalizeImageForWan,
+  createWanVideoTask,
+  clampWanDuration,
+  needsLongFormModel,
+  WAN_LONGFORM_MODEL,
 } from '../_shared/dashscope.ts';
 
 function guessTypeFromExt(path: string): string {
