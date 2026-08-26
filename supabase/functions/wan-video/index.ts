@@ -256,48 +256,46 @@ serve(async (req) => {
       return await bail('This generation mode is not supported.');
   }
   console.log(
-    '[wan-video] dispatch', body.category, body.model,
+    '[wan-video] dispatch', body.category, requestModel,
     'duration=' + duration, 'resolution=' + resolution,
     JSON.stringify(input).slice(0, 300)
   );
 
-  const payload = { model: body.model, input, parameters };
-
   try {
-    const headers: Record<string, string> = { ...asyncAuthHeaders() };
+    const headers: Record<string, string> = {};
     // Required when input media uses oss:// URLs uploaded to DashScope storage.
     if (usedOss) headers['X-DashScope-OssResourceResolve'] = 'enable';
-    const upstream = await fetch(endpoint, {
-      method: 'POST',
+
+    const result = await createWanVideoTask({
+      endpoint,
+      model: requestModel,
+      input,
+      parameters,
       headers,
-      body: JSON.stringify(payload),
+      fallbackModel: longForm ? body.model : undefined,
     });
 
-    if (!upstream.ok) {
-      const txt = await upstream.text();
-      console.error('[wan-video] upstream error', upstream.status, txt);
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(upstream.status, txt));
+    if (!result.ok) {
+      await markFailed(
+        admin, body.requestId, requestModel,
+        humanizeProviderError(result.status, result.detail),
+      );
       return genericError(502, 'Submission failed');
     }
 
-    const json = await upstream.json();
-    const taskId: string | undefined = json?.output?.task_id;
-    if (!taskId) {
-      console.error('[wan-video] no task_id', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Submission failed');
-    }
+    const taskId = result.taskId;
 
     await admin
       .from('generation_requests')
       .update({
         status: 'in-progress',
         auto_provider: 'wan',
-        auto_model: body.model,
+        auto_model: result.model,
         provider_task_id: taskId,
         auto_failed: false,
         failure_reason: null,
       })
+
       .eq('id', body.requestId);
 
     return ok({ ok: true, taskId, requestId: body.requestId });
