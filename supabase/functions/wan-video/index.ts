@@ -182,11 +182,12 @@ serve(async (req) => {
   // Clean creative prompt (technical settings line removed) for the model.
   const modelPrompt = cleanPromptForModel(body.prompt);
   // Duration: prefer the explicit body value; fall back to the value recorded
-  // in the prompt metadata so it is never silently lost. Wan2.7 supports 2-15s.
+  // in the prompt metadata so it is never silently lost. Wan3.0 supports up to
+  // 30s, Wan2.7 up to 15s.
   const promptDuration = parseInt(parseSetting(body.prompt, 'Duration') || '', 10);
   const rawDuration = body.duration ?? (Number.isFinite(promptDuration) ? promptDuration : 5);
-  const duration = Math.max(2, Math.min(15, Math.round(rawDuration)));
-  // Wan2.x video models only accept '720P' or '1080P'. Normalize any
+  const duration = clampWanDuration(rawDuration, 5);
+  // Wan video models only accept '720P' or '1080P'. Normalize any
   // unsupported value (e.g. legacy '480P' or '4K') so a request never gets
   // rejected and stuck in processing. Fall back to the prompt metadata too.
   const rawResolution = String(
@@ -197,6 +198,10 @@ serve(async (req) => {
     resolution,
     duration,
   };
+  // Clips longer than 15s only exist on the wan3.0 long-form model.
+  const longForm = needsLongFormModel(duration) && body.category !== 'video-face-swap';
+  const requestModel = longForm ? WAN_LONGFORM_MODEL : body.model;
+
 
   // Every early return below marks the row failed first: a request that never
   // reaches the provider must never keep showing "Processing" to the user.
