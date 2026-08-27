@@ -146,6 +146,18 @@ const vi: Translation = {
         },
       },
     },
+    finalCta: {
+      badge: 'Bắt Đầu Sáng Tạo Ngay Hôm Nay',
+      headingPrefix: 'Sẵn sàng tạo',
+      headingHighlight: 'video viral đầu tiên?',
+      subtitle: 'Tham gia cùng hàng nghìn nhà sáng tạo biến ý tưởng thành nội dung thu hút chỉ trong vài phút. Không cần kỹ năng dựng phim.',
+      cta: 'Tạo Tài Khoản Miễn Phí',
+      points: {
+        noCard: 'Không cần thẻ tín dụng',
+        freeTier: 'Có gói miễn phí',
+        cancelAnytime: 'Hủy bất cứ lúc nào',
+      },
+    },
   },
   features: {
     badge: 'Công cụ chỉnh sửa bằng AI',

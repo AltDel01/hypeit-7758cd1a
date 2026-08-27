@@ -146,6 +146,18 @@ const id: Translation = {
         },
       },
     },
+    finalCta: {
+      badge: 'Mulai Berkarya Hari Ini',
+      headingPrefix: 'Siap membuat',
+      headingHighlight: 'video viral pertamamu?',
+      subtitle: 'Bergabunglah dengan ribuan kreator yang mengubah ide menjadi konten menarik dalam hitungan menit. Tanpa perlu keahlian editing.',
+      cta: 'Buat Akun Gratis',
+      points: {
+        noCard: 'Tanpa kartu kredit',
+        freeTier: 'Tersedia paket gratis',
+        cancelAnytime: 'Batalkan kapan saja',
+      },
+    },
   },
   features: {
     badge: 'Alat Editing Bertenaga AI',

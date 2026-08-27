@@ -144,6 +144,18 @@ const en = {
         },
       },
     },
+    finalCta: {
+      badge: 'Start Creating Today',
+      headingPrefix: 'Ready to make your first',
+      headingHighlight: 'viral video?',
+      subtitle: 'Join thousands of creators turning ideas into scroll-stopping content in minutes. No editing skills needed.',
+      cta: 'Create Free Account',
+      points: {
+        noCard: 'No credit card required',
+        freeTier: 'Free tier available',
+        cancelAnytime: 'Cancel anytime',
+      },
+    },
   },
   features: {
     badge: 'AI-Powered Editing Tools',
