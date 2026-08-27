@@ -126,6 +126,26 @@ const id: Translation = {
         detail: 'AI membantu, tetapi Anda yang memutuskan. Atur setiap detail video dengan prompt sederhana. Perpaduan pas antara otomatisasi dan kreativitas.',
       },
     },
+    howItWorks: {
+      badge: 'Proses Sederhana',
+      headingPrefix: 'Cara',
+      headingHighlight: 'kerjanya',
+      subtitle: 'Tiga langkah dari ide mentah menjadi video yang siap viral.',
+      steps: {
+        upload: {
+          title: 'Unggah atau Jelaskan',
+          description: 'Unggah footage dan gambar Anda, atau cukup jelaskan video yang Anda inginkan dalam satu prompt.',
+        },
+        customize: {
+          title: 'Biarkan AI Berkarya',
+          description: 'AI kami menulis, mengedit, dan memoles: transisi, teks, gerakan, dan audio diurus untuk Anda.',
+        },
+        export: {
+          title: 'Ekspor dan Posting',
+          description: 'Unduh dalam format yang Anda butuhkan, atau langsung posting ke TikTok, Instagram, dan Facebook.',
+        },
+      },
+    },
   },
   features: {
     badge: 'Alat Editing Bertenaga AI',
