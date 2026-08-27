@@ -124,6 +124,26 @@ const en = {
         detail: 'AI assists, but you decide. Fine-tune every aspect of your video with simple prompts. The perfect balance of automation and creativity.',
       },
     },
+    howItWorks: {
+      badge: 'Simple Process',
+      headingPrefix: 'How it',
+      headingHighlight: 'works',
+      subtitle: 'Three steps from raw idea to a finished, scroll-stopping video.',
+      steps: {
+        upload: {
+          title: 'Upload or Describe',
+          description: 'Drop in your footage and images, or simply describe the video you want in one prompt.',
+        },
+        customize: {
+          title: 'Let AI Create',
+          description: 'Our AI writes, edits, and polishes: transitions, captions, motion, and sound handled for you.',
+        },
+        export: {
+          title: 'Export and Post',
+          description: 'Download in the format you need, or publish straight to TikTok, Instagram, and Facebook.',
+        },
+      },
+    },
   },
   features: {
     badge: 'AI-Powered Editing Tools',

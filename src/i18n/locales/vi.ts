@@ -126,6 +126,26 @@ const vi: Translation = {
         detail: 'AI hỗ trợ, bạn quyết định. Tinh chỉnh mọi khía cạnh của video bằng câu lệnh đơn giản. Cân bằng hoàn hảo giữa tự động hóa và sáng tạo.',
       },
     },
+    howItWorks: {
+      badge: 'Quy Trình Đơn Giản',
+      headingPrefix: 'Cách',
+      headingHighlight: 'hoạt động',
+      subtitle: 'Ba bước từ ý tưởng thô đến video hoàn chỉnh, gây chú ý ngay lập tức.',
+      steps: {
+        upload: {
+          title: 'Tải Lên hoặc Mô Tả',
+          description: 'Tải footage và hình ảnh của bạn lên, hoặc chỉ cần mô tả video bạn muốn trong một câu lệnh.',
+        },
+        customize: {
+          title: 'Để AI Sáng Tạo',
+          description: 'AI viết, dựng và hoàn thiện: chuyển cảnh, phụ đề, chuyển động và âm thanh đều được lo trọn.',
+        },
+        export: {
+          title: 'Xuất và Đăng',
+          description: 'Tải về theo định dạng bạn cần, hoặc đăng thẳng lên TikTok, Instagram và Facebook.',
+        },
+      },
+    },
   },
   features: {
     badge: 'Công cụ chỉnh sửa bằng AI',
