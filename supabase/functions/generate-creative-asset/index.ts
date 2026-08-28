@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
-      const videoModel = 'wan2.7-t2v'
+      const videoModel = needsLongFormModel(videoDuration) ? WAN_LONGFORM_MODEL : 'wan2.7-t2v'
       const { data: gr, error: grErr } = await admin
         .from('generation_requests')
         .insert({
