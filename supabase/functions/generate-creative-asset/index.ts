@@ -1,5 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
+
 
 const IMAGE_COST = 30
 const VIDEO_COST = 50
@@ -36,8 +38,10 @@ Deno.serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
-    const body = (await req.json().catch(() => ({}))) as { dayId?: string }
+    const body = (await req.json().catch(() => ({}))) as { dayId?: string; duration?: number | string }
     const dayId = (body.dayId || '').toString()
+    const videoDuration = clampWanDuration(body.duration, 5)
+
     if (!dayId) {
       return json({ error: 'A day is required.' }, 400)
     }
@@ -84,7 +88,7 @@ Deno.serve(async (req) => {
 
     /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
-      const videoModel = 'wan2.7-t2v'
+      const videoModel = needsLongFormModel(videoDuration) ? WAN_LONGFORM_MODEL : 'wan2.7-t2v'
       const { data: gr, error: grErr } = await admin
         .from('generation_requests')
         .insert({
@@ -128,7 +132,7 @@ Deno.serve(async (req) => {
           model: videoModel,
           prompt: basePrompt,
           resolution: '1080P',
-          duration: 5,
+          duration: videoDuration,
         }),
       }).catch((e) => {
         console.error('wan-video dispatch failed', e)

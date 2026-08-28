@@ -165,6 +165,9 @@ const CreativeWorkflow = () => {
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  // Per-day video clip length (seconds). Clips over 15s use the Wan 3.0 long-form model.
+  const [videoDurations, setVideoDurations] = useState<Record<string, number>>({});
+
 
   // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
   const hasStrategy = !!days && days.length > 0;
@@ -537,8 +540,9 @@ const CreativeWorkflow = () => {
     upsertPost(day, 'processing');
     try {
       const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
-        body: { dayId: day.id },
+        body: { dayId: day.id, duration: videoDurations[day.id] ?? 5 },
       });
+
       if (error) {
         // Surface insufficient-credit / rate-limit messages from the function body.
         let msg = 'Could not generate this asset. Try again.';
@@ -1044,6 +1048,28 @@ const CreativeWorkflow = () => {
                     </button>
                   ))}
                 </div>
+                {day.assetType === 'video' && day.genStage === 'idle' && (
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Clip length</p>
+                    <div className="flex flex-wrap gap-1">
+                      {[5, 10, 15, 20, 30].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setVideoDurations((prev) => ({ ...prev, [day.id]: s }))}
+                          className={cn(
+                            'rounded border px-1.5 py-0.5 text-[10px] transition-colors',
+                            (videoDurations[day.id] ?? 5) === s
+                              ? 'border-[#8C52FF] bg-[#8C52FF] text-white'
+                              : 'border-border text-muted-foreground hover:text-foreground',
+                          )}
+                        >
+                          {s}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="relative mx-auto aspect-[9/16] w-full max-w-[140px] overflow-hidden rounded-lg bg-gradient-to-b from-muted to-muted/40">
                   {day.genStage === 'idle' && (
                     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">

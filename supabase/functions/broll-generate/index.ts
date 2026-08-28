@@ -3,8 +3,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import {
   DASHSCOPE_BASE,
   authHeaders,
-  asyncAuthHeaders,
+  clampWanDuration,
+  needsLongFormModel,
+  createWanVideoTask,
+  WAN_LONGFORM_MODEL,
 } from '../_shared/dashscope.ts'
+
 
 /**
  * broll-generate
@@ -63,9 +67,8 @@ Deno.serve(async (req) => {
       const prompt = (body.prompt || '').toString().trim().slice(0, 1500)
       if (!prompt) return json({ error: 'A b-roll prompt is required.' }, 400)
 
-      // Wan supports 2-15s clips.
-      const rawSecs = Number(body.seconds)
-      const secs = Number.isFinite(rawSecs) ? Math.max(2, Math.min(15, Math.round(rawSecs))) : 5
+      // Wan supports 2-30s clips (over 15s runs on the wan3.0 long-form model).
+      const secs = clampWanDuration(body.seconds, 5)
       const orientation: Orientation =
         body.orientation === 'portrait' || body.orientation === 'square' ? body.orientation : 'landscape'
       // Wan accepts 720P or 1080P only.
@@ -75,29 +78,31 @@ Deno.serve(async (req) => {
         : orientation === 'square' ? (resolution === '720P' ? '960*960' : '1440*1440')
         : (resolution === '720P' ? '1280*720' : '1920*1080')
 
-      const res = await fetch(CREATE_URL, {
-        method: 'POST',
-        headers: asyncAuthHeaders(),
-        body: JSON.stringify({
-          model: MODEL,
-          input: { prompt },
-          parameters: { resolution, duration: secs, size },
-        }),
+      const longForm = needsLongFormModel(secs)
+      const result = await createWanVideoTask({
+        endpoint: CREATE_URL,
+        model: longForm ? WAN_LONGFORM_MODEL : MODEL,
+        input: { prompt },
+        parameters: { resolution, duration: secs, size },
+        fallbackModel: MODEL,
       })
 
-      const payload = await res.json().catch(() => null)
-      const taskId = payload?.output?.task_id
-
-      if (!res.ok || !taskId) {
-        console.error('broll-generate create failed', res.status, JSON.stringify(payload).slice(0, 500))
-        if (res.status === 429) {
+      if (!result.ok) {
+        console.error('broll-generate create failed', result.status, result.detail.slice(0, 500))
+        if (result.status === 429) {
           return json({ error: 'The provider is rate limiting, please wait a moment.' }, 429)
         }
         return json({ error: 'The b-roll clip could not be started.' }, 400)
       }
 
-      return json({ videoId: taskId, status: 'in_progress', model: MODEL, seconds: secs })
+      return json({
+        videoId: result.taskId,
+        status: 'in_progress',
+        model: result.model,
+        seconds: result.duration || secs,
+      })
     }
+
 
     // ---- poll ----
     const videoId = (body.videoId || '').toString().trim()
