@@ -165,6 +165,9 @@ const CreativeWorkflow = () => {
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  // Per-day video clip length (seconds). Clips over 15s use the Wan 3.0 long-form model.
+  const [videoDurations, setVideoDurations] = useState<Record<string, number>>({});
+
 
   // Brand Profile is a one-time setup: once a strategy is saved we jump straight to the calendar.
   const hasStrategy = !!days && days.length > 0;
