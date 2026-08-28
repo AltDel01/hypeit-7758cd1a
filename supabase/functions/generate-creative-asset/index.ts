@@ -1,5 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
+
 
 const IMAGE_COST = 30
 const VIDEO_COST = 50
