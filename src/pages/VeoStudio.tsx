@@ -416,12 +416,11 @@ const VeoStudio: React.FC = () => {
                   />
                   <div className="flex flex-wrap gap-2">
                     {([4, 6, 8, 10, 15, 20, 30] as const).map((s) => (
-
                       <button
                         key={s}
                         type="button"
                         onClick={() => updateScene(scene.id, { seconds: s })}
-                        className={`flex-1 rounded-md border px-2 py-2 text-xs transition disabled:opacity-40 ${
+                        className={`min-w-[42px] flex-1 rounded-md border px-2 py-2 text-xs transition disabled:opacity-40 ${
                           scene.seconds === s
                             ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
                         }`}
@@ -430,6 +429,10 @@ const VeoStudio: React.FC = () => {
                       </button>
                     ))}
                   </div>
+                  <p className="text-[10px] text-muted-foreground md:col-span-3">
+                    Clips over 15s use the Wan 3.0 long-form model.
+                  </p>
+
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
