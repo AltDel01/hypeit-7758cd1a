@@ -80,14 +80,13 @@ Deno.serve(async (req) => {
       const orientation = body.orientation === 'portrait' ? 'portrait' : 'landscape'
       const resolution = body.resolution === '1080p' ? '1080p' : '720p'
 
-      const rawSeconds = Number(body.seconds)
-      const seconds = Number.isFinite(rawSeconds)
-        ? Math.max(2, Math.min(15, Math.round(rawSeconds)))
-        : 5
+      const seconds = clampWanDuration(body.seconds, 5)
 
       const ref = (body.inputReference || '').toString()
       let firstFrame: string | undefined
-      const model = ref ? 'wan2.7-i2v' : 'wan2.7-t2v'
+      const baseModel = ref ? 'wan2.7-i2v' : 'wan2.7-t2v'
+      const model = needsLongFormModel(seconds) ? WAN_LONGFORM_MODEL : baseModel
+
 
       if (ref) {
         if (!ref.startsWith('data:image/')) {
