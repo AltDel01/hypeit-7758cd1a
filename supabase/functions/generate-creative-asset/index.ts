@@ -38,8 +38,10 @@ Deno.serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
-    const body = (await req.json().catch(() => ({}))) as { dayId?: string }
+    const body = (await req.json().catch(() => ({}))) as { dayId?: string; duration?: number | string }
     const dayId = (body.dayId || '').toString()
+    const videoDuration = clampWanDuration(body.duration, 5)
+
     if (!dayId) {
       return json({ error: 'A day is required.' }, 400)
     }
