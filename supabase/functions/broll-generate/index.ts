@@ -3,8 +3,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import {
   DASHSCOPE_BASE,
   authHeaders,
-  asyncAuthHeaders,
+  clampWanDuration,
+  needsLongFormModel,
+  createWanVideoTask,
+  WAN_LONGFORM_MODEL,
 } from '../_shared/dashscope.ts'
+
 
 /**
  * broll-generate
