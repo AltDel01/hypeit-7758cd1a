@@ -1048,6 +1048,28 @@ const CreativeWorkflow = () => {
                     </button>
                   ))}
                 </div>
+                {day.assetType === 'video' && day.genStage === 'idle' && (
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Clip length</p>
+                    <div className="flex flex-wrap gap-1">
+                      {[5, 10, 15, 20, 30].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setVideoDurations((prev) => ({ ...prev, [day.id]: s }))}
+                          className={cn(
+                            'rounded border px-1.5 py-0.5 text-[10px] transition-colors',
+                            (videoDurations[day.id] ?? 5) === s
+                              ? 'border-[#8C52FF] bg-[#8C52FF] text-white'
+                              : 'border-border text-muted-foreground hover:text-foreground',
+                          )}
+                        >
+                          {s}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="relative mx-auto aspect-[9/16] w-full max-w-[140px] overflow-hidden rounded-lg bg-gradient-to-b from-muted to-muted/40">
                   {day.genStage === 'idle' && (
                     <div className="flex h-full flex-col items-center justify-center gap-2 p-2 text-center">
