@@ -414,8 +414,9 @@ const VeoStudio: React.FC = () => {
                     onChange={(e) => updateScene(scene.id, { avoid: e.target.value })}
                     placeholder="Avoid, e.g. text overlays"
                   />
-                  <div className="flex gap-2">
-                    {([4, 6, 8, 10, 15] as const).map((s) => (
+                  <div className="flex flex-wrap gap-2">
+                    {([4, 6, 8, 10, 15, 20, 30] as const).map((s) => (
+
                       <button
                         key={s}
                         type="button"
