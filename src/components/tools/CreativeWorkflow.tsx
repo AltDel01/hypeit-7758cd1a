@@ -540,8 +540,9 @@ const CreativeWorkflow = () => {
     upsertPost(day, 'processing');
     try {
       const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
-        body: { dayId: day.id },
+        body: { dayId: day.id, duration: videoDurations[day.id] ?? 5 },
       });
+
       if (error) {
         // Surface insufficient-credit / rate-limit messages from the function body.
         let msg = 'Could not generate this asset. Try again.';
