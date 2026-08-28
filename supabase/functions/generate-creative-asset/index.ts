@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
           model: videoModel,
           prompt: basePrompt,
           resolution: '1080P',
-          duration: 5,
+          duration: videoDuration,
         }),
       }).catch((e) => {
         console.error('wan-video dispatch failed', e)
