@@ -111,29 +111,25 @@ Deno.serve(async (req) => {
       const input: Record<string, unknown> = { prompt }
       if (firstFrame) input.media = [{ type: 'first_frame', url: firstFrame }]
 
-      const headers: Record<string, string> = { ...asyncAuthHeaders() }
+      const headers: Record<string, string> = {}
       if (firstFrame) headers['X-DashScope-OssResourceResolve'] = 'enable'
 
-      const res = await fetch(CREATE_URL, {
-        method: 'POST',
+      const result = await createWanVideoTask({
+        endpoint: CREATE_URL,
+        model,
+        input,
+        parameters: {
+          resolution: resolution === '1080p' ? '1080P' : '720P',
+          duration: seconds,
+          size: SIZES[resolution][orientation],
+        },
         headers,
-        body: JSON.stringify({
-          model,
-          input,
-          parameters: {
-            resolution: resolution === '1080p' ? '1080P' : '720P',
-            duration: seconds,
-            size: SIZES[resolution][orientation],
-          },
-        }),
+        fallbackModel: baseModel,
       })
 
-      const payload = await res.json().catch(() => null)
-      const taskId = payload?.output?.task_id
-
-      if (!res.ok || !taskId) {
-        console.error('veo-studio create failed', res.status, JSON.stringify(payload).slice(0, 600))
-        if (res.status === 429) {
+      if (!result.ok) {
+        console.error('veo-studio create failed', result.status, result.detail.slice(0, 600))
+        if (result.status === 429) {
           return json({ error: 'The provider is rate limiting, please wait a moment.' }, 429)
         }
         return json(
@@ -145,13 +141,14 @@ Deno.serve(async (req) => {
       }
 
       return json({
-        videoId: taskId,
+        videoId: result.taskId,
         status: 'in_progress',
-        model,
-        seconds,
+        model: result.model,
+        seconds: result.duration || seconds,
         resolution,
         orientation,
       })
+
     }
 
     // ---- poll ----
