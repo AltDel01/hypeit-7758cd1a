@@ -429,6 +429,9 @@ const ChatComposer: React.FC = () => {
                             >{d}s</button>
                           ))}
                         </div>
+                        {duration > 15 && (
+                          <p className="mt-1.5 text-[10px] text-gray-500">Clips over 15s use Wan 3.0 long-form (up to 30s).</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-[10px] uppercase tracking-wide text-gray-500 mb-1.5">Resolution</label>
