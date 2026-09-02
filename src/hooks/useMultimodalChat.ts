@@ -369,13 +369,22 @@ export function useMultimodalChat() {
       try {
         const bmp = await createImageBitmap(file);
         const MAX = 2000;
-        const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+        const MIN = 384; // Wan rejects any side below 240px; keep a safe margin
+        let scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+        const minSide = Math.min(bmp.width, bmp.height) * scale;
+        if (minSide < MIN) {
+          scale = Math.min(
+            scale * (MIN / minSide),
+            MAX / Math.max(bmp.width, bmp.height)
+          );
+        }
         const w = Math.max(1, Math.round(bmp.width * scale));
         const h = Math.max(1, Math.round(bmp.height * scale));
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         if (!ctx) return file;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(bmp, 0, 0, w, h);
         bmp.close();
         const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/jpeg', 0.92));
@@ -386,6 +395,7 @@ export function useMultimodalChat() {
         return file;
       }
     };
+
 
     const uploadFile = async (file: File, prefix = ''): Promise<string | undefined> => {
       if (!user) return undefined;
