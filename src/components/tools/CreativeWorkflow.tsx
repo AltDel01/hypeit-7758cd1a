@@ -413,7 +413,7 @@ const CreativeWorkflow = () => {
         } else if ((r as { auto_failed?: boolean }).auto_failed) {
           patchDay(day.id, { genStage: 'idle', status: 'Draft' });
           toast.error(
-            (r as { failure_reason?: string }).failure_reason ||
+            displayFailureReason((r as { failure_reason?: string }).failure_reason) ||
               `${day.day} video generation failed. Please try again.`
           );
         }
