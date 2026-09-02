@@ -26,6 +26,7 @@ import {
   clampWanDuration,
   needsLongFormModel,
   WAN_LONGFORM_MODEL,
+  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 
 function guessTypeFromExt(path: string): string {
