@@ -7,6 +7,7 @@ import { GenerationRequest, retryAutoFulfill } from '@/services/generationReques
 import { toast } from 'sonner';
 import { parsePromptString } from '@/utils/promptParser';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { displayFailureReason } from '@/utils/failureReason';
 import { FEATURE_MODE_MAP } from '@/config/featureModes';
 import ReviewFeedbackBox from '@/components/dashboard/ReviewFeedbackBox';
 import { supabase } from '@/integrations/supabase/client';
@@ -232,7 +233,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
           <p className="text-sm opacity-80">{status.description}</p>
           {(request as any).failure_reason && (request.status === 'new' || request.status === 'failed') && (
             <p className="text-sm mt-2 opacity-90">
-              <span className="font-medium">Reason:</span> {(request as any).failure_reason}
+              <span className="font-medium">Reason:</span> {displayFailureReason((request as any).failure_reason)}
             </p>
           )}
           {autoFailed && (

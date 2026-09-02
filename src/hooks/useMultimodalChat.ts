@@ -302,9 +302,7 @@ export function useMultimodalChat() {
           update(assistantId, {
             kind: 'error',
             status: 'failed',
-            content:
-              (cur as any).failure_reason ||
-              'Auto-generation failed. Please try again.',
+            content: displayFailureReason((cur as any).failure_reason),
           });
           return;
         }
