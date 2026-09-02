@@ -307,6 +307,43 @@ export async function getUserIdFromAuth(
   return data.claims.sub as string;
 }
 
+/**
+ * Convert raw provider errors into a short, user-friendly message.
+ * Never leaks provider names, URLs, signatures, or raw JSON to clients.
+ */
+export function friendlyFailureReason(raw: unknown): string {
+  const text = String(raw ?? '');
+  const t = text.toLowerCase();
+
+  if (!text) return 'Automatic generation failed. Please try again.';
+  if (t.includes('resolution must be at least') || (t.includes('resolution') && t.includes('at least'))) {
+    return 'The reference image is too small. Please upload a larger image (at least 240x240) and try again.';
+  }
+  if (t.includes('can not read image') || t.includes('cannot read image') || t.includes('invalid image')) {
+    return 'The reference image could not be read. Please re-upload it and try again.';
+  }
+  if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
+    return "Blocked by the content safety filter. Try rewording your prompt or removing sensitive imagery.";
+  }
+  if (t.includes('inputdatalengthexceeded') || (t.includes('prompt') && t.includes('too long'))) {
+    return 'The prompt is too long for this model. Please shorten it and try again.';
+  }
+  if (t.includes('invalidapikey') || t.includes('api key')) {
+    return 'Generation service is temporarily unavailable. Please contact support.';
+  }
+  if (t.includes('throttling') || t.includes('rate limit') || t.includes('429')) {
+    return 'The generation service is busy right now. Please try again in a minute.';
+  }
+  if (t.includes('timeout') || t.includes('timed out')) {
+    return 'Generation timed out. Please try again.';
+  }
+  if (t.includes('no video url') || t.includes('no result')) {
+    return 'Generation finished without a result. Please try again.';
+  }
+  // Default: short generic message, raw provider detail stays server-side.
+  return 'Automatic generation failed. Please try again.';
+}
+
 export function genericError(status: number, message = 'Request failed') {
   return new Response(JSON.stringify({ error: message }), {
     status,
