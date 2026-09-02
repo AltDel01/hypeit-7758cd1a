@@ -68,6 +68,18 @@ function bilinearResize(
   return dst;
 }
 
+// Wan rejects any image with a side below 240px; keep a safe margin.
+const WAN_MIN_SIDE = 384;
+
+function wanScale(w: number, h: number): number {
+  let scale = Math.min(1, WAN_MAX_SIDE / Math.max(w, h));
+  const minSide = Math.min(w, h) * scale;
+  if (minSide < WAN_MIN_SIDE) {
+    scale = Math.min(scale * (WAN_MIN_SIDE / minSide), WAN_MAX_SIDE / Math.max(w, h));
+  }
+  return scale;
+}
+
 export async function normalizeImageForWan(
   bytes: Uint8Array,
   contentType: string
@@ -78,11 +90,12 @@ export async function normalizeImageForWan(
   try {
     const { Image } = await import('https://deno.land/x/imagescript@1.2.15/mod.ts');
     const img = await Image.decode(bytes);
-    if (img.width <= WAN_MAX_SIDE && img.height <= WAN_MAX_SIDE) {
-      return { bytes, contentType };
-    }
-    const scale = Math.min(WAN_MAX_SIDE / img.width, WAN_MAX_SIDE / img.height);
-    img.resize(Math.round(img.width * scale), Math.round(img.height * scale));
+    const scale = wanScale(img.width, img.height);
+    if (scale === 1) return { bytes, contentType };
+    img.resize(
+      Math.max(1, Math.round(img.width * scale)),
+      Math.max(1, Math.round(img.height * scale))
+    );
     const out = await img.encodeJPEG(90);
     console.log(`[dashscope] resized (imagescript) -> ${img.width}x${img.height}, ${out.length}B`);
     return { bytes: out, contentType: 'image/jpeg' };
@@ -95,8 +108,8 @@ export async function normalizeImageForWan(
     const jpeg = await import('npm:jpeg-js@0.4.4');
     const decoded = jpeg.decode(bytes, { useTArray: true, maxMemoryUsageInMB: 1024 });
     const { width: sw, height: sh } = decoded;
-    if (sw <= WAN_MAX_SIDE && sh <= WAN_MAX_SIDE) return { bytes, contentType };
-    const scale = Math.min(WAN_MAX_SIDE / sw, WAN_MAX_SIDE / sh);
+    const scale = wanScale(sw, sh);
+    if (scale === 1) return { bytes, contentType };
     const dw = Math.max(1, Math.round(sw * scale));
     const dh = Math.max(1, Math.round(sh * scale));
     const resized = bilinearResize(new Uint8Array(decoded.data), sw, sh, dw, dh);
@@ -108,6 +121,7 @@ export async function normalizeImageForWan(
     return { bytes, contentType };
   }
 }
+
 
 /**
  * Upload a file to DashScope's own temporary OSS storage and return an
