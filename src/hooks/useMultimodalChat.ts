@@ -7,6 +7,7 @@ import {
   GenerationRequest,
 } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { displayFailureReason } from '@/utils/failureReason';
 import {
   joinStoredAttachmentUrls,
   withMediaRole,
