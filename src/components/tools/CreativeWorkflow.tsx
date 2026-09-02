@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { displayFailureReason } from '@/utils/failureReason';
 
 /* ---------------- Types ---------------- */
 
