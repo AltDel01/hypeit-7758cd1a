@@ -17,6 +17,7 @@ import {
   getUserIdFromAuth,
   genericError,
   ok,
+  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 
 interface RequestBody {

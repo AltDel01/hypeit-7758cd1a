@@ -23,6 +23,7 @@ import {
   ok,
   uploadToDashScopeOss,
   normalizeImageForWan,
+  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 
 const LIPSYNC_MODEL = 'wan2.7-i2v';
