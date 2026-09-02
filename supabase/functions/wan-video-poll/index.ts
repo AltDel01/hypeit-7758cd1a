@@ -142,16 +142,7 @@ serve(async (req) => {
 
 function humanizeTaskFailure(json: any): string {
   const out = json?.output || {};
-  const code: string = String(out.code || '').toLowerCase();
-  const msg: string = String(out.message || '');
-  if (code.includes('datainspectionfailed') || msg.toLowerCase().includes('green net') || msg.toLowerCase().includes('inappropriate')) {
-    return "Blocked by provider's content safety filter. Try rewording your prompt or removing sensitive imagery.";
-  }
-  if (code.includes('inputdatalengthexceeded') || msg.toLowerCase().includes('too long')) {
-    return 'Prompt is too long for this model. Please shorten it.';
-  }
-  if (code.includes('invalidapikey')) return 'Provider rejected the API key.';
-  if (out.task_status === 'UNKNOWN') return 'Provider lost track of the task.';
-  return msg ? `Provider error: ${msg}` : 'Automatic generation failed.';
+  if (out.task_status === 'UNKNOWN') return 'Generation was interrupted. Please try again.';
+  return friendlyFailureReason(`${out.code || ''} ${out.message || ''}`);
 }
 
