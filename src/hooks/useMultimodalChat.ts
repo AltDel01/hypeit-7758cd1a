@@ -7,6 +7,7 @@ import {
   GenerationRequest,
 } from '@/services/generationRequestService';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { displayFailureReason } from '@/utils/failureReason';
 import {
   joinStoredAttachmentUrls,
   withMediaRole,
@@ -302,9 +303,7 @@ export function useMultimodalChat() {
           update(assistantId, {
             kind: 'error',
             status: 'failed',
-            content:
-              (cur as any).failure_reason ||
-              'Auto-generation failed. Please try again.',
+            content: displayFailureReason((cur as any).failure_reason),
           });
           return;
         }

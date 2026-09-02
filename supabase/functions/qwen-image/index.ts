@@ -17,6 +17,7 @@ import {
   getUserIdFromAuth,
   genericError,
   ok,
+  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 
 interface RequestBody {
@@ -278,29 +279,11 @@ function isModelUnavailable(status: number, raw: string): boolean {
 
 function humanizeProviderError(status: number, raw: string): string {
   const t = (raw || '').toLowerCase();
-  if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
-    return "Blocked by provider's content safety filter. Try rewording your prompt.";
+  if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied') || status === 403) {
+    return 'This image model is temporarily unavailable. Please try again later.';
   }
-  if (t.includes('inputdatalengthexceeded') || (t.includes('prompt') && t.includes('length'))) {
-    return 'Prompt is too long for this model (max ~4000 chars). Please shorten it.';
-  }
-  if (t.includes('invalidapikey')) {
-    return 'Provider rejected the API key. Please contact support.';
-  }
-  if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied')) {
-    return 'This image model is not available on the provider account.';
-  }
-  if (t.includes('throttling') || status === 429) {
-    return 'Provider is rate-limiting requests. Please retry in a minute.';
-  }
-  if (status === 401) {
-    return 'Provider rejected the API key. Please contact support.';
-  }
-  if (status === 403) {
-    return 'This image model is not available on the provider account.';
-  }
-  if (status >= 500) return 'Provider service is temporarily unavailable.';
-  return `Provider error (${status}).`;
+  // Everything else maps to a short, friendly, provider-agnostic message.
+  return friendlyFailureReason(`${status} ${raw || ''}`);
 }
 
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {

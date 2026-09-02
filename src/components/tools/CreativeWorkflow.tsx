@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
+import { displayFailureReason } from '@/utils/failureReason';
 
 /* ---------------- Types ---------------- */
 
@@ -413,7 +414,7 @@ const CreativeWorkflow = () => {
         } else if ((r as { auto_failed?: boolean }).auto_failed) {
           patchDay(day.id, { genStage: 'idle', status: 'Draft' });
           toast.error(
-            (r as { failure_reason?: string }).failure_reason ||
+            displayFailureReason((r as { failure_reason?: string }).failure_reason) ||
               `${day.day} video generation failed. Please try again.`
           );
         }
