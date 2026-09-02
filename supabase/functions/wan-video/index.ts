@@ -306,22 +306,11 @@ serve(async (req) => {
   }
 });
 
-function humanizeProviderError(status: number, raw: string): string {
-  const t = (raw || '').toLowerCase();
-  if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate')) {
-    return "Blocked by provider's content safety filter. Try rewording your prompt or removing sensitive imagery.";
-  }
-  if (t.includes('inputdatalengthexceeded') || t.includes('prompt') && t.includes('length')) {
-    return 'Prompt is too long for this model. Please shorten it (Wan supports ~800 chars).';
-  }
-  if (t.includes('invalidapikey') || status === 401 || status === 403) {
-    return 'Provider rejected the API key. Please contact support.';
-  }
-  if (t.includes('throttling') || status === 429) {
-    return 'Provider is rate-limiting requests. Please retry in a minute.';
-  }
-  if (status >= 500) return 'Provider service is temporarily unavailable.';
-  return `Provider error (${status}).`;
+function humanizeProviderError(_status: number, raw: string): string {
+  // Never surface raw provider payloads (they contain signed OSS URLs and
+  // internal error JSON). All user-facing reasons go through the shared
+  // friendly mapper; raw detail stays in function logs only.
+  return friendlyFailureReason(raw);
 }
 
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
@@ -332,7 +321,7 @@ async function markFailed(admin: any, requestId: string, model: string, reason?:
       auto_model: model,
       auto_failed: true,
       status: 'new',
-      failure_reason: reason || 'Automatic generation failed',
+      failure_reason: friendlyFailureReason(reason),
     })
     .eq('id', requestId);
 }
