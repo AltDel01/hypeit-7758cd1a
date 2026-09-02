@@ -206,11 +206,10 @@ serve(async (req) => {
 
 function humanizeUpstream(txt: string): string {
   const t = txt.toLowerCase();
-  if (t.includes('model not exist')) return 'The lip sync model is not available on this account region.';
-  if (t.includes('face')) return 'The provider could not detect a usable face in the photo. Try a clear, front-facing portrait.';
-  if (t.includes('audio')) return 'The provider rejected the audio track. Use a WAV or MP3 between 2 and 30 seconds.';
-  if (t.includes('invalidapikey')) return 'Provider rejected the API key.';
-  return 'The provider rejected this lip sync request.';
+  if (t.includes('model not exist')) return 'Lip sync is temporarily unavailable. Please try again later.';
+  if (t.includes('face')) return 'No usable face was detected in the photo. Try a clear, front-facing portrait.';
+  if (t.includes('audio')) return 'The audio track could not be used. Use a WAV or MP3 between 2 and 30 seconds.';
+  return friendlyFailureReason(txt);
 }
 
 async function markFailed(admin: any, requestId: string, model: string, reason: string) {

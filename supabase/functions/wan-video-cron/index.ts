@@ -18,6 +18,7 @@ import {
   authHeaders,
   genericError,
   ok,
+  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 
 serve(async (req) => {
