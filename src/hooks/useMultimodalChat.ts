@@ -413,11 +413,15 @@ export function useMultimodalChat() {
     };
 
     // 2. Upload attachments (paperclip), keeping each user-assigned role.
+    // An upload that fails must never be swallowed: continuing would silently
+    // generate a plain text-to-video clip that ignores the user's media.
     const storageRefs: string[] = [];
+    const failedUploads: string[] = [];
     if (user && attachments.length) {
       for (const item of attachments) {
         const r = await uploadFile(item.file);
         if (r) storageRefs.push(withMediaRole(r, item.role));
+        else failedUploads.push(item.file.name);
       }
     }
 
@@ -427,10 +431,42 @@ export function useMultimodalChat() {
     let firstFrameRef: string | undefined;
     let lastFrameRef: string | undefined;
     let maskRef: string | undefined;
-    if (user && videoOpts?.audioFile) audioRef = await uploadFile(videoOpts.audioFile, 'audio-');
-    if (user && videoOpts?.firstFrameFile) firstFrameRef = await uploadFile(videoOpts.firstFrameFile, 'first-');
-    if (user && videoOpts?.lastFrameFile) lastFrameRef = await uploadFile(videoOpts.lastFrameFile, 'last-');
-    if (user && imageOpts?.maskFile) maskRef = await uploadFile(imageOpts.maskFile, 'mask-');
+    if (user && videoOpts?.audioFile) {
+      audioRef = await uploadFile(videoOpts.audioFile, 'audio-');
+      if (!audioRef) failedUploads.push(videoOpts.audioFile.name);
+    }
+    if (user && videoOpts?.firstFrameFile) {
+      firstFrameRef = await uploadFile(videoOpts.firstFrameFile, 'first-');
+      if (!firstFrameRef) failedUploads.push(videoOpts.firstFrameFile.name);
+    }
+    if (user && videoOpts?.lastFrameFile) {
+      lastFrameRef = await uploadFile(videoOpts.lastFrameFile, 'last-');
+      if (!lastFrameRef) failedUploads.push(videoOpts.lastFrameFile.name);
+    }
+    if (user && imageOpts?.maskFile) {
+      maskRef = await uploadFile(imageOpts.maskFile, 'mask-');
+      if (!maskRef) failedUploads.push(imageOpts.maskFile.name);
+    }
+
+    if (failedUploads.length) {
+      toast.error(
+        failedUploads.length === 1
+          ? `"${failedUploads[0]}" could not be uploaded. Please try a smaller file.`
+          : `${failedUploads.length} attachments could not be uploaded. Please try smaller files.`
+      );
+      setMessages(prev => [
+        ...prev,
+        {
+          id: uid(),
+          role: 'assistant',
+          kind: 'error',
+          content:
+            'Your attachment could not be uploaded, so nothing was generated. Please re-attach the file and try again.',
+        },
+      ]);
+      setIsBusy(false);
+      return;
+    }
 
     // If a mask is provided, force image intent (inpaint)
     const hasMask = !!maskRef;

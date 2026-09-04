@@ -16,6 +16,7 @@ import {
   ok,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
   requestId: string;
@@ -129,6 +130,8 @@ serve(async (req) => {
           failure_reason: null,
         })
         .eq('id', body.requestId);
+
+      await notifyResultReady(admin, body.requestId);
 
       return ok({ status: 'completed', resultUrl: storedUrl });
     }

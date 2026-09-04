@@ -19,6 +19,7 @@ import {
   ok,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
   requestId: string;
@@ -223,6 +224,8 @@ serve(async (req) => {
       console.error('[qwen-image] update failed', updErr);
       return genericError(500, 'Internal error');
     }
+
+    await notifyResultReady(admin, body.requestId);
 
     return ok({ ok: true, requestId: body.requestId });
   } catch (e) {

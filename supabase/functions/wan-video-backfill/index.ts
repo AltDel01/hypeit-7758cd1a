@@ -16,6 +16,7 @@ import {
   genericError,
   ok,
 } from '../_shared/dashscope.ts';
+import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -115,6 +116,8 @@ serve(async (req) => {
             auto_failed: false,
           })
           .eq('id', row.id);
+
+        await notifyResultReady(admin, row.id);
 
         results.push({ id: row.id, status: 'completed' });
       }
