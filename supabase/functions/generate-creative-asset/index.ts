@@ -1,6 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
+import { notifyResultReady } from '../_shared/resultEmail.ts'
 
 
 const IMAGE_COST = 30
@@ -258,6 +259,8 @@ Deno.serve(async (req) => {
       })
       .select('id')
       .maybeSingle()
+
+    if (imgReq?.id) await notifyResultReady(admin, imgReq.id)
 
     await admin
       .from('creative_days')
