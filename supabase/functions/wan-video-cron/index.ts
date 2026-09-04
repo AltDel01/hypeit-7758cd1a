@@ -20,6 +20,7 @@ import {
   ok,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -156,6 +157,8 @@ serve(async (req) => {
             failure_reason: null,
           })
           .eq('id', row.id);
+
+        await notifyResultReady(admin, row.id);
 
         results.push({ id: row.id, status: 'completed' });
       }
