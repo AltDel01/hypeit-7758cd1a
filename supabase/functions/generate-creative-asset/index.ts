@@ -2,6 +2,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
+import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
 
 
 const IMAGE_COST = 30
@@ -111,6 +112,14 @@ Deno.serve(async (req) => {
         console.error('video request insert failed', grErr)
         return json({ error: 'Could not start video generation.' }, 500)
       }
+
+      notifyAdminNewRequest(admin, {
+        userName: profile?.display_name,
+        userEmail: profile?.email,
+        requestType: 'video',
+        prompt: basePrompt,
+        aspectRatio: '9:16',
+      })
 
       await admin
         .from('creative_days')
@@ -260,7 +269,16 @@ Deno.serve(async (req) => {
       .select('id')
       .maybeSingle()
 
-    if (imgReq?.id) await notifyResultReady(admin, imgReq.id)
+    if (imgReq?.id) {
+      await notifyResultReady(admin, imgReq.id)
+      await notifyAdminNewRequest(admin, {
+        userName: profile?.display_name,
+        userEmail: profile?.email,
+        requestType: 'image',
+        prompt: basePrompt,
+        aspectRatio: '9:16',
+      })
+    }
 
     await admin
       .from('creative_days')
