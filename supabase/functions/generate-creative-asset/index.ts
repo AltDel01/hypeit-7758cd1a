@@ -269,7 +269,16 @@ Deno.serve(async (req) => {
       .select('id')
       .maybeSingle()
 
-    if (imgReq?.id) await notifyResultReady(admin, imgReq.id)
+    if (imgReq?.id) {
+      await notifyResultReady(admin, imgReq.id)
+      await notifyAdminNewRequest(admin, {
+        userName: profile?.display_name,
+        userEmail: profile?.email,
+        requestType: 'image',
+        prompt: basePrompt,
+        aspectRatio: '9:16',
+      })
+    }
 
     await admin
       .from('creative_days')
