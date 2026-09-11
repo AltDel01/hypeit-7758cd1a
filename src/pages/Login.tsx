@@ -137,6 +137,26 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+
+            {unconfirmedEmail && (
+              <div className="mt-5 rounded-lg border border-[#8c52ff]/40 bg-[#8c52ff]/10 p-4 text-center">
+                <p className="text-sm text-gray-200">
+                  Please verify your email first. We sent a link to{' '}
+                  <span className="font-medium text-white">{unconfirmedEmail}</span>.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResend}
+                  disabled={cooldown > 0}
+                  className="mt-3 w-full border-[#8c52ff]/50 bg-transparent text-white hover:bg-[#8c52ff]/20"
+                >
+                  {cooldown > 0 ? `Resend email in ${cooldown}s` : 'Resend verification email'}
+                </Button>
+              </div>
+            )}
+
+
             
             <div className="mt-6 text-center">
               <p className="text-gray-400">
