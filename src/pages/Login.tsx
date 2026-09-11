@@ -25,8 +25,10 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmation } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const [params] = useSearchParams();
 
   // If /login?next=/some/path is present, preserve it for the post-login redirect
@@ -37,6 +39,12 @@ export default function Login() {
       sessionStorage.setItem('postLoginRedirect', next);
     }
   }, [params]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,12 +57,26 @@ export default function Login() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setUnconfirmedEmail(null);
     try {
       await signIn(values.email, values.password);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'email_not_confirmed') {
+        setUnconfirmedEmail(values.email);
+      }
       console.error('Login failed:', error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!unconfirmedEmail || cooldown > 0) return;
+    try {
+      await resendConfirmation(unconfirmedEmail);
+      setCooldown(60);
+    } catch (error) {
+      console.error('Resend failed:', error);
     }
   }
 
