@@ -157,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         signIn,
         signUp,
+        resendConfirmation,
         signOut
       }}
     >
@@ -176,6 +177,7 @@ export const useAuth = () => {
       loading: true,
       signIn: async () => { throw new Error('AuthProvider not available'); },
       signUp: async () => { throw new Error('AuthProvider not available'); },
+      resendConfirmation: async () => { throw new Error('AuthProvider not available'); },
       signOut: async () => { throw new Error('AuthProvider not available'); },
     } as AuthContextType;
   }
