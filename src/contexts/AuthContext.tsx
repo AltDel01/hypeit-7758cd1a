@@ -35,6 +35,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Backfill the user's country in the background (non-blocking)
           const uid = currentSession?.user?.id;
           if (uid) setTimeout(() => { captureUserCountry(uid); }, 0);
+          // Arriving from an email verification link: confirm it and go to the app
+          const hash = window.location.hash || '';
+          const search = window.location.search || '';
+          const cameFromEmailLink =
+            hash.includes('type=signup') ||
+            hash.includes('type=email_change') ||
+            new URLSearchParams(search).has('code');
+          if (cameFromEmailLink && sessionStorage.getItem('authRedirectPending') !== '1') {
+            toast.success('Email verified. Welcome to Viralin AI!');
+          }
           // Only redirect when sign-in was explicitly initiated from UI
           const shouldHandleRedirect = sessionStorage.getItem('authRedirectPending') === '1';
           if (shouldHandleRedirect) {
