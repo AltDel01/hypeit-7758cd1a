@@ -69,15 +69,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
     } catch (error: any) {
       sessionStorage.removeItem('authRedirectPending');
+      const unconfirmed =
+        error?.code === 'email_not_confirmed' ||
+        /confirm/i.test(error?.message || '') && /email/i.test(error?.message || '');
+      if (unconfirmed) {
+        const e = new Error('Please verify your email first. Check your inbox for the verification link.');
+        (e as any).code = 'email_not_confirmed';
+        toast.error(e.message);
+        throw e;
+      }
       toast.error(error.message || 'Error signing in');
       throw error;
     }
   };
 
+  const resendConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    if (error) {
+      toast.error(error.message || 'Could not resend the verification email');
+      throw error;
+    }
+    toast.success('Verification email sent. Please check your inbox.');
+  };
+
   const signUp = async (email: string, password: string, name?: string, referralCode?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -91,45 +113,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (error) throw error;
 
-      // If referral code provided, link the referral
-      if (referralCode && data.user) {
-        // Find the referrer by referral_code
-        const { data: referrerProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('referral_code', referralCode)
-          .maybeSingle();
+      // Referral attribution now happens in the signup database trigger,
+      // because there is no session until the email is confirmed.
 
-        if (referrerProfile) {
-          // Update the new user's referred_by
-          await supabase
-            .from('profiles')
-            .update({ referred_by: referrerProfile.id })
-            .eq('id', data.user.id);
-
-          // Update the referral record status
-          await supabase
-            .from('referrals')
-            .update({ 
-              referred_id: data.user.id, 
-              status: 'signed_up' 
-            } as any)
-            .eq('referrer_id', referrerProfile.id)
-            .eq('referral_code', referralCode)
-            .is('referred_id', null);
-
-          // Award bonus credits to the new user
-          try {
-            await supabase
-              .from('profiles')
-              .update({ bonus_credits: 10 } as any)
-              .eq('id', data.user.id);
-          } catch {
-            console.error('Failed to award bonus credits');
-          }
-        }
-      }
-      
       // Send signup notification email (fire and forget)
       sendNotificationEmail({
         type: 'signup',
@@ -137,8 +123,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userEmail: email,
         timestamp: new Date().toISOString(),
       }).catch(console.error);
-      
-      toast.success('Account created successfully!');
+
+      const needsConfirmation = !data.session;
+      if (!needsConfirmation) toast.success('Account created successfully!');
+      return { needsConfirmation };
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');
       throw error;
