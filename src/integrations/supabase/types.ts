@@ -563,6 +563,21 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_config: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       internal_keys: {
         Row: {
           created_at: string
