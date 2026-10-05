@@ -3,7 +3,6 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { sendNotificationEmail } from '@/services/generationRequestService';
 import { captureUserCountry } from '@/utils/geo';
 interface AuthContextType {
   session: Session | null;
@@ -126,13 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Referral attribution now happens in the signup database trigger,
       // because there is no session until the email is confirmed.
 
-      // Send signup notification email (fire and forget)
-      sendNotificationEmail({
-        type: 'signup',
-        userName: name || email.split('@')[0],
-        userEmail: email,
-        timestamp: new Date().toISOString(),
-      }).catch(console.error);
+      // Admin "new signup" alert is sent server-side by a database trigger.
 
       const needsConfirmation = !data.session;
       if (!needsConfirmation) toast.success('Account created successfully!');
