@@ -250,6 +250,9 @@ export type Database = {
           id: string
           platforms: Json
           position: number
+          post_error: string | null
+          publish_results: Json
+          scheduled_at: string | null
           scheduled_time: string
           status: string
           strategy_id: string | null
@@ -268,6 +271,9 @@ export type Database = {
           id?: string
           platforms?: Json
           position?: number
+          post_error?: string | null
+          publish_results?: Json
+          scheduled_at?: string | null
           scheduled_time?: string
           status?: string
           strategy_id?: string | null
@@ -286,6 +292,9 @@ export type Database = {
           id?: string
           platforms?: Json
           position?: number
+          post_error?: string | null
+          publish_results?: Json
+          scheduled_at?: string | null
           scheduled_time?: string
           status?: string
           strategy_id?: string | null
@@ -913,6 +922,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_connections: {
+        Row: {
+          access_token_ciphertext: string
+          account_id: string
+          account_name: string | null
+          avatar_url: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          ig_user_id: string | null
+          page_id: string | null
+          platform: string
+          refresh_expires_at: string | null
+          refresh_token_ciphertext: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_ciphertext: string
+          account_id: string
+          account_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ig_user_id?: string | null
+          page_id?: string | null
+          platform: string
+          refresh_expires_at?: string | null
+          refresh_token_ciphertext?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_ciphertext?: string
+          account_id?: string
+          account_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ig_user_id?: string | null
+          page_id?: string | null
+          platform?: string
+          refresh_expires_at?: string | null
+          refresh_token_ciphertext?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_oauth_states: {
+        Row: {
+          created_at: string
+          provider: string
+          redirect_uri: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          provider: string
+          redirect_uri: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          provider?: string
+          redirect_uri?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       tool_workflow_runs: {
         Row: {
