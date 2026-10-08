@@ -11,6 +11,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, Phone, Twitter, Instagram, Linkedin, Globe, Camera, Loader2, Save, ArrowLeft } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { z } from 'zod';
+import ConnectedAccounts, { useSocialConnections } from '@/components/social/ConnectedAccounts';
+
+const SocialAccountsCard = () => {
+  const state = useSocialConnections();
+  return <ConnectedAccounts state={state} />;
+};
 
 const profileSchema = z.object({
   display_name: z.string().max(100, 'Name must be less than 100 characters').optional().nullable(),
@@ -265,6 +271,8 @@ const Settings = () => {
           </Card>
 
           {/* Basic Info Section */}
+          <SocialAccountsCard />
+
           <Card className="bg-gray-900/50 border-gray-800">
             <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
               <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
