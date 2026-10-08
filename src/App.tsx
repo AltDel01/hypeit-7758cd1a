@@ -39,6 +39,7 @@ import Tools from "./pages/Tools";
 import PostingHistory from "./pages/PostingHistory";
 import TrendResearch from "./pages/TrendResearch";
 import OAuthConsent from "./pages/OAuthConsent";
+import SocialOAuthCallback from "./pages/SocialOAuthCallback";
 import VeoStudio from "./pages/VeoStudio";
 import React from "react";
 import { useLanguage } from "./hooks/useLanguage";
@@ -170,6 +171,7 @@ const AppRoutes = () => {
         element={<ProtectedRoute><CustomErrorBoundary><VeoStudio /></CustomErrorBoundary></ProtectedRoute>}
       />
       <Route path="/.lovable/oauth/consent" element={<CustomErrorBoundary><OAuthConsent /></CustomErrorBoundary>} />
+      <Route path="/oauth/:provider/callback" element={<SocialOAuthCallback />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
     </Routes>

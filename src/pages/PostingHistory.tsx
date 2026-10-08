@@ -8,12 +8,13 @@ import AuroraBackground from '@/components/effects/AuroraBackground';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import TikTokIcon from '@/components/tools/TikTokIcon';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 
-type PostStatus = 'queued' | 'processing' | 'posted' | 'failed';
+type PostStatus = 'queued' | 'scheduled' | 'processing' | 'posting' | 'posted' | 'failed';
 
 interface PostRow {
   id: string;
@@ -27,18 +28,23 @@ interface PostRow {
   platforms: Record<string, boolean> | null;
   scheduled_time: string;
   status: string;
+  scheduled_at?: string | null;
+  post_error?: string | null;
+  publish_results?: Record<string, { status: string; url?: string; error?: string }> | null;
   created_at: string;
   updated_at: string;
 }
 
 const STATUS_META: Record<PostStatus, { label: string; icon: typeof Clock; className: string; spin?: boolean }> = {
   queued: { label: 'Queued', icon: ListTodo, className: 'bg-amber-500/15 text-amber-500 border-amber-500/30' },
+  scheduled: { label: 'Scheduled', icon: Clock, className: 'bg-violet-500/15 text-violet-400 border-violet-500/30' },
+  posting: { label: 'Posting', icon: Loader2, className: 'bg-sky-500/15 text-sky-500 border-sky-500/30', spin: true },
   processing: { label: 'Processing', icon: Loader2, className: 'bg-sky-500/15 text-sky-500 border-sky-500/30', spin: true },
   posted: { label: 'Posted', icon: CheckCircle2, className: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' },
   failed: { label: 'Failed', icon: XCircle, className: 'bg-red-500/15 text-red-500 border-red-500/30' },
 };
 
-const FILTERS: ('all' | PostStatus)[] = ['all', 'queued', 'processing', 'posted', 'failed'];
+const FILTERS: ('all' | PostStatus)[] = ['all', 'queued', 'scheduled', 'processing', 'posted', 'failed'];
 
 const PlatformIcons = ({ platforms }: { platforms: Record<string, boolean> | null }) => {
   if (!platforms) return null;
@@ -94,10 +100,18 @@ const PostingHistory = () => {
       .select('*')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
-    setPosts((data as PostRow[]) || []);
+    setPosts((data as unknown as PostRow[]) || []);
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+
+  const publishNow = async (id: string) => {
+    setPosts((prev) => prev ? prev.map((x) => x.id === id ? { ...x, status: 'posting' } : x) : prev);
+    const { data, error } = await supabase.functions.invoke('social-publish', { body: { postId: id } });
+    if (error || data?.status === 'failed') toast.error('Some platforms did not accept the post.');
+    else toast.success(data?.status === 'posted' ? 'Posted!' : 'Publishing, check back shortly.');
+    load();
+  };
 
   const visible = (posts || []).filter((p) => filter === 'all' || p.status === filter);
 
@@ -169,6 +183,15 @@ const PostingHistory = () => {
                       {p.scheduled_time && <span>Scheduled {p.scheduled_time.replace('T', ' ')} · </span>}
                       Updated {new Date(p.updated_at).toLocaleString()}
                     </p>
+                    {p.publish_results && Object.keys(p.publish_results).length > 0 && (
+                      <div className="flex flex-wrap gap-2 text-[11px]">
+                        {Object.entries(p.publish_results).map(([plat, r]) => (
+                          r.url && r.status === 'posted'
+                            ? <a key={plat} href={r.url} target="_blank" rel="noreferrer" className="text-primary underline capitalize">View on {plat}</a>
+                            : <span key={plat} className={cn('capitalize', r.status === 'failed' ? 'text-destructive' : 'text-muted-foreground')}>{plat}: {r.status === 'failed' ? r.error : r.status}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <span
                     className={cn(
@@ -179,6 +202,11 @@ const PostingHistory = () => {
                     <Icon className={cn('h-3.5 w-3.5', meta.spin && 'animate-spin')} />
                     {meta.label}
                   </span>
+                  {(p.status === 'failed' || p.status === 'queued') && p.asset_url && (
+                    <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => publishNow(p.id)}>
+                      {p.status === 'failed' ? 'Retry' : 'Post now'}
+                    </Button>
+                  )}
                 </Card>
               );
             })}
