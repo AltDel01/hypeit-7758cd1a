@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
+import ConnectedAccounts, { useSocialConnections } from '@/components/social/ConnectedAccounts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -162,6 +163,7 @@ const CreativeWorkflow = () => {
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
+  const social = useSocialConnections();
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
@@ -615,16 +617,46 @@ const CreativeWorkflow = () => {
   const setAssetType = (day: DayPlan, t: AssetType) => patchDay(day.id, { assetType: t });
 
 
-  const togglePlatform = (day: DayPlan, p: Platform) =>
+  const togglePlatform = (day: DayPlan, p: Platform) => {
+    if (!day.platforms[p] && !social.isConnected(p)) {
+      toast.error(`Connect your ${PLATFORM_META[p].label.split(' ')[0]} account first (Connected Accounts above).`);
+      return;
+    }
     patchDay(day.id, { platforms: { ...day.platforms, [p]: !day.platforms[p] } });
+  };
+
+  const connectedTargets = (day: DayPlan) =>
+    (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p] && social.isConnected(p));
+
+  /** Send a saved post to the publisher; a future time schedules it, otherwise it posts now. */
+  const publishDay = async (day: DayPlan, scheduleAt: string | null) => {
+    const { data: row } = await supabase.from('creative_posts').select('id').eq('day_id', day.id).maybeSingle();
+    if (!row?.id) throw new Error('Could not find the saved post');
+    const { data, error } = await supabase.functions.invoke('social-publish', {
+      body: { postId: row.id, scheduledAt: scheduleAt },
+    });
+    if (error) throw new Error('Posting failed, please try again');
+    return data as { status: string; scheduledAt?: string };
+  };
 
   const approve = async (day: DayPlan) => {
     if (day.genStage !== 'ready' || !day.assetUrl) {
       toast.error('Generate the image or video first, then approve it.');
       return;
     }
+    const targets = connectedTargets(day);
     // Saving to the posting history happens here, once the user approves the result.
-    await finalizeDay(day, day.assetUrl);
+    await finalizeDay({ ...day, platforms: Object.fromEntries((Object.keys(day.platforms) as Platform[]).map((p) => [p, targets.includes(p)])) as Record<Platform, boolean> }, day.assetUrl);
+    const when = day.time ? new Date(day.time) : null;
+    if (targets.length && when && !isNaN(when.getTime()) && when.getTime() > Date.now() + 60_000) {
+      try {
+        await publishDay(day, when.toISOString());
+        toast.success(`${day.day} scheduled to post on ${when.toLocaleString()}.`);
+        return;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'Could not schedule');
+      }
+    }
     toast.success(`${day.day} approved and saved to your posting history.`);
   };
 
@@ -686,19 +718,32 @@ const CreativeWorkflow = () => {
   };
 
   /* -------- Post a single day to its selected social platforms -------- */
-  const handlePost = (day: DayPlan) => {
+  const handlePost = async (day: DayPlan) => {
     if (day.genStage !== 'ready' || !day.assetUrl) {
       toast.error('Generate or add an asset before posting.');
       return;
     }
-    const targets = (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p]);
+    const targets = connectedTargets(day);
     if (!targets.length) {
-      toast.error('Select at least one platform to post to.');
+      toast.error('Connect an account and select at least one platform to post to.');
       return;
     }
-    patchDay(day.id, { status: 'Published' });
-    upsertPost({ ...day, status: 'Published' }, 'posted');
-    toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`);
+    const toastId = toast.loading(`Posting ${day.day}...`);
+    try {
+      const only = Object.fromEntries((Object.keys(day.platforms) as Platform[]).map((p) => [p, targets.includes(p)])) as Record<Platform, boolean>;
+      await upsertPost({ ...day, platforms: only }, 'processing');
+      const r = await publishDay(day, null);
+      if (r.status === 'posted') {
+        patchDay(day.id, { status: 'Published' });
+        toast.success(`${day.day} posted to ${targets.map((p) => PLATFORM_META[p].label).join(', ')}.`, { id: toastId });
+      } else if (r.status === 'posting') {
+        toast.success(`${day.day} is being published. Check Posting history for the result.`, { id: toastId });
+      } else {
+        toast.error('Some platforms did not accept the post. See Posting history for details.', { id: toastId });
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Posting failed', { id: toastId });
+    }
   };
 
   return (
@@ -724,6 +769,8 @@ const CreativeWorkflow = () => {
         Tip: once a day's media finishes generating, the box clears itself and the result moves to your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
       </p>
 
+
+      <ConnectedAccounts state={social} />
 
       {/* Brand summary bar (returning users) */}
       {hasStrategy && !editingProfile && (
