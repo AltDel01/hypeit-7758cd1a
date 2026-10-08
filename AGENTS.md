@@ -1,0 +1,1 @@
+- Social posting (TikTok/Meta) uses custom per-user OAuth in edge functions (social-*), tokens encrypted in service-role-only social_connections; why: no managed connector exists and tokens must never reach the browser.
