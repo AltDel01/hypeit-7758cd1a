@@ -100,7 +100,7 @@ const PostingHistory = () => {
       .select('*')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
-    setPosts((data as PostRow[]) || []);
+    setPosts((data as unknown as PostRow[]) || []);
   }, [user]);
 
   useEffect(() => { load(); }, [load]);

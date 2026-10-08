@@ -163,7 +163,7 @@ const CreativeWorkflow = () => {
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [strategyId, setStrategyId] = useState<string | null>(null);
   const [days, setDays] = useState<DayPlan[] | null>(null);
-  const social = useSocialConnections();
+  const socialConn = useSocialConnections();
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
@@ -618,7 +618,7 @@ const CreativeWorkflow = () => {
 
 
   const togglePlatform = (day: DayPlan, p: Platform) => {
-    if (!day.platforms[p] && !social.isConnected(p)) {
+    if (!day.platforms[p] && !socialConn.isConnected(p)) {
       toast.error(`Connect your ${PLATFORM_META[p].label.split(' ')[0]} account first (Connected Accounts above).`);
       return;
     }
@@ -626,7 +626,7 @@ const CreativeWorkflow = () => {
   };
 
   const connectedTargets = (day: DayPlan) =>
-    (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p] && social.isConnected(p));
+    (Object.keys(day.platforms) as Platform[]).filter((p) => day.platforms[p] && socialConn.isConnected(p));
 
   /** Send a saved post to the publisher; a future time schedules it, otherwise it posts now. */
   const publishDay = async (day: DayPlan, scheduleAt: string | null) => {
@@ -770,7 +770,7 @@ const CreativeWorkflow = () => {
       </p>
 
 
-      <ConnectedAccounts state={social} />
+      <ConnectedAccounts state={socialConn} />
 
       {/* Brand summary bar (returning users) */}
       {hasStrategy && !editingProfile && (
