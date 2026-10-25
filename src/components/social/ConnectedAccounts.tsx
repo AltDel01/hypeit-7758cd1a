@@ -62,7 +62,7 @@ const ConnectedAccounts = ({ state }: Props) => {
         body: { provider, origin: window.location.origin },
       });
       if (error || !data?.authorizationUrl) {
-        throw new Error(data?.error === 'not_configured' || !data ? `${META[p].label} connection is not available yet` : 'Could not start connection');
+        throw new Error(`We couldn't reach ${META[p].label} right now. Please try again in a few minutes.`);
       }
       const done = waitForPopup(popup, provider);
       popup.location.href = data.authorizationUrl;
@@ -98,7 +98,6 @@ const ConnectedAccounts = ({ state }: Props) => {
         {(Object.keys(META) as SocialPlatform[]).map((p) => {
           const Icon = META[p].icon;
           const conn = connections.find((c) => c.platform === p);
-          const available = configured[META[p].provider];
           return (
             <div key={p} className="flex items-center gap-3 rounded-lg border border-border bg-background/60 p-3">
               {conn?.avatar_url
@@ -107,7 +106,7 @@ const ConnectedAccounts = ({ state }: Props) => {
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-muted-foreground">{META[p].label}</div>
                 <div className="truncate text-sm text-foreground">
-                  {loading ? '...' : conn ? conn.account_name : available ? 'Not connected' : 'Coming soon'}
+                  {loading ? '...' : conn ? conn.account_name : 'Not connected'}
                 </div>
               </div>
               {conn ? (
@@ -115,7 +114,7 @@ const ConnectedAccounts = ({ state }: Props) => {
                   {busy === p ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink className="h-4 w-4" />}
                 </Button>
               ) : (
-                <Button size="sm" disabled={!available || busy === p || loading} onClick={() => connect(p)}>
+                <Button size="sm" disabled={busy === p || loading} onClick={() => connect(p)}>
                   {busy === p ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Connect'}
                 </Button>
               )}
