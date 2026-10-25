@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,39 +10,36 @@ import AvaButton from "./components/audio/AvaButton";
 import AdminRoute from "./components/routes/AdminRoute";
 import EditorRoute from "./components/routes/EditorRoute";
 import Index from "./pages/Index";
-import BrandIdentity from "./pages/BrandIdentity";
-import Virality from "./pages/Virality";
-import Analytics from "./pages/Analytics";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import StableDiffusionPage from "./pages/StableDiffusionPage";
-import Admin from "./pages/Admin";
-import AdminLogin from "./pages/AdminLogin";
-import AdminRequestWorkspace from "./pages/AdminRequestWorkspace";
-import EditorDashboard from "./pages/EditorDashboard";
-import EditorRequestWorkspace from "./pages/EditorRequestWorkspace";
-import Pricing from "./pages/Pricing";
-import Settings from "./pages/Settings";
-import CreditUsage from "./pages/CreditUsage";
-import Language from "./pages/Language";
-import Enterprise from "./pages/Enterprise";
-import Features from "./pages/Features";
-import RefundRequest from "./pages/RefundRequest";
-import FAQ from "./pages/FAQ";
-import InviteRedirect from "./pages/InviteRedirect";
-import Explainer from "./pages/Explainer";
-import Careers from "./pages/Careers";
-import HeroPreview from "./pages/HeroPreview";
-import CareerApply from "./pages/CareerApply";
-import Tools from "./pages/Tools";
-import PostingHistory from "./pages/PostingHistory";
-import TrendResearch from "./pages/TrendResearch";
-import OAuthConsent from "./pages/OAuthConsent";
-import SocialOAuthCallback from "./pages/SocialOAuthCallback";
-import VeoStudio from "./pages/VeoStudio";
-import React from "react";
+const Analytics = React.lazy(() => import("./pages/Analytics"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Signup = React.lazy(() => import("./pages/Signup"));
+const StableDiffusionPage = React.lazy(() => import("./pages/StableDiffusionPage"));
+const Admin = React.lazy(() => import("./pages/Admin"));
+const AdminLogin = React.lazy(() => import("./pages/AdminLogin"));
+const AdminRequestWorkspace = React.lazy(() => import("./pages/AdminRequestWorkspace"));
+const EditorDashboard = React.lazy(() => import("./pages/EditorDashboard"));
+const EditorRequestWorkspace = React.lazy(() => import("./pages/EditorRequestWorkspace"));
+const Pricing = React.lazy(() => import("./pages/Pricing"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const CreditUsage = React.lazy(() => import("./pages/CreditUsage"));
+const Language = React.lazy(() => import("./pages/Language"));
+const Enterprise = React.lazy(() => import("./pages/Enterprise"));
+const Features = React.lazy(() => import("./pages/Features"));
+const RefundRequest = React.lazy(() => import("./pages/RefundRequest"));
+const FAQ = React.lazy(() => import("./pages/FAQ"));
+const InviteRedirect = React.lazy(() => import("./pages/InviteRedirect"));
+const Explainer = React.lazy(() => import("./pages/Explainer"));
+const Careers = React.lazy(() => import("./pages/Careers"));
+const HeroPreview = React.lazy(() => import("./pages/HeroPreview"));
+const CareerApply = React.lazy(() => import("./pages/CareerApply"));
+const Tools = React.lazy(() => import("./pages/Tools"));
+const PostingHistory = React.lazy(() => import("./pages/PostingHistory"));
+const TrendResearch = React.lazy(() => import("./pages/TrendResearch"));
+const OAuthConsent = React.lazy(() => import("./pages/OAuthConsent"));
+const SocialOAuthCallback = React.lazy(() => import("./pages/SocialOAuthCallback"));
+const VeoStudio = React.lazy(() => import("./pages/VeoStudio"));
 import { useLanguage } from "./hooks/useLanguage";
 
 // Create a new query client outside of component rendering
@@ -94,14 +92,13 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 // App routes with AuthProvider
 const AppRoutes = () => {
   return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
     <Routes>
       <Route path="/" element={<CustomErrorBoundary><Index /></CustomErrorBoundary>} />
       <Route path="/hero-preview" element={<CustomErrorBoundary><HeroPreview /></CustomErrorBoundary>} />
       <Route path="/pricing" element={<CustomErrorBoundary><Pricing /></CustomErrorBoundary>} />
-      <Route path="/virality" element={<CustomErrorBoundary><Virality /></CustomErrorBoundary>} />
       <Route path="/enterprise" element={<CustomErrorBoundary><Enterprise /></CustomErrorBoundary>} />
       <Route path="/features" element={<CustomErrorBoundary><Features /></CustomErrorBoundary>} />
-      <Route path="/brand-identity" element={<CustomErrorBoundary><BrandIdentity /></CustomErrorBoundary>} />
       <Route path="/analytics" element={<CustomErrorBoundary><Analytics /></CustomErrorBoundary>} />
       <Route
         path="/dashboard"
@@ -175,6 +172,7 @@ const AppRoutes = () => {
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<CustomErrorBoundary><NotFound /></CustomErrorBoundary>} />
     </Routes>
+    </Suspense>
   );
 };
 

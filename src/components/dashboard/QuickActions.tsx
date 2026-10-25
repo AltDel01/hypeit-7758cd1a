@@ -46,10 +46,10 @@ const QuickActions = () => {
         navigate("/");
         break;
       case "Build Moodboard":
-        navigate("/brand-identity");
+        navigate("/dashboard");
         break;
       case "Create Strategy":
-        navigate("/virality");
+        navigate("/dashboard");
         break;
     }
   };

@@ -18,8 +18,6 @@ const footerGroups = [
     links: [
       { key: 'videoEditing', href: '/dashboard' },
       { key: 'socialContent', href: '/' },
-      { key: 'brandIdentity', href: '/brand-identity' },
-      { key: 'viralityStrategy', href: '/virality' },
     ],
   },
   {
