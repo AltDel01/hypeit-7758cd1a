@@ -1,0 +1,3 @@
+- [ ] Verify Indonesian brand suggestions and seven-day strategies.
+- [ ] Preserve comprehensive brand/reference prompts with hook, story, product demonstration, and CTA for workflow media.
+- [ ] Run targeted tests and verify live workflow where authentication permits.
