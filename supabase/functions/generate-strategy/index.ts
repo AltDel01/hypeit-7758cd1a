@@ -159,7 +159,7 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
 Provide exactly 7 day objects, each with exactly 4 scenes in the required order.`
 
     const aiRes = await callQwen({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'system', content: languageInstruction(product) }, { role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     })
 

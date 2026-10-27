@@ -91,7 +91,7 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
 Provide exactly 4 scenes in order: hook, story, product_demo, cta. Show the actual product in use in scene 3; end with an explicit relevant CTA in scene 4. Do not invent product benefits or offers.`
 
     const aiRes = await callQwen({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'system', content: languageInstruction(productDesc) }, { role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     })
 
