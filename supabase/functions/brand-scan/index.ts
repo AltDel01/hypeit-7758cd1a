@@ -1,3 +1,4 @@
+import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
 
@@ -63,7 +64,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    const siteText = website ? await fetchSiteText(website) : ''
+    const [siteText, socialText] = await Promise.all([
+      website ? fetchSiteText(website) : Promise.resolve(''),
+      readSocialProfiles(social),
+    ])
 
     const prompt = `You are a brand strategist. Analyze the brand below and infer its positioning.
 
@@ -79,10 +83,15 @@ Website content extracted (may be empty):
 ${siteText || 'No website content available.'}
 """
 
+Recent social media posts and profile info (may be empty):
+"""
+${socialText || 'No social content available.'}
+"""
+
 Return ONLY a JSON object (no markdown) with:
 - "brandMessage": one concise sentence (max 140 chars) capturing the brand tone, voice and value proposition.
 - "brandColor": the single most representative primary brand color as a 6-digit hex string like "#8C52FF".
-Base your answer on the website content if available, otherwise infer sensibly from the name and niche.`
+Base your answer on the website and social posts if available, otherwise infer sensibly from the name and niche.`
 
     const aiRes = await callQwen({
       messages: [{ role: 'user', content: prompt }],
