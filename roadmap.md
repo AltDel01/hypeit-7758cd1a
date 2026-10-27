@@ -1,4 +1,4 @@
-- [ ] Clear Creative Workflow's previous seven-day strategy on refresh and new login without deleting history.
+- [x] Clear Creative Workflow's previous seven-day strategy on refresh and new login without deleting history; two reset tests pass and preview build is clean.
 - [x] Verify Indonesian brand suggestions and seven-day strategies through live brand-scan and the exact planning prompt sent to Qwen.
 - [x] Preserve brand details, tone, color, scene directions and spoken lines with hook, story, product demonstration and CTA in workflow media prompts.
 - [x] Run targeted prompt tests and real Qwen image generation; Wan accepted a 15-second video task.
