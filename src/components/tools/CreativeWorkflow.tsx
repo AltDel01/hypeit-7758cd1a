@@ -452,7 +452,7 @@ const CreativeWorkflow = () => {
     setDays(null);
     try {
       const { data, error } = await supabase.functions.invoke('generate-strategy', {
-        body: { brandName, product, brandMessage, brandColor, social, ecommerce },
+        body: { brandName, product, brandMessage, brandColor, social, ecommerce, website },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -481,7 +481,7 @@ const CreativeWorkflow = () => {
         benchmark: str(d.benchmark),
         concept: str(d.concept, `Day ${i + 1} concept`),
         hook: str(d.hook),
-        body: str(d.body),
+        body: [str(d.body), str(d.caption) ? `Caption: ${str(d.caption)}` : ''].filter(Boolean).join('\n\n'),
         scenes: (Array.isArray(d.scenes) ? d.scenes : []) as unknown as Json,
         asset_type: str(d.asset_type ?? (d as { assetType?: unknown }).assetType, 'image'),
         gen_stage: 'idle',
@@ -526,6 +526,8 @@ const CreativeWorkflow = () => {
 
 
       const linked = [...Object.values(social).filter(Boolean), ...Object.values(ecommerce).filter(Boolean)].length;
+      const audience = (data?.analysis as { audience?: string } | null)?.audience;
+      if (audience) toast.message(`Audience found: ${audience}`);
       toast.success(`7-day strategy tailored to ${brandName}${linked ? `, benchmarked against ${linked} linked channel${linked > 1 ? 's' : ''}` : ''}.`);
     } catch (e) {
       console.error(e);
