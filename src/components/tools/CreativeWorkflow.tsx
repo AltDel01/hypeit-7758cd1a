@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
-import ConnectedAccounts, { useSocialConnections } from '@/components/social/ConnectedAccounts';
+import ConnectedAccounts, { ConnectedAccountsTrigger, useSocialConnections } from '@/components/social/ConnectedAccounts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -192,6 +192,7 @@ const CreativeWorkflow = () => {
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
   const [editingProfile, setEditingProfile] = useState(false);
+  const [accountsOpen, setAccountsOpen] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
   // Per-day video clip length (seconds). Clips over 15s use the Wan 3.0 long-form model.
   const [videoDurations, setVideoDurations] = useState<Record<string, number>>({});
@@ -708,15 +709,22 @@ const CreativeWorkflow = () => {
           </div>
           <h1 className="min-w-0 text-xl font-bold leading-tight text-foreground sm:text-2xl">Creative Workflow</h1>
         </div>
-        <Button asChild variant="outline" size="sm" className="h-9 shrink-0 self-start gap-1.5 sm:self-auto">
-          <Link to="/posts">
-            <ListChecks className="h-3.5 w-3.5" /> Posting history
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Button asChild variant="outline" size="sm" className="h-9 shrink-0 gap-1.5">
+            <Link to="/posts">
+              <ListChecks className="h-3.5 w-3.5" /> Posting history
+            </Link>
+          </Button>
+          <ConnectedAccountsTrigger
+            state={socialConn}
+            open={accountsOpen}
+            onToggle={() => setAccountsOpen((v) => !v)}
+          />
+        </div>
       </div>
 
 
-      <ConnectedAccounts state={socialConn} />
+      <ConnectedAccounts state={socialConn} open={accountsOpen} />
 
       {/* Brand summary bar (returning users) */}
       {hasStrategy && !editingProfile && (

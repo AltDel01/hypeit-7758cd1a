@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Instagram, Facebook, Loader2, Link2, Unlink } from 'lucide-react';
+import { ChevronDown, Facebook, Instagram, Link2, Loader2, Unlink } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -46,9 +47,30 @@ export function useSocialConnections() {
   return { connections, configured, loading, refresh, isConnected };
 }
 
-interface Props { state: ReturnType<typeof useSocialConnections> }
+interface Props { state: ReturnType<typeof useSocialConnections>; open?: boolean }
 
-const ConnectedAccounts = ({ state }: Props) => {
+export const ConnectedAccountsTrigger = ({ state, open, onToggle }: Props & { open: boolean; onToggle: () => void }) => {
+  const { connections, loading } = state;
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      aria-expanded={open}
+      onClick={onToggle}
+      className="h-9 shrink-0 gap-1.5 sm:hidden"
+    >
+      <Link2 className="h-3.5 w-3.5 text-primary" />
+      {loading ? 'Accounts' : 'Connected'}
+      {connections.length > 0 && (
+        <span className="rounded-full bg-primary/15 px-1.5 text-[10px] font-semibold text-primary">{connections.length}</span>
+      )}
+      <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+    </Button>
+  );
+};
+
+const ConnectedAccounts = ({ state, open }: Props) => {
   const { connections, configured, loading, refresh } = state;
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -90,8 +112,8 @@ const ConnectedAccounts = ({ state }: Props) => {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card/50 p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+    <div className={cn('rounded-xl border border-border bg-card/50 p-3 sm:p-4', open === false && 'hidden sm:block')}>
+      <div className={cn('mb-3 flex items-center gap-2 text-sm font-semibold text-foreground', open !== undefined && 'hidden sm:flex')}>
         <Link2 className="h-4 w-4 text-primary" /> Connected Accounts
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -99,7 +121,7 @@ const ConnectedAccounts = ({ state }: Props) => {
           const Icon = META[p].icon;
           const conn = connections.find((c) => c.platform === p);
           return (
-            <div key={p} className="flex items-center gap-3 rounded-lg border border-border bg-background/60 p-3">
+            <div key={p} className="flex items-center gap-2.5 rounded-lg border border-border bg-background/60 p-2.5 sm:gap-3 sm:p-3">
               {conn?.avatar_url
                 ? <img src={conn.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
                 : <Icon className="h-6 w-6 text-muted-foreground" />}
