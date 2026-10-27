@@ -1,3 +1,4 @@
+- [ ] Replace Creative Workflow Brand Color with a product photo upload and carry the real reference into images, videos, request history and admin emails.
 - [x] Clear Creative Workflow's previous seven-day strategy on refresh and new login without deleting history; two reset tests pass and preview build is clean.
 - [x] Verify Indonesian brand suggestions and seven-day strategies through live brand-scan and the exact planning prompt sent to Qwen.
 - [x] Preserve brand details, tone, color, scene directions and spoken lines with hook, story, product demonstration and CTA in workflow media prompts.
