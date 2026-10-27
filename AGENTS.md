@@ -1,3 +1,4 @@
 - Social posting (TikTok/Meta) uses custom per-user OAuth in edge functions (social-*), tokens encrypted in service-role-only social_connections; why: no managed connector exists and tokens must never reach the browser.
 - Creative Workflow uses the shared creativeBrief helper for owner-brief language policy, four ordered narrative stages and media prompt construction; why: scanning, planning, script regeneration and media dispatch must not lose brand context or spoken lines.
 - Active Creative Workflow calendar state is initialized with createWorkflowSession on mount and account changes, never rehydrated from saved strategies; why: previous visits must not repopulate the working calendar or mutate historical requests.
+- Workflow product photos are private owner-scoped storage references saved on strategies and passed as actual image content or video reference media; why: every day must preserve the uploaded product rather than generate text-only substitutes.

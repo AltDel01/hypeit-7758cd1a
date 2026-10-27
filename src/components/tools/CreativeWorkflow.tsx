@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
+import WorkflowProductPhoto from './WorkflowProductPhoto';
 import ConnectedAccounts, { ConnectedAccountsTrigger, useSocialConnections } from '@/components/social/ConnectedAccounts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -92,8 +93,6 @@ const STATUS_STYLES: Record<DayStatus, string> = {
   'Published': 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
 };
 
-const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
-
 // Columns applied when a completed day is moved to posting history.
 const BLANK_DAY_RESET = {
   status: 'Draft',
@@ -172,6 +171,9 @@ const CreativeWorkflow = () => {
   const [website, setWebsite] = useState('');
   const [brandMessage, setBrandMessage] = useState('');
   const [brandColor, setBrandColor] = useState('#8C52FF');
+  const [productPhotoRef, setProductPhotoRef] = useState<string | null>(null);
+  const [productPhotoPreview, setProductPhotoPreview] = useState<string | null>(null);
+  const [uploadingProductPhoto, setUploadingProductPhoto] = useState(false);
   const [social, setSocial] = useState({ instagram: '', tiktok: '', facebook: '' });
   const [ecommerce, setEcommerce] = useState({ tiktokshop: '', shopee: '', tokopedia: '' });
   const [scanning, setScanning] = useState(false);
@@ -215,6 +217,8 @@ const CreativeWorkflow = () => {
     setScriptingIds({});
     setVideoDurations({});
     setEditingProfile(false);
+    setProductPhotoRef(null);
+    setProductPhotoPreview(null);
     return () => {
       Object.values(persistTimers.current).forEach(clearTimeout);
       persistTimers.current = {};
@@ -255,7 +259,7 @@ const CreativeWorkflow = () => {
       if (data?.brandMessage) setBrandMessage(data.brandMessage);
       if (data?.brandColor) setBrandColor(data.brandColor);
       setScanned(true);
-      toast.success('Brand voice and color auto-detected from your channels.');
+      toast.success('Brand voice suggested from your details.');
     } catch (e) {
       console.error(e);
       if (!silent) toast.error(e instanceof Error ? e.message : 'Could not scan your brand. Try again.');
@@ -383,7 +387,17 @@ const CreativeWorkflow = () => {
 
 
   /* -------- Generate real strategy via AI + save -------- */
+  const handleProductPhotoChange = async (ref: string | null, preview: string | null) => {
+    if (strategyId) {
+      const { error } = await supabase.from('creative_strategies').update({ product_photo_ref: ref }).eq('id', strategyId);
+      if (error) throw error;
+    }
+    setProductPhotoRef(ref);
+    setProductPhotoPreview(preview);
+  };
+
   const handleStrategy = async () => {
+    if (uploadingProductPhoto) return;
     if (!brandName.trim()) {
       toast.error('Add your brand name first.');
       return;
@@ -415,7 +429,7 @@ const CreativeWorkflow = () => {
       // Create the strategy record.
       const { data: strat, error: sErr } = await supabase
         .from('creative_strategies')
-        .insert({ user_id: userId, brand_name: brandName, product, brand_message: brandMessage, brand_color: brandColor })
+        .insert({ user_id: userId, brand_name: brandName, product, brand_message: brandMessage, brand_color: brandColor, product_photo_ref: productPhotoRef })
         .select()
         .single();
       if (sErr) throw sErr;
@@ -465,6 +479,7 @@ const CreativeWorkflow = () => {
           user_name: prof?.display_name || null,
           request_type: 'creative-strategy',
           category: 'creative-workflow',
+          reference_image_url: productPhotoRef,
           prompt: `7-Day Creative Strategy for ${brandName} — ${product}`.replace(/—/g, '-'),
           status: 'completed',
           credits_used: 0,
@@ -489,6 +504,7 @@ const CreativeWorkflow = () => {
   };
 
   const handleGenerateAsset = async (day: DayPlan) => {
+    if (uploadingProductPhoto) { toast.error('Please wait for your product photo to finish uploading.'); return; }
     const startedAt = new Date().toISOString();
     patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
     // Stamp the generation time so this box auto-clears 7 days from now.
@@ -615,6 +631,7 @@ const CreativeWorkflow = () => {
 
   /* -------- Skip Brand Profile: build a blank, fully editable 7-day week -------- */
   const handleBlankWeek = async () => {
+    if (uploadingProductPhoto) return;
     const { data: auth } = await supabase.auth.getUser();
     const userId = auth.user?.id;
     if (!userId) {
@@ -632,6 +649,7 @@ const CreativeWorkflow = () => {
           product: product || '',
           brand_message: brandMessage || '',
           brand_color: brandColor,
+          product_photo_ref: productPhotoRef,
         })
         .select()
         .single();
@@ -785,6 +803,8 @@ const CreativeWorkflow = () => {
                 setProduct('');
                 setBrandMessage('');
                 setBrandColor('#8C52FF');
+                setProductPhotoRef(null);
+                setProductPhotoPreview(null);
                 setSocial({ instagram: '', tiktok: '', facebook: '' });
                 setEcommerce({ tiktokshop: '', shopee: '', tokopedia: '' });
                 setScanned(false);
@@ -862,19 +882,19 @@ const CreativeWorkflow = () => {
           )}
           <p className="text-xs text-muted-foreground">
             {scanning
-              ? 'Scanning your website and social channels to detect your tone and brand color...'
+              ? 'Finding your brand voice...'
               : scanned
-                ? 'Brand voice and color auto-detected. Edit anything below if needed.'
-                : 'Fill in your brand name, website and social links, the AI scans them automatically to recommend your brand message and color.'}
+                ? 'Brand voice suggested.'
+                : 'Brand voice'}
           </p>
         </div>
 
-        {/* Brand message + color (auto-filled, still editable) */}
+        {/* Brand message and product reference */}
         <div className="relative grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
           {scanning && (
             <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-lg bg-background/70 backdrop-blur-sm">
               <Loader2 className="h-5 w-5 animate-spin text-[#8C52FF]" />
-              <span className="text-xs text-muted-foreground">Detecting brand voice and color...</span>
+              <span className="text-xs text-muted-foreground">Finding brand voice...</span>
             </div>
           )}
           <div className="space-y-1.5">
@@ -891,31 +911,7 @@ const CreativeWorkflow = () => {
               className="min-h-[64px] text-sm"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Brand Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={brandColor}
-                onChange={(e) => setBrandColor(e.target.value)}
-                className="h-9 w-10 cursor-pointer rounded-md border border-border bg-transparent p-0.5"
-              />
-              <div className="flex flex-wrap gap-1.5">
-                {BRAND_COLOR_PRESETS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setBrandColor(c)}
-                    className={cn(
-                      'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
-                      brandColor.toLowerCase() === c.toLowerCase() ? 'border-foreground' : 'border-transparent',
-                    )}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+          <WorkflowProductPhoto userId={user?.id} preview={productPhotoPreview} uploading={uploadingProductPhoto} setUploading={setUploadingProductPhoto} onChange={handleProductPhotoChange} />
         </div>
 
       </Card>
@@ -929,7 +925,7 @@ const CreativeWorkflow = () => {
           <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleStrategy}
-              disabled={generating}
+              disabled={generating || uploadingProductPhoto}
               className="bg-[#8C52FF] hover:bg-[#7a45e0] text-white gap-2 h-10"
             >
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -938,7 +934,7 @@ const CreativeWorkflow = () => {
             {!days && (
               <Button
                 onClick={handleBlankWeek}
-                disabled={generating}
+                disabled={generating || uploadingProductPhoto}
                 variant="outline"
                 className="gap-2 h-10"
               >
