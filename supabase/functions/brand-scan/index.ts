@@ -1,6 +1,7 @@
 import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
+import { languageInstruction } from '../_shared/creativeBrief.ts'
 
 interface ScanBody {
   brandName?: string
@@ -70,6 +71,7 @@ Deno.serve(async (req) => {
     ])
 
     const prompt = `You are a brand strategist. Analyze the brand below and infer its positioning.
+${languageInstruction(niche)}
 
 Brand name: ${brandName || 'unknown'}
 Website: ${website || 'none'}
@@ -95,7 +97,7 @@ Return ONLY a JSON object (no markdown) with:
 Base your answer first on what they sell, then the website, and only then the social posts, otherwise base it on what they sell. Never invent products, industries or claims that are not supported by the information above; if information is thin, keep the message simple and about what they sell. Write it in the same language the owner used.`
 
     const aiRes = await callQwen({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'system', content: languageInstruction(niche) }, { role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     })
 

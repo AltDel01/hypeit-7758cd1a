@@ -1,0 +1,5 @@
+- [x] Verify Indonesian brand suggestions and seven-day strategies through live brand-scan and the exact planning prompt sent to Qwen.
+- [x] Preserve brand details, tone, color, scene directions and spoken lines with hook, story, product demonstration and CTA in workflow media prompts.
+- [x] Run targeted prompt tests and real Qwen image generation; Wan accepted a 15-second video task.
+- [ ] Inspect completed Wan video: provider still reports RUNNING after repeated bounded checks.
+- [ ] Verify saved seven-day plan and media through signed-in UI: external Supabase session unavailable; protected planner returned 401.

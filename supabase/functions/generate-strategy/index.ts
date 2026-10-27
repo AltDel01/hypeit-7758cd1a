@@ -2,6 +2,7 @@ import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
+import { CREATIVE_STAGES, languageInstruction } from '../_shared/creativeBrief.ts'
 
 interface StrategyBody {
   brandName?: string
@@ -116,6 +117,7 @@ Deno.serve(async (req) => {
     ].filter(Boolean).join('\n') || 'none'
 
     const prompt = `You are a senior short-form social media strategist. First ANALYZE the brand below, then build a 7-day content plan that is specific to it. Never write generic filler: every hook, scene and voiceover must mention or show this brand's actual products, benefits, offers or customers.
+${languageInstruction(product)}
 
 Brand name: ${brandName}
 What they sell / brief from the owner: ${product}
@@ -130,8 +132,8 @@ ${siteText || 'not available'}
 Recent social media posts (ignore anything that doesn't match what the owner sells; otherwise study their style, topics, products and what the audience responds to; build on it, don't copy):
 ${socialText || 'not available'}
 
-Step 1, analysis: identify the target audience, their main pains and desires, the brand's unique selling points, and the language the audience speaks (write all hooks, voiceovers and captions in that language; default to the language of the owner's brief).
-Step 2, plan: create exactly 7 distinct daily posts (Day-1 to Day-7), varied in angle (education, social proof, founder story, trend remix, myth-busting, behind-the-scenes, offer). Each day needs 3 short scenes for a vertical video or image carousel, plus a ready-to-post caption with hashtags.
+Step 1, analysis: identify the target audience, their main pains and desires, and supported unique selling points. Use the owner's product-description language for all content, regardless of the audience or source language.
+Step 2, plan: create exactly 7 distinct daily posts (Day-1 to Day-7), varied in angle (education, founder story, trend remix, myth-busting, behind-the-scenes, product use, offer). Each day needs exactly 4 short scenes, ordered hook, story, product_demo, cta, plus a ready-to-post caption with hashtags. Demonstrate the actual product in scene 3. Scene 4 must include an explicit, relevant call to action. No fabricated social proof, discounts or benchmarks.
 
 Return ONLY a JSON object (no markdown) shaped exactly as:
 {
@@ -143,21 +145,21 @@ Return ONLY a JSON object (no markdown) shaped exactly as:
   },
   "days": [
     {
-      "benchmark": "one short data-style rationale with an emoji, e.g. '🔥 Mirrors top TikTok unboxing, 4.2M views'",
+      "benchmark": "short rationale grounded in the supplied brief, no invented metrics",
       "concept": "short concept name (max 60 chars)",
       "hook": "scroll-stopping first line spoken/shown on screen (max 90 chars)",
       "body": "one sentence describing the visual treatment and pacing (max 160 chars)",
       "caption": "ready-to-post caption with 3 to 6 hashtags (max 400 chars)",
       "scenes": [
-        { "visual": "concrete visual direction for the shot", "voiceover": "spoken line for this scene" }
+        { "stage": "hook|story|product_demo|cta", "visual": "concrete visual direction with camera, product action and lighting", "voiceover": "concise spoken line in the owner's language" }
       ]
     }
   ]
 }
-Provide exactly 7 day objects, each with exactly 3 scenes.`
+Provide exactly 7 day objects, each with exactly 4 scenes in the required order.`
 
     const aiRes = await callQwen({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'system', content: languageInstruction(product) }, { role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     })
 
@@ -192,12 +194,16 @@ Provide exactly 7 day objects, each with exactly 3 scenes.`
     }
 
     const rawDays = Array.isArray(parsed.days) ? parsed.days : []
+    if (rawDays.length !== 7 || rawDays.some((d) => !Array.isArray(d.scenes) || d.scenes.length !== 4 || d.scenes.some((s: Record<string, unknown>) => !s.visual || !s.voiceover))) {
+      return new Response(JSON.stringify({ error: 'The plan was incomplete. Please generate it again.' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
     const days = DAYS.map((dayName, i) => {
       const d = (rawDays[i] || {}) as Record<string, unknown>
       const rawScenes = Array.isArray(d.scenes) ? (d.scenes as Array<Record<string, unknown>>) : []
-      const scenes = [0, 1, 2].map((si) => {
+      const scenes = CREATIVE_STAGES.map((stage, si) => {
         const s = rawScenes[si] || {}
         return {
+          stage,
           visual: (s.visual || '').toString().slice(0, 400),
           voiceover: (s.voiceover || '').toString().slice(0, 400),
         }
