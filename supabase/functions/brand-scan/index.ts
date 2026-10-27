@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as ScanBody
     const brandName = (body.brandName || '').toString().slice(0, 200)
     const website = (body.website || '').toString().slice(0, 500)
-    const niche = (body.niche || '').toString().slice(0, 100)
+    const niche = (body.niche || '').toString().slice(0, 1000)
     const social = body.social || {}
 
     if (!brandName.trim() && !website.trim()) {
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
 
 Brand name: ${brandName || 'unknown'}
 Website: ${website || 'none'}
-Niche/category: ${niche || 'unknown'}
+What they sell (written by the owner, treat as the main source of truth): ${niche || 'unknown'}
 Instagram: ${social.instagram || 'none'}
 TikTok: ${social.tiktok || 'none'}
 Facebook: ${social.facebook || 'none'}
@@ -91,7 +91,7 @@ ${socialText || 'No social content available.'}
 Return ONLY a JSON object (no markdown) with:
 - "brandMessage": one concise sentence (max 140 chars) capturing the brand tone, voice and value proposition.
 - "brandColor": the single most representative primary brand color as a 6-digit hex string like "#8C52FF".
-Base your answer on the website and social posts if available, otherwise infer sensibly from the name and niche.`
+Base your answer on the website and social posts if available, otherwise base it on what they sell. Never invent products, industries or claims that are not supported by the information above; if information is thin, keep the message simple and about what they sell. Write it in the same language the owner used.`
 
     const aiRes = await callQwen({
       messages: [{ role: 'user', content: prompt }],
