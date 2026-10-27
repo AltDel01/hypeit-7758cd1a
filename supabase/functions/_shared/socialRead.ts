@@ -35,13 +35,12 @@ const looksBlocked = (md: string) =>
 
 async function readOne(platform: string, url: string, key: string): Promise<string> {
   const handle = handleOf(url)
-  const scraped = await fc('scrape', key, { url, formats: ['markdown'], onlyMainContent: true, waitFor: 2500 })
-  const md: string = scraped?.data?.markdown || scraped?.markdown || ''
-  let text = md && !looksBlocked(md) ? md.slice(0, 3500) : ''
+  // Instagram/TikTok/Facebook block direct page scraping, so read public post snippets via search.
+  let text = ''
 
   if (!text) {
     const site = platform === 'facebook' ? 'facebook.com' : platform === 'tiktok' ? 'tiktok.com' : 'instagram.com'
-    const found = await fc('search', key, { query: `site:${site} ${handle}`, limit: 6 })
+    const found = await fc('search', key, { query: `site:${site} ${handle}`, limit: 8 })
     const items: Array<Record<string, string>> = found?.data?.web || found?.data || []
     text = (Array.isArray(items) ? items : [])
       .map((r) => `- ${r.title || ''}: ${r.description || ''}`)
