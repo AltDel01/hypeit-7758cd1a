@@ -42,7 +42,13 @@ async function readOne(platform: string, url: string, key: string): Promise<stri
     const site = platform === 'facebook' ? 'facebook.com' : platform === 'tiktok' ? 'tiktok.com' : 'instagram.com'
     const found = await fc('search', key, { query: `site:${site} ${handle}`, limit: 8 })
     const items: Array<Record<string, string>> = found?.data?.web || found?.data || []
+    const h = handle.toLowerCase()
+    // Keep only results that belong to this exact account, so other similar accounts don't mislead the AI.
     text = (Array.isArray(items) ? items : [])
+      .filter((r) => {
+        const u = (r.url || '').toLowerCase().replace(/\/+$/, '')
+        return u.includes(`/${h}/`) || u.endsWith(`/${h}`) || u.includes(`/@${h}`) || (r.title || '').toLowerCase().includes(`@${h})`)
+      })
       .map((r) => `- ${r.title || ''}: ${r.description || ''}`)
       .join('\n')
       .slice(0, 2500)

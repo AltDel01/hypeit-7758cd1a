@@ -127,7 +127,7 @@ ${socialLinks}
 Linked channels: ${linkedChannels}
 Website content (may be partial):
 ${siteText || 'not available'}
-Recent social media posts (study their style, topics, products and what the audience responds to; build on it, don't copy):
+Recent social media posts (ignore anything that doesn't match what the owner sells; otherwise study their style, topics, products and what the audience responds to; build on it, don't copy):
 ${socialText || 'not available'}
 
 Step 1, analysis: identify the target audience, their main pains and desires, the brand's unique selling points, and the language the audience speaks (write all hooks, voiceovers and captions in that language; default to the language of the owner's brief).
