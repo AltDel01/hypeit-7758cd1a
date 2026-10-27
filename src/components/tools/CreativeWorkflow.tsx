@@ -21,6 +21,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { displayFailureReason } from '@/utils/failureReason';
+import { createWorkflowSession } from '@/utils/workflowSession';
+import { useAuth } from '@/contexts/AuthContext';
 
 /* ---------------- Types ---------------- */
 
@@ -92,9 +94,7 @@ const STATUS_STYLES: Record<DayStatus, string> = {
 
 const BRAND_COLOR_PRESETS = ['#8C52FF', '#FF2E63', '#00C2A8', '#FF8A00', '#1DA1F2', '#111111'];
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
-// Columns applied to a creative_day when its box auto-clears after 7 days.
+// Columns applied when a completed day is moved to posting history.
 const BLANK_DAY_RESET = {
   status: 'Draft',
   concept: '',
@@ -166,6 +166,7 @@ const patchToColumns = (patch: Partial<DayPlan>): Record<string, unknown> => {
 /* ---------------- Component ---------------- */
 
 const CreativeWorkflow = () => {
+  const { user } = useAuth();
   // Brand funnel intake
   const [brandName, setBrandName] = useState('');
   const [website, setWebsite] = useState('');
@@ -178,9 +179,15 @@ const CreativeWorkflow = () => {
 
   const [product, setProduct] = useState('');
   const [generating, setGenerating] = useState(false);
-  const [loadingExisting, setLoadingExisting] = useState(true);
-  const [strategyId, setStrategyId] = useState<string | null>(null);
-  const [days, setDays] = useState<DayPlan[] | null>(null);
+  const [workflowSession, setWorkflowSession] = useState(() => createWorkflowSession<DayPlan>());
+  const { strategyId, days } = workflowSession;
+  const setStrategyId = (strategyId: string | null) =>
+    setWorkflowSession((previous) => ({ ...previous, strategyId }));
+  const setDays = (next: React.SetStateAction<DayPlan[] | null>) =>
+    setWorkflowSession((previous) => ({
+      ...previous,
+      days: typeof next === 'function' ? next(previous.days) : next,
+    }));
   const socialConn = useSocialConnections();
   const [scriptDay, setScriptDay] = useState<DayPlan | null>(null);
   const [scriptingIds, setScriptingIds] = useState<Record<string, boolean>>({});
@@ -200,93 +207,18 @@ const CreativeWorkflow = () => {
   // profile never triggers a re-scan that overwrites saved tone/color.
   const lastScanSig = useRef('');
 
-  /* -------- Load most recent saved strategy on mount -------- */
+  /* -------- Each visit / login starts with an empty active calendar -------- */
   useEffect(() => {
-    (async () => {
-      try {
-        const { data: auth } = await supabase.auth.getUser();
-        const currentUserId = auth.user?.id;
-        if (!currentUserId) {
-          setLoadingExisting(false);
-          return;
-        }
-        const { data: strat } = await supabase
-          .from('creative_strategies')
-          .select('*')
-          .eq('user_id', currentUserId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (strat) {
-          const { data: rows } = await supabase
-            .from('creative_days')
-            .select('*')
-            .eq('strategy_id', strat.id)
-            .order('position', { ascending: true });
-          if (rows && rows.length) {
-            // Restore the saved calendar only. Brand Profile is a fresh intake
-            // form on every page load and must never inherit an older brand.
-            setStrategyId(strat.id);
-
-            // Only boxes older than a week are archived and blanked. A freshly
-            // generated asset stays visible until the user approves it.
-            const cutoff = Date.now() - SEVEN_DAYS_MS;
-            const done = rows.filter((r) => {
-              const row = r as DayRow;
-              return !!row.generated_at && new Date(row.generated_at).getTime() < cutoff;
-            }) as DayRow[];
-
-            if (done.length) {
-              const { data: auth } = await supabase.auth.getUser();
-              const userId = auth.user?.id;
-              const finished = done.filter((r) => !!r.asset_url);
-              if (userId && finished.length) {
-                await supabase.from('creative_posts').upsert(
-                  finished.map((r) => ({
-                    user_id: userId,
-                    strategy_id: strat.id,
-                    day_id: r.id,
-                    day: r.day,
-                    position: r.position,
-                    concept: r.concept || '',
-                    hook: r.hook || '',
-                    body: r.body || '',
-                    asset_type: r.asset_type,
-                    asset_url: r.asset_url,
-                    platforms: r.platforms as Json,
-                    scheduled_time: r.scheduled_time,
-                    status: 'queued',
-                  })),
-                  { onConflict: 'day_id' },
-                );
-              }
-              await supabase
-                .from('creative_days')
-                .update(BLANK_DAY_RESET)
-                .in('id', done.map((r) => r.id));
-            }
-
-            const doneIds = new Set(done.map((r) => r.id));
-            setDays(
-              rows.map((r) =>
-                doneIds.has(r.id)
-                  ? rowToDay({ ...(r as DayRow), ...BLANK_DAY_RESET } as DayRow)
-                  : rowToDay(r as DayRow),
-              ),
-            );
-          } else {
-            // This is a failed generation attempt, not a reusable brand profile.
-            await supabase.from('creative_strategies').delete().eq('id', strat.id);
-          }
-
-        }
-      } catch (e) {
-        console.error('load strategy failed', e);
-      } finally {
-        setLoadingExisting(false);
-      }
-    })();
-  }, []);
+    setWorkflowSession(createWorkflowSession<DayPlan>());
+    setScriptDay(null);
+    setScriptingIds({});
+    setVideoDurations({});
+    setEditingProfile(false);
+    return () => {
+      Object.values(persistTimers.current).forEach(clearTimeout);
+      persistTimers.current = {};
+    };
+  }, [user?.id]);
 
   /* -------- Consume a content idea handed off from Trend Research -------- */
   useEffect(() => {
@@ -1012,7 +944,7 @@ const CreativeWorkflow = () => {
       )}
 
       {/* Empty state */}
-      {!days && !generating && !loadingExisting && (
+      {!days && !generating && (
         <Card className="p-12 text-center border-dashed border-border bg-card/30">
           <CalendarRange className="mx-auto h-10 w-10 text-muted-foreground/50" />
           <p className="mt-3 text-sm text-muted-foreground">
@@ -1021,11 +953,11 @@ const CreativeWorkflow = () => {
         </Card>
       )}
 
-      {(generating || loadingExisting) && !days && (
+      {generating && !days && (
         <Card className="p-12 text-center border-border bg-card/30">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#8C52FF]" />
           <p className="mt-3 text-sm text-muted-foreground">
-            {loadingExisting && !generating ? 'Loading your saved workflow...' : 'Analyzing benchmarks and building your week...'}
+            Analyzing benchmarks and building your week...
           </p>
         </Card>
       )}
