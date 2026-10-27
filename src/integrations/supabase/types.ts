@@ -311,6 +311,7 @@ export type Database = {
           created_at: string
           id: string
           product: string
+          product_photo_ref: string | null
           updated_at: string
           user_id: string
         }
@@ -321,6 +322,7 @@ export type Database = {
           created_at?: string
           id?: string
           product?: string
+          product_photo_ref?: string | null
           updated_at?: string
           user_id: string
         }
@@ -331,6 +333,7 @@ export type Database = {
           created_at?: string
           id?: string
           product?: string
+          product_photo_ref?: string | null
           updated_at?: string
           user_id?: string
         }
