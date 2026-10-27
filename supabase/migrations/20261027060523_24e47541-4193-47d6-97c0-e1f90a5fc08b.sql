@@ -1,0 +1,3 @@
+ALTER TABLE public.creative_strategies ADD COLUMN product_photo_ref text;
+ALTER TABLE public.creative_strategies ADD CONSTRAINT creative_strategy_product_photo_owner CHECK (product_photo_ref IS NULL OR (product_photo_ref LIKE 'storage:product-images/' || user_id::text || '/%' AND product_photo_ref NOT LIKE '%..%'));
+COMMENT ON COLUMN public.creative_strategies.product_photo_ref IS 'Permanent private product photo reference used by workflow image and video generation.';

@@ -1,8 +1,9 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
+import { clampWanDuration } from '../_shared/dashscope.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
+import { productPhotoPath, workflowVideoInput, workflowImageContent } from '../_shared/workflowProductPhoto.ts'
 import { buildCreativeMediaPrompt } from '../_shared/creativeBrief.ts'
 
 
@@ -87,14 +88,25 @@ Deno.serve(async (req) => {
     }
 
     const { data: brand, error: brandError } = await admin.from('creative_strategies')
-      .select('brand_name, product, brand_message, brand_color')
+      .select('brand_name, product, brand_message, brand_color, product_photo_ref')
       .eq('id', day.strategy_id).eq('user_id', userId).maybeSingle()
     if (brandError || !brand) return json({ error: 'Your brand details could not be loaded.' }, 400)
+    const productPhoto = brand.product_photo_ref || null
+    let signedPhoto: string | null = null
+    if (productPhoto) {
+      let path: string
+      try { path = productPhotoPath(productPhoto, userId) }
+      catch { return json({ error: 'Please upload your product photo again.' }, 400) }
+      const { data: photo, error: photoError } = await admin.storage.from('product-images').createSignedUrl(path, 3600)
+      if (photoError || !photo?.signedUrl) return json({ error: 'Your product photo could not be opened. Please upload it again.' }, 400)
+      signedPhoto = photo.signedUrl
+    }
     const basePrompt = buildCreativeMediaPrompt(brand, { ...day, scenes: Array.isArray(day.scenes) ? day.scenes : [] }, assetType, videoDuration)
 
     /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
-      const videoModel = needsLongFormModel(videoDuration) ? WAN_LONGFORM_MODEL : 'wan2.7-t2v'
+      const videoInput = workflowVideoInput(productPhoto, videoDuration)
+      const videoModel = videoInput.model
       const { data: gr, error: grErr } = await admin
         .from('generation_requests')
         .insert({
@@ -106,7 +118,8 @@ Deno.serve(async (req) => {
           aspect_ratio: '9:16',
           status: 'new',
           credits_used: cost,
-          category: 'video-t2v',
+          category: videoInput.category,
+          reference_image_url: productPhoto,
           auto_provider: 'wan',
           auto_model: videoModel,
         })
@@ -117,12 +130,13 @@ Deno.serve(async (req) => {
         return json({ error: 'Could not start video generation.' }, 500)
       }
 
-      notifyAdminNewRequest(admin, {
+      await notifyAdminNewRequest(admin, {
         userName: profile?.display_name,
         userEmail: profile?.email,
         requestType: 'video',
         prompt: basePrompt,
         aspectRatio: '9:16',
+        referenceImageUrl: productPhoto,
       })
 
       await admin
@@ -142,8 +156,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           requestId: gr.id,
-          category: 'video-t2v',
-          model: videoModel,
+          ...videoInput,
           prompt: basePrompt,
           resolution: '1080P',
           duration: videoDuration,
@@ -180,7 +193,9 @@ Deno.serve(async (req) => {
       return json({ error: 'Image generation is not configured.' }, 500)
     }
 
-    const imageModels = ['qwen-image-3.0-pro', 'qwen-image-plus', 'qwen-image']
+    const imageModels = productPhoto
+      ? ['qwen-image-3.0-pro', 'qwen-image-edit-plus', 'qwen-image-edit']
+      : ['qwen-image-3.0-pro', 'qwen-image-plus', 'qwen-image']
     let remoteImageUrl: string | undefined
     let lastErr = ''
 
@@ -192,7 +207,7 @@ Deno.serve(async (req) => {
           headers: { Authorization: `Bearer ${qwenKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model,
-            input: { messages: [{ role: 'user', content: [{ text: basePrompt }] }] },
+            input: { messages: [{ role: 'user', content: workflowImageContent(basePrompt, signedPhoto) }] },
             parameters: { size: '928*1664', n: 1, prompt_extend: false },
           }),
         },
@@ -267,6 +282,7 @@ Deno.serve(async (req) => {
         status: 'completed',
         credits_used: cost,
         category: 'creative-workflow',
+        reference_image_url: productPhoto,
         result_url: assetRef,
         completed_at: new Date().toISOString(),
       })
@@ -281,6 +297,7 @@ Deno.serve(async (req) => {
         requestType: 'image',
         prompt: basePrompt,
         aspectRatio: '9:16',
+        referenceImageUrl: productPhoto,
       })
     }
 
