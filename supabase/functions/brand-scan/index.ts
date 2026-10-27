@@ -1,6 +1,7 @@
 import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
+import { languageInstruction } from '../_shared/creativeBrief.ts'
 
 interface ScanBody {
   brandName?: string
@@ -70,6 +71,7 @@ Deno.serve(async (req) => {
     ])
 
     const prompt = `You are a brand strategist. Analyze the brand below and infer its positioning.
+${languageInstruction(niche)}
 
 Brand name: ${brandName || 'unknown'}
 Website: ${website || 'none'}

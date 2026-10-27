@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration, needsLongFormModel, WAN_LONGFORM_MODEL } from '../_shared/dashscope.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
+import { buildCreativeMediaPrompt } from '../_shared/creativeBrief.ts'
 
 
 const IMAGE_COST = 30
@@ -25,9 +26,10 @@ Deno.serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !anonKey || !serviceKey) return json({ error: 'Generation is not configured.' }, 500)
 
     // Identify the caller
     const authClient = createClient(supabaseUrl, anonKey, {
@@ -53,7 +55,7 @@ Deno.serve(async (req) => {
     // Load the day and verify ownership
     const { data: day, error: dayErr } = await admin
       .from('creative_days')
-      .select('id, user_id, day, concept, hook, body, scenes, asset_type')
+      .select('id, user_id, strategy_id, day, concept, hook, body, scenes, asset_type')
       .eq('id', dayId)
       .maybeSingle()
     if (dayErr || !day) {
@@ -84,9 +86,11 @@ Deno.serve(async (req) => {
       )
     }
 
-    const scenes = Array.isArray(day.scenes) ? (day.scenes as Array<{ visual?: string; voiceover?: string }>) : []
-    const sceneText = scenes.map((s, i) => `Scene ${i + 1}: ${s.visual || ''}`).join('. ')
-    const basePrompt = `Vertical 9:16 social media ${assetType} for "${day.concept}". Hook: ${day.hook}. ${day.body}. ${sceneText}. Polished, scroll-stopping, high quality.`
+    const { data: brand, error: brandError } = await admin.from('creative_strategies')
+      .select('brand_name, product, brand_message, brand_color')
+      .eq('id', day.strategy_id).eq('user_id', userId).maybeSingle()
+    if (brandError || !brand) return json({ error: 'Your brand details could not be loaded.' }, 400)
+    const basePrompt = buildCreativeMediaPrompt(brand, { ...day, scenes: Array.isArray(day.scenes) ? day.scenes : [] }, assetType, videoDuration)
 
     /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
