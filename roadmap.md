@@ -1,4 +1,5 @@
-- [ ] Replace Creative Workflow Brand Color with a product photo upload and carry the real reference into images, videos, request history and admin emails.
+- [x] Replace Creative Workflow Brand Color with a product photo upload; image/video reference routing, history and admin email attachments implemented and deployed; seven targeted tests pass and upload control renders without errors.
+- [ ] Verify product upload to a completed workflow image/video while signed in: external Supabase has no available authenticated test session.
 - [x] Clear Creative Workflow's previous seven-day strategy on refresh and new login without deleting history; two reset tests pass and preview build is clean.
 - [x] Verify Indonesian brand suggestions and seven-day strategies through live brand-scan and the exact planning prompt sent to Qwen.
 - [x] Preserve brand details, tone, color, scene directions and spoken lines with hook, story, product demonstration and CTA in workflow media prompts.
