@@ -1,3 +1,4 @@
+import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
@@ -104,7 +105,7 @@ Deno.serve(async (req) => {
       ecommerce.tokopedia && 'Tokopedia',
     ].filter(Boolean).join(', ') || 'none linked yet'
 
-    const siteText = await fetchSiteText(website)
+    const [siteText, socialText] = await Promise.all([fetchSiteText(website), readSocialProfiles(social)])
     const socialLinks = [
       social.instagram && `Instagram: ${social.instagram}`,
       social.tiktok && `TikTok: ${social.tiktok}`,
@@ -126,6 +127,8 @@ ${socialLinks}
 Linked channels: ${linkedChannels}
 Website content (may be partial):
 ${siteText || 'not available'}
+Recent social media posts (study their style, topics, products and what the audience responds to; build on it, don't copy):
+${socialText || 'not available'}
 
 Step 1, analysis: identify the target audience, their main pains and desires, the brand's unique selling points, and the language the audience speaks (write all hooks, voiceovers and captions in that language; default to the language of the owner's brief).
 Step 2, plan: create exactly 7 distinct daily posts (Day-1 to Day-7), varied in angle (education, social proof, founder story, trend remix, myth-busting, behind-the-scenes, offer). Each day needs 3 short scenes for a vertical video or image carousel, plus a ready-to-post caption with hashtags.
