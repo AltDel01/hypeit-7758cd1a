@@ -26,6 +26,24 @@ import { displayFailureReason } from '@/utils/failureReason';
 
 type DayStatus = 'Draft' | 'Generating' | 'Ready to Post' | 'Published';
 type GenStage = 'idle' | 'generating' | 'ready';
+
+const SOCIAL_BASE: Record<string, string> = {
+  instagram: 'https://www.instagram.com/',
+  tiktok: 'https://www.tiktok.com/@',
+  facebook: 'https://www.facebook.com/',
+};
+/** Turns "@brand", "brand" or a full link into a full profile link. */
+export const toSocialUrl = (platform: string, value: string) => {
+  const v = value.trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^(www\.)?(instagram|tiktok|facebook|fb)\.com\//i.test(v)) return `https://${v}`;
+  const handle = v.replace(/^@+/, '').replace(/\s+/g, '');
+  return (SOCIAL_BASE[platform] || '') + handle;
+};
+const socialUrls = (s: Record<string, string>) =>
+  Object.fromEntries(Object.entries(s).map(([k, v]) => [k, toSocialUrl(k, v)])) as typeof s;
+
 type Platform = 'tiktok' | 'instagram' | 'facebook';
 type AssetType = 'image' | 'video';
 
@@ -297,7 +315,7 @@ const CreativeWorkflow = () => {
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke('brand-scan', {
-        body: { brandName, website, social },
+        body: { brandName, website, social: socialUrls(social) },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -452,7 +470,7 @@ const CreativeWorkflow = () => {
     setDays(null);
     try {
       const { data, error } = await supabase.functions.invoke('generate-strategy', {
-        body: { brandName, product, brandMessage, brandColor, social, ecommerce, website },
+        body: { brandName, product, brandMessage, brandColor, social: socialUrls(social), ecommerce, website },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -883,9 +901,9 @@ const CreativeWorkflow = () => {
             <Instagram className="h-3 w-3" /> Social Media Links
           </label>
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="Instagram URL" />
-            <Input value={social.tiktok} onChange={(e) => setSocial({ ...social, tiktok: e.target.value })} placeholder="TikTok URL" />
-            <Input value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="Facebook URL" />
+            <Input value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="Instagram @handle or URL" />
+            <Input value={social.tiktok} onChange={(e) => setSocial({ ...social, tiktok: e.target.value })} placeholder="TikTok @handle or URL" />
+            <Input value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="Facebook @handle or URL" />
           </div>
         </div>
 
