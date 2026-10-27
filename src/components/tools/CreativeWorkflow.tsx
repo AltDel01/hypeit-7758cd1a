@@ -769,25 +769,19 @@ const CreativeWorkflow = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start gap-3">
-        <div className="rounded-xl bg-[#8C52FF]/15 p-2.5 text-[#8C52FF]">
-          <CalendarRange className="h-6 w-6" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="shrink-0 rounded-lg bg-primary/15 p-2 text-primary">
+            <CalendarRange className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <h1 className="min-w-0 text-xl font-bold leading-tight text-foreground sm:text-2xl">Creative Workflow</h1>
         </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">Creative Workflow</h1>
-          <p className="text-sm text-muted-foreground">
-            Ideation, scripting, generation and automated posting to TikTok, Instagram and Facebook, planned across a full week.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm" className="gap-1.5 h-9 shrink-0">
+        <Button asChild variant="outline" size="sm" className="h-9 shrink-0 self-start gap-1.5 sm:self-auto">
           <Link to="/posts">
             <ListChecks className="h-3.5 w-3.5" /> Posting history
           </Link>
         </Button>
       </div>
-      <p className="-mt-3 text-xs text-muted-foreground">
-        Tip: once a day's media finishes generating, the box clears itself and the result moves to your <Link to="/posts" className="text-[#8C52FF] underline">posting history</Link>.
-      </p>
 
 
       <ConnectedAccounts state={socialConn} />
