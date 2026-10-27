@@ -315,7 +315,7 @@ const CreativeWorkflow = () => {
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke('brand-scan', {
-        body: { brandName, website, social: socialUrls(social) },
+        body: { brandName, website, niche: product, social: socialUrls(social) },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -334,17 +334,17 @@ const CreativeWorkflow = () => {
   // Auto-scan once the user has supplied enough brand signals (debounced).
 
   useEffect(() => {
-    const hasSignal = website.trim() || social.instagram.trim() || social.tiktok.trim() || social.facebook.trim();
+    const hasSignal = product.trim().length >= 8 || website.trim() || social.instagram.trim() || social.tiktok.trim() || social.facebook.trim();
     if (!brandName.trim() || !hasSignal) return;
-    const sig = JSON.stringify({ brandName, website, social });
+    const sig = JSON.stringify({ brandName, website, social, product });
     if (sig === lastScanSig.current) return;
     const t = setTimeout(() => {
       lastScanSig.current = sig;
       handleScan(true);
-    }, 1200);
+    }, 2000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandName, website, social]);
+  }, [brandName, website, social, product]);
 
   /* -------- Persist a single day's edits (debounced) -------- */
   const persistDay = (id: string, patch: Partial<DayPlan>) => {
