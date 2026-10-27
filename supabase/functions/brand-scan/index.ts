@@ -89,7 +89,8 @@ ${socialText || 'No social content available.'}
 """
 
 Return ONLY a JSON object (no markdown) with:
-- "brandMessage": one concise sentence (max 140 chars) capturing the brand tone, voice and value proposition.
+- "brandMessage": one concise sentence (max 140 chars) describing HOW the brand should sound and what it promises, e.g. "Playful, warm and relatable; everyday affordable treats that make young professionals smile." Do NOT just repeat the product description word for word.
+- "brandColor" must ALWAYS be a real hex color that fits the product and audience (never leave it empty).
 - "brandColor": the single most representative primary brand color as a 6-digit hex string like "#8C52FF".
 Base your answer first on what they sell, then the website, and only then the social posts, otherwise base it on what they sell. Never invent products, industries or claims that are not supported by the information above; if information is thin, keep the message simple and about what they sell. Write it in the same language the owner used.`
 
