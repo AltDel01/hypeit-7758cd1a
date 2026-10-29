@@ -187,69 +187,16 @@ Deno.serve(async (req) => {
       return json({ assetType: 'video', status: 'generating', requestId: gr.id })
     }
 
-    /* ---------------- IMAGE: generate now via Qwen (DashScope) ---------------- */
-    const qwenKey = Deno.env.get('QWEN_API_KEY')
-    if (!qwenKey) {
+    /* ---------------- IMAGE: generate now via Seedream (ModelArk) ---------------- */
+    if (!Deno.env.get('ARK_API_KEY')) {
       return json({ error: 'Image generation is not configured.' }, 500)
     }
-
-    const imageModels = productPhoto
-      ? ['qwen-image-3.0-pro', 'qwen-image-edit-plus', 'qwen-image-edit']
-      : ['qwen-image-3.0-pro', 'qwen-image-plus', 'qwen-image']
-    let remoteImageUrl: string | undefined
-    let lastErr = ''
-
-    for (const model of imageModels) {
-      const res = await fetch(
-        'https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${qwenKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model,
-            input: { messages: [{ role: 'user', content: workflowImageContent(basePrompt, signedPhoto) }] },
-            parameters: { size: '928*1664', n: 1, prompt_extend: false },
-          }),
-        },
-      )
-
-      if (!res.ok) {
-        lastErr = await res.text()
-        console.error('qwen image error', model, res.status, lastErr.slice(0, 400))
-        const t = lastErr.toLowerCase()
-        const modelIssue =
-          res.status === 403 || res.status === 404 ||
-          t.includes('model not exist') || t.includes('unsupported model') ||
-          t.includes('model not support') || t.includes('access denied')
-        if (modelIssue) continue
-        break
-      }
-
-      const data = await res.json()
-      const choices = data?.output?.choices
-      if (Array.isArray(choices)) {
-        for (const choice of choices) {
-          const parts = choice?.message?.content
-          if (Array.isArray(parts)) {
-            for (const part of parts) {
-              if (part?.image && !remoteImageUrl) remoteImageUrl = part.image
-            }
-          }
-        }
-      }
-      if (!remoteImageUrl && Array.isArray(data?.output?.results)) {
-        remoteImageUrl = data.output.results.find((r: { url?: string }) => r?.url)?.url
-      }
-      if (remoteImageUrl) {
-        if (model !== imageModels[0]) console.warn('creative asset fell back to', model)
-        break
-      }
-      console.error('qwen returned no image', JSON.stringify(data).slice(0, 400))
+    const imageReq = workflowImageRequest(basePrompt, signedPhoto)
+    const gen = await arkGenerateImages({ prompt: imageReq.prompt, images: imageReq.images, size: arkImageSize('9:16') })
+    if (!gen.ok) {
+      return json({ error: friendlyFailureReason(gen.detail) }, 502)
     }
-
-    if (!remoteImageUrl) {
-      return json({ error: 'Image generation failed.' }, 502)
-    }
+    const remoteImageUrl = gen.urls[0]
 
     const imgRes = await fetch(remoteImageUrl)
     if (!imgRes.ok) {
