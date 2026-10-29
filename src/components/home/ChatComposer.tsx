@@ -65,7 +65,7 @@ const ChatComposer: React.FC = () => {
   const [files, setFiles] = useState<TaggedFile[]>([]);
   const [mode, setMode] = useState<ChatMode>('chat');
   const [ratio, setRatio] = useState<string>('16:9');
-  const [duration, setDuration] = useState<number>(5);
+  const [duration, setDuration] = useState<number>(-1);
   const [resolution, setResolution] = useState<string>('720P');
   const [style, setStyle] = useState<string>('Cinematic');
   const [motion, setMotion] = useState<string>('Static');
