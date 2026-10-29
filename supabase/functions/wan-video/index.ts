@@ -366,8 +366,9 @@ async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response
   };
 
   const modelPrompt = cleanPromptForModel(body.prompt);
-  const promptDuration = parseInt(parseSetting(body.prompt, 'Duration') || '', 10);
-  const duration = clampArkDuration(body.duration ?? (Number.isFinite(promptDuration) ? promptDuration : 5), 5);
+  const promptDurationRaw = parseSetting(body.prompt, 'Duration') || '';
+  const promptDuration = /smart/i.test(promptDurationRaw) ? 'smart' : parseInt(promptDurationRaw, 10);
+  const duration = clampArkDuration(body.duration ?? (promptDuration === 'smart' || Number.isFinite(promptDuration) ? promptDuration : 5), 5);
   const resolution = body.resolution || parseSetting(body.prompt, 'Resolution') || '1080p';
   const ratio = parseSetting(body.prompt, 'Aspect') || body.size;
 

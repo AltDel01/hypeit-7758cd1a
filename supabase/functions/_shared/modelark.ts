@@ -20,7 +20,15 @@ export function arkHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
 }
 
+/** -1 (or "smart") lets Seedance pick the length that fits the story. */
+export const ARK_SMART_DURATION = -1;
+export function isSmart(raw: unknown): boolean {
+  const r = String(raw ?? '').trim().toLowerCase();
+  return r === 'smart' || r === 'adaptive' || r === 'auto' || r === '-1';
+}
+
 export function clampArkDuration(raw: unknown, fallback = 5): number {
+  if (isSmart(raw)) return ARK_SMART_DURATION;
   const n = Number(raw);
   if (!Number.isFinite(n)) return fallback;
   return Math.max(ARK_MIN_DURATION, Math.min(ARK_MAX_DURATION, Math.round(n)));
@@ -35,6 +43,7 @@ export function normalizeArkResolution(raw: unknown): '480p' | '720p' | '1080p' 
 
 export function normalizeArkRatio(raw: unknown): string {
   const r = String(raw ?? '').trim();
+  if (isSmart(r)) return 'adaptive';
   if (ARK_RATIOS.includes(r)) return r;
   const m = r.match(/^(\d+)\s*[*x:]\s*(\d+)$/i);
   if (m) {
@@ -54,6 +63,8 @@ export function normalizeArkRatio(raw: unknown): string {
 /** Map a requested aspect ratio to a Seedream pixel size. */
 export function arkImageSize(raw: unknown): string {
   const s = String(raw ?? '').trim();
+  // A quality level alone ('2K') lets Seedream choose the shape from the prompt.
+  if (isSmart(s)) return '2K';
   const m = s.match(/^(\d+)\s*[*x]\s*(\d+)$/i);
   if (m) {
     const w = Number(m[1]), h = Number(m[2]);
@@ -163,6 +174,21 @@ export type VideoPoll =
   | { state: 'failed'; reason: string }
   | { state: 'succeeded'; videoUrl?: string };
 
+/**
+ * Cancel a ModelArk video task. ModelArk only allows this while the task is
+ * still queued; once running it cannot be stopped.
+ */
+export async function arkCancelVideoTask(taskId: string): Promise<'cancelled' | 'running' | 'error'> {
+  const r = await fetch(`${ARK_BASE}/contents/generations/tasks/${encodeURIComponent(taskId)}`, {
+    method: 'DELETE', headers: arkHeaders(),
+  });
+  if (r.ok) return 'cancelled';
+  const t = await r.text();
+  if (t.includes('RunningTaskDeletion')) return 'running';
+  console.error('[modelark] cancel failed', r.status, t.slice(0, 300));
+  return 'error';
+}
+
 /** Poll a video task for either provider ('modelark' or legacy 'wan'). */
 export async function pollVideoTask(provider: string | null | undefined, taskId: string): Promise<VideoPoll | null> {
   if (provider === ARK_PROVIDER) {
@@ -176,6 +202,7 @@ export async function pollVideoTask(provider: string | null | undefined, taskId:
     if (s === 'queued' || s === 'running') return { state: 'pending' };
     if (s === 'succeeded') return { state: 'succeeded', videoUrl: j?.content?.video_url };
     const err = j?.error ? `${j.error.code || ''} ${j.error.message || ''}` : s;
+    if (s === 'cancelled') return { state: 'failed', reason: 'This generation was cancelled.' };
     if (s === 'expired') return { state: 'failed', reason: 'Generation timed out. Please try again.' };
     return { state: 'failed', reason: friendlyFailureReason(err) };
   }

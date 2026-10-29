@@ -92,6 +92,22 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
     );
   };
 
+  const [isCancelling, setIsCancelling] = useState(false);
+  const canCancel =
+    !autoFailed &&
+    request.request_type === 'video' &&
+    (request.status === 'new' || request.status === 'in-progress') &&
+    (request as any).auto_provider === 'modelark';
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    const { data, error } = await supabase.functions.invoke('cancel-generation', { body: { requestId: request.id } });
+    setIsCancelling(false);
+    if (error) return toast.error('Could not cancel right now. Please try again.');
+    if (data?.result === 'cancelled') toast.success('Cancelled. No credits were used.');
+    else if (data?.result === 'running') toast.info('This video is already being made and can no longer be stopped.');
+    else toast.info('This video has already finished.');
+  };
+
   const parsed = parsePromptString(request.prompt);
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [resolvedImages, setResolvedImages] = useState<string[]>([]);
@@ -250,6 +266,12 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
               Try again
+            </Button>
+          )}
+          {canCancel && (
+            <Button size="sm" variant="outline" className="mt-3" disabled={isCancelling} onClick={handleCancel}>
+              {isCancelling ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <XCircle className="h-4 w-4 mr-2" />}
+              Cancel
             </Button>
           )}
         </div>
