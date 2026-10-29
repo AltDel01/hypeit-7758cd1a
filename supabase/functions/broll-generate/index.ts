@@ -1,13 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import {
-  DASHSCOPE_BASE,
-  authHeaders,
-  clampWanDuration,
-  needsLongFormModel,
-  createWanVideoTask,
-  WAN_LONGFORM_MODEL,
-} from '../_shared/dashscope.ts'
+import { arkCreateVideoTask, clampArkDuration, pollVideoTask } from '../_shared/modelark.ts'
 
 
 /**
@@ -19,10 +12,7 @@ import {
  * Jobs are created one at a time by the client.
  */
 
-const CREATE_URL = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`
-const TASK_URL = `${DASHSCOPE_BASE}/api/v1/tasks`
 const BUCKET = 'broll-media'
-const MODEL = 'wan2.7-t2v'
 
 type Orientation = 'portrait' | 'landscape' | 'square'
 
@@ -50,7 +40,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: 'Unauthorized' }, 401)
     const userId = userData.user.id
 
-    if (!Deno.env.get('QWEN_API_KEY')) return json({ error: 'AI is not configured.' }, 500)
+    if (!Deno.env.get('ARK_API_KEY')) return json({ error: 'AI is not configured.' }, 500)
 
     const body = (await req.json().catch(() => ({}))) as {
       action?: string
@@ -67,24 +57,15 @@ Deno.serve(async (req) => {
       const prompt = (body.prompt || '').toString().trim().slice(0, 1500)
       if (!prompt) return json({ error: 'A b-roll prompt is required.' }, 400)
 
-      // Wan supports 2-30s clips (over 15s runs on the wan3.0 long-form model).
-      const secs = clampWanDuration(body.seconds, 5)
+      const secs = clampArkDuration(body.seconds, 5)
       const orientation: Orientation =
         body.orientation === 'portrait' || body.orientation === 'square' ? body.orientation : 'landscape'
-      // Wan accepts 720P or 1080P only.
-      const resolution = body.quality === 'lite' ? '720P' : '1080P'
-      const size =
-        orientation === 'portrait' ? (resolution === '720P' ? '720*1280' : '1080*1920')
-        : orientation === 'square' ? (resolution === '720P' ? '960*960' : '1440*1440')
-        : (resolution === '720P' ? '1280*720' : '1920*1080')
-
-      const longForm = needsLongFormModel(secs)
-      const result = await createWanVideoTask({
-        endpoint: CREATE_URL,
-        model: longForm ? WAN_LONGFORM_MODEL : MODEL,
-        input: { prompt },
-        parameters: { resolution, duration: secs, size },
-        fallbackModel: MODEL,
+      const result = await arkCreateVideoTask({
+        prompt,
+        duration: secs,
+        resolution: body.quality === 'lite' ? '720p' : '1080p',
+        ratio: orientation === 'portrait' ? '9:16' : orientation === 'square' ? '1:1' : '16:9',
+        generateAudio: false,
       })
 
       if (!result.ok) {
@@ -108,34 +89,20 @@ Deno.serve(async (req) => {
     const videoId = (body.videoId || '').toString().trim()
     if (!videoId) return json({ error: 'Missing clip id.' }, 400)
 
-    const jobRes = await fetch(`${TASK_URL}/${encodeURIComponent(videoId)}`, {
-      headers: authHeaders(),
-    })
-    if (!jobRes.ok) {
-      const detail = await jobRes.text()
-      console.error('broll-generate poll failed', jobRes.status, detail.slice(0, 500))
+    const polled = await pollVideoTask(videoId.startsWith('cgt-') ? 'modelark' : 'wan', videoId)
+    if (!polled) {
+      console.error('broll-generate poll failed')
       return json({ error: 'Could not check the clip status.' }, 502)
     }
-    const job = await jobRes.json()
-    const state = job?.output?.task_status
-
-    if (state === 'FAILED' || state === 'UNKNOWN' || state === 'CANCELED') {
-      console.error('broll-generate task failed', JSON.stringify(job?.output).slice(0, 500))
-      return json({
-        status: 'failed',
-        error: job?.output?.message || 'The provider rejected this b-roll clip.',
-      })
+    if (polled.state === 'failed') {
+      return json({ status: 'failed', error: polled.reason })
     }
-    if (state !== 'SUCCEEDED') {
+    if (polled.state !== 'succeeded') {
       return json({ status: 'in_progress', progress: 0 })
     }
 
-    const remoteUrl: string | undefined =
-      job?.output?.video_url ||
-      job?.output?.results?.[0]?.video_url ||
-      job?.output?.results?.[0]?.url
+    const remoteUrl: string | undefined = polled.videoUrl
     if (!remoteUrl) {
-      console.error('broll-generate no video url', JSON.stringify(job?.output).slice(0, 500))
       return json({ error: 'The finished clip could not be downloaded.' }, 502)
     }
 

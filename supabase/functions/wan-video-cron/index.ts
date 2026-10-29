@@ -14,12 +14,10 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   genericError,
   ok,
-  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { pollVideoTask } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 serve(async (req) => {
@@ -35,8 +33,8 @@ serve(async (req) => {
   // every previously failed task is re-polled on every single cron tick.
   const { data: stuck, error } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, status, result_url, created_at')
-    .eq('auto_provider', 'wan')
+    .select('id, user_id, provider_task_id, auto_provider, status, result_url, created_at')
+    .in('auto_provider', ['wan', 'modelark'])
     .in('status', ['new', 'in-progress'])
     .eq('auto_failed', false)
     .not('provider_task_id', 'is', null)
@@ -81,18 +79,13 @@ serve(async (req) => {
       const ageMinutes =
         (Date.now() - new Date(row.created_at as string).getTime()) / 60000;
 
-      const upstream = await fetch(
-        `${DASHSCOPE_BASE}/api/v1/tasks/${row.provider_task_id}`,
-        { headers: authHeaders() }
-      );
-      if (!upstream.ok) {
+      const polled = await pollVideoTask(row.auto_provider, row.provider_task_id);
+      if (!polled) {
         results.push({ id: row.id, status: 'upstream-error' });
         continue;
       }
-      const json = await upstream.json();
-      const taskStatus: string = json?.output?.task_status || 'UNKNOWN';
 
-      if (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
+      if (polled.state === 'pending') {
         if (ageMinutes > STALE_MINUTES) {
           await admin
             .from('generation_requests')
@@ -109,19 +102,17 @@ serve(async (req) => {
         results.push({ id: row.id, status: 'pending' });
         continue;
       }
-      if (taskStatus === 'FAILED' || taskStatus === 'UNKNOWN') {
+      if (polled.state === 'failed') {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new', failure_reason: humanizeTaskFailure(json) })
+          .update({ auto_failed: true, status: 'new', failure_reason: polled.reason })
           .eq('id', row.id);
         results.push({ id: row.id, status: 'failed' });
         continue;
       }
-      if (taskStatus === 'SUCCEEDED') {
-        const videoUrl: string | undefined =
-          json?.output?.video_url ||
-          json?.output?.results?.[0]?.video_url ||
-          json?.output?.results?.[0]?.url;
+      {
+        const videoUrl = polled.videoUrl;
+
 
         if (!videoUrl) {
           await admin
@@ -172,10 +163,3 @@ serve(async (req) => {
   console.log('[wan-cron] scanned', stuck?.length ?? 0, JSON.stringify(results));
   return ok({ scanned: stuck?.length ?? 0, results });
 });
-
-function humanizeTaskFailure(json: any): string {
-  const out = json?.output || {};
-  if (out.task_status === 'UNKNOWN') return 'Generation was interrupted. Please try again.';
-  return friendlyFailureReason(`${out.code || ''} ${out.message || ''}`);
-}
-

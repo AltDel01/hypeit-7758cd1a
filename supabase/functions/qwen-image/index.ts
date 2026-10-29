@@ -12,13 +12,12 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   getUserIdFromAuth,
   genericError,
   ok,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { arkGenerateImages, arkImageSize, ARK_IMAGE_MODEL, ARK_PROVIDER } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
@@ -56,7 +55,7 @@ serve(async (req) => {
   if (!body.requestId || !body.prompt || !body.model || !body.mode) {
     return genericError(400, 'Missing required fields');
   }
-  if (body.prompt.length > 4000) return genericError(400, 'Prompt too long');
+  if (body.prompt.length > 20000) return genericError(400, 'Prompt too long');
   if (body.mode === 'edit' && (!body.referenceImageUrls || body.referenceImageUrls.length === 0)) {
     return genericError(400, 'Edit mode requires at least one reference image');
   }
@@ -87,99 +86,33 @@ serve(async (req) => {
     return data.signedUrl;
   };
 
-  // Build DashScope payload
-  // Multimodal generation endpoint supports both text->image and edit (with image refs)
-  const content: any[] = [];
+  const images: string[] = [];
   if (body.mode === 'edit' && body.referenceImageUrls) {
-    for (const url of body.referenceImageUrls.slice(0, 3)) {
+    for (const url of body.referenceImageUrls.slice(0, 10)) {
       const resolved = await resolveUrl(url);
       if (!resolved) {
-        await markFailed(admin, body.requestId, body.model, 'Could not resolve reference image');
+        await markFailed(admin, body.requestId, ARK_IMAGE_MODEL, 'Could not resolve reference image');
         return genericError(400, 'Could not resolve reference image');
       }
-      content.push({ image: resolved });
+      images.push(resolved);
     }
   }
 
-  content.push({ text: body.prompt });
-
   const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
-
-  const buildPayload = (model: string) => ({
-    model,
-    input: {
-      messages: [{ role: 'user', content }],
-    },
-    parameters: {
-      size: snapSize(body.size),
-      n: imageCount,
-      prompt_extend: body.promptExtend ?? false,
-    },
-  });
+  const effectiveModel = ARK_IMAGE_MODEL;
 
   try {
-    // Try the requested model first, then fall back to the previous-generation
-    // Qwen image models if the provider does not accept it.
-    const candidates = modelCandidates(body.model, body.mode);
-    let upstream: Response | undefined;
-    let lastStatus = 502;
-    let lastText = '';
-    let effectiveModel = body.model;
-
-    for (const candidate of candidates) {
-      const res = await fetch(
-        `${DASHSCOPE_BASE}/api/v1/services/aigc/multimodal-generation/generation`,
-        {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify(buildPayload(candidate)),
-        }
-      );
-      if (res.ok) {
-        upstream = res;
-        effectiveModel = candidate;
-        if (candidate !== body.model) {
-          console.warn('[qwen-image] fell back from', body.model, 'to', candidate);
-        }
-        break;
-      }
-      lastStatus = res.status;
-      lastText = await res.text();
-      console.error('[qwen-image] upstream error', candidate, res.status, lastText);
-      if (!isModelUnavailable(res.status, lastText)) break;
-    }
-
-    if (!upstream) {
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(lastStatus, lastText));
+    const gen = await arkGenerateImages({
+      prompt: body.prompt,
+      size: arkImageSize(body.size),
+      images,
+      n: imageCount,
+    });
+    if (!gen.ok) {
+      await markFailed(admin, body.requestId, effectiveModel, friendlyFailureReason(`${gen.status} ${gen.detail}`));
       return genericError(502, 'Generation failed');
     }
-
-    const json = await upstream.json();
-    // Collect all image urls from common response shapes
-    const rawUrls: string[] = [];
-    const choices = json?.output?.choices;
-    if (Array.isArray(choices)) {
-      for (const choice of choices) {
-        const parts = choice?.message?.content;
-        if (Array.isArray(parts)) {
-          for (const part of parts) {
-            if (part?.image) rawUrls.push(part.image);
-          }
-        }
-      }
-    }
-    if (Array.isArray(json?.output?.results)) {
-      for (const r of json.output.results) {
-        if (r?.url) rawUrls.push(r.url);
-      }
-    }
-    if (rawUrls.length === 0 && json?.output?.url) rawUrls.push(json.output.url);
-
-    if (rawUrls.length === 0) {
-      console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, effectiveModel, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Generation failed');
-    }
+    const rawUrls = gen.urls;
 
     // Download and upload each image to Supabase Storage
     const storedUrls: string[] = [];
@@ -190,10 +123,12 @@ serve(async (req) => {
         const imgRes = await fetch(imageUrl);
         if (imgRes.ok) {
           const buf = new Uint8Array(await imgRes.arrayBuffer());
-          const path = `${userId}/${body.requestId}-${i}.png`;
+          const ct = imgRes.headers.get('content-type') || 'image/jpeg';
+          const ext = ct.includes('png') ? 'png' : 'jpg';
+          const path = `${userId}/${body.requestId}-${i}.${ext}`;
           const { error: upErr } = await admin.storage
             .from('generated-images')
-            .upload(path, buf, { contentType: 'image/png', upsert: true });
+            .upload(path, buf, { contentType: ct, upsert: true });
           if (!upErr) {
             storedUrl = `storage:generated-images/${path}`;
           } else {
@@ -213,7 +148,7 @@ serve(async (req) => {
         result_url: storedUrls[0],
         result_images: storedUrls,
         completed_at: new Date().toISOString(),
-        auto_provider: 'qwen',
+        auto_provider: ARK_PROVIDER,
         auto_model: effectiveModel,
         auto_failed: false,
         failure_reason: null,
@@ -235,65 +170,11 @@ serve(async (req) => {
   }
 });
 
-/**
- * DashScope Qwen image models accept only these sizes. Anything else is
- * rejected with a 400, so snap to the closest allowed aspect ratio.
- */
-const ALLOWED_SIZES: Array<[number, number]> = [
-  [1664, 928], [1472, 1104], [1328, 1328], [1104, 1472], [928, 1664],
-];
-
-function snapSize(size?: string): string {
-  const m = (size || '').match(/^(\d+)\s*\*\s*(\d+)$/);
-  if (!m) return '1328*1328';
-  const w = parseInt(m[1], 10);
-  const h = parseInt(m[2], 10);
-  if (!w || !h) return '1328*1328';
-  if (ALLOWED_SIZES.some(([aw, ah]) => aw === w && ah === h)) return `${w}*${h}`;
-  const target = w / h;
-  let best = ALLOWED_SIZES[2];
-  let bestDiff = Infinity;
-  for (const s of ALLOWED_SIZES) {
-    const diff = Math.abs(s[0] / s[1] - target);
-    if (diff < bestDiff) { bestDiff = diff; best = s; }
-  }
-  return `${best[0]}*${best[1]}`;
-}
-
-/**
- * Fallback chain: requested model first, then the previous-generation Qwen
- * image models so a request still produces a result if 3.0 is unavailable.
- */
-function modelCandidates(requested: string, mode: 'gen' | 'edit'): string[] {
-  const legacy = mode === 'edit'
-    ? ['qwen-image-edit-plus', 'qwen-image-edit']
-    : ['qwen-image-plus', 'qwen-image'];
-  return [requested, ...legacy.filter((m) => m !== requested)];
-}
-
-/** True when the provider rejected the model itself (not the prompt/content). */
-function isModelUnavailable(status: number, raw: string): boolean {
-  const t = (raw || '').toLowerCase();
-  if (t.includes('model not exist') || t.includes('invalid_parameter') && t.includes('model')) return true;
-  if (t.includes('unsupported model') || t.includes('model not support')) return true;
-  if (t.includes('accessdenied') || t.includes('access denied')) return true;
-  return status === 403 || status === 404;
-}
-
-function humanizeProviderError(status: number, raw: string): string {
-  const t = (raw || '').toLowerCase();
-  if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied') || status === 403) {
-    return 'This image model is temporarily unavailable. Please try again later.';
-  }
-  // Everything else maps to a short, friendly, provider-agnostic message.
-  return friendlyFailureReason(`${status} ${raw || ''}`);
-}
-
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
   await admin
     .from('generation_requests')
     .update({
-      auto_provider: 'qwen',
+      auto_provider: ARK_PROVIDER,
       auto_model: model,
       auto_failed: true,
       status: 'new', // ensure manual editor queue picks it up

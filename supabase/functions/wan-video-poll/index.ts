@@ -9,13 +9,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   getUserIdFromAuth,
   genericError,
   ok,
-  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { pollVideoTask } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
@@ -46,7 +44,7 @@ serve(async (req) => {
 
   const { data: reqRow } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, auto_model, status, result_url')
+    .select('id, user_id, provider_task_id, auto_provider, auto_model, status, result_url')
     .eq('id', body.requestId)
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
@@ -61,45 +59,30 @@ serve(async (req) => {
   }
 
   try {
-    const upstream = await fetch(
-      `${DASHSCOPE_BASE}/api/v1/tasks/${reqRow.provider_task_id}`,
-      { headers: authHeaders() }
-    );
-    if (!upstream.ok) {
-      const txt = await upstream.text();
-      console.error('[wan-video-poll] upstream error', upstream.status, txt);
+    const polled = await pollVideoTask(reqRow.auto_provider, reqRow.provider_task_id);
+    if (!polled || polled.state === 'pending') {
       return ok({ status: 'pending' });
     }
 
-    const json = await upstream.json();
-    const taskStatus: string = json?.output?.task_status || 'UNKNOWN';
-
-    if (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
-      return ok({ status: 'pending', taskStatus });
-    }
-
-    if (taskStatus === 'FAILED' || taskStatus === 'UNKNOWN') {
-      console.error('[wan-video-poll] task failed', JSON.stringify(json).slice(0, 500));
+    if (polled.state === 'failed') {
       await admin
         .from('generation_requests')
-        .update({ auto_failed: true, status: 'new', failure_reason: humanizeTaskFailure(json) })
+        .update({ auto_failed: true, status: 'new', failure_reason: polled.reason })
         .eq('id', body.requestId);
       return ok({ status: 'failed' });
     }
 
-    if (taskStatus === 'SUCCEEDED') {
-      const videoUrl: string | undefined =
-        json?.output?.video_url ||
-        json?.output?.results?.[0]?.video_url ||
-        json?.output?.results?.[0]?.url;
+    {
+      const videoUrl = polled.videoUrl;
 
       if (!videoUrl) {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new', failure_reason: 'Provider returned no video URL' })
+          .update({ auto_failed: true, status: 'new', failure_reason: 'Generation finished without a result. Please try again.' })
           .eq('id', body.requestId);
         return ok({ status: 'failed' });
       }
+
 
 
       // Download and store
@@ -135,17 +118,9 @@ serve(async (req) => {
 
       return ok({ status: 'completed', resultUrl: storedUrl });
     }
-
-    return ok({ status: 'pending', taskStatus });
   } catch (e) {
     console.error('[wan-video-poll] exception', e);
     return ok({ status: 'pending' });
   }
 });
-
-function humanizeTaskFailure(json: any): string {
-  const out = json?.output || {};
-  if (out.task_status === 'UNKNOWN') return 'Generation was interrupted. Please try again.';
-  return friendlyFailureReason(`${out.code || ''} ${out.message || ''}`);
-}
 
