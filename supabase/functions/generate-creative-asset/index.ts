@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration } from '../_shared/dashscope.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
-import { productPhotoPath, workflowVideoInput, workflowImageContent } from '../_shared/workflowProductPhoto.ts'
+import { productPhotoPath, workflowVideoInput, workflowImageRequest } from '../_shared/workflowProductPhoto.ts'
 import { buildCreativeMediaPrompt } from '../_shared/creativeBrief.ts'
 
 
