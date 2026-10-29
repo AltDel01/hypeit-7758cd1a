@@ -33,7 +33,8 @@ const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
   { value: '4:3',  w: 26, h: 20 },
   { value: '3:4',  w: 20, h: 26 },
 ];
-const DURATION_OPTIONS = [4, 5, 8, 10, 12, 15, 20, 30];
+/** -1 = Smart: the model picks the length that fits the story. */
+const DURATION_OPTIONS = [-1, 4, 5, 8, 10, 12, 15, 20, 30];
 const RESOLUTION_OPTIONS = ['720P', '1080P'];
 const IMAGE_ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
   { value: '1:1',  w: 22, h: 22 },
@@ -125,7 +126,7 @@ const ChatComposer: React.FC = () => {
     const settings: string[] = [];
     if (ratio) settings.push(`Aspect: ${ratio}`);
     if (resolution) settings.push(`Resolution: ${resolution}`);
-    if (duration) settings.push(`Duration: ${duration}s`);
+    if (duration) settings.push(duration === -1 ? 'Duration: Smart' : `Duration: ${duration}s`);
     if (firstFrameFile) settings.push(`First frame: attached`);
     if (lastFrameFile) settings.push(`Last frame: attached`);
     if (settings.length) out += `\n| ${settings.join(' | ')}`;
@@ -426,11 +427,11 @@ const ChatComposer: React.FC = () => {
                                 'px-2.5 py-1 rounded text-xs border',
                                 duration === d ? 'bg-[#8c52ff] text-white border-[#8c52ff]' : 'bg-gray-900/60 text-gray-300 border-gray-700/50 hover:border-gray-500',
                               )}
-                            >{d}s</button>
+                            >{d === -1 ? 'Smart' : `${d}s`}</button>
                           ))}
                         </div>
-                        {duration > 15 && (
-                          <p className="mt-1.5 text-[10px] text-gray-500">Clips over 15s use Wan 3.0 long-form (up to 30s).</p>
+                        {duration === -1 && (
+                          <p className="mt-1.5 text-[10px] text-gray-500">The AI picks the best length, from 4 to 30 seconds.</p>
                         )}
                       </div>
                       <div>

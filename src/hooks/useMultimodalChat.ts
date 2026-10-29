@@ -40,6 +40,7 @@ const STORAGE_KEY = 'viralin_chat_thread_v1';
 
 /** Map aspect ratio + resolution tier to a DashScope size string (W*H). */
 function imageSize(ratio: string, resolution: string): string {
+  if (ratio === 'Smart') return 'smart';
   const is2K = resolution === '2K';
   const map: Record<string, [string, string]> = {
     '1:1':  ['1024*1024', '1664*1664'],
