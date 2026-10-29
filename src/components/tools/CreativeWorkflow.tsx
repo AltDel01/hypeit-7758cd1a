@@ -512,7 +512,7 @@ const CreativeWorkflow = () => {
     upsertPost(day, 'processing');
     try {
       const { data, error } = await supabase.functions.invoke('generate-creative-asset', {
-        body: { dayId: day.id, duration: videoDurations[day.id] ?? 5 },
+        body: { dayId: day.id, duration: videoDurations[day.id] ?? -1 },
       });
 
       if (error) {
@@ -1056,7 +1056,7 @@ const CreativeWorkflow = () => {
                           onClick={() => setVideoDurations((prev) => ({ ...prev, [day.id]: s }))}
                           className={cn(
                             'rounded border px-1.5 py-0.5 text-[10px] transition-colors',
-                            (videoDurations[day.id] ?? 5) === s
+                            (videoDurations[day.id] ?? -1) === s
                               ? 'border-[#8C52FF] bg-[#8C52FF] text-white'
                               : 'border-border text-muted-foreground hover:text-foreground',
                           )}

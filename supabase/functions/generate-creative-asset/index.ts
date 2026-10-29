@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as { dayId?: string; duration?: number | string }
     const dayId = (body.dayId || '').toString()
-    const videoDuration = clampArkDuration(body.duration, 5)
+    const videoDuration = clampArkDuration(body.duration ?? -1, -1)
 
     if (!dayId) {
       return json({ error: 'A day is required.' }, 400)
