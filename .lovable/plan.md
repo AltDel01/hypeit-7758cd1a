@@ -6,12 +6,11 @@ Every feature that makes images or videos moves from Alibaba to BytePlus ModelAr
 Nothing visible. The homepage generator, dashboard tools, Creative Workflow Day-1 to Day-7 media, Editor B-roll and thumbnails, image editing, and the Studio page all produce results from ModelArk. History, emails, credits and friendly error messages keep working the same way.
 
 ## Models
-- Images (generate and edit with reference photos, including the workflow product photo): Seedream 4.0
-- Videos (text-to-video, image-to-video, first/last frame, reference images): Seedance 1.0 Pro, with Seedance Lite as fallback
+- Images (generate and edit with reference photos, including the workflow product photo): Dola-Seedream-5.0-pro
+- Videos (text-to-video, image-to-video, first/last frame, reference images): Dreamina-Seedance-2.5
 
 ## Limits to know about
-- Seedance makes clips up to 12 seconds per run. The 15s, 20s and 30s options would be removed, or capped at 12s. (Longer would need clip stitching, a separate project.)
-- Resolution options become 480p, 720p, 1080p. Aspect ratios: 16:9, 9:16, 1:1, 4:3, 3:4, 21:9.
+- Before switching, I'll check Seedance 2.5's real limits with your key (longest clip, resolutions, aspect ratios). Any duration option it can't do (for example 20s or 30s) gets removed or capped, so users never get a shorter video than they picked.
 - Lip Sync has no ModelArk equivalent. It stays on Alibaba unless you want it hidden.
 - Videos already processing on Alibaba finish on Alibaba; only new requests use ModelArk.
 
