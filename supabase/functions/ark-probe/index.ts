@@ -15,9 +15,9 @@ Deno.serve(async (req) => {
       out.ids = (j.data ?? []).map((m: any) => m.id).filter((id: string) => /seed|dola|dreamina/i.test(id));
     } catch { out.body = t.slice(0, 500); }
   } else if (action === 'image') {
-    const model = url.searchParams.get('m')!;
-    const r = await fetch(`${BASE}/images/generations`, { method: 'POST', headers: h, body: JSON.stringify({ model, prompt: 'a red apple on a table', size: '2K', response_format: 'url', watermark: false }) });
-    out.status = r.status; out.body = (await r.text()).slice(0, 600);
+    const t0 = Date.now(); const model = url.searchParams.get('m')!;
+    const r = await fetch(`${BASE}/images/generations`, { method: 'POST', headers: h, body: JSON.stringify({ model, prompt: 'a red apple on a table', size: url.searchParams.get('s') ?? '2K', response_format: 'url', watermark: false }) });
+    out.status = r.status; out.body = (await r.text()).slice(0, 600); console.log('IMG', Date.now()-t0, out.status, out.body);
   } else if (action === 'video') {
     const model = url.searchParams.get('m')!;
     const dur = Number(url.searchParams.get('d') ?? '5');
