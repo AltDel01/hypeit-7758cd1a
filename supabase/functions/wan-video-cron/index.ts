@@ -42,6 +42,28 @@ serve(async (req) => {
 
   if (error) return genericError(500, 'DB query failed');
 
+  // Old Alibaba jobs are stopped, never followed: cancel queued tasks at the
+  // provider (best effort) and close the rows so nothing re-submits them.
+  const { data: legacy } = await admin
+    .from('generation_requests')
+    .select('id, provider_task_id')
+    .in('auto_provider', ['wan', 'qwen'])
+    .neq('category', 'video-lipsync')
+    .in('status', ['new', 'in-progress'])
+    .eq('auto_failed', false)
+    .is('result_url', null);
+  const qwenKey = Deno.env.get('QWEN_API_KEY');
+  for (const l of legacy ?? []) {
+    if (l.provider_task_id && qwenKey) {
+      await fetch(`https://dashscope-intl.aliyuncs.com/api/v1/tasks/${encodeURIComponent(l.provider_task_id)}/cancel`, {
+        method: 'POST', headers: { Authorization: `Bearer ${qwenKey}` },
+      }).catch(() => null);
+    }
+    await admin.from('generation_requests')
+      .update({ auto_failed: true, failure_reason: 'This generation was stopped. Please try again.' })
+      .eq('id', l.id);
+  }
+
   // Safety net: requests that were never submitted to the provider (no task
   // id) would otherwise show 'Processing' forever. After 15 minutes hand them
   // to the editor queue.
