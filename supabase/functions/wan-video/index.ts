@@ -118,6 +118,12 @@ serve(async (req) => {
     return genericError(400, 'Prompt too long');
   }
 
+  // All modes except face swap run on BytePlus ModelArk (Seedance).
+  if (body.category !== 'video-face-swap') {
+    return await dispatchModelArk(admin, body);
+  }
+
+
   // Resolve storage: refs by downloading the bytes and uploading them to
   // DashScope's own OSS storage (oss:// URL). This is Alibaba's officially
   // supported input method and avoids their validator fetching external URLs
