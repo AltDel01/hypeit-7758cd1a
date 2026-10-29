@@ -1050,7 +1050,7 @@ const CreativeWorkflow = () => {
                   <div className="space-y-1">
                     <p className="text-[9px] uppercase tracking-wide text-muted-foreground">Clip length</p>
                     <div className="flex flex-wrap gap-1">
-                      {[5, 10, 15, 20, 30].map((s) => (
+                      {[-1, 5, 10, 15, 20, 30].map((s) => (
                         <button
                           key={s}
                           onClick={() => setVideoDurations((prev) => ({ ...prev, [day.id]: s }))}
@@ -1061,7 +1061,7 @@ const CreativeWorkflow = () => {
                               : 'border-border text-muted-foreground hover:text-foreground',
                           )}
                         >
-                          {s}s
+                          {s === -1 ? 'Smart' : `${s}s`}
                         </button>
                       ))}
                     </div>
