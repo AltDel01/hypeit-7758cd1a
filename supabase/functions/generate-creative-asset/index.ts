@@ -232,6 +232,8 @@ Deno.serve(async (req) => {
         reference_image_url: productPhoto,
         result_url: assetRef,
         completed_at: new Date().toISOString(),
+        auto_provider: ARK_PROVIDER,
+        auto_model: ARK_IMAGE_MODEL,
       })
       .select('id')
       .maybeSingle()
