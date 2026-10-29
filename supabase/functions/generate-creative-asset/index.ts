@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           credits_used: cost,
           category: videoInput.category,
           reference_image_url: productPhoto,
-          auto_provider: 'wan',
+          auto_provider: ARK_PROVIDER,
           auto_model: videoModel,
         })
         .select('id')
