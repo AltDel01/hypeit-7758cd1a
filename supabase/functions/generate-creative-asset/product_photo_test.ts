@@ -26,3 +26,10 @@ Deno.test('product references can only access the owning user private photos', (
   assertThrows(() => productPhotoPath(photo, 'other-owner'))
   assertThrows(() => productPhotoPath('storage:product-images/owner/../other/product.png', 'owner'))
 })
+import { arkImageSize, normalizeArkRatio } from '../_shared/modelark.ts'
+Deno.test('Smart options let the model choose shape and length', () => {
+  assertEquals(clampArkDuration('smart'), -1)
+  assertEquals(clampArkDuration(-1), -1)
+  assertEquals(normalizeArkRatio('Smart'), 'adaptive')
+  assertEquals(arkImageSize('smart'), '2K')
+})
