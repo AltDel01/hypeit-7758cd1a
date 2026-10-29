@@ -28,6 +28,9 @@ import {
   WAN_LONGFORM_MODEL,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import {
+  arkCreateVideoTask, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
+} from '../_shared/modelark.ts';
 
 function guessTypeFromExt(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase() || '';
@@ -332,3 +335,76 @@ async function markFailed(admin: any, requestId: string, model: string, reason?:
     .eq('id', requestId);
 }
 
+
+/** Resolve a storage:/https reference into something ModelArk can read (data URL for private files). */
+async function toArkImage(admin: any, u?: string): Promise<string | undefined> {
+  if (!u) return undefined;
+  if (!u.startsWith('storage:')) return u;
+  const rest = u.slice('storage:'.length);
+  const slash = rest.indexOf('/');
+  if (slash < 0) return undefined;
+  const bucket = rest.slice(0, slash);
+  const path = rest.slice(slash + 1);
+  const { data, error } = await admin.storage.from(bucket).download(path);
+  if (error || !data) {
+    console.error('[wan-video] storage download failed', bucket, path, error?.message);
+    return undefined;
+  }
+  const raw = new Uint8Array(await data.arrayBuffer());
+  const rawType = (data as any).type || guessTypeFromExt(path);
+  const { bytes, contentType } = await normalizeImageForWan(raw, rawType);
+  return bytesToDataUrl(bytes, contentType);
+}
+
+async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response> {
+  const fail = async (reason: string, status = 400) => {
+    await admin.from('generation_requests').update({
+      auto_provider: ARK_PROVIDER, auto_model: ARK_VIDEO_MODEL, auto_failed: true,
+      status: 'new', failure_reason: friendlyFailureReason(reason),
+    }).eq('id', body.requestId);
+    return genericError(status, 'Submission failed');
+  };
+
+  const modelPrompt = cleanPromptForModel(body.prompt);
+  const promptDuration = parseInt(parseSetting(body.prompt, 'Duration') || '', 10);
+  const duration = clampArkDuration(body.duration ?? (Number.isFinite(promptDuration) ? promptDuration : 5), 5);
+  const resolution = body.resolution || parseSetting(body.prompt, 'Resolution') || '1080p';
+  const ratio = parseSetting(body.prompt, 'Aspect') || body.size;
+
+  const images: Array<{ url: string; role: ArkMediaRole }> = [];
+  try {
+    if (body.category === 'video-i2v' || body.category === 'video-kf2v') {
+      const first = await toArkImage(admin, body.firstFrameUrl);
+      if (!first) return await fail('The reference image could not be read. Please re-upload it.');
+      images.push({ url: first, role: 'first_frame' });
+      if (body.category === 'video-kf2v') {
+        const last = await toArkImage(admin, body.lastFrameUrl);
+        if (!last) return await fail('Both the first and last frame images are required. Please re-upload them.');
+        images.push({ url: last, role: 'last_frame' });
+      }
+    } else if (body.category === 'video-r2v') {
+      for (const u of (body.referenceImageUrls || []).slice(0, 9)) {
+        const r = await toArkImage(admin, u);
+        if (r) images.push({ url: r, role: 'reference_image' });
+      }
+      if (!images.length) return await fail('The reference images could not be read. Please re-upload them.');
+    }
+  } catch (e) {
+    console.error('[wan-video] reference prep failed', e);
+    return await fail('The reference image could not be read. Please re-upload it.', 502);
+  }
+
+  console.log('[wan-video] modelark dispatch', body.category, 'duration=' + duration, 'images=' + images.length);
+  try {
+    const result = await arkCreateVideoTask({ prompt: modelPrompt, duration, resolution, ratio, images });
+    if (!result.ok) return await fail(result.detail, 502);
+    await admin.from('generation_requests').update({
+      status: 'in-progress', auto_provider: ARK_PROVIDER, auto_model: result.model,
+      provider_task_id: result.taskId, auto_failed: false, failure_reason: null,
+    }).eq('id', body.requestId);
+    return ok({ ok: true, taskId: result.taskId, model: result.model, duration: result.duration, requestId: body.requestId });
+  } catch (e) {
+    console.error('[wan-video] modelark exception', e);
+    return await fail('Network error while submitting to provider', 502);
+  }
+}
