@@ -12,13 +12,12 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   getUserIdFromAuth,
   genericError,
   ok,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { arkGenerateImages, arkImageSize, ARK_IMAGE_MODEL, ARK_PROVIDER } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
@@ -56,7 +55,7 @@ serve(async (req) => {
   if (!body.requestId || !body.prompt || !body.model || !body.mode) {
     return genericError(400, 'Missing required fields');
   }
-  if (body.prompt.length > 4000) return genericError(400, 'Prompt too long');
+  if (body.prompt.length > 20000) return genericError(400, 'Prompt too long');
   if (body.mode === 'edit' && (!body.referenceImageUrls || body.referenceImageUrls.length === 0)) {
     return genericError(400, 'Edit mode requires at least one reference image');
   }
@@ -171,65 +170,11 @@ serve(async (req) => {
   }
 });
 
-/**
- * DashScope Qwen image models accept only these sizes. Anything else is
- * rejected with a 400, so snap to the closest allowed aspect ratio.
- */
-const ALLOWED_SIZES: Array<[number, number]> = [
-  [1664, 928], [1472, 1104], [1328, 1328], [1104, 1472], [928, 1664],
-];
-
-function snapSize(size?: string): string {
-  const m = (size || '').match(/^(\d+)\s*\*\s*(\d+)$/);
-  if (!m) return '1328*1328';
-  const w = parseInt(m[1], 10);
-  const h = parseInt(m[2], 10);
-  if (!w || !h) return '1328*1328';
-  if (ALLOWED_SIZES.some(([aw, ah]) => aw === w && ah === h)) return `${w}*${h}`;
-  const target = w / h;
-  let best = ALLOWED_SIZES[2];
-  let bestDiff = Infinity;
-  for (const s of ALLOWED_SIZES) {
-    const diff = Math.abs(s[0] / s[1] - target);
-    if (diff < bestDiff) { bestDiff = diff; best = s; }
-  }
-  return `${best[0]}*${best[1]}`;
-}
-
-/**
- * Fallback chain: requested model first, then the previous-generation Qwen
- * image models so a request still produces a result if 3.0 is unavailable.
- */
-function modelCandidates(requested: string, mode: 'gen' | 'edit'): string[] {
-  const legacy = mode === 'edit'
-    ? ['qwen-image-edit-plus', 'qwen-image-edit']
-    : ['qwen-image-plus', 'qwen-image'];
-  return [requested, ...legacy.filter((m) => m !== requested)];
-}
-
-/** True when the provider rejected the model itself (not the prompt/content). */
-function isModelUnavailable(status: number, raw: string): boolean {
-  const t = (raw || '').toLowerCase();
-  if (t.includes('model not exist') || t.includes('invalid_parameter') && t.includes('model')) return true;
-  if (t.includes('unsupported model') || t.includes('model not support')) return true;
-  if (t.includes('accessdenied') || t.includes('access denied')) return true;
-  return status === 403 || status === 404;
-}
-
-function humanizeProviderError(status: number, raw: string): string {
-  const t = (raw || '').toLowerCase();
-  if (t.includes('model not exist') || t.includes('accessdenied') || t.includes('access denied') || status === 403) {
-    return 'This image model is temporarily unavailable. Please try again later.';
-  }
-  // Everything else maps to a short, friendly, provider-agnostic message.
-  return friendlyFailureReason(`${status} ${raw || ''}`);
-}
-
 async function markFailed(admin: any, requestId: string, model: string, reason?: string) {
   await admin
     .from('generation_requests')
     .update({
-      auto_provider: 'qwen',
+      auto_provider: ARK_PROVIDER,
       auto_model: model,
       auto_failed: true,
       status: 'new', // ensure manual editor queue picks it up
