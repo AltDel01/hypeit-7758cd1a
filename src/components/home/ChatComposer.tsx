@@ -117,7 +117,7 @@ const ChatComposer: React.FC = () => {
     // Creative direction is baked into the prompt so the model honors it.
     const tags: string[] = [];
     if (style) tags.push(`Style: ${style}`);
-    if (motion && motion !== 'Static') tags.push(`Camera: ${motion}`);
+    if (motion) tags.push(`Camera: ${motion}`);
     if (intensity) tags.push(`Motion intensity: ${intensity}`);
     let out = tags.length ? `${base}\n\n[${tags.join(' | ')}]` : base;
 

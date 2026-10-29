@@ -218,3 +218,50 @@ export async function pollVideoTask(provider: string | null | undefined, taskId:
   if (s === 'UNKNOWN') return { state: 'failed', reason: 'Generation was interrupted. Please try again.' };
   return { state: 'failed', reason: friendlyFailureReason(`${j?.output?.code || ''} ${j?.output?.message || ''}`) };
 }
+
+const STYLE_TEXT: Record<string, string> = {
+  'cinematic': 'cinematic film look, shallow depth of field, rich contrast, film grain',
+  'vintage': 'vintage retro film look, warm faded colors, soft grain',
+  'anime': 'Japanese anime art style, cel shading, clean line art',
+  'documentary': 'documentary realism, natural light, observational framing',
+  'commercial': 'polished commercial advertising look, bright clean lighting, crisp detail',
+  'music video': 'stylish music video look, bold colors, rhythmic cutting',
+  'horror': 'dark horror atmosphere, low key lighting, eerie mood',
+  'sci-fi': 'science fiction look, futuristic lighting, neon accents',
+};
+const CAMERA_TEXT: Record<string, string> = {
+  'static': 'locked-off static camera, the camera does not move',
+  'pan': 'smooth horizontal camera pan',
+  'zoom in': 'camera slowly zooms in',
+  'zoom out': 'camera slowly zooms out',
+  'tracking': 'tracking shot, camera follows the subject',
+  'crane': 'crane shot, camera rises smoothly',
+  'handheld': 'handheld camera with natural slight shake',
+  'dolly': 'dolly shot, camera glides toward the subject',
+};
+const INTENSITY_TEXT: Record<string, string> = {
+  'subtle': 'subtle, gentle movement',
+  'moderate': 'moderate, natural movement',
+  'dynamic': 'dynamic, energetic movement',
+};
+
+/**
+ * Turn the composer's "[Style: X | Camera: Y | Motion intensity: Z]" block into
+ * plain directions Seedance follows (it reads natural language, not tags).
+ */
+export function seedanceDirections(prompt: string): string {
+  return prompt.replace(/\[([^\]]*(?:Style|Camera|Motion intensity)\s*:[^\]]*)\]/i, (_m, inner: string) => {
+    const parts: string[] = [];
+    for (const seg of inner.split('|')) {
+      const [k, ...rest] = seg.split(':');
+      const key = (k || '').trim().toLowerCase();
+      const val = rest.join(':').trim();
+      const v = val.toLowerCase();
+      if (!val) continue;
+      if (key === 'style') parts.push(`Visual style: ${STYLE_TEXT[v] || val}.`);
+      else if (key === 'camera') parts.push(`Camera: ${CAMERA_TEXT[v] || val}.`);
+      else if (key === 'motion intensity') parts.push(`Motion: ${INTENSITY_TEXT[v] || val}.`);
+    }
+    return parts.join(' ');
+  }).trim();
+}

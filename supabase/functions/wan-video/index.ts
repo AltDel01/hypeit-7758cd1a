@@ -29,7 +29,7 @@ import {
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 import {
-  arkCreateVideoTask, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
+  arkCreateVideoTask, seedanceDirections, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
 } from '../_shared/modelark.ts';
 
 function guessTypeFromExt(path: string): string {
@@ -357,6 +357,7 @@ async function toArkImage(admin: any, u?: string): Promise<string | undefined> {
 }
 
 async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response> {
+  // Seedance reads natural language, so style / camera / motion tags become directions.
   const fail = async (reason: string, status = 400) => {
     await admin.from('generation_requests').update({
       auto_provider: ARK_PROVIDER, auto_model: ARK_VIDEO_MODEL, auto_failed: true,
@@ -365,7 +366,7 @@ async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response
     return genericError(status, 'Submission failed');
   };
 
-  const modelPrompt = cleanPromptForModel(body.prompt);
+  const modelPrompt = seedanceDirections(cleanPromptForModel(body.prompt));
   const promptDurationRaw = parseSetting(body.prompt, 'Duration') || '';
   const promptDuration = /smart/i.test(promptDurationRaw) ? 'smart' : parseInt(promptDurationRaw, 10);
   const duration = clampArkDuration(body.duration ?? (promptDuration === 'smart' || Number.isFinite(promptDuration) ? promptDuration : 'smart'), 5);
