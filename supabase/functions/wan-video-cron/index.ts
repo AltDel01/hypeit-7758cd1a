@@ -163,10 +163,3 @@ serve(async (req) => {
   console.log('[wan-cron] scanned', stuck?.length ?? 0, JSON.stringify(results));
   return ok({ scanned: stuck?.length ?? 0, results });
 });
-
-function humanizeTaskFailure(json: any): string {
-  const out = json?.output || {};
-  if (out.task_status === 'UNKNOWN') return 'Generation was interrupted. Please try again.';
-  return friendlyFailureReason(`${out.code || ''} ${out.message || ''}`);
-}
-

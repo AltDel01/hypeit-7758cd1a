@@ -10,12 +10,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   getUserIdFromAuth,
   genericError,
   ok,
 } from '../_shared/dashscope.ts';
+import { pollVideoTask } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 serve(async (req) => {
@@ -41,9 +40,9 @@ serve(async (req) => {
 
   const { data: stuck, error } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, status, result_url')
+    .select('id, user_id, provider_task_id, auto_provider, status, result_url')
     .eq('request_type', 'video')
-    .eq('auto_provider', 'wan')
+    .in('auto_provider', ['wan', 'modelark'])
     .in('status', ['new', 'in-progress'])
     .not('provider_task_id', 'is', null)
     .is('result_url', null);
@@ -54,34 +53,25 @@ serve(async (req) => {
 
   for (const row of stuck ?? []) {
     try {
-      const upstream = await fetch(
-        `${DASHSCOPE_BASE}/api/v1/tasks/${row.provider_task_id}`,
-        { headers: authHeaders() }
-      );
-      if (!upstream.ok) {
+      const polled = await pollVideoTask(row.auto_provider, row.provider_task_id);
+      if (!polled) {
         results.push({ id: row.id, status: 'upstream-error' });
         continue;
       }
-      const json = await upstream.json();
-      const taskStatus: string = json?.output?.task_status || 'UNKNOWN';
-
-      if (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
+      if (polled.state === 'pending') {
         results.push({ id: row.id, status: 'pending' });
         continue;
       }
-      if (taskStatus === 'FAILED' || taskStatus === 'UNKNOWN') {
+      if (polled.state === 'failed') {
         await admin
           .from('generation_requests')
-          .update({ auto_failed: true, status: 'new' })
+          .update({ auto_failed: true, status: 'new', failure_reason: polled.reason })
           .eq('id', row.id);
         results.push({ id: row.id, status: 'failed' });
         continue;
       }
-      if (taskStatus === 'SUCCEEDED') {
-        const videoUrl: string | undefined =
-          json?.output?.video_url ||
-          json?.output?.results?.[0]?.video_url ||
-          json?.output?.results?.[0]?.url;
+      {
+        const videoUrl = polled.videoUrl;
 
         if (!videoUrl) {
           await admin
