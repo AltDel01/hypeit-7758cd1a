@@ -1,7 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration, friendlyFailureReason } from '../_shared/dashscope.ts'
-import { arkGenerateImages, arkImageSize, ARK_PROVIDER, ARK_IMAGE_MODEL } from '../_shared/modelark.ts'
+import { clampArkDuration, arkGenerateImages, arkImageSize, ARK_PROVIDER, ARK_IMAGE_MODEL } from '../_shared/modelark.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
 import { productPhotoPath, workflowVideoInput, workflowImageRequest } from '../_shared/workflowProductPhoto.ts'
@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as { dayId?: string; duration?: number | string }
     const dayId = (body.dayId || '').toString()
-    const videoDuration = clampWanDuration(body.duration, 5)
+    const videoDuration = clampArkDuration(body.duration, 5)
 
     if (!dayId) {
       return json({ error: 'A day is required.' }, 400)
