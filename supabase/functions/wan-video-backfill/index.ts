@@ -42,7 +42,7 @@ serve(async (req) => {
     .from('generation_requests')
     .select('id, user_id, provider_task_id, auto_provider, status, result_url')
     .eq('request_type', 'video')
-    .in('auto_provider', ['wan', 'modelark'])
+    .eq('auto_provider', 'modelark')
     .in('status', ['new', 'in-progress'])
     .not('provider_task_id', 'is', null)
     .is('result_url', null);
