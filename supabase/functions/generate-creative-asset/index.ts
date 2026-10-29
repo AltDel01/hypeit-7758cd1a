@@ -1,6 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { clampWanDuration } from '../_shared/dashscope.ts'
+import { clampWanDuration, friendlyFailureReason } from '../_shared/dashscope.ts'
+import { arkGenerateImages, arkImageSize, ARK_PROVIDER, ARK_IMAGE_MODEL } from '../_shared/modelark.ts'
 import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
 import { productPhotoPath, workflowVideoInput, workflowImageRequest } from '../_shared/workflowProductPhoto.ts'
