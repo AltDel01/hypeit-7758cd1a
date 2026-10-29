@@ -87,99 +87,33 @@ serve(async (req) => {
     return data.signedUrl;
   };
 
-  // Build DashScope payload
-  // Multimodal generation endpoint supports both text->image and edit (with image refs)
-  const content: any[] = [];
+  const images: string[] = [];
   if (body.mode === 'edit' && body.referenceImageUrls) {
-    for (const url of body.referenceImageUrls.slice(0, 3)) {
+    for (const url of body.referenceImageUrls.slice(0, 10)) {
       const resolved = await resolveUrl(url);
       if (!resolved) {
-        await markFailed(admin, body.requestId, body.model, 'Could not resolve reference image');
+        await markFailed(admin, body.requestId, ARK_IMAGE_MODEL, 'Could not resolve reference image');
         return genericError(400, 'Could not resolve reference image');
       }
-      content.push({ image: resolved });
+      images.push(resolved);
     }
   }
 
-  content.push({ text: body.prompt });
-
   const imageCount = Math.min(4, Math.max(1, Math.floor(body.n ?? 1)));
-
-  const buildPayload = (model: string) => ({
-    model,
-    input: {
-      messages: [{ role: 'user', content }],
-    },
-    parameters: {
-      size: snapSize(body.size),
-      n: imageCount,
-      prompt_extend: body.promptExtend ?? false,
-    },
-  });
+  const effectiveModel = ARK_IMAGE_MODEL;
 
   try {
-    // Try the requested model first, then fall back to the previous-generation
-    // Qwen image models if the provider does not accept it.
-    const candidates = modelCandidates(body.model, body.mode);
-    let upstream: Response | undefined;
-    let lastStatus = 502;
-    let lastText = '';
-    let effectiveModel = body.model;
-
-    for (const candidate of candidates) {
-      const res = await fetch(
-        `${DASHSCOPE_BASE}/api/v1/services/aigc/multimodal-generation/generation`,
-        {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify(buildPayload(candidate)),
-        }
-      );
-      if (res.ok) {
-        upstream = res;
-        effectiveModel = candidate;
-        if (candidate !== body.model) {
-          console.warn('[qwen-image] fell back from', body.model, 'to', candidate);
-        }
-        break;
-      }
-      lastStatus = res.status;
-      lastText = await res.text();
-      console.error('[qwen-image] upstream error', candidate, res.status, lastText);
-      if (!isModelUnavailable(res.status, lastText)) break;
-    }
-
-    if (!upstream) {
-      await markFailed(admin, body.requestId, body.model, humanizeProviderError(lastStatus, lastText));
+    const gen = await arkGenerateImages({
+      prompt: body.prompt,
+      size: arkImageSize(body.size),
+      images,
+      n: imageCount,
+    });
+    if (!gen.ok) {
+      await markFailed(admin, body.requestId, effectiveModel, friendlyFailureReason(`${gen.status} ${gen.detail}`));
       return genericError(502, 'Generation failed');
     }
-
-    const json = await upstream.json();
-    // Collect all image urls from common response shapes
-    const rawUrls: string[] = [];
-    const choices = json?.output?.choices;
-    if (Array.isArray(choices)) {
-      for (const choice of choices) {
-        const parts = choice?.message?.content;
-        if (Array.isArray(parts)) {
-          for (const part of parts) {
-            if (part?.image) rawUrls.push(part.image);
-          }
-        }
-      }
-    }
-    if (Array.isArray(json?.output?.results)) {
-      for (const r of json.output.results) {
-        if (r?.url) rawUrls.push(r.url);
-      }
-    }
-    if (rawUrls.length === 0 && json?.output?.url) rawUrls.push(json.output.url);
-
-    if (rawUrls.length === 0) {
-      console.error('[qwen-image] no image url in response', JSON.stringify(json).slice(0, 500));
-      await markFailed(admin, body.requestId, effectiveModel, humanizeProviderError(200, JSON.stringify(json)));
-      return genericError(502, 'Generation failed');
-    }
+    const rawUrls = gen.urls;
 
     // Download and upload each image to Supabase Storage
     const storedUrls: string[] = [];
@@ -190,10 +124,12 @@ serve(async (req) => {
         const imgRes = await fetch(imageUrl);
         if (imgRes.ok) {
           const buf = new Uint8Array(await imgRes.arrayBuffer());
-          const path = `${userId}/${body.requestId}-${i}.png`;
+          const ct = imgRes.headers.get('content-type') || 'image/jpeg';
+          const ext = ct.includes('png') ? 'png' : 'jpg';
+          const path = `${userId}/${body.requestId}-${i}.${ext}`;
           const { error: upErr } = await admin.storage
             .from('generated-images')
-            .upload(path, buf, { contentType: 'image/png', upsert: true });
+            .upload(path, buf, { contentType: ct, upsert: true });
           if (!upErr) {
             storedUrl = `storage:generated-images/${path}`;
           } else {
@@ -213,7 +149,7 @@ serve(async (req) => {
         result_url: storedUrls[0],
         result_images: storedUrls,
         completed_at: new Date().toISOString(),
-        auto_provider: 'qwen',
+        auto_provider: ARK_PROVIDER,
         auto_model: effectiveModel,
         auto_failed: false,
         failure_reason: null,
