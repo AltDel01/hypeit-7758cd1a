@@ -33,3 +33,12 @@ Deno.test('Smart options let the model choose shape and length', () => {
   assertEquals(normalizeArkRatio('Smart'), 'adaptive')
   assertEquals(arkImageSize('smart'), '2K')
 })
+import { seedanceDirections } from '../_shared/modelark.ts'
+Deno.test('style, camera and motion choices become plain Seedance directions', () => {
+  const out = seedanceDirections('A latte\n\n[Style: Cinematic | Camera: Static | Motion intensity: Subtle]')
+  assert(out.startsWith('A latte'))
+  assert(out.includes('cinematic film look'))
+  assert(out.includes('camera does not move'))
+  assert(out.includes('gentle movement'))
+  assert(!out.includes('['))
+})
