@@ -1,14 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import {
-  DASHSCOPE_BASE,
-  authHeaders,
-  uploadToDashScopeOss,
-  normalizeImageForWan,
-  clampWanDuration,
-  needsLongFormModel,
-  createWanVideoTask,
-  WAN_LONGFORM_MODEL,
-} from '../_shared/dashscope.ts'
+import { arkCreateVideoTask, clampArkDuration, pollVideoTask } from '../_shared/modelark.ts'
+import { normalizeImageForWan } from '../_shared/dashscope.ts'
 
 
 /**
@@ -24,14 +16,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const CREATE_URL = `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`
-const TASK_URL = `${DASHSCOPE_BASE}/api/v1/tasks`
 const BUCKET = 'broll-media'
-
-const SIZES: Record<string, Record<string, string>> = {
-  '720p': { landscape: '1280*720', portrait: '720*1280' },
-  '1080p': { landscape: '1920*1080', portrait: '1080*1920' },
-}
 
 function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; contentType: string } | null {
   const m = dataUrl.match(/^data:([^;]+);base64,(.*)$/)
@@ -64,7 +49,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: 'Unauthorized' }, 401)
     const userId = userData.user.id
 
-    if (!Deno.env.get('QWEN_API_KEY')) return json({ error: 'AI is not configured.' }, 500)
+    if (!Deno.env.get('ARK_API_KEY')) return json({ error: 'AI is not configured.' }, 500)
 
     const body = (await req.json().catch(() => ({}))) as {
       action?: string
@@ -82,15 +67,12 @@ Deno.serve(async (req) => {
       if (!prompt) return json({ error: 'A prompt is required.' }, 400)
 
       const orientation = body.orientation === 'portrait' ? 'portrait' : 'landscape'
-      const resolution = body.resolution === '1080p' ? '1080p' : '720p'
+      const resolution = body.resolution === '1080p' ? '1080p' : body.resolution === '480p' ? '480p' : '720p'
 
-      const seconds = clampWanDuration(body.seconds, 5)
+      const seconds = clampArkDuration(body.seconds, 5)
 
       const ref = (body.inputReference || '').toString()
       let firstFrame: string | undefined
-      const baseModel = ref ? 'wan2.7-i2v' : 'wan2.7-t2v'
-      const model = needsLongFormModel(seconds) ? WAN_LONGFORM_MODEL : baseModel
-
 
       if (ref) {
         if (!ref.startsWith('data:image/')) {
@@ -98,37 +80,18 @@ Deno.serve(async (req) => {
         }
         const decoded = decodeDataUrl(ref)
         if (!decoded) return json({ error: 'The reference image could not be read.' }, 400)
-        try {
-          const normalized = await normalizeImageForWan(decoded.bytes, decoded.contentType)
-          firstFrame = await uploadToDashScopeOss(
-            model,
-            normalized.bytes,
-            `frame.${normalized.contentType.includes('png') ? 'png' : 'jpg'}`,
-            normalized.contentType,
-          )
-        } catch (e) {
-          console.error('veo-studio reference upload failed', e)
-          return json({ error: 'The reference image could not be sent to the provider.' }, 502)
-        }
+        const normalized = await normalizeImageForWan(decoded.bytes, decoded.contentType)
+        let bin = ''
+        for (let i = 0; i < normalized.bytes.length; i += 0x8000) bin += String.fromCharCode(...normalized.bytes.subarray(i, i + 0x8000))
+        firstFrame = `data:${normalized.contentType};base64,${btoa(bin)}`
       }
 
-      const input: Record<string, unknown> = { prompt }
-      if (firstFrame) input.media = [{ type: 'first_frame', url: firstFrame }]
-
-      const headers: Record<string, string> = {}
-      if (firstFrame) headers['X-DashScope-OssResourceResolve'] = 'enable'
-
-      const result = await createWanVideoTask({
-        endpoint: CREATE_URL,
-        model,
-        input,
-        parameters: {
-          resolution: resolution === '1080p' ? '1080P' : '720P',
-          duration: seconds,
-          size: SIZES[resolution][orientation],
-        },
-        headers,
-        fallbackModel: baseModel,
+      const result = await arkCreateVideoTask({
+        prompt,
+        duration: seconds,
+        resolution,
+        ratio: orientation === 'portrait' ? '9:16' : '16:9',
+        images: firstFrame ? [{ url: firstFrame, role: 'first_frame' }] : [],
       })
 
       if (!result.ok) {
@@ -159,33 +122,20 @@ Deno.serve(async (req) => {
     const videoId = (body.videoId || '').toString().trim()
     if (!videoId) return json({ error: 'Missing clip id.' }, 400)
 
-    const jobRes = await fetch(`${TASK_URL}/${encodeURIComponent(videoId)}`, {
-      headers: authHeaders(),
-    })
-    if (!jobRes.ok) {
-      console.error('veo-studio poll failed', jobRes.status)
+    const polled = await pollVideoTask(videoId.startsWith('cgt-') ? 'modelark' : 'wan', videoId)
+    if (!polled) {
+      console.error('veo-studio poll failed')
       return json({ error: 'Could not check the clip status.' }, 502)
     }
-    const job = await jobRes.json()
-    const state = job?.output?.task_status
-
-    if (state === 'FAILED' || state === 'UNKNOWN' || state === 'CANCELED') {
-      console.error('veo-studio task failed', JSON.stringify(job?.output).slice(0, 500))
-      return json({
-        status: 'failed',
-        error: job?.output?.message || 'The provider rejected this clip.',
-      })
+    if (polled.state === 'failed') {
+      return json({ status: 'failed', error: polled.reason })
     }
-    if (state !== 'SUCCEEDED') {
+    if (polled.state !== 'succeeded') {
       return json({ status: 'in_progress', progress: 0 })
     }
 
-    const remoteUrl: string | undefined =
-      job?.output?.video_url ||
-      job?.output?.results?.[0]?.video_url ||
-      job?.output?.results?.[0]?.url
+    const remoteUrl: string | undefined = polled.videoUrl
     if (!remoteUrl) {
-      console.error('veo-studio no video url', JSON.stringify(job?.output).slice(0, 500))
       return json({ error: 'The finished clip could not be downloaded.' }, 502)
     }
 
