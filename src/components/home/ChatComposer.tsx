@@ -27,6 +27,7 @@ const examples = [
 ];
 
 const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
+  { value: 'Smart', w: 18, h: 18 },
   { value: '16:9', w: 28, h: 16 },
   { value: '9:16', w: 16, h: 28 },
   { value: '1:1',  w: 22, h: 22 },
@@ -37,6 +38,7 @@ const ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
 const DURATION_OPTIONS = [-1, 4, 5, 8, 10, 12, 15, 20, 30];
 const RESOLUTION_OPTIONS = ['720P', '1080P'];
 const IMAGE_ASPECT_OPTIONS: { value: string; w: number; h: number }[] = [
+  { value: 'Smart', w: 18, h: 18 },
   { value: '1:1',  w: 22, h: 22 },
   { value: '16:9', w: 28, h: 16 },
   { value: '9:16', w: 16, h: 28 },
