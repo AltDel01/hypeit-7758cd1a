@@ -9,13 +9,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
-  DASHSCOPE_BASE,
-  authHeaders,
   getUserIdFromAuth,
   genericError,
   ok,
-  friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { pollVideoTask } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
 
 interface RequestBody {
@@ -46,7 +44,7 @@ serve(async (req) => {
 
   const { data: reqRow } = await admin
     .from('generation_requests')
-    .select('id, user_id, provider_task_id, auto_model, status, result_url')
+    .select('id, user_id, provider_task_id, auto_provider, auto_model, status, result_url')
     .eq('id', body.requestId)
     .maybeSingle();
   if (!reqRow || reqRow.user_id !== userId) return genericError(404, 'Request not found');
@@ -120,17 +118,9 @@ serve(async (req) => {
 
       return ok({ status: 'completed', resultUrl: storedUrl });
     }
-
-    return ok({ status: 'pending', taskStatus });
   } catch (e) {
     console.error('[wan-video-poll] exception', e);
     return ok({ status: 'pending' });
   }
 });
-
-function humanizeTaskFailure(json: any): string {
-  const out = json?.output || {};
-  if (out.task_status === 'UNKNOWN') return 'Generation was interrupted. Please try again.';
-  return friendlyFailureReason(`${out.code || ''} ${out.message || ''}`);
-}
 
