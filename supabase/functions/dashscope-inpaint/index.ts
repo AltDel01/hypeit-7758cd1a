@@ -92,102 +92,14 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Create async task
-    const payload = {
-      model,
-      input: {
-        prompt: body.prompt || 'remove the masked area, fill with surrounding background',
-        function: 'description_edit_with_mask',
-        base_image_url: baseUrl,
-        mask_image_url: maskUrl,
-      },
-      parameters: {
-        n: 1,
-      },
-    };
-
-    // Try the requested model, then fall back to the stable inpaint model.
-    const candidates = [model, 'wanx2.1-imageedit'].filter((m, i, a) => a.indexOf(m) === i);
-    let createRes: Response | undefined;
-    let effectiveModel = model;
-    for (const candidate of candidates) {
-      const res = await fetch(
-        `${DASHSCOPE_BASE}/api/v1/services/aigc/image2image/image-synthesis`,
-        {
-          method: 'POST',
-          headers: asyncAuthHeaders(),
-          body: JSON.stringify({ ...payload, model: candidate }),
-        },
-      );
-      if (res.ok) {
-        createRes = res;
-        effectiveModel = candidate;
-        if (candidate !== model) console.warn('[dashscope-inpaint] fell back to', candidate);
-        break;
-      }
-      const txt = await res.text();
-      console.error('[dashscope-inpaint] create failed', candidate, res.status, txt);
-      const t = txt.toLowerCase();
-      const modelIssue =
-        res.status === 403 || res.status === 404 ||
-        t.includes('model not exist') || t.includes('unsupported model') ||
-        t.includes('model not support') || t.includes('access denied');
-      if (!modelIssue) break;
-    }
-
-    if (!createRes) {
-      await markFailed(admin, body.requestId, model);
+    const instruction =
+      `Edit the first image. The second image is a mask: change ONLY the area that is white in the mask, keep every other part of the first image exactly the same. Edit: ${body.prompt || 'remove the masked area and fill it naturally with the surrounding background'}`;
+    const gen = await arkGenerateImages({ prompt: instruction, images: [baseUrl, maskUrl], size: '2K' });
+    if (!gen.ok) {
+      await markFailed(admin, body.requestId, ARK_IMAGE_MODEL);
       return genericError(502, 'Inpaint failed');
     }
-
-    const createJson = await createRes.json();
-    const taskId: string | undefined = createJson?.output?.task_id;
-    if (!taskId) {
-      console.error('[dashscope-inpaint] no task_id', JSON.stringify(createJson).slice(0, 500));
-      await markFailed(admin, body.requestId, model);
-      return genericError(502, 'Inpaint failed');
-    }
-
-    // Persist task id for visibility
-    await admin
-      .from('generation_requests')
-      .update({ provider_task_id: taskId, auto_provider: 'qwen', auto_model: effectiveModel })
-      .eq('id', body.requestId);
-
-    // 2. Poll
-    let resultImageUrl: string | undefined;
-    for (let i = 0; i < MAX_POLLS; i++) {
-      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-
-      const pollRes = await fetch(`${DASHSCOPE_BASE}/api/v1/tasks/${taskId}`, {
-        method: 'GET',
-        headers: authHeaders(),
-      });
-      if (!pollRes.ok) {
-        console.error('[dashscope-inpaint] poll failed', pollRes.status);
-        continue;
-      }
-      const pollJson = await pollRes.json();
-      const status: string | undefined = pollJson?.output?.task_status;
-
-      if (status === 'SUCCEEDED') {
-        resultImageUrl =
-          pollJson?.output?.results?.[0]?.url ||
-          pollJson?.output?.results?.[0]?.image_url;
-        break;
-      }
-      if (status === 'FAILED' || status === 'UNKNOWN') {
-        console.error('[dashscope-inpaint] task failed', JSON.stringify(pollJson).slice(0, 500));
-        await markFailed(admin, body.requestId, model);
-        return genericError(502, 'Inpaint failed');
-      }
-    }
-
-    if (!resultImageUrl) {
-      console.error('[dashscope-inpaint] timed out waiting for result');
-      await markFailed(admin, body.requestId, model);
-      return genericError(504, 'Inpaint timed out');
-    }
+    const resultImageUrl = gen.urls[0];
 
     // 3. Download + store
     let storedUrl = resultImageUrl;
