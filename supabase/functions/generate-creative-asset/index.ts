@@ -170,19 +170,22 @@ Deno.serve(async (req) => {
       if (!dispatch || !dispatch.ok) {
         const detail = dispatch ? await dispatch.text().catch(() => '') : 'network error'
         console.error('wan-video dispatch rejected', dispatch?.status, detail.slice(0, 300))
+        // wan-video already stored a clear, user-friendly reason; keep it.
+        const { data: row } = await admin
+          .from('generation_requests')
+          .select('failure_reason')
+          .eq('id', gr.id)
+          .maybeSingle()
+        const reason = row?.failure_reason || 'The video could not be started. Please try again in a moment.'
         await admin
           .from('generation_requests')
-          .update({
-            auto_failed: true,
-            status: 'new',
-            failure_reason: 'Video generation could not be submitted to the provider. Please try again.',
-          })
+          .update({ auto_failed: true, status: 'new', failure_reason: reason })
           .eq('id', gr.id)
         await admin
           .from('creative_days')
           .update({ gen_stage: 'idle', status: 'Draft' })
           .eq('id', dayId)
-        return json({ error: 'Could not start video generation.' }, 502)
+        return json({ error: reason }, 502)
       }
 
       return json({ assetType: 'video', status: 'generating', requestId: gr.id })

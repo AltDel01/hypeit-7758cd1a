@@ -4,8 +4,10 @@
 export const DASHSCOPE_CHAT_URL =
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 
-// Latest Qwen chat models, tried in order (first available on the account wins).
-export const QWEN_TEXT_MODELS = ["qwen3-max", "qwen-plus"];
+// Qwen chat models, tried in order (first available on the account wins).
+// "qwen3-max" is not enabled on this account (404 every call), so it is
+// skipped to avoid a wasted round-trip on every request.
+export const QWEN_TEXT_MODELS = ["qwen-plus", "qwen-max"];
 // Vision-capable models for image input.
 export const QWEN_VISION_MODELS = ["qwen3-vl-plus", "qwen-vl-max"];
 
