@@ -322,6 +322,9 @@ export function friendlyFailureReason(raw: unknown): string {
   if (t.includes('can not read image') || t.includes('cannot read image') || t.includes('invalid image')) {
     return 'The reference image could not be read. Please re-upload it and try again.';
   }
+  if (t.includes('privacyinformation') || t.includes('real person') || t.includes('shows a real person')) {
+    return "Your photo seems to show a real person's face, which the video model can't use. Please upload a photo of the product only and try again.";
+  }
   if (t.includes('datainspection') || t.includes('green net') || t.includes('inappropriate') || t.includes('sensitive')) {
     return "Blocked by the content safety filter. Try rewording your prompt or removing sensitive imagery.";
   }
