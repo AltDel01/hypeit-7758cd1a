@@ -196,7 +196,8 @@ Deno.serve(async (req) => {
       return json({ error: 'Image generation is not configured.' }, 500)
     }
     const imageReq = workflowImageRequest(basePrompt, signedPhoto)
-    const gen = await arkGenerateImages({ prompt: imageReq.prompt, images: imageReq.images, size: arkImageSize('9:16') })
+    // Quick mode: the brief is already detailed, and full prompt rewriting took 2+ min (timeouts).
+    const gen = await arkGenerateImages({ prompt: imageReq.prompt, images: imageReq.images, size: arkImageSize('9:16'), fast: true })
     if (!gen.ok) {
       return json({ error: friendlyFailureReason(gen.detail) }, 502)
     }
