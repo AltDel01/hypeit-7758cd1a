@@ -322,6 +322,9 @@ export function friendlyFailureReason(raw: unknown): string {
   if (t.includes('can not read image') || t.includes('cannot read image') || t.includes('invalid image')) {
     return 'The reference image could not be read. Please re-upload it and try again.';
   }
+  if (t.includes('accountoverdue') || t.includes('overdue balance') || t.includes('modelnotopen') || t.includes('insufficient balance')) {
+    return 'Generation is temporarily unavailable. Please try again a little later.';
+  }
   if (t.includes('privacyinformation') || t.includes('real person') || t.includes('shows a real person')) {
     return "Your photo seems to show a real person's face, which the video model can't use. Please upload a photo of the product only and try again.";
   }
