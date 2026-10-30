@@ -29,7 +29,8 @@ import {
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 import {
-  arkCreateVideoTask, seedanceDirections, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
+  arkCreateVideoTask, arkGenerateImages, arkImageSize, arkSafeReferencePrompt, isArkRealPersonError,
+  seedanceDirections, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
 } from '../_shared/modelark.ts';
 
 function guessTypeFromExt(path: string): string {
@@ -123,7 +124,7 @@ serve(async (req) => {
 
   // All modes except face swap run on BytePlus ModelArk (Seedance).
   if (body.category !== 'video-face-swap') {
-    return await dispatchModelArk(admin, body);
+    return await dispatchModelArk(admin, body, userId);
   }
 
 
@@ -356,14 +357,57 @@ async function toArkImage(admin: any, u?: string): Promise<string | undefined> {
   return bytesToDataUrl(bytes, contentType);
 }
 
-async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response> {
+async function sha256Hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
+}
+
+const SAFE_BUCKET = 'generated-images';
+
+/** Previously rebuilt (person-free) version of this reference, if any. */
+async function cachedSafeReference(admin: any, userId: string, src: string, role: ArkMediaRole): Promise<string | undefined> {
+  const path = `${userId}/ark-safe/${role}-${await sha256Hex(src)}.jpg`;
+  const { data, error } = await admin.storage.from(SAFE_BUCKET).download(path);
+  if (error || !data) return undefined;
+  return bytesToDataUrl(new Uint8Array(await data.arrayBuffer()), 'image/jpeg');
+}
+
+/**
+ * Rebuild a reference Seedance rejected for showing a real person, using
+ * Seedream, and cache it so later days / retries skip the rejected round-trip.
+ */
+async function buildSafeReference(admin: any, userId: string, src: string, role: ArkMediaRole, ratio?: string): Promise<string | undefined> {
+  const gen = await arkGenerateImages({
+    prompt: arkSafeReferencePrompt(role),
+    images: [src],
+    size: role === 'reference_image' ? '2K' : arkImageSize(ratio || 'smart'),
+  });
+  if (!gen.ok) {
+    console.error('[wan-video] safe reference rebuild failed', gen.status, gen.detail.slice(0, 300));
+    return undefined;
+  }
+  try {
+    const r = await fetch(gen.urls[0]);
+    if (!r.ok) return gen.urls[0];
+    const bytes = new Uint8Array(await r.arrayBuffer());
+    const path = `${userId}/ark-safe/${role}-${await sha256Hex(src)}.jpg`;
+    await admin.storage.from(SAFE_BUCKET).upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
+    return bytesToDataUrl(bytes, 'image/jpeg');
+  } catch (e) {
+    console.error('[wan-video] safe reference cache failed', e);
+    return gen.urls[0];
+  }
+}
+
+async function dispatchModelArk(admin: any, body: RequestBody, userId: string): Promise<Response> {
   // Seedance reads natural language, so style / camera / motion tags become directions.
   const fail = async (reason: string, status = 400) => {
+    const friendly = friendlyFailureReason(reason);
     await admin.from('generation_requests').update({
       auto_provider: ARK_PROVIDER, auto_model: ARK_VIDEO_MODEL, auto_failed: true,
-      status: 'new', failure_reason: friendlyFailureReason(reason),
+      status: 'new', failure_reason: friendly,
     }).eq('id', body.requestId);
-    return genericError(status, 'Submission failed');
+    return genericError(status, friendly);
   };
 
   const modelPrompt = seedanceDirections(cleanPromptForModel(body.prompt));
@@ -396,9 +440,31 @@ async function dispatchModelArk(admin: any, body: RequestBody): Promise<Response
     return await fail('The reference image could not be read. Please re-upload it.', 502);
   }
 
-  console.log('[wan-video] modelark dispatch', body.category, 'duration=' + duration, 'images=' + images.length);
+  // Reuse a person-free version made earlier for the same photo, so Seedance
+  // doesn't reject it again (and the user doesn't wait for a second rebuild).
+  const prepared = await Promise.all(images.map(async (img) => {
+    const cached = await cachedSafeReference(admin, userId, img.url, img.role).catch(() => undefined);
+    return cached ? { url: cached, role: img.role, original: img.url } : { ...img, original: img.url };
+  }));
+
+  console.log('[wan-video] modelark dispatch', body.category, 'duration=' + duration, 'images=' + prepared.length,
+    'cachedSafe=' + prepared.filter((p) => p.url !== p.original).length);
   try {
-    const result = await arkCreateVideoTask({ prompt: modelPrompt, duration, resolution, ratio, images });
+    let result = await arkCreateVideoTask({ prompt: modelPrompt, duration, resolution, ratio, images: prepared });
+    if (!result.ok && prepared.length && isArkRealPersonError(result.detail)) {
+      console.log('[wan-video] real-person reference rejected, rebuilding with Seedream');
+      const rebuilt = await Promise.all(prepared.map(async (p) => {
+        if (p.url !== p.original) return p; // already a safe version
+        const safe = await buildSafeReference(admin, userId, p.original, p.role, ratio);
+        return safe ? { ...p, url: safe } : null;
+      }));
+      if (rebuilt.every(Boolean)) {
+        result = await arkCreateVideoTask({
+          prompt: modelPrompt, duration, resolution, ratio,
+          images: rebuilt.map((r) => ({ url: r!.url, role: r!.role })),
+        });
+      }
+    }
     if (!result.ok) return await fail(result.detail, 502);
     await admin.from('generation_requests').update({
       status: 'in-progress', auto_provider: ARK_PROVIDER, auto_model: result.model,
