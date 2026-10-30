@@ -97,7 +97,7 @@ const RequestDetailView = ({ request, onClose, onFeedbackSubmitted }: RequestDet
     !autoFailed &&
     request.request_type === 'video' &&
     (request.status === 'new' || request.status === 'in-progress') &&
-    (request as any).auto_provider === 'modelark';
+    (request as any).auto_provider === 'modelark' || (request as any).auto_provider === 'alibaba';
   const handleCancel = async () => {
     setIsCancelling(true);
     const { data, error } = await supabase.functions.invoke('cancel-generation', { body: { requestId: request.id } });
