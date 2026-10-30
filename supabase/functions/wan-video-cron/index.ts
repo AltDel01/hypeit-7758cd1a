@@ -65,9 +65,9 @@ serve(async (req) => {
   }
 
   // Safety net: requests that were never submitted to the provider (no task
-  // id) would otherwise show 'Processing' forever. After 15 minutes hand them
+  // id) would otherwise show 'Processing' forever. After 6 minutes close them
   // to the editor queue.
-  const NEVER_SUBMITTED_MINUTES = 15;
+  const NEVER_SUBMITTED_MINUTES = 6;
   const cutoff = new Date(Date.now() - NEVER_SUBMITTED_MINUTES * 60000).toISOString();
   const { data: orphans } = await admin
     .from('generation_requests')
