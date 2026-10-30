@@ -449,28 +449,48 @@ async function dispatchModelArk(admin: any, body: RequestBody, userId: string): 
 
   console.log('[wan-video] modelark dispatch', body.category, 'duration=' + duration, 'images=' + prepared.length,
     'cachedSafe=' + prepared.filter((p) => p.url !== p.original).length);
+  const markSubmitted = async (taskId: string, model: string) => {
+    await admin.from('generation_requests').update({
+      status: 'in-progress', auto_provider: ARK_PROVIDER, auto_model: model,
+      provider_task_id: taskId, auto_failed: false, failure_reason: null,
+    }).eq('id', body.requestId);
+  };
   try {
-    let result = await arkCreateVideoTask({ prompt: modelPrompt, duration, resolution, ratio, images: prepared });
-    if (!result.ok && prepared.length && isArkRealPersonError(result.detail)) {
-      console.log('[wan-video] real-person reference rejected, rebuilding with Seedream');
-      const rebuilt = await Promise.all(prepared.map(async (p) => {
-        if (p.url !== p.original) return p; // already a safe version
-        const safe = await buildSafeReference(admin, userId, p.original, p.role, ratio);
-        return safe ? { ...p, url: safe } : null;
-      }));
-      if (rebuilt.every(Boolean)) {
-        result = await arkCreateVideoTask({
+    const result = await arkCreateVideoTask({ prompt: modelPrompt, duration, resolution, ratio, images: prepared });
+    if (result.ok) {
+      await markSubmitted(result.taskId, result.model);
+      return ok({ ok: true, taskId: result.taskId, model: result.model, duration: result.duration, requestId: body.requestId });
+    }
+    if (!(prepared.length && isArkRealPersonError(result.detail))) return await fail(result.detail, 502);
+
+    // The photo shows a person, so Seedance refused it. Rebuilding it with
+    // Seedream takes a minute or more, so finish in the background and answer
+    // now; the request stays "Processing" and the UI picks up the result.
+    console.log('[wan-video] real-person reference rejected, rebuilding with Seedream');
+    const rebuildAndSubmit = async () => {
+      try {
+        const rebuilt = await Promise.all(prepared.map(async (p) => {
+          if (p.url !== p.original) return p; // already a safe version
+          const safe = await buildSafeReference(admin, userId, p.original, p.role, ratio);
+          return safe ? { ...p, url: safe } : null;
+        }));
+        if (!rebuilt.every(Boolean)) { await fail(result.detail, 502); return; }
+        const retry = await arkCreateVideoTask({
           prompt: modelPrompt, duration, resolution, ratio,
           images: rebuilt.map((r) => ({ url: r!.url, role: r!.role })),
         });
+        if (!retry.ok) { await fail(retry.detail, 502); return; }
+        await markSubmitted(retry.taskId, retry.model);
+        console.log('[wan-video] submitted with rebuilt reference', body.requestId);
+      } catch (e) {
+        console.error('[wan-video] rebuild exception', e);
+        await fail('Network error while submitting to provider', 502);
       }
-    }
-    if (!result.ok) return await fail(result.detail, 502);
-    await admin.from('generation_requests').update({
-      status: 'in-progress', auto_provider: ARK_PROVIDER, auto_model: result.model,
-      provider_task_id: result.taskId, auto_failed: false, failure_reason: null,
-    }).eq('id', body.requestId);
-    return ok({ ok: true, taskId: result.taskId, model: result.model, duration: result.duration, requestId: body.requestId });
+    };
+    const er = (globalThis as any).EdgeRuntime;
+    if (er?.waitUntil) er.waitUntil(rebuildAndSubmit());
+    else await rebuildAndSubmit();
+    return ok({ ok: true, pending: true, requestId: body.requestId });
   } catch (e) {
     console.error('[wan-video] modelark exception', e);
     return await fail('Network error while submitting to provider', 502);
