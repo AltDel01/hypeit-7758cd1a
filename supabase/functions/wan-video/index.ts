@@ -445,7 +445,9 @@ async function dispatchModelArk(admin: any, body: RequestBody, userId: string): 
   // Reuse a person-free version made earlier for the same photo, so Seedance
   // doesn't reject it again (and the user doesn't wait for a second rebuild).
   const prepared = await Promise.all(images.map(async (img) => {
-    const cached = await cachedSafeReference(admin, userId, img.url, img.role).catch(() => undefined);
+    const cached = ARK_PROVIDER === 'modelark'
+      ? await cachedSafeReference(admin, userId, img.url, img.role).catch(() => undefined)
+      : undefined;
     return cached ? { url: cached, role: img.role, original: img.url } : { ...img, original: img.url };
   }));
 
