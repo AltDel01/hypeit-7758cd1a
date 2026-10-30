@@ -42,7 +42,7 @@ serve(async (req) => {
     .from('generation_requests')
     .select('id, user_id, provider_task_id, auto_provider, status, result_url')
     .eq('request_type', 'video')
-    .or('auto_provider.eq.modelark,category.eq.video-lipsync')
+    .or('auto_provider.in.(modelark,alibaba),category.eq.video-lipsync')
     .in('status', ['new', 'in-progress'])
     .not('provider_task_id', 'is', null)
     .is('result_url', null);

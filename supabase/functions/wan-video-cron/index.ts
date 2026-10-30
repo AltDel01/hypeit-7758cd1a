@@ -34,7 +34,7 @@ serve(async (req) => {
   const { data: stuck, error } = await admin
     .from('generation_requests')
     .select('id, user_id, provider_task_id, auto_provider, status, result_url, created_at')
-    .or('auto_provider.eq.modelark,category.eq.video-lipsync')
+    .or('auto_provider.in.(modelark,alibaba),category.eq.video-lipsync')
     .in('status', ['new', 'in-progress'])
     .eq('auto_failed', false)
     .not('provider_task_id', 'is', null)

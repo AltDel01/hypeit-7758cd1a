@@ -2,12 +2,26 @@
  * Shared BytePlus ModelArk helpers for image (Seedream) and video (Seedance)
  * generation. Model IDs live here so they can be swapped in one place.
  */
-import { DASHSCOPE_BASE, authHeaders as dashscopeHeaders, friendlyFailureReason } from './dashscope.ts';
+import {
+  DASHSCOPE_BASE, authHeaders as dashscopeHeaders, friendlyFailureReason,
+  createWanVideoTask, normalizeImageForWan, uploadToDashScopeOss, WAN_LONGFORM_MODEL,
+} from './dashscope.ts';
+
+/**
+ * Which service makes images and videos: 'alibaba' (DashScope Qwen/Wan) or
+ * 'modelark' (BytePlus Seedream/Seedance). Every caller goes through the
+ * helpers below, so flipping this switches the whole app.
+ */
+export const GEN_PROVIDER = (Deno.env.get('GEN_PROVIDER') || 'alibaba').toLowerCase() === 'modelark' ? 'modelark' : 'alibaba';
+const USE_ALIBABA = GEN_PROVIDER === 'alibaba';
+const ALI_IMAGE_MODEL = 'qwen-image-3.0-pro';
+const ALI_VIDEO_MODEL = 'wan2.7';
 
 export const ARK_BASE = 'https://ark.ap-southeast.bytepluses.com/api/v3';
-export const ARK_IMAGE_MODEL = Deno.env.get('ARK_IMAGE_MODEL') || 'dola-seedream-5-0-pro-260628';
-export const ARK_VIDEO_MODEL = Deno.env.get('ARK_VIDEO_MODEL') || 'dreamina-seedance-2-5-260628';
-export const ARK_PROVIDER = 'modelark';
+export const ARK_IMAGE_MODEL = USE_ALIBABA ? ALI_IMAGE_MODEL : (Deno.env.get('ARK_IMAGE_MODEL') || 'dola-seedream-5-0-pro-260628');
+export const ARK_VIDEO_MODEL = USE_ALIBABA ? ALI_VIDEO_MODEL : (Deno.env.get('ARK_VIDEO_MODEL') || 'dreamina-seedance-2-5-260628');
+/** Recorded as generation_requests.auto_provider so polling hits the right service. */
+export const ARK_PROVIDER = GEN_PROVIDER;
 
 /** Seedance 2.5 accepts up to 30 seconds (verified: 30 accepted, 60 rejected). */
 export const ARK_MIN_DURATION = 4;
@@ -102,6 +116,7 @@ export async function arkGenerateImages(opts: {
   fast?: boolean;
 }): Promise<{ ok: true; urls: string[] } | { ok: false; status: number; detail: string }> {
   const n = Math.max(1, Math.min(4, opts.n ?? 1));
+  if (USE_ALIBABA) return aliGenerateImages({ ...opts, n });
   const body: Record<string, unknown> = {
     model: ARK_IMAGE_MODEL,
     prompt: opts.prompt,
@@ -165,6 +180,7 @@ export async function arkCreateVideoTask(opts: {
   images?: Array<{ url: string; role: ArkMediaRole }>;
   generateAudio?: boolean;
 }): Promise<{ ok: true; taskId: string; model: string; duration: number } | { ok: false; status: number; detail: string }> {
+  if (USE_ALIBABA) return aliCreateVideoTask(opts);
   const duration = clampArkDuration(opts.duration);
   const content: any[] = [{ type: 'text', text: opts.prompt || 'A cinematic video' }];
   for (const img of opts.images ?? []) {
@@ -204,6 +220,16 @@ export type VideoPoll =
  * still queued; once running it cannot be stopped.
  */
 export async function arkCancelVideoTask(taskId: string): Promise<'cancelled' | 'running' | 'error'> {
+  if (USE_ALIBABA) {
+    const r = await fetch(`${DASHSCOPE_BASE}/api/v1/tasks/${encodeURIComponent(taskId)}/cancel`, {
+      method: 'POST', headers: dashscopeHeaders(),
+    });
+    if (r.ok) return 'cancelled';
+    const t = await r.text();
+    if (/running|status/i.test(t)) return 'running';
+    console.error('[alibaba] cancel failed', r.status, t.slice(0, 300));
+    return 'error';
+  }
   const r = await fetch(`${ARK_BASE}/contents/generations/tasks/${encodeURIComponent(taskId)}`, {
     method: 'DELETE', headers: arkHeaders(),
   });
@@ -216,7 +242,7 @@ export async function arkCancelVideoTask(taskId: string): Promise<'cancelled' | 
 
 /** Poll a video task for either provider ('modelark' or legacy 'wan'). */
 export async function pollVideoTask(provider: string | null | undefined, taskId: string): Promise<VideoPoll | null> {
-  if (provider === ARK_PROVIDER) {
+  if (provider === 'modelark') {
     const r = await fetch(`${ARK_BASE}/contents/generations/tasks/${taskId}`, { headers: arkHeaders() });
     if (!r.ok) {
       console.error('[modelark] poll error', r.status, (await r.text()).slice(0, 300));
@@ -289,4 +315,128 @@ export function seedanceDirections(prompt: string): string {
     }
     return parts.join(' ');
   }).trim();
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Alibaba DashScope (Qwen image, Wan video) implementations
+ * ------------------------------------------------------------------ */
+
+const ALI_SIZES: Array<[number, number]> = [
+  [1664, 928], [1472, 1104], [1328, 1328], [1104, 1472], [928, 1664],
+];
+function aliSize(raw?: string): string {
+  const m = String(raw ?? '').match(/^(\d+)\s*[*x]\s*(\d+)$/i);
+  if (!m) return '1328*1328';
+  const t = Number(m[1]) / Number(m[2]);
+  let best = ALI_SIZES[2], diff = Infinity;
+  for (const s of ALI_SIZES) {
+    const d = Math.abs(s[0] / s[1] - t);
+    if (d < diff) { diff = d; best = s; }
+  }
+  return `${best[0]}*${best[1]}`;
+}
+
+async function aliGenerateImages(opts: { prompt: string; size?: string; images?: string[]; n: number }):
+  Promise<{ ok: true; urls: string[] } | { ok: false; status: number; detail: string }> {
+  const content: any[] = (opts.images ?? []).slice(0, 3).map((image) => ({ image }));
+  content.push({ text: opts.prompt });
+  const edit = content.length > 1;
+  const models = edit
+    ? [ALI_IMAGE_MODEL, 'qwen-image-edit-plus', 'qwen-image-edit']
+    : [ALI_IMAGE_MODEL, 'qwen-image-plus', 'qwen-image'];
+  let last = { status: 502, detail: 'no result' };
+  for (const model of models) {
+    const res = await fetch(`${DASHSCOPE_BASE}/api/v1/services/aigc/multimodal-generation/generation`, {
+      method: 'POST', headers: dashscopeHeaders(),
+      body: JSON.stringify({
+        model,
+        input: { messages: [{ role: 'user', content }] },
+        parameters: { size: aliSize(opts.size), n: opts.n, prompt_extend: false, watermark: false },
+      }),
+    });
+    const text = await res.text();
+    if (res.ok) {
+      try {
+        const j = JSON.parse(text);
+        const urls: string[] = [];
+        for (const c of j?.output?.choices ?? []) {
+          for (const part of c?.message?.content ?? []) if (part?.image) urls.push(part.image);
+        }
+        for (const r of j?.output?.results ?? []) if (r?.url) urls.push(r.url);
+        if (urls.length) return { ok: true, urls };
+      } catch { /* fall through */ }
+      return { ok: false, status: 502, detail: text };
+    }
+    console.error('[alibaba] image failed', model, res.status, text.slice(0, 400));
+    last = { status: res.status, detail: text };
+    const t = text.toLowerCase();
+    const modelIssue = t.includes('model') && (t.includes('not exist') || t.includes('not support') || t.includes('invalid')) || res.status === 403 || res.status === 404;
+    if (!modelIssue) break;
+  }
+  return { ok: false, ...last };
+}
+
+async function toOss(model: string, url: string): Promise<string> {
+  let bytes: Uint8Array, type: string;
+  const m = url.match(/^data:([^;]+);base64,(.*)$/);
+  if (m) {
+    type = m[1];
+    bytes = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
+  } else {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`reference fetch ${r.status}`);
+    type = r.headers.get('content-type') || 'image/jpeg';
+    bytes = new Uint8Array(await r.arrayBuffer());
+  }
+  const norm = await normalizeImageForWan(bytes, type);
+  const ext = norm.contentType.includes('png') ? 'png' : norm.contentType.includes('webp') ? 'webp' : 'jpg';
+  return await uploadToDashScopeOss(model, norm.bytes, `ref-${crypto.randomUUID()}.${ext}`, norm.contentType);
+}
+
+async function aliCreateVideoTask(opts: {
+  prompt: string; duration: number; resolution?: unknown; ratio?: unknown;
+  images?: Array<{ url: string; role: ArkMediaRole }>;
+}): Promise<{ ok: true; taskId: string; model: string; duration: number } | { ok: false; status: number; detail: string }> {
+  // Wan has no "smart" length: use 10s, a good fit for short social clips.
+  const duration = isSmart(opts.duration) || Number(opts.duration) < 0
+    ? 10 : Math.max(2, Math.min(30, Math.round(Number(opts.duration) || 5)));
+  const images = opts.images ?? [];
+  const refs = images.filter((i) => i.role === 'reference_image');
+  const first = images.find((i) => i.role === 'first_frame');
+  const last = images.find((i) => i.role === 'last_frame');
+  const base = refs.length ? 'wan2.7-r2v' : first ? 'wan2.7-i2v' : 'wan2.7-t2v';
+  const longForm = duration > 15;
+  const model = longForm ? WAN_LONGFORM_MODEL : base;
+
+  const media: Array<{ type: string; url: string }> = [];
+  try {
+    if (refs.length) {
+      for (const r of refs.slice(0, 3)) media.push({ type: 'reference_image', url: await toOss(base, r.url) });
+    } else {
+      if (first) media.push({ type: 'first_frame', url: await toOss(base, first.url) });
+      if (first && last) media.push({ type: 'last_frame', url: await toOss(base, last.url) });
+    }
+  } catch (e) {
+    console.error('[alibaba] reference upload failed', e);
+    return { ok: false, status: 400, detail: 'can not read image' };
+  }
+
+  const r = String(opts.resolution ?? '').toLowerCase();
+  const parameters: Record<string, unknown> = {
+    resolution: r.startsWith('720') || r.startsWith('480') ? '720P' : '1080P',
+    duration,
+    watermark: false,
+  };
+  const ratio = normalizeArkRatio(opts.ratio);
+  if (!first && ratio !== 'adaptive') parameters.ratio = ratio;
+
+  const input: Record<string, unknown> = { prompt: opts.prompt || 'A cinematic video' };
+  if (media.length) input.media = media;
+  return await createWanVideoTask({
+    endpoint: `${DASHSCOPE_BASE}/api/v1/services/aigc/video-generation/video-synthesis`,
+    model, input, parameters,
+    headers: media.length ? { 'X-DashScope-OssResourceResolve': 'enable' } : {},
+    fallbackModel: longForm ? base : undefined,
+  });
 }
