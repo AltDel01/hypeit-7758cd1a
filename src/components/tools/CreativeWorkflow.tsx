@@ -350,11 +350,16 @@ const CreativeWorkflow = () => {
 
 
   /* -------- Poll pending video requests until the editor delivers them -------- */
+  // Read the latest days through a ref: the interval keeps running while
+  // other days start generating, so a captured `days` would miss them and
+  // leave their spinner on after the video finished.
+  const daysRef = useRef(days);
+  daysRef.current = days;
   const hasPendingVideos = !!days?.some((d) => d.genStage === 'generating' && d.requestId);
   useEffect(() => {
     if (!hasPendingVideos) return;
     const poll = async () => {
-      const pending = (days || []).filter((d) => d.genStage === 'generating' && d.requestId);
+      const pending = (daysRef.current || []).filter((d) => d.genStage === 'generating' && d.requestId);
       if (!pending.length) return;
       const ids = pending.map((d) => d.requestId as string);
       const { data: reqs } = await supabase
