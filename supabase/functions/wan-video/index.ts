@@ -380,7 +380,9 @@ async function buildSafeReference(admin: any, userId: string, src: string, role:
   const gen = await arkGenerateImages({
     prompt: arkSafeReferencePrompt(role),
     images: [src],
-    size: role === 'reference_image' ? '2K' : arkImageSize(ratio || 'smart'),
+    // 1K + fast keeps this around 20s; full quality takes over two minutes.
+    size: '1K',
+    fast: true,
   });
   if (!gen.ok) {
     console.error('[wan-video] safe reference rebuild failed', gen.status, gen.detail.slice(0, 300));

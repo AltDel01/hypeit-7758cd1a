@@ -98,6 +98,8 @@ export async function arkGenerateImages(opts: {
   size?: string;
   images?: string[];
   n?: number;
+  /** Quick mode: skips Seedream's slow prompt rewriting (~20s instead of 2+ min). */
+  fast?: boolean;
 }): Promise<{ ok: true; urls: string[] } | { ok: false; status: number; detail: string }> {
   const n = Math.max(1, Math.min(4, opts.n ?? 1));
   const body: Record<string, unknown> = {
@@ -107,6 +109,7 @@ export async function arkGenerateImages(opts: {
     response_format: 'url',
     watermark: false,
   };
+  if (opts.fast) body.optimize_prompt_options = { mode: 'fast' };
   if (opts.images?.length) body.image = opts.images.length === 1 ? opts.images[0] : opts.images.slice(0, 10);
   if (n > 1) {
     body.sequential_image_generation = 'auto';
