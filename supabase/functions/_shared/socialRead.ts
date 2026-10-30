@@ -7,7 +7,12 @@ type Social = { instagram?: string; tiktok?: string; facebook?: string }
 const handleOf = (url: string) =>
   url.replace(/^https?:\/\/(www\.)?[^/]+\//i, '').replace(/^@/, '').split(/[/?#]/)[0]
 
+// When Firecrawl is out of credits or rate limited, skip it for a while so
+// brand scans and strategies don't wait on calls that will fail anyway.
+let pausedUntil = 0
+
 async function fc(path: string, key: string, body: unknown, ms = 20000) {
+  if (Date.now() < pausedUntil) return null
   const ctrl = new AbortController()
   const t = setTimeout(() => ctrl.abort(), ms)
   try {
@@ -18,6 +23,8 @@ async function fc(path: string, key: string, body: unknown, ms = 20000) {
       signal: ctrl.signal,
     })
     if (!res.ok) {
+      if (res.status === 402) pausedUntil = Date.now() + 10 * 60_000
+      else if (res.status === 429) pausedUntil = Date.now() + 30_000
       console.error(`socialRead ${path} failed [${res.status}]: ${(await res.text()).slice(0, 300)}`)
       return null
     }
