@@ -98,6 +98,8 @@ export async function arkGenerateImages(opts: {
   size?: string;
   images?: string[];
   n?: number;
+  /** Quick mode: skips Seedream's slow prompt rewriting (~20s instead of 2+ min). */
+  fast?: boolean;
 }): Promise<{ ok: true; urls: string[] } | { ok: false; status: number; detail: string }> {
   const n = Math.max(1, Math.min(4, opts.n ?? 1));
   const body: Record<string, unknown> = {
@@ -107,6 +109,7 @@ export async function arkGenerateImages(opts: {
     response_format: 'url',
     watermark: false,
   };
+  if (opts.fast) body.optimize_prompt_options = { mode: 'fast' };
   if (opts.images?.length) body.image = opts.images.length === 1 ? opts.images[0] : opts.images.slice(0, 10);
   if (n > 1) {
     body.sequential_image_generation = 'auto';
@@ -130,6 +133,28 @@ export async function arkGenerateImages(opts: {
 }
 
 export type ArkMediaRole = 'first_frame' | 'last_frame' | 'reference_image';
+
+/** Seedance refuses input images it thinks show a real person (privacy filter). */
+export function isArkRealPersonError(detail: unknown): boolean {
+  const t = String(detail ?? '').toLowerCase();
+  return t.includes('privacyinformation') || t.includes('real person');
+}
+
+/**
+ * Seedream prompt that rebuilds a reference so Seedance accepts it: product
+ * references become product-only shots; frames keep the scene but any real
+ * person is replaced with a clearly different, fictional AI-generated person.
+ */
+export function arkSafeReferencePrompt(role: ArkMediaRole): string {
+  if (role === 'reference_image') {
+    return 'Recreate the product from the reference image as a clean, high quality studio product photo. ' +
+      'Keep the product exactly the same: shape, colors, packaging, logo and label text. ' +
+      'Remove every person, face, hand and body part. Product only, neutral premium background, soft lighting.';
+  }
+  return 'Recreate this image with the same composition, setting, lighting, colors and products. ' +
+    'Replace every real person with a clearly different fictional AI-generated person (different face), ' +
+    'same pose, clothing style and framing. Keep any product, packaging and label exactly the same.';
+}
 
 /** Submit a Seedance video task. Returns the task id. */
 export async function arkCreateVideoTask(opts: {
