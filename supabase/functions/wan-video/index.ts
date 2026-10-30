@@ -29,7 +29,7 @@ import {
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
 import {
-  arkCreateVideoTask, arkGenerateImages, arkImageSize, arkSafeReferencePrompt, isArkRealPersonError,
+  arkCreateVideoTask, arkGenerateImages, arkSafeReferencePrompt, isArkRealPersonError,
   seedanceDirections, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
 } from '../_shared/modelark.ts';
 
