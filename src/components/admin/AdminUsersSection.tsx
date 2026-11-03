@@ -35,11 +35,11 @@ function CustomerChart({ rows, kind, showChurn = false }: { rows: CustomerPeriod
         const row = payload?.[0]?.payload as CustomerPeriod | undefined;
         return `${row?.month ?? ''}${row?.is_estimated ? ' · Estimated customers' : ''}`;
       }} formatter={(value, name) => <div className="flex flex-wrap items-center justify-between gap-4 w-full"><span className="text-muted-foreground">{String(name)}</span><span className="font-mono tabular-nums">{name === 'Revenue (IDR)' ? rupiah(Number(value)) : name === 'Churn rate (%)' ? `${Number(value).toFixed(2)}%` : number(Number(value))}</span></div>} />} />
-      {(kind === 'combined' || kind === 'new' || kind === 'comparison') && <Bar dataKey="new_paying_users" name="New paying users" fill="var(--color-new_paying_users)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
-      {(kind === 'combined' || kind === 'active') && <Line type="linear" dataKey="ending_active_users" name="Active paying users" stroke="var(--color-ending_active_users)" strokeWidth={3} dot={{ r: 3 }} />}
-      {(showChurn || kind === 'churn' || kind === 'comparison') && <Bar dataKey="churned_users" name="Churned users" fill="var(--color-churned_users)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
-      {kind === 'rate' && <Line type="linear" dataKey="churn_rate" name="Churn rate (%)" stroke="var(--color-churn_rate)" strokeWidth={2} dot={{ r: 3 }} />}
-      {kind === 'revenue' && <Bar dataKey="monthly_revenue_idr" name="Revenue (IDR)" fill="var(--color-monthly_revenue_idr)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
+      {(kind === 'combined' || kind === 'new' || kind === 'comparison') && <Bar isAnimationActive={false} dataKey="new_paying_users" name="New paying users" fill="var(--color-new_paying_users)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
+      {(kind === 'combined' || kind === 'active') && <Line isAnimationActive={false} type="linear" dataKey="ending_active_users" name="Active paying users" stroke="var(--color-ending_active_users)" strokeWidth={3} dot={{ r: 3 }} />}
+      {(showChurn || kind === 'churn' || kind === 'comparison') && <Bar isAnimationActive={false} dataKey="churned_users" name="Churned users" fill="var(--color-churned_users)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
+      {kind === 'rate' && <Line isAnimationActive={false} type="linear" dataKey="churn_rate" name="Churn rate (%)" stroke="var(--color-churn_rate)" strokeWidth={2} dot={{ r: 3 }} />}
+      {kind === 'revenue' && <Bar isAnimationActive={false} dataKey="monthly_revenue_idr" name="Revenue (IDR)" fill="var(--color-monthly_revenue_idr)" radius={[3, 3, 0, 0]} maxBarSize={36} />}
       <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
     </ComposedChart>
   </ChartContainer>;
