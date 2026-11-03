@@ -15,6 +15,7 @@ import AdminTokenDashboard from '@/components/admin/AdminTokenDashboard';
 import AdminCareersSection from '@/components/admin/AdminCareersSection';
 import AdminPaymentsSection from '@/components/admin/AdminPaymentsSection';
 import AdminCountriesSection from '@/components/admin/AdminCountriesSection';
+import AdminUsersSection from '@/components/admin/AdminUsersSection';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -42,10 +43,14 @@ const Admin = () => {
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
             <Tabs defaultValue="dashboard" className="w-full">
-              <TabsList className="mb-6 w-full md:w-auto">
+              <TabsList className="mb-6 w-full justify-start overflow-x-auto h-auto min-h-10">
                 <TabsTrigger value="dashboard" className="gap-2">
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-2">
+                  <Users className="h-4 w-4" />
+                  User
                 </TabsTrigger>
                 <TabsTrigger value="requests" className="gap-2">
                   <ClipboardList className="h-4 w-4" />
@@ -80,6 +85,9 @@ const Admin = () => {
 
               <TabsContent value="dashboard">
                 <AdminTokenDashboard />
+              </TabsContent>
+              <TabsContent value="users">
+                <AdminUsersSection />
               </TabsContent>
 
               <TabsContent value="requests">
