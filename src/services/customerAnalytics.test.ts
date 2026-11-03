@@ -37,3 +37,17 @@ test('October customers are estimated and revenue has a distinct cutoff', () => 
   assert.ok(customerCsv(rows).includes('Through October 22 2026 (not full month)'));
   assert.ok(customerCsv(rows).includes('Demo / Simulated Data'));
 });
+ test('new signups are five times new paying users in every month', () => {
+  rows.forEach(row => assert.equal(row.new_registered_users, row.new_paying_users * 5));
+  assert.equal(summarizeCustomers(rows).newRegistered, 5025);
+ });
+ test('registered balances include existing accounts and cumulative signups', () => {
+  assert.equal(rows[0].beginning_registered_users, 1900);
+  assert.equal(summarizeCustomers(rows).registered, 6925);
+ });
+ test('quarter and date selections preserve five-to-one signup acquisition', () => {
+  const quarters = aggregateQuarters(rows);
+  quarters.forEach(row => assert.equal(row.new_registered_users, row.new_paying_users * 5));
+  assert.equal(summarizeCustomers(quarters).registered, 6925);
+  assert.equal(summarizeCustomers(filterMonths(rows, '2026-10', '2026-10')).newRegistered, 575);
+ });
