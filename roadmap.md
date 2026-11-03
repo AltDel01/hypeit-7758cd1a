@@ -6,3 +6,4 @@
 - [x] Run targeted prompt tests and real Qwen image generation; Wan accepted a 15-second video task.
 - [ ] Inspect completed Wan video: provider still reports RUNNING after repeated bounded checks.
 - [ ] Verify saved seven-day plan and media through signed-in UI: external Supabase session unavailable; protected planner returned 401.
+- [ ] Add a local demo Customer Analytics dashboard under the admin User tab, including filters, charts, sorting, CSV export and formula tests.
