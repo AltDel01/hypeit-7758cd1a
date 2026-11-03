@@ -7,4 +7,4 @@
 - [ ] Inspect completed Wan video: provider still reports RUNNING after repeated bounded checks.
 - [ ] Verify saved seven-day plan and media through signed-in UI: external Supabase session unavailable; protected planner returned 401.
 - [x] Add a local demo Customer Analytics dashboard under the admin User tab; 13 formula tests pass and isolated browser checks verify filters, aggregation, sorting, CSV, empty state and mobile layout. Protected admin navigation cannot be tested with external Supabase authentication.
-- [ ] Add demo registered-user status and 5x signups, clarify cumulative new-paying versus period-end active-paying totals, and verify calculations and controls.
+- [x] Add demo registered-user status and 5x signups, clarify cumulative new-paying versus period-end active-paying totals; 16 calculation tests and isolated browser selection/quarterly checks pass. Protected admin login remains unavailable with external Supabase.
