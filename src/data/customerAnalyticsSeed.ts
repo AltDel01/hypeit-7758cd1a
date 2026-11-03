@@ -2,6 +2,8 @@ export interface CustomerSeed {
   month: string;
   beginning_active_users: number;
   new_paying_users: number;
+  new_registered_users: number;
+  beginning_registered_users: number;
   churned_users: number;
   monthly_revenue_idr: number;
   is_estimated: boolean;
@@ -23,6 +25,7 @@ const values = [
 
 export const customerAnalyticsSeed: CustomerSeed[] = values.map(([month, beginning, newUsers, churned, revenue]) => ({
   month, beginning_active_users: beginning, new_paying_users: newUsers,
+  new_registered_users: newUsers * 5, beginning_registered_users: 1900,
   churned_users: churned, monthly_revenue_idr: revenue,
   is_estimated: month === '2026-10', data_source: 'demo',
 }));
