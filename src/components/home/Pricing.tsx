@@ -25,7 +25,7 @@ const plans = [
     title: 'Free',
     usd: 'FREE',
     idr: 'Coba Sekarang',
-    credits: '500',
+    credits: '150',
     usdPer: '',
     idrPer: '',
     mediaInfo: 'TRIAL',

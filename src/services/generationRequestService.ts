@@ -95,7 +95,7 @@ export async function createGenerationRequest(
     const creditsUsed = params.requestType === "image" ? baseCredits * imageCount : baseCredits;
     const remaining = (profile as any)?.monthly_generation_limit 
       ? ((profile as any).monthly_generation_limit - ((profile as any).generations_this_month || 0))
-      : 500;
+      : 150;
     
     if (creditsUsed > remaining) {
       console.error("Insufficient credits:", { creditsUsed, remaining });
