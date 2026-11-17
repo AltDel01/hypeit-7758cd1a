@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
 import { CREATIVE_STAGES, languageInstruction } from '../_shared/creativeBrief.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 interface StrategyBody {
   brandName?: string
@@ -51,6 +52,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   try {
     const authHeader = req.headers.get('Authorization')

@@ -2,11 +2,14 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { callQwen } from '../_shared/qwen.ts'
 import { CREATIVE_STAGES, languageInstruction } from '../_shared/creativeBrief.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   try {
     const authHeader = req.headers.get('Authorization')

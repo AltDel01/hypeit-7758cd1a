@@ -6,6 +6,7 @@ import { notifyResultReady } from '../_shared/resultEmail.ts'
 import { notifyAdminNewRequest } from '../_shared/notifyAdminNewRequest.ts'
 import { productPhotoPath, workflowVideoInput, workflowImageRequest } from '../_shared/workflowProductPhoto.ts'
 import { buildCreativeMediaPrompt } from '../_shared/creativeBrief.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 
 const IMAGE_COST = 30
@@ -15,6 +16,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {

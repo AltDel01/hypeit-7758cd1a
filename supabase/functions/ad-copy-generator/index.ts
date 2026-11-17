@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 import { callQwen } from "../_shared/qwen.ts";
+import { freePlanGate } from '../_shared/access.ts';
 
 function err(status: number, message: string) {
   return new Response(JSON.stringify({ error: message }), {
@@ -39,6 +40,8 @@ async function fetchBrandText(url: string): Promise<string> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
   if (req.method !== "POST") return err(405, "Method not allowed");
 
   try {

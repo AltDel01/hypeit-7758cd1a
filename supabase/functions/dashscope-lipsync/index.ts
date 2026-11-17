@@ -25,6 +25,7 @@ import {
   normalizeImageForWan,
   friendlyFailureReason,
 } from '../_shared/dashscope.ts';
+import { freePlanGate } from '../_shared/access.ts';
 
 const LIPSYNC_MODEL = 'wan2.7-i2v';
 
@@ -63,6 +64,8 @@ function cleanPromptForModel(prompt: string | undefined): string {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
   if (req.method !== 'POST') return genericError(405, 'Method not allowed');
 
   const userId = await getUserIdFromAuth(req, createClient);

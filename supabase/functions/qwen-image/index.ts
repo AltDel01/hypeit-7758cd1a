@@ -19,6 +19,7 @@ import {
 } from '../_shared/dashscope.ts';
 import { arkGenerateImages, arkImageSize, ARK_IMAGE_MODEL, ARK_PROVIDER } from '../_shared/modelark.ts';
 import { notifyResultReady } from '../_shared/resultEmail.ts';
+import { freePlanGate } from '../_shared/access.ts';
 
 interface RequestBody {
   requestId: string;
@@ -35,6 +36,8 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
   if (req.method !== 'POST') return genericError(405, 'Method not allowed');
 
   const userId = await getUserIdFromAuth(req, createClient);
