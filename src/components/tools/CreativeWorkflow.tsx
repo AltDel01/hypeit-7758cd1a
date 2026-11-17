@@ -24,6 +24,7 @@ import { resolveResultUrl } from '@/utils/resolveResultUrl';
 import { displayFailureReason } from '@/utils/failureReason';
 import { createWorkflowSession } from '@/utils/workflowSession';
 import { useAuth } from '@/contexts/AuthContext';
+import { canGenerate, ensureCanGenerate, showUpgradeRequired } from '@/lib/generationAccess';
 
 /* ---------------- Types ---------------- */
 
@@ -249,6 +250,10 @@ const CreativeWorkflow = () => {
       if (!silent) toast.error('Add your brand name or website first.');
       return;
     }
+    if (!(await canGenerate())) {
+      if (!silent) showUpgradeRequired();
+      return;
+    }
     setScanning(true);
     try {
       const { data, error } = await supabase.functions.invoke('brand-scan', {
@@ -417,6 +422,7 @@ const CreativeWorkflow = () => {
       toast.error('Please sign in to generate and save a strategy.');
       return;
     }
+    if (!(await ensureCanGenerate())) return;
 
     setGenerating(true);
     setDays(null);
@@ -510,6 +516,7 @@ const CreativeWorkflow = () => {
 
   const handleGenerateAsset = async (day: DayPlan) => {
     if (uploadingProductPhoto) { toast.error('Please wait for your product photo to finish uploading.'); return; }
+    if (!(await ensureCanGenerate())) return;
     const startedAt = new Date().toISOString();
     patchDay(day.id, { genStage: 'generating', status: 'Generating' }, false);
     // Stamp the generation time so this box auto-clears 7 days from now.
@@ -557,6 +564,7 @@ const CreativeWorkflow = () => {
       toast.error('Add a concept name first so we know what to write about.');
       return;
     }
+    if (!(await ensureCanGenerate())) return;
     setScriptingIds((prev) => ({ ...prev, [day.id]: true }));
     try {
       const { data, error } = await supabase.functions.invoke('generate-day-script', {

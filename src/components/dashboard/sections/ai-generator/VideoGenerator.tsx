@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AspectRatioSelector from './AspectRatioSelector';
 import { createGenerationRequest } from '@/services/generationRequestService';
+import { ensureCanGenerate } from '@/lib/generationAccess';
 const VideoGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [enhancedPrompt, setEnhancedPrompt] = useState('');
@@ -142,6 +143,7 @@ const VideoGenerator = () => {
   };
 
   const handleGenerate = async () => {
+    if (!(await ensureCanGenerate())) return;
     const finalPrompt = enhancedPrompt || prompt;
     if (!finalPrompt.trim()) {
       toast({

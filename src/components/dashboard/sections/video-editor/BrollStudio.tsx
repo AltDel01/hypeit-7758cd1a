@@ -30,6 +30,7 @@ import {
   MAX_SOURCE_SECONDS,
   type CompositeClip,
 } from '@/utils/broll/composite';
+import { ensureCanGenerate } from '@/lib/generationAccess';
 
 type Stage = 'idle' | 'analyzing' | 'review' | 'generating' | 'compositing' | 'done';
 
@@ -111,6 +112,7 @@ const BrollStudio: React.FC = () => {
 
   const analyze = useCallback(async () => {
     if (!file || !meta) return;
+    if (!(await ensureCanGenerate())) return;
     setStage('analyzing');
     setProgress(15);
     setProgressLabel('Sampling frames from your video');
@@ -209,6 +211,7 @@ const BrollStudio: React.FC = () => {
 
   const runFullEdit = async () => {
     if (!file || !meta || !user) return;
+    if (!(await ensureCanGenerate())) return;
     const accepted = moments.filter((m) => m.accepted);
     if (accepted.length === 0) {
       toast.error('Keep at least one b-roll moment.');
