@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_flags: {
+        Row: {
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_profiles: {
         Row: {
           accent_color: string | null
@@ -1125,6 +1143,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_generate: { Args: { _user_id: string }; Returns: boolean }
+      can_i_generate: { Args: never; Returns: boolean }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
