@@ -50,6 +50,7 @@ import { cn } from '@/lib/utils';
 import AuroraBackground from '@/components/effects/AuroraBackground';
 import Seo from '@/components/seo/Seo';
 import TikTokIcon from '@/components/tools/TikTokIcon';
+import { ensureCanGenerate } from '@/lib/generationAccess';
 
 type PlatformId =
   | 'youtube'
@@ -254,6 +255,7 @@ const TrendResearch = () => {
       toast.error('Select at least one platform.');
       return;
     }
+    if (!(await ensureCanGenerate())) return;
     setLoading(true);
     setReport([]);
     setIdeas([]);

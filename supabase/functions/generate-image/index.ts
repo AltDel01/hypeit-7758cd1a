@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "./config.ts";
 import { handlePollingRequest } from "./polling.ts";
 import { handleGenerationRequest } from "./generation.ts";
+import { freePlanGate } from '../_shared/access.ts';
 
 /**
  * Main request handler for the generate-image function
@@ -12,6 +13,8 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   // Authenticate the request
   const authHeader = req.headers.get('Authorization');

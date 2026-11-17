@@ -1,6 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { arkCreateVideoTask, clampArkDuration, pollVideoTask } from '../_shared/modelark.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 
 /**
@@ -20,6 +21,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {

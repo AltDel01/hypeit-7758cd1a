@@ -32,6 +32,7 @@ import {
   arkCreateVideoTask, arkGenerateImages, arkSafeReferencePrompt, isArkRealPersonError,
   seedanceDirections, bytesToDataUrl, clampArkDuration, ARK_PROVIDER, ARK_VIDEO_MODEL, type ArkMediaRole,
 } from '../_shared/modelark.ts';
+import { freePlanGate } from '../_shared/access.ts';
 
 function guessTypeFromExt(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase() || '';
@@ -85,6 +86,8 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
   if (req.method !== 'POST') return genericError(405, 'Method not allowed');
 
   const userId = await getUserIdFromAuth(req, createClient);

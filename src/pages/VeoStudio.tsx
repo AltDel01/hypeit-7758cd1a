@@ -16,6 +16,7 @@ import {
   ArrowRight, Upload, Scissors, Layers, Clapperboard,
 } from 'lucide-react';
 import { extractVideoFrame, fileToDataUrl, normalizeImageDataUrl } from '@/utils/videoFrames';
+import { ensureCanGenerate } from '@/lib/generationAccess';
 
 type Quality = 'lite' | 'fast' | 'high';
 type Orientation = 'landscape' | 'portrait';
@@ -156,6 +157,7 @@ const VeoStudio: React.FC = () => {
   };
 
   const generateAll = async () => {
+    if (!(await ensureCanGenerate())) return;
     const pending = scenes.filter((s) => s.prompt.trim());
     if (!pending.length) {
       toast.error('Write at least one scene prompt.');
@@ -484,7 +486,7 @@ const VeoStudio: React.FC = () => {
                           <Download className="mr-1 h-3.5 w-3.5" /> Download
                         </a>
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => runScene(scene)} disabled={running}>
+                      <Button variant="outline" size="sm" onClick={async () => { if (await ensureCanGenerate()) runScene(scene); }} disabled={running}>
                         Regenerate
                       </Button>
                     </div>

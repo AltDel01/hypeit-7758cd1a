@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { arkCreateVideoTask, clampArkDuration, pollVideoTask } from '../_shared/modelark.ts'
 import { normalizeImageForWan } from '../_shared/dashscope.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 
 /**
@@ -29,6 +30,8 @@ function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; contentType: strin
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {

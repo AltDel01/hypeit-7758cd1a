@@ -6,6 +6,7 @@ import {
   CATEGORY_MAP,
   pickModel,
 } from "@/config/generationCategories";
+import { canGenerate, showUpgradeRequired } from '@/lib/generationAccess';
 
 export interface GenerationRequest {
   id: string;
@@ -76,6 +77,12 @@ export async function createGenerationRequest(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.error("User not authenticated");
+      return null;
+    }
+
+    // Free plan generation is paused; the database enforces the same rule.
+    if (!(await canGenerate())) {
+      showUpgradeRequired();
       return null;
     }
 

@@ -17,6 +17,7 @@ import {
   type MediaRole,
 } from '@/utils/requestMedia';
 import { toast } from 'sonner';
+import { ensureCanGenerate, userAuthHeader } from '@/lib/generationAccess';
 
 export type ChatMode = 'chat' | 'image' | 'video';
 
@@ -113,10 +114,16 @@ export function useMultimodalChat() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await userAuthHeader(),
       },
       body: JSON.stringify({ mode: 'chat', messages: history }),
     });
+
+    if (resp.status === 403 || resp.status === 401) {
+      const j = await resp.json().catch(() => ({}));
+      update(assistantId, { kind: 'error', content: j?.error || 'Please upgrade to continue.' });
+      return;
+    }
 
     if (resp.status === 429) { toast.error('Rate limit reached. Try again in a moment.'); update(assistantId, { kind: 'error', content: 'Rate limit reached.' }); return; }
     if (resp.status === 402) { toast.error('AI credits exhausted.'); update(assistantId, { kind: 'error', content: 'AI credits exhausted.' }); return; }
@@ -343,6 +350,7 @@ export function useMultimodalChat() {
       item instanceof File ? { file: item } : item
     );
     if (!text.trim() && attachments.length === 0 && !videoOpts?.firstFrameFile && !videoOpts?.lastFrameFile) return;
+    if (!(await ensureCanGenerate())) return;
     setIsBusy(true);
 
     // 1. Append user message

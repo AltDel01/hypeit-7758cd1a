@@ -2,6 +2,7 @@ import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
 import { languageInstruction } from '../_shared/creativeBrief.ts'
+import { freePlanGate } from '../_shared/access.ts';
 
 interface ScanBody {
   brandName?: string
@@ -42,6 +43,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   try {
     const apiKey = Deno.env.get('QWEN_API_KEY')

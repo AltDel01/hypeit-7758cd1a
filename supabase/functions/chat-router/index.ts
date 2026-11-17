@@ -1,3 +1,4 @@
+import { freePlanGate } from '../_shared/access.ts';
 // Multimodal chat router: intent classification + chat streaming via Alibaba DashScope (Qwen).
 // Body: { mode: 'route' | 'chat', messages: {role,content}[], hasAttachment?: boolean }
 
@@ -73,6 +74,8 @@ function gatewayErrorResponse(status: number) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const gateResponse = await freePlanGate(req, corsHeaders);
+  if (gateResponse) return gateResponse;
 
   try {
     const { mode, messages, hasAttachment } = await req.json();
