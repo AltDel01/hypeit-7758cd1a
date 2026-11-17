@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { ensureCanGenerate, userAuthHeader } from '@/lib/generationAccess';
 
 interface Campaign {
   format: string;
@@ -29,6 +30,7 @@ const AdCopyGenerator = () => {
       toast.error('Paste a full URL starting with https://');
       return;
     }
+    if (!(await ensureCanGenerate())) return;
     setLoading(true);
     setCampaigns([]);
     setSummary('');
@@ -38,7 +40,7 @@ const AdCopyGenerator = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: await userAuthHeader(),
         },
         body: JSON.stringify({ url }),
       });

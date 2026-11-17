@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { ensureCanGenerate, userAuthHeader } from '@/lib/generationAccess';
 
 interface BrainScores {
   visual_cortex: number;
@@ -54,6 +55,7 @@ const ViralPredictor = () => {
 
   const predict = async () => {
     if (!file) { toast.error('Upload a clip first.'); return; }
+    if (!(await ensureCanGenerate())) return;
     setLoading(true);
     setResult(null);
     try {
@@ -62,7 +64,7 @@ const ViralPredictor = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: await userAuthHeader(),
         },
         body: JSON.stringify({
           fileName: file.name,
