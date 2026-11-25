@@ -3,7 +3,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
 import { languageInstruction } from '../_shared/creativeBrief.ts'
 import { freePlanGate } from '../_shared/access.ts';
-import { fetchBrandSite, findBrandLogo, pickBrandColor } from '../_shared/brandSite.ts'
+import { fetchBrandSite, findBrandLogo, pickBrandColor, extractDominantColor } from '../_shared/brandSite.ts'
 
 interface ScanBody {
   brandName?: string
@@ -115,8 +115,11 @@ Base your answer first on what they sell, then the website, and only then the so
     }
 
     const brandMessage = (parsed.brandMessage || '').toString().slice(0, 200)
-    const brandColor = pickBrandColor((parsed.brandColor || '').toString(), site.colors)
     const logoUrl = await logoPromise
+    // The logo's own dominant color is the best guess for the brand color;
+    // fall back to the AI pick (validated against real site colors) when the logo can't be read.
+    const logoColor = await extractDominantColor(logoUrl)
+    const brandColor = logoColor || pickBrandColor((parsed.brandColor || '').toString(), site.colors)
 
     return new Response(JSON.stringify({ brandMessage, brandColor, logoUrl, siteColors: site.colors }), {
       status: 200,

@@ -137,3 +137,79 @@ export function pickBrandColor(aiColor: string, siteColors: string[], fallback =
   if (siteColors.length) return siteColors.includes(c) ? c : siteColors[0]
   return /^#[0-9A-F]{6}$/.test(c) ? c : fallback
 }
+
+/** Decode a PNG (8-bit RGB/RGBA, non-interlaced) to RGBA pixels using only built-ins. */
+async function decodePng(data: Uint8Array): Promise<{ width: number; pixels: Uint8Array } | null> {
+  const u32 = (o: number) => (data[o] << 24 | data[o + 1] << 16 | data[o + 2] << 8 | data[o + 3]) >>> 0
+  if (data.length < 8 || data[0] !== 0x89 || data[1] !== 0x50) return null
+  let width = 0, height = 0, bitDepth = 0, colorType = 0, interlace = 0
+  const idat: number[] = []
+  for (let o = 8; o + 8 <= data.length;) {
+    const len = u32(o), type = String.fromCharCode(data[o + 4], data[o + 5], data[o + 6], data[o + 7])
+    const chunk = data.subarray(o + 8, o + 8 + len)
+    if (type === 'IHDR') { width = u32(o + 8); height = u32(o + 12); bitDepth = chunk[8]; colorType = chunk[9]; interlace = chunk[12] }
+    if (type === 'IDAT') for (const b of chunk) idat.push(b)
+    o += 12 + len
+  }
+  if (!width || !height || bitDepth !== 8 || interlace !== 0 || (colorType !== 2 && colorType !== 6)) return null
+  const ch = colorType === 6 ? 4 : 3, stride = width * ch
+  const raw = await new Response(
+    new Blob([new Uint8Array(idat)]).stream().pipeThrough(new DecompressionStream('deflate')),
+  ).arrayBuffer()
+  const src = new Uint8Array(raw)
+  const out = new Uint8Array(width * height * 4)
+  const prev = new Uint8Array(stride)
+  let sp = 0
+  for (let y = 0; y < height; y++) {
+    const filter = src[sp++]
+    const row = src.subarray(sp, sp + stride); sp += stride
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? row[x - ch] : 0, b = prev[x], c = x >= ch ? prev[x - ch] : 0
+      let v = row[x]
+      if (filter === 1) v += a
+      else if (filter === 2) v += b
+      else if (filter === 3) v += (a + b) >> 1
+      else if (filter === 4) { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c }
+      row[x] = v & 255
+    }
+    prev.set(row)
+    for (let x = 0; x < width; x++) {
+      const o = (y * width + x) * 4
+      out[o] = row[x * ch]; out[o + 1] = row[x * ch + 1]; out[o + 2] = row[x * ch + 2]
+      out[o + 3] = ch === 4 ? row[x * ch + 3] : 255
+    }
+  }
+  return { width, pixels: out }
+}
+
+/**
+ * Dominant color of the logo image itself, the best guess for the brand color.
+ * Downloads the logo (PNG) and picks the most common non-neutral color.
+ */
+export async function extractDominantColor(logoUrl: string | null | undefined): Promise<string | null> {
+  if (!logoUrl) return null
+  try {
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 8000)
+    const res = await fetch(logoUrl, { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } })
+    clearTimeout(t)
+    if (!res.ok) return null
+    const bytes = new Uint8Array(await res.arrayBuffer())
+    if (bytes.length > 4_000_000) return null
+    const decoded = await decodePng(bytes)
+    if (!decoded) return null
+    const { pixels } = decoded
+    const counts = new Map<number, number>()
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] < 128) continue
+      // Quantize to 32-step buckets so near-identical shades count together.
+      const r = pixels[i] & 0xE0, g = pixels[i + 1] & 0xE0, b = pixels[i + 2] & 0xE0
+      const max = Math.max(r, g, b), min = Math.min(r, g, b)
+      if (max - min < 40 || max < 40 || min > 225) continue // skip neutral/near-black/near-white
+      const key = (r << 16) | (g << 8) | b
+      counts.set(key, (counts.get(key) || 0) + 1)
+    }
+    if (!counts.size) return null
+    const best = [...counts].sort((a, b) => b[1] - a[1])[0][0]
+    return `#${best.toString(16).padStart(6, '0').toUpperCase()}`
+  } catch { return null }
+}
