@@ -3,6 +3,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
 import { languageInstruction } from '../_shared/creativeBrief.ts'
 import { freePlanGate } from '../_shared/access.ts';
+import { fetchBrandSite, checkLogo } from '../_shared/brandSite.ts'
 
 interface ScanBody {
   brandName?: string
@@ -12,32 +13,6 @@ interface ScanBody {
 }
 
 const HEX = /^#([0-9a-fA-F]{6})$/
-
-// Best-effort fetch of website text to ground the analysis.
-async function fetchSiteText(url: string): Promise<string> {
-  try {
-    const normalized = url.startsWith('http') ? url : `https://${url}`
-    const ctrl = new AbortController()
-    const t = setTimeout(() => ctrl.abort(), 8000)
-    const res = await fetch(normalized, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BrandScan/1.0)' },
-      signal: ctrl.signal,
-    })
-    clearTimeout(t)
-    if (!res.ok) return ''
-    const html = await res.text()
-    // Strip tags, scripts, styles and collapse whitespace.
-    const text = html
-      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-    return text.slice(0, 6000)
-  } catch (_e) {
-    return ''
-  }
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -68,11 +43,13 @@ Deno.serve(async (req) => {
       })
     }
 
-    const [siteText, socialText] = await Promise.all([
-      website ? fetchSiteText(website) : Promise.resolve(''),
+    const [site, socialText] = await Promise.all([
+      website ? fetchBrandSite(website) : Promise.resolve({ text: '', logoUrl: null, colors: [] as string[] }),
       readSocialProfiles(social),
     ])
 
+    const siteText = site.text
+    const logoPromise = checkLogo(site.logoUrl)
     const prompt = `You are a brand strategist. Analyze the brand below and infer its positioning.
 ${languageInstruction(niche)}
 
@@ -82,6 +59,8 @@ What they sell (written by the owner, treat as the main source of truth): ${nich
 Instagram: ${social.instagram || 'none'}
 TikTok: ${social.tiktok || 'none'}
 Facebook: ${social.facebook || 'none'}
+
+Colors used on the website (most used first, these are the real brand colors): ${site.colors.join(', ') || 'none found'}
 
 Website content extracted (may be empty):
 """
@@ -96,7 +75,7 @@ ${socialText || 'No social content available.'}
 Return ONLY a JSON object (no markdown) with:
 - "brandMessage": one concise sentence (max 140 chars) describing HOW the brand should sound and what it promises, e.g. "Playful, warm and relatable; everyday affordable treats that make young professionals smile." Do NOT just repeat the product description word for word.
 - "brandColor" must ALWAYS be a real hex color that fits the product and audience (never leave it empty).
-- "brandColor": the single most representative primary brand color as a 6-digit hex string like "#8C52FF".
+- "brandColor": the single most representative primary brand color as a 6-digit hex string like "#8C52FF". If the website colors list is not empty, use the first website color that is clearly a brand color.
 Base your answer first on what they sell, then the website, and only then the social posts, otherwise base it on what they sell. Never invent products, industries or claims that are not supported by the information above; if information is thin, keep the message simple and about what they sell. Write it in the same language the owner used.`
 
     const aiRes = await callQwen({
@@ -136,9 +115,10 @@ Base your answer first on what they sell, then the website, and only then the so
 
     const brandMessage = (parsed.brandMessage || '').toString().slice(0, 200)
     let brandColor = (parsed.brandColor || '').toString().trim()
-    if (!HEX.test(brandColor)) brandColor = '#8C52FF'
+    if (!HEX.test(brandColor)) brandColor = site.colors[0] || '#8C52FF'
+    const logoUrl = await logoPromise
 
-    return new Response(JSON.stringify({ brandMessage, brandColor }), {
+    return new Response(JSON.stringify({ brandMessage, brandColor, logoUrl, siteColors: site.colors }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

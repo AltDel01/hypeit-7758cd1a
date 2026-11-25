@@ -1,3 +1,4 @@
+import { checkLogo } from '../_shared/brandSite.ts'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { clampWanDuration, friendlyFailureReason } from '../_shared/dashscope.ts'
@@ -92,10 +93,12 @@ Deno.serve(async (req) => {
     }
 
     const { data: brand, error: brandError } = await admin.from('creative_strategies')
-      .select('brand_name, product, brand_message, brand_color, product_photo_ref')
+      .select('brand_name, product, brand_message, brand_color, logo_url, product_photo_ref')
       .eq('id', day.strategy_id).eq('user_id', userId).maybeSingle()
     if (brandError || !brand) return json({ error: 'Your brand details could not be loaded.' }, 400)
     const productPhoto = brand.product_photo_ref || null
+    const logo = await checkLogo(brand.logo_url)
+    if (!logo) brand.logo_url = null
     let signedPhoto: string | null = null
     if (productPhoto) {
       let path: string
@@ -109,7 +112,7 @@ Deno.serve(async (req) => {
 
     /* ---------------- VIDEO: generate automatically via Wan (DashScope) ---------------- */
     if (assetType === 'video') {
-      const videoInput = workflowVideoInput(productPhoto, videoDuration)
+      const videoInput = workflowVideoInput(productPhoto, videoDuration, logo)
       const videoModel = videoInput.model
       const { data: gr, error: grErr } = await admin
         .from('generation_requests')
@@ -198,7 +201,7 @@ Deno.serve(async (req) => {
     if (!Deno.env.get('ARK_API_KEY')) {
       return json({ error: 'Image generation is not configured.' }, 500)
     }
-    const imageReq = workflowImageRequest(basePrompt, signedPhoto)
+    const imageReq = workflowImageRequest(basePrompt, signedPhoto, logo)
     // Quick mode: the brief is already detailed, and full prompt rewriting took 2+ min (timeouts).
     const gen = await arkGenerateImages({ prompt: imageReq.prompt, images: imageReq.images, size: arkImageSize('9:16'), fast: true })
     if (!gen.ok) {

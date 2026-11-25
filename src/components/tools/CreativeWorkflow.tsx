@@ -172,6 +172,7 @@ const CreativeWorkflow = () => {
   const [website, setWebsite] = useState('');
   const [brandMessage, setBrandMessage] = useState('');
   const [brandColor, setBrandColor] = useState('#8C52FF');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [productPhotoRef, setProductPhotoRef] = useState<string | null>(null);
   const [productPhotoPreview, setProductPhotoPreview] = useState<string | null>(null);
   const [uploadingProductPhoto, setUploadingProductPhoto] = useState(false);
@@ -263,6 +264,7 @@ const CreativeWorkflow = () => {
       if (data?.error) throw new Error(data.error);
       if (data?.brandMessage) setBrandMessage(data.brandMessage);
       if (data?.brandColor) setBrandColor(data.brandColor);
+      setLogoUrl(typeof data?.logoUrl === 'string' ? data.logoUrl : null);
       setScanned(true);
       toast.success('Brand voice suggested from your details.');
     } catch (e) {
@@ -428,7 +430,7 @@ const CreativeWorkflow = () => {
     setDays(null);
     try {
       const { data, error } = await supabase.functions.invoke('generate-strategy', {
-        body: { brandName, product, brandMessage, brandColor, social: socialUrls(social), ecommerce, website },
+        body: { brandName, product, brandMessage, brandColor, logoUrl, social: socialUrls(social), ecommerce, website },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -436,11 +438,13 @@ const CreativeWorkflow = () => {
       if (!Array.isArray(genDays) || genDays.length === 0) {
         throw new Error('The strategy came back empty. Please try again.');
       }
+      const finalLogo = logoUrl || (typeof data?.logoUrl === 'string' ? data.logoUrl : null);
+      if (finalLogo !== logoUrl) setLogoUrl(finalLogo);
 
       // Create the strategy record.
       const { data: strat, error: sErr } = await supabase
         .from('creative_strategies')
-        .insert({ user_id: userId, brand_name: brandName, product, brand_message: brandMessage, brand_color: brandColor, product_photo_ref: productPhotoRef })
+        .insert({ user_id: userId, brand_name: brandName, product, brand_message: brandMessage, brand_color: brandColor, logo_url: finalLogo, product_photo_ref: productPhotoRef })
         .select()
         .single();
       if (sErr) throw sErr;
@@ -662,6 +666,7 @@ const CreativeWorkflow = () => {
           product: product || '',
           brand_message: brandMessage || '',
           brand_color: brandColor,
+          logo_url: logoUrl,
           product_photo_ref: productPhotoRef,
         })
         .select()
@@ -816,6 +821,7 @@ const CreativeWorkflow = () => {
                 setProduct('');
                 setBrandMessage('');
                 setBrandColor('#8C52FF');
+                setLogoUrl(null);
                 setProductPhotoRef(null);
                 setProductPhotoPreview(null);
                 setSocial({ instagram: '', tiktok: '', facebook: '' });

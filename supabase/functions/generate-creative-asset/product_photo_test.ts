@@ -42,3 +42,18 @@ Deno.test('style, camera and motion choices become plain Seedance directions', (
   assert(out.includes('gentle movement'))
   assert(!out.includes('['))
 })
+import { extractBrandAssets } from '../_shared/brandSite.ts'
+Deno.test('website logo and brand colors are read from the page', () => {
+  const html = '<meta name="theme-color" content="#0047ab"><link rel="icon" href="/fav.ico"><img class="site-logo" src="/img/logo.png"><style>.a{color:#ffffff}.b{background:#E30613}</style>'
+  const r = extractBrandAssets(html, 'https://brand.example/about')
+  assertEquals(r.logoUrl, 'https://brand.example/img/logo.png')
+  assertEquals(r.colors[0], '#0047AB')
+  assert(r.colors.includes('#E30613'))
+  assert(!r.colors.includes('#FFFFFF'))
+})
+Deno.test('the website logo is sent to images and videos alongside the product photo', () => {
+  const logo = 'https://brand.example/logo.png'
+  assertEquals(workflowImageRequest('P', null, logo).images, [logo])
+  assertEquals(workflowImageRequest('P', 'https://signed/p.png', logo).images, ['https://signed/p.png', logo])
+  assertEquals(workflowVideoInput(null, 5, logo), { category: 'video-r2v', model: ARK_VIDEO_MODEL, referenceImageUrls: [logo] })
+})

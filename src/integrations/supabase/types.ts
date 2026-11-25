@@ -328,6 +328,7 @@ export type Database = {
           brand_name: string
           created_at: string
           id: string
+          logo_url: string | null
           product: string
           product_photo_ref: string | null
           updated_at: string
@@ -339,6 +340,7 @@ export type Database = {
           brand_name?: string
           created_at?: string
           id?: string
+          logo_url?: string | null
           product?: string
           product_photo_ref?: string | null
           updated_at?: string
@@ -350,6 +352,7 @@ export type Database = {
           brand_name?: string
           created_at?: string
           id?: string
+          logo_url?: string | null
           product?: string
           product_photo_ref?: string | null
           updated_at?: string

@@ -81,6 +81,7 @@ ${languageInstruction(productDesc)}
 Brand name: ${brandName || 'the brand'}
 What they sell: ${productDesc || 'not specified'}
 Brand voice/tone: ${brandMessage || 'infer a fitting tone'}
+Brand color: ${strat?.brand_color || 'not specified'} (feature it prominently in every scene visual)
 Content concept: ${concept}
 
 Return ONLY a JSON object (no markdown) shaped exactly as:

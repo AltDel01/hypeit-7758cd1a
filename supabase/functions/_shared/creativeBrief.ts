@@ -12,18 +12,20 @@ export function languageInstruction(product: string): string {
 }
 
 export interface CreativeScene { visual?: string; voiceover?: string; stage?: string }
-export interface CreativeBrand { brand_name?: string; product?: string; brand_message?: string; brand_color?: string; product_photo_ref?: string | null }
+export interface CreativeBrand { brand_name?: string; product?: string; brand_message?: string; brand_color?: string; logo_url?: string | null; product_photo_ref?: string | null }
 export interface CreativeDay { concept?: string; hook?: string; body?: string; scenes?: CreativeScene[] }
 
 export function buildCreativeMediaPrompt(brand: CreativeBrand, day: CreativeDay, assetType: 'video' | 'image', duration: number): string {
   const scenes = day.scenes || []
   const photoInstruction = brand.product_photo_ref
     ? 'Use the attached product photograph as the visual source of truth. Preserve its actual shape, colors, packaging, logo and existing label details. Do not replace it with a generic product or redesign it. Keep the same product throughout every shot, including the product demonstration and ending CTA.'
-    : '' 
-  const context = `Brand: ${brand.brand_name || 'not specified'}\nOwner's product details: ${brand.product || 'not specified'}\nBrand voice: ${brand.brand_message || 'match the owner brief'}\nBrand color: ${brand.brand_color || 'not specified'}\n${languageInstruction(brand.product || '')}\nConcept: ${day.concept || ''}\nCreative treatment and posting caption (caption is not a spoken script): ${day.body || ''}`
+    : ''
+  const color = brand.brand_color || ''
+  const brandLook = `${color ? `Brand color ${color}: make it the dominant accent of the scene (backgrounds, props, wardrobe, packaging accents or lighting) so the content is instantly recognizable as this brand.` : ''}${brand.logo_url ? ' The brand logo is attached as a reference image: reproduce that exact logo (same shape, colors and lettering, never redesigned or misspelled) once, small and clean, on the product, packaging, signage or a final end card.' : ''}`
+  const context = `Brand: ${brand.brand_name || 'not specified'}\nOwner's product details: ${brand.product || 'not specified'}\nBrand voice: ${brand.brand_message || 'match the owner brief'}\nBrand color: ${brand.brand_color || 'not specified'}\n${brandLook}\n${languageInstruction(brand.product || '')}\nConcept: ${day.concept || ''}\nCreative treatment and posting caption (caption is not a spoken script): ${day.body || ''}`
   if (assetType === 'image') {
     const productScene = scenes.find((s) => s.stage === 'product_demo') || scenes[2] || scenes[0]
-    return `ONE photorealistic product photograph, vertical 9:16, full frame. ${brand.product_photo_ref ? 'Preserve existing labels and logos from the attached photo; add no new text or logos.' : 'No text whatsoever, no letters, logos or labels.'} No watermarks, panels, collages, website UI or document layout. ${photoInstruction} Brand context (not text to print): ${brand.brand_name || ''}. Actual product: ${brand.product || ''}. Mood: ${brand.brand_message || 'natural and welcoming'}. Accent color: ${brand.brand_color || 'match product'}. Campaign language: ${contentLanguage(brand.product || '')}; campaign copy stays in the posting caption, not printed in this photograph. Art direction: ${productScene?.visual || 'Hero close-up of the described product in use'}. One clean photographic composition, clearly visible product, realistic lighting and natural handling. Use plain unbranded packaging when no exact reference exists. No invented claims. Output only the photograph.`
+    return `ONE photorealistic product photograph, vertical 9:16, full frame. ${brand.product_photo_ref ? 'Preserve existing labels and logos from the attached photo; add no other new text.' : brand.logo_url ? 'No text other than the attached brand logo.' : 'No text whatsoever, no letters, logos or labels.'} ${brandLook} No watermarks, panels, collages, website UI or document layout. ${photoInstruction} Brand context (not text to print): ${brand.brand_name || ''}. Actual product: ${brand.product || ''}. Mood: ${brand.brand_message || 'natural and welcoming'}. Brand accent color: ${brand.brand_color || 'match product'}. Campaign language: ${contentLanguage(brand.product || '')}; campaign copy stays in the posting caption, not printed in this photograph. Art direction: ${productScene?.visual || 'Hero close-up of the described product in use'}. One clean photographic composition, clearly visible product, realistic lighting and natural handling. ${brand.logo_url ? 'Use only the attached logo for branding.' : 'Use plain unbranded packaging when no exact reference exists.'} No invented claims. Output only the photograph.`
   }
   // Smart duration (-1): describe beats as shares of the clip, the model picks the length.
   const smart = duration <= 0

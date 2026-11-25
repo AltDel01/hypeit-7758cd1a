@@ -2,6 +2,7 @@ import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
+import { fetchBrandSite, checkLogo } from '../_shared/brandSite.ts'
 import { CREATIVE_STAGES, languageInstruction } from '../_shared/creativeBrief.ts'
 import { freePlanGate } from '../_shared/access.ts';
 
@@ -10,6 +11,7 @@ interface StrategyBody {
   product?: string
   brandMessage?: string
   brandColor?: string
+  logoUrl?: string | null
   website?: string
   social?: { instagram?: string; tiktok?: string; facebook?: string }
   ecommerce?: { tiktokshop?: string; shopee?: string; tokopedia?: string }
@@ -109,7 +111,12 @@ Deno.serve(async (req) => {
       ecommerce.tokopedia && 'Tokopedia',
     ].filter(Boolean).join(', ') || 'none linked yet'
 
-    const [siteText, socialText] = await Promise.all([fetchSiteText(website), readSocialProfiles(social)])
+    const [site, socialText] = await Promise.all([
+      website ? fetchBrandSite(website) : Promise.resolve({ text: '', logoUrl: null, colors: [] as string[] }),
+      readSocialProfiles(social),
+    ])
+    const siteText = site.text
+    const logoPromise = body.logoUrl ? Promise.resolve(null) : checkLogo(site.logoUrl)
     const socialLinks = [
       social.instagram && `Instagram: ${social.instagram}`,
       social.tiktok && `TikTok: ${social.tiktok}`,
@@ -125,7 +132,8 @@ ${languageInstruction(product)}
 Brand name: ${brandName}
 What they sell / brief from the owner: ${product}
 Brand voice/tone: ${brandMessage || 'infer a fitting tone'}
-Brand color: ${brandColor}
+Brand color: ${brandColor} (every scene visual must feature this color prominently in setting, props, wardrobe or lighting)
+Website colors: ${site.colors.join(', ') || 'none found'}
 Website: ${website || 'not provided'}
 Social and shop links:
 ${socialLinks}
@@ -227,7 +235,7 @@ Provide exactly 7 day objects, each with exactly 4 scenes in the required order.
       }
     })
 
-    return new Response(JSON.stringify({ days, analysis: parsed.analysis || null, usedWebsite: !!siteText }), {
+    return new Response(JSON.stringify({ days, logoUrl: await logoPromise, siteColors: site.colors, analysis: parsed.analysis || null, usedWebsite: !!siteText }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
