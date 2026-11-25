@@ -75,3 +75,65 @@ export async function checkLogo(url: string | null | undefined): Promise<string 
     return res.ok && /image\/(png|jpe?g|webp)/i.test(type) ? url : null
   } catch { return null }
 }
+
+const handleOf = (v: string, host: string) => {
+  const s = v.trim(); if (!s) return ''
+  if (!/^https?:|\./.test(s)) return s.replace(/^@/, '')
+  const m = s.match(new RegExp(`${host}\\.com/@?([A-Za-z0-9._-]+)`, 'i')); return m?.[1] || ''
+}
+
+/** Profile picture / share image of a public profile or shop page (og:image). */
+async function pageImage(url: string): Promise<string | null> {
+  try {
+    const u = url.startsWith('http') ? url : `https://${url}`
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 6000)
+    const res = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; facebookexternalhit/1.1)' }, signal: ctrl.signal })
+    clearTimeout(t)
+    if (!res.ok) return null
+    const html = await res.text()
+    for (const m of html.matchAll(/<meta\b[^>]*>/gi)) {
+      if (/^(og:image|twitter:image)$/i.test(attr(m[0], 'property') || attr(m[0], 'name'))) {
+        const img = abs(attr(m[0], 'content'), res.url || u); if (img) return img
+      }
+    }
+  } catch { /* ignore */ }
+  return null
+}
+
+export interface LogoSources {
+  siteLogo?: string | null
+  social?: { instagram?: string; tiktok?: string; facebook?: string }
+  ecommerce?: { tiktokshop?: string; shopee?: string; tokopedia?: string }
+}
+
+/** Ordered list of places a logo can come from: website, Instagram, TikTok, Facebook, then shops. */
+export function logoCandidates(src: LogoSources): (() => Promise<string | null>)[] {
+  const out: (() => Promise<string | null>)[] = []
+  if (src.siteLogo) out.push(async () => src.siteLogo!)
+  const ig = handleOf(src.social?.instagram || '', 'instagram')
+  if (ig) out.push(() => pageImage(`https://www.instagram.com/${ig}/`))
+  const tt = handleOf(src.social?.tiktok || '', 'tiktok')
+  if (tt) out.push(() => pageImage(`https://www.tiktok.com/@${tt}`), async () => `https://unavatar.io/tiktok/${tt}?fallback=false`)
+  const fb = (src.social?.facebook || '').trim()
+  if (fb) out.push(() => pageImage(/^https?:|\./.test(fb) ? fb : `https://www.facebook.com/${fb.replace(/^@/, '')}`))
+  for (const shop of [src.ecommerce?.tiktokshop, src.ecommerce?.shopee, src.ecommerce?.tokopedia]) {
+    if (shop?.trim()) out.push(() => pageImage(shop.trim()))
+  }
+  return out
+}
+
+/** First logo from any source that is a real readable image. */
+export async function findBrandLogo(src: LogoSources): Promise<string | null> {
+  for (const get of logoCandidates(src)) {
+    const ok = await checkLogo(await get().catch(() => null))
+    if (ok) return ok
+  }
+  return null
+}
+
+/** Keep the AI's color only if it is one of the colors really found; otherwise the most used one. */
+export function pickBrandColor(aiColor: string, siteColors: string[], fallback = '#8C52FF'): string {
+  const c = (aiColor || '').trim().toUpperCase()
+  if (siteColors.length) return siteColors.includes(c) ? c : siteColors[0]
+  return /^#[0-9A-F]{6}$/.test(c) ? c : fallback
+}

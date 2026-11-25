@@ -2,7 +2,7 @@ import { readSocialProfiles } from '../_shared/socialRead.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { callQwen } from '../_shared/qwen.ts'
-import { fetchBrandSite, checkLogo } from '../_shared/brandSite.ts'
+import { fetchBrandSite, findBrandLogo } from '../_shared/brandSite.ts'
 import { CREATIVE_STAGES, languageInstruction } from '../_shared/creativeBrief.ts'
 import { freePlanGate } from '../_shared/access.ts';
 
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       readSocialProfiles(social),
     ])
     const siteText = site.text
-    const logoPromise = body.logoUrl ? Promise.resolve(null) : checkLogo(site.logoUrl)
+    const logoPromise = body.logoUrl ? Promise.resolve(null) : findBrandLogo({ siteLogo: site.logoUrl, social, ecommerce })
     const socialLinks = [
       social.instagram && `Instagram: ${social.instagram}`,
       social.tiktok && `TikTok: ${social.tiktok}`,
